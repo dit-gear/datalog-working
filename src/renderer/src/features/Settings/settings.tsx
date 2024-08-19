@@ -1,6 +1,6 @@
-import { ReactElement, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@components/ui/button'
-import { useForm, useFieldArray, FormProvider } from 'react-hook-form'
+import { useForm, FormProvider } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@components/ui/form'
@@ -11,18 +11,105 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
   DialogClose
 } from '@components/ui/dialog'
-import { ScrollArea } from '@components/ui/scroll-area'
 import GeneralTab from './GeneralTab'
 import PathsTab from './PathsTab'
 import CsvParsingTab from './CsvParsingTab'
 import EmailTab from './EmailTab'
+
+const fieldType = z.enum(['string', 'array', 'object', 'duration'])
+export type fieldType = z.infer<typeof fieldType>
+
+const options = z
+  .object({
+    type: fieldType,
+    regex: z.string().optional(),
+    unit: z.enum(['ms', 's', 'tc', 'frames']).optional(),
+    fps: z.string().max(80).optional()
+  })
+  .optional()
+
+const subfields = z.array(z.object({ name: z.string().min(1).max(80) })).optional()
+const additionalParsing = z.object({
+  clip: z.object({ field: z.string().min(1).max(80), regex: z.string().max(60).optional() }),
+  fields: z
+    .array(
+      z
+        .object({
+          name: z.string().min(1).max(80),
+          field: z.string().min(1).max(80),
+          subfields: subfields,
+          options: options
+        })
+        .superRefine((data, ctx) => {
+          const { type } = data.options || {}
+          if (type === 'object' && (!data.subfields || data.subfields.length === 0)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'At least one subfield is required when type is "object"',
+              path: ['subfields']
+            })
+          }
+          if (type === 'duration') {
+            const unit = data.options?.unit
+            if (!unit) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Unit is required when type is "duration"',
+                path: ['options', 'unit']
+              })
+            }
+            const fps = data.options?.fps
+            if (unit === 'tc' || (unit === 'frames' && (!fps || fps.length < 1))) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'FPS is required when using "Timecode" or "Frames"',
+                path: ['options', 'fps']
+              })
+            }
+          }
+
+          if (data.subfields) {
+            const seenSubfieldNames = new Set<string>()
+            data.subfields.forEach((subfield, subfieldIndex) => {
+              if (seenSubfieldNames.has(subfield.name)) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: 'Key must be unique',
+                  path: ['subfields', subfieldIndex, 'name']
+                })
+              } else {
+                seenSubfieldNames.add(subfield.name)
+              }
+            })
+          }
+        })
+    )
+    .superRefine((fields, ctx) => {
+      const reservedNames = ['clip', 'duration']
+      const seenNames = new Set<string>(reservedNames)
+
+      fields.forEach((field, index) => {
+        if (seenNames.has(field.name)) {
+          const message = reservedNames.includes(field.name.toLowerCase())
+            ? `"${field.name}" is reserved and cannot be used.`
+            : 'Key must be unique'
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: message,
+            path: [index, 'name']
+          })
+        } else {
+          seenNames.add(field.name)
+        }
+      })
+    })
+    .optional()
+})
+export type additionalParsing = z.infer<typeof additionalParsing>
 
 const schema = z.object({
   projectName: z.string().min(1).max(80),
@@ -35,7 +122,9 @@ const schema = z.object({
   project_default_proxies_path: z.string().optional(),
   global_default_proxies_path: z.string().optional(),
   project_enable_parsing: z.boolean(),
-  global_enable_parsing: z.boolean()
+  global_enable_parsing: z.boolean(),
+  project_additional_parsing: additionalParsing.optional(),
+  global_additional_parsing: additionalParsing.optional()
 })
 
 interface SettingsDialogProps {
@@ -59,7 +148,9 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaultSettings }) => {
       project_default_proxies_path: defaultSettings.default_proxies_path,
       global_default_proxies_path: '',
       project_enable_parsing: false,
-      global_enable_parsing: false
+      global_enable_parsing: false,
+      project_additional_parsing: { clip: { field: '', regex: '' }, fields: [] },
+      global_additional_parsing: { clip: { field: '', regex: '' }, fields: [] }
     },
     mode: 'onChange',
     resolver: zodResolver(schema)
@@ -119,7 +210,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaultSettings }) => {
                 />
               </TabsContent>
               <TabsContent value="parsing">
-                <CsvParsingTab scope={scope} control={control} watch={watch} setValue={setValue} />
+                <CsvParsingTab scope={scope} />
               </TabsContent>
               <TabsContent value="email">
                 <EmailTab />
@@ -142,4 +233,3 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaultSettings }) => {
 }
 
 export default Settings
-// className="mt-auto -mr-6 -ml-6 -mb-6 p-6 bg-card shadow-sm border"

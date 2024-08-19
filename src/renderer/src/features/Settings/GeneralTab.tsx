@@ -1,8 +1,7 @@
 import { useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card'
-import { ScrollArea } from '@components/ui/scroll-area'
 import { schemaType } from './settings'
-import { Form, useFormContext } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 import FormRow from '@components/FormRow'
 
 interface GeneralTabProps {
