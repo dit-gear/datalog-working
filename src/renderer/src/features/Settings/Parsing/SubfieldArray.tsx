@@ -1,5 +1,5 @@
 import { useFieldArray, useFormContext } from 'react-hook-form'
-import { schemaType, fieldType } from './settings'
+import { schemaType, fieldType } from '../settings'
 import {
   FormField,
   FormItem,

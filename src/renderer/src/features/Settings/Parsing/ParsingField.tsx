@@ -21,7 +21,7 @@ import {
 import DurationFields from './DurationFields'
 import { MoreHorizontal } from 'lucide-react'
 import { FieldArrayWithId, UseFieldArrayRemove, useFormContext, useWatch } from 'react-hook-form'
-import { schemaType, fieldType, additionalParsing } from './settings'
+import { schemaType, fieldType, additionalParsing } from '../settings'
 import SubfieldArray from './SubfieldArray'
 
 interface ParsingFieldProps {

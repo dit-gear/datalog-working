@@ -4,7 +4,7 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@components/ui/form'
-
+import { emailZodObj, emailApiZodObj } from './Email/types'
 import { ProjectSettings } from '@types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 
@@ -17,8 +17,8 @@ import {
 } from '@components/ui/dialog'
 import GeneralTab from './GeneralTab'
 import PathsTab from './PathsTab'
-import CsvParsingTab from './CsvParsingTab'
-import EmailTab from './EmailTab'
+import ParsingTab from './Parsing/ParsingTab'
+import EmailTab from './Email/EmailTab'
 
 const fieldType = z.enum(['string', 'array', 'object', 'duration'])
 export type fieldType = z.infer<typeof fieldType>
@@ -121,10 +121,15 @@ const schema = z.object({
   global_default_ocf_paths: z.array(z.string()).optional(),
   project_default_proxies_path: z.string().optional(),
   global_default_proxies_path: z.string().optional(),
+  project_parse_camera_metadata: z.boolean(),
+  global_parse_camera_metadata: z.boolean(),
   project_enable_parsing: z.boolean(),
   global_enable_parsing: z.boolean(),
   project_additional_parsing: additionalParsing.optional(),
-  global_additional_parsing: additionalParsing.optional()
+  global_additional_parsing: additionalParsing.optional(),
+  project_emails: z.array(emailZodObj).optional(),
+  global_emails: z.array(emailZodObj).optional(),
+  new_email_api: emailApiZodObj.optional()
 })
 
 interface SettingsDialogProps {
@@ -147,10 +152,14 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaultSettings }) => {
       global_default_ocf_paths: [],
       project_default_proxies_path: defaultSettings.default_proxies_path,
       global_default_proxies_path: '',
+      project_parse_camera_metadata: true,
+      global_parse_camera_metadata: true,
       project_enable_parsing: false,
       global_enable_parsing: false,
       project_additional_parsing: { clip: { field: '', regex: '' }, fields: [] },
-      global_additional_parsing: { clip: { field: '', regex: '' }, fields: [] }
+      global_additional_parsing: { clip: { field: '', regex: '' }, fields: [] },
+      project_emails: [],
+      global_emails: []
     },
     mode: 'onChange',
     resolver: zodResolver(schema)
@@ -183,17 +192,11 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaultSettings }) => {
                   <TabsTrigger className="w-full justify-start" value="paths">
                     OCF/Proxies Paths
                   </TabsTrigger>
-                  <TabsTrigger className="w-full justify-start" value="mhl">
-                    OCF Parsing
-                  </TabsTrigger>
                   <TabsTrigger className="w-full justify-start" value="parsing">
-                    CSV Parsing
-                  </TabsTrigger>
-                  <TabsTrigger className="w-full justify-start" value="emails">
-                    Emails
+                    Parsing
                   </TabsTrigger>
                   <TabsTrigger className="w-full justify-start" value="email">
-                    Email API
+                    Email
                   </TabsTrigger>
                 </TabsList>
               </nav>
@@ -210,10 +213,10 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaultSettings }) => {
                 />
               </TabsContent>
               <TabsContent value="parsing">
-                <CsvParsingTab scope={scope} />
+                <ParsingTab scope={scope} />
               </TabsContent>
               <TabsContent value="email">
-                <EmailTab />
+                <EmailTab scope={scope} />
               </TabsContent>
 
               <DialogFooter className="md:col-span-2 mt-auto">

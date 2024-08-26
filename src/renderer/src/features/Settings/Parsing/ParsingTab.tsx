@@ -5,11 +5,11 @@ import { Switch } from '@components/ui/switch'
 import { useWatch, useFormContext } from 'react-hook-form'
 import ParsingWrapper from './ParsingWrapper'
 
-interface CsvParsingTabProps {
+interface ParsingTabProps {
   scope: 'project' | 'global'
 }
 
-const CsvParsingTab = ({ scope }: CsvParsingTabProps): ReactElement => {
+const ParsingTab = ({ scope }: ParsingTabProps): ReactElement => {
   const { control } = useFormContext()
   const watchEnableParsingLocal = useWatch({ control, name: 'project_enable_parsing' })
   const watchEnableParsingGlobal = useWatch({ control, name: 'global_enable_parsing' })
@@ -17,7 +17,7 @@ const CsvParsingTab = ({ scope }: CsvParsingTabProps): ReactElement => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>CSV Parsing</CardTitle>
+        <CardTitle>Parsing</CardTitle>
         <CardDescription>
           You can optionally import more metadata to merge with your clips. Enabling this feature
           will allow you to select an CSV file to import.
@@ -25,6 +25,36 @@ const CsvParsingTab = ({ scope }: CsvParsingTabProps): ReactElement => {
       </CardHeader>
       <CardContent>
         <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <dt className="text-sm font-medium leading-6 text-white">Parse Camera metadata</dt>
+          <dd className="mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 flex flex-col gap-3">
+            {scope === 'project' ? (
+              <FormField
+                key="project_parse_camera_metadata"
+                control={control}
+                name="project_parse_camera_metadata"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <FormField
+                key="global_parse_camera_metadata"
+                control={control}
+                name="global_parse_camera_metadata"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            )}
+          </dd>
           <dt className="text-sm font-medium leading-6 text-white">Enable CSV Parsing</dt>
           <dd className="mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 flex flex-col gap-3">
             {scope === 'project' ? (
@@ -67,4 +97,4 @@ const CsvParsingTab = ({ scope }: CsvParsingTabProps): ReactElement => {
   )
 }
 
-export default CsvParsingTab
+export default ParsingTab

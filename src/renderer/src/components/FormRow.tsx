@@ -30,7 +30,7 @@ const FormRow: React.FC<FormRowProps> = ({
       key={name}
       name={name}
       render={({ field }) => (
-        <FormItem className='"px-4 py-6 grid max-w-3xl grid-cols-1 grid-rows-[auto auto auto] md:grid-cols-6 md:gap-x-16 md:gap-y-4 md:px-0'>
+        <FormItem className='"px-4 grid max-w-3xl grid-cols-1 grid-rows-[auto auto auto] md:grid-cols-6 md:gap-x-16 md:gap-y-4 md:px-0'>
           <FormLabel className="md:col-span-2 md:row-span-1 md:mt-5">{label}</FormLabel>
           <div className="flex flex-col row-start-3 md:col-span-2 md:row-start-2 md:row-span-2 gap-1.5">
             <FormDescription>{description}</FormDescription>
