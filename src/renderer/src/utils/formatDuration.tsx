@@ -1,4 +1,4 @@
-import { durationType } from '@types'
+import { durationType } from '@shared/shared-types'
 
 const formatDuration = (totalSeconds: number): durationType => {
   const hours = Math.floor(totalSeconds / 3600)

@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@components/ui/dropdown-menu'
-import { entryType } from '@types'
+import { entryType } from '@shared/shared-types'
 import formatDuration from '@renderer/utils/formatDuration'
 import { getVolumes, getReels } from '../utils'
 

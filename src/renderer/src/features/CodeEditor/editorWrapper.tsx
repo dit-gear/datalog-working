@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import Editor from './editor'
-import { LoadedFile } from '@types'
+import { LoadedFile } from '@shared/shared-types'
 import { handleApiResponse } from '@renderer/utils/handleApiResponse'
 import { useLoadedFile } from './loadedFileContext'
 

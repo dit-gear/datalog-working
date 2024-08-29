@@ -1,4 +1,4 @@
-import { durationType } from '@types'
+import { durationType } from '@shared/shared-types'
 interface StatProps {
   label: string
   value?: string | number

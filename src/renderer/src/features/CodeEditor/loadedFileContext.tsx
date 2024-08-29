@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import useInitialDir from './useInitialDir'
-import { LoadedFile } from '@types'
+import { LoadedFile } from '@shared/shared-types'
 
 interface LoadedFileContextType {
   loadedFile: LoadedFile | null

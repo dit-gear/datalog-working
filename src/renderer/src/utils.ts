@@ -1,4 +1,4 @@
-import { clipsType } from '@types'
+import { clipsType } from '@shared/shared-types'
 
 export function timecodeToSeconds(timecode: string, frameRate: number): number {
   const parts = timecode.split(':').map(Number)

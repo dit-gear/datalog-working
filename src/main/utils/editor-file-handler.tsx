@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron'
 import fs from 'fs'
 import { join } from 'path'
-import { DirectoryFile, InitialDir } from './../../types'
+import { DirectoryFile, InitialDir } from '../../shared/shared-types'
 
 function ensureDirectoryExists(dirPath: string): void {
   if (!fs.existsSync(dirPath)) {

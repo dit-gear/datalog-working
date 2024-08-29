@@ -15,7 +15,7 @@ import z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, useEffect } from 'react'
-import { ProjectType } from '@types'
+import { ProjectType } from '@shared/projectTypes'
 
 interface NewProjectDialogProps {
   showbtn: boolean

@@ -1,5 +1,5 @@
 import { BrowserWindow } from 'electron'
-import { DestinationData } from '../../types'
+import { DestinationData } from '../../shared/shared-types'
 import { XMLParser, XMLValidator } from 'fast-xml-parser'
 import fs from 'fs'
 import { mhlSchema, AscMhlschema } from './mhl-schemas'

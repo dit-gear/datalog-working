@@ -1,5 +1,6 @@
 import { shell } from 'electron'
-import { Response } from '../../types'
+import { Response } from '../../shared/shared-types'
+import fs from 'fs'
 
 export async function moveFileToTrash(filePath: string): Promise<Response> {
   return shell
@@ -10,4 +11,10 @@ export async function moveFileToTrash(filePath: string): Promise<Response> {
     .catch((error) => {
       return { success: false, error: (error as Error).message }
     })
+}
+
+export function ensureDirectoryExists(dirPath: string): void {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath)
+  }
 }

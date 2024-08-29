@@ -12,24 +12,29 @@ import { ScrollArea } from '@components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import Stat from './stat'
 import { useState, useEffect } from 'react'
-import { combinedType, CopyDestination, OfflineFolderType, metadataCsv } from '@types'
+import {
+  combinedType,
+  CopyDestination,
+  OfflineFolderType,
+  metadataCsv,
+  entryType,
+  entrySchema
+} from '@shared/shared-types'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Papa from 'papaparse'
-import Cliptable from './cliptable'
 import { timecodeToSeconds, getReels } from '../utils'
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import { Calendar } from '@components/ui/calendar'
 import { lightFormat } from 'date-fns'
-import { ProjectSettings, entrySchema } from '@types'
+import { ProjectRootType } from '@shared/projectTypes'
 import replaceTags from '../utils/formatDynamicString'
 import { Pencil } from 'lucide-react'
 import { useToast } from '@components/ui/use-toast'
-import { entryType } from '@types'
 import formatDuration from '../utils/formatDuration'
 
 interface EntrydialogProps {
-  settings: ProjectSettings
+  settings: ProjectRootType
   previousEntries?: entryType[]
   setOpen: (value: boolean) => void
   refetch: () => void

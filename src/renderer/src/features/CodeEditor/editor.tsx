@@ -18,7 +18,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuTrigger
 } from '@components/ui/dropdown-menu'
-import { LoadedFile } from '@types'
+import { LoadedFile } from '@shared/shared-types'
 
 type Monaco = typeof monaco
 

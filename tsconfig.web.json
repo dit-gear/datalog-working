@@ -5,7 +5,7 @@
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.tsx",
     "src/preload/*.d.ts",
-    "src/types.ts",
+    "src/shared/*.ts",
   ],
   "compilerOptions": {
     "composite": true,
@@ -18,8 +18,8 @@
       "@renderer/*": [
         "src/renderer/src/*"
       ],
-      "@types" : [
-        "src/types"
+      "@shared/*" : [
+        "src/shared/*"
       ],
     }
   }

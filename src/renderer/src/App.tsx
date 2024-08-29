@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { ProjectType, entryType } from '@types'
+import { entryType } from '@shared/shared-types'
+import { ProjectType } from '@shared/projectTypes'
 import NewProjectDialog from './components/newProjectDialog'
 import Entrydialogtrigger from '@components/entrydialogtrigger'
 import Settings from './features/Settings/settings'

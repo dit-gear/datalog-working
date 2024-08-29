@@ -18,7 +18,7 @@ import { Button } from '@components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group'
 import useInitialDir from './useInitialDir'
 import { EmailStarter } from '../../templates/EmailStarter'
-import { LoadedFile } from '@types'
+import { LoadedFile } from '@shared/shared-types'
 import { getFileExtension } from '@renderer/utils/formatString'
 
 export interface NewTemplateDialogHandle {

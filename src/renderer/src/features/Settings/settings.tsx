@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@components/ui/form'
 import { emailZodObj, emailApiZodObj } from './Email/types'
-import { ProjectSettings } from '@types'
+//import { ProjectSettings } from '@shared/projectTypes'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 
 import {

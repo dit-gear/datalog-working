@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { DirectoryFile, Path } from '@types'
+import { DirectoryFile, Path } from '@shared/shared-types'
 
 const useInitialDir = () => {
   const [dir, setDir] = useState<DirectoryFile[]>([])

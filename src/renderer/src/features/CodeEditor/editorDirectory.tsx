@@ -1,5 +1,5 @@
 import { TabsContent } from '@components/ui/tabs'
-import { DirectoryFile } from '@types'
+import { DirectoryFile } from '@shared/shared-types'
 import { useLoadedFile } from './loadedFileContext'
 import {
   ContextMenu,

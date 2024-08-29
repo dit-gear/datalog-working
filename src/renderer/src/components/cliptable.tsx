@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Badge } from '@components/ui/badge'
-import { combinedType } from '@types'
+import { combinedType } from '@shared/shared-types'
 import { splitStringIntoArray } from '@renderer/utils'
 
 interface CliptableProps {

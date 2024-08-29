@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogTrigger } from '@components/ui/dialog'
-import { ProjectSettings, entryType } from '@types'
+import { entryType } from '@shared/shared-types'
+import { ProjectRootType } from '@shared/projectTypes'
 import { Button } from '@components/ui/button'
 import { Plus } from 'lucide-react'
 import Entrydialog from './entrydialog'
 
 interface EntrydialogProps {
-  settings: ProjectSettings
+  settings: ProjectRootType
   previousEntries?: entryType[]
   refetch: () => void
 }

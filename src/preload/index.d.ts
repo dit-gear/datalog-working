@@ -7,7 +7,7 @@ import {
   DirectoryFile,
   LoadedFile,
   Response
-} from '@types'
+} from '@shared/shared-types'
 
 declare global {
   interface Window {
