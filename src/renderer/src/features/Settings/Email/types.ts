@@ -1,15 +1,5 @@
 import { z } from 'zod'
-
-export const emailZodObj = z.object({
-  name: z.string(),
-  show: z.object({ item: z.boolean(), root: z.boolean() }),
-  sender: z.string().email().optional(),
-  recipients: z.array(z.string().email()).optional(),
-  subject: z.string().optional(),
-  attatchments: z.array(z.string()).optional(),
-  body: z.string().optional(),
-  template: z.string() // url to file.
-})
+import { emailZodObj } from '@shared/projectTypes'
 
 export type emailType = z.infer<typeof emailZodObj>
 

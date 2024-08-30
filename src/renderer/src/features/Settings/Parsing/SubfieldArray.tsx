@@ -1,5 +1,6 @@
 import { useFieldArray, useFormContext } from 'react-hook-form'
-import { schemaType, fieldType } from '../settings'
+import { formSchemaType } from '../types'
+import { fieldType } from '@shared/projectTypes'
 import {
   FormField,
   FormItem,
@@ -22,7 +23,7 @@ const SubfieldArray: React.FC<SubfieldArrayProps> = ({ type, scope, parentIndex 
   const {
     control,
     formState: { errors }
-  } = useFormContext<schemaType>()
+  } = useFormContext<formSchemaType>()
   const { fields, append, remove } = useFieldArray({
     control, // control prop comes from useForm or FormProvider
     name: `${scope}_additional_parsing.fields.${parentIndex}.subfields` // unique name for your Field Array

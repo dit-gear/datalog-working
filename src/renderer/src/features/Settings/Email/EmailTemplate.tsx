@@ -11,7 +11,8 @@ import {
 } from '@components/ui/select'
 import { Textarea } from '@components/ui/textarea'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { emailType, emailEditType, emailZodObj } from './types'
+import { emailType, emailEditType } from './types'
+import { emailZodObj } from '@shared/projectTypes'
 import {
   Dialog,
   DialogTrigger,

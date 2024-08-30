@@ -6,14 +6,14 @@ import { Label } from '@components/ui/label'
 import { Button } from '@components/ui/button'
 import ParsingField from './ParsingField'
 import { useFormContext, useFieldArray } from 'react-hook-form'
-import { schemaType } from './settings'
+import { formSchemaType } from '../types'
 
 interface ParsingWrapperProps {
   scope: 'project' | 'global'
 }
 
 const ParsingWrapper: React.FC<ParsingWrapperProps> = ({ scope }) => {
-  const { control } = useFormContext<schemaType>()
+  const { control } = useFormContext<formSchemaType>()
   const { fields, append, remove } = useFieldArray({
     control,
     name: `${scope}_additional_parsing.fields`

@@ -21,7 +21,8 @@ import {
 import DurationFields from './DurationFields'
 import { MoreHorizontal } from 'lucide-react'
 import { FieldArrayWithId, UseFieldArrayRemove, useFormContext, useWatch } from 'react-hook-form'
-import { schemaType, fieldType, additionalParsing } from '../settings'
+import { formSchemaType } from '../types'
+import { fieldType, additionalParsing } from '@shared/projectTypes'
 import SubfieldArray from './SubfieldArray'
 
 interface ParsingFieldProps {
@@ -32,7 +33,7 @@ interface ParsingFieldProps {
 }
 
 const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove }) => {
-  const { control, setValue } = useFormContext<schemaType>()
+  const { control, setValue } = useFormContext<formSchemaType>()
   const activeType = useWatch({
     control,
     name: `${scope}_additional_parsing.fields.${index}.options.type`

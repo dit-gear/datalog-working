@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card'
-import { schemaType } from './settings'
-import { useFormContext } from 'react-hook-form'
+import { formSchemaType } from './types'
+import { useFormContext, useWatch } from 'react-hook-form'
 import FormRow from '@components/FormRow'
 
 interface GeneralTabProps {
@@ -9,27 +9,16 @@ interface GeneralTabProps {
 }
 
 const GeneralTab: React.FC<GeneralTabProps> = ({ scope }) => {
-  const { watch, clearErrors, setError } = useFormContext<schemaType>()
+  const { control, trigger } = useFormContext<formSchemaType>()
 
-  const projectFolderTemplate = watch('project_folderTemplate')
-  const globalFolderTemplate = watch('global_folderTemplate')
+  const projectFolderTemplateValue = useWatch({ control, name: 'project_folder_template' })
+  const globalFolderTemplateValue = useWatch({ control, name: 'global_folder_template' })
 
   useEffect(() => {
-    if (projectFolderTemplate || globalFolderTemplate) {
-      clearErrors(['project_folderTemplate', 'global_folderTemplate'])
-    } else {
-      // Set error on both fields if neither is filled
-      setError('project_folderTemplate', {
-        type: 'manual',
-        message: 'Either needs to be set in this project or in global. Both cannot be empty.'
-      })
-      setError('global_folderTemplate', {
-        type: 'manual',
-        message: 'Either needs to be set in this project or in global. Both cannot be empty.'
-      })
+    if (projectFolderTemplateValue !== undefined || globalFolderTemplateValue !== undefined) {
+      trigger(['project_folder_template', 'global_folder_template'])
     }
-  }),
-    [projectFolderTemplate, globalFolderTemplate, clearErrors]
+  }, [projectFolderTemplateValue, globalFolderTemplateValue, trigger])
 
   return (
     <Card>
@@ -41,12 +30,12 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ scope }) => {
         {scope === 'project' ? (
           <>
             <FormRow
-              name="projectName"
+              name="project_project_name"
               label="Project Name"
               descriptionTag={['Required for Project', `Tag: <project_name>`]}
             />
             <FormRow
-              name="project_folderTemplate"
+              name="project_folder_template"
               label="Entry Name Format"
               description="Set Entry Name Format for dynamically naming your entries and folders"
               descriptionTag={['Required (project or global)', 'Tag: None']}
@@ -68,7 +57,7 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ scope }) => {
               disabled
             />
             <FormRow
-              name="global_folderTemplate"
+              name="global_folder_template"
               label="Entry Name Format"
               description="Set Entry Name Format for dynamically naming your entries and folders"
               descriptionTag={['Required (project or global)', 'Tag: None']}

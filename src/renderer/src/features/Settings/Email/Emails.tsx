@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { CardContent } from '@components/ui/card'
 import { useFormContext, useFieldArray } from 'react-hook-form'
-import { schemaType } from '../settings'
+import { schemaType } from '../Settings'
 import { emailEditType } from './types'
 import {
   Accordion,

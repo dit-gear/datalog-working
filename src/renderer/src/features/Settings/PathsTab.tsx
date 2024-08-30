@@ -2,25 +2,16 @@ import { ReactElement } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
-import { schemaType } from './settings'
-import {
-  Control,
-  UseFormWatch,
-  UseFormSetValue,
-  UseFormRegister,
-  useFieldArray
-} from 'react-hook-form'
+import { formSchemaType } from './types'
+import { useFieldArray, useWatch, useFormContext } from 'react-hook-form'
 import { Pencil } from 'lucide-react'
 
 interface PathsTabProps {
   scope: 'project' | 'global'
-  control: Control<schemaType>
-  watch: UseFormWatch<schemaType>
-  setValue: UseFormSetValue<schemaType>
-  register: UseFormRegister<schemaType>
 }
 
-const PathsTab = ({ scope, control, watch, setValue, register }: PathsTabProps): ReactElement => {
+const PathsTab = ({ scope }: PathsTabProps): ReactElement => {
+  const { control, setValue, register } = useFormContext<formSchemaType>()
   const {
     fields: projectOcfFields,
     append: appendProjectOcfPath,
@@ -29,6 +20,8 @@ const PathsTab = ({ scope, control, watch, setValue, register }: PathsTabProps):
     control,
     name: `project_default_ocf_paths` as never
   })
+
+  const watch = useWatch({ control, name: 'project_default_proxies_path' })
 
   const handleAddOcfPath = (): void => {
     try {
@@ -122,7 +115,7 @@ const PathsTab = ({ scope, control, watch, setValue, register }: PathsTabProps):
         <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
           <dt className="text-sm font-medium leading-6 text-white">Default Proxies Path</dt>
           <dd className="mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 flex justify-between items-center mr-5">
-            {watch('project_default_proxies_path') ? (
+            {watch ? (
               <>
                 <Input
                   id="proxiesPath"

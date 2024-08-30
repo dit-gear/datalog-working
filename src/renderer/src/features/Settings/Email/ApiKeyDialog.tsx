@@ -24,7 +24,7 @@ import { Form, FormField, FormItem, FormControl, FormLabel, FormMessage } from '
 import { useFormContext, useForm, SubmitHandler } from 'react-hook-form'
 import { emailApiType, emailApiZodObj } from './types'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { schemaType } from '../settings'
+import { schemaType } from '../Settings'
 
 const ApiKeyDialog: React.FC = () => {
   const [open, setOpen] = useState<boolean>(false)
