@@ -32,15 +32,14 @@ const Datalogtable = ({ log }: DatalogtableProps): JSX.Element | null => {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead />
-          <TableHead>DAY</TableHead>
-          <TableHead>DATE</TableHead>
-          <TableHead>OCF FILES</TableHead>
-          <TableHead>OCF SIZE</TableHead>
-          <TableHead>PROXY SIZE</TableHead>
-          <TableHead>DURATION</TableHead>
-          <TableHead>VOLUMES</TableHead>
-          <TableHead className="text-right">REELS</TableHead>
+          <TableHead>Shooting Day</TableHead>
+          <TableHead>Shooting Date</TableHead>
+          <TableHead>OCF Files</TableHead>
+          <TableHead>OCF Size</TableHead>
+          <TableHead>Proxy Size</TableHead>
+          <TableHead>Duration</TableHead>
+          <TableHead>Backups</TableHead>
+          <TableHead>Camera Reels</TableHead>
           <TableHead></TableHead>
         </TableRow>
       </TableHeader>
@@ -108,17 +107,6 @@ const Datalogtable = ({ log }: DatalogtableProps): JSX.Element | null => {
           <div className="flex flex-col">No entries</div>
         )}
       </TableBody>
-      <TableFooter>
-        <TableRow>
-          <TableCell>WEEK 1 Total</TableCell>
-          <TableCell></TableCell>
-          <TableCell></TableCell>
-          <TableCell>XX</TableCell>
-          <TableCell>XX</TableCell>
-          <TableCell>XX</TableCell>
-          <TableCell>XX</TableCell>
-        </TableRow>
-      </TableFooter>
     </Table>
   )
 }

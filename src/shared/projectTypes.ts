@@ -2,6 +2,10 @@ import z from 'zod'
 
 const fieldType = z.enum(['string', 'array', 'object', 'duration'])
 
+const fileNameRegex = /^[^<>:"/\\|?*\x00-\x1F]*$/
+
+const reservedNames = ['settings', 'shared', 'templates']
+
 const options = z
   .object({
     type: fieldType,
@@ -123,7 +127,16 @@ export const GlobalSchemaZod = z.object({
 })
 
 export const ProjectSchemaZod = z.object({
-  project_name: z.string().min(1).max(80),
+  project_name: z
+    .string()
+    .min(1, { message: 'The project name must contain at least 1 character' })
+    .max(100, { message: 'The project name must be shorter' })
+    .regex(fileNameRegex, {
+      message: 'Please remove any invalid characters from project name'
+    })
+    .refine((name) => !reservedNames.includes(name), {
+      message: 'The project name cannot be a reserved name'
+    }),
   ...GlobalSchemaZod.shape
 })
 

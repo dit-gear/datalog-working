@@ -15,7 +15,7 @@ import z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, useEffect } from 'react'
-import { ProjectType } from '@shared/projectTypes'
+import { ProjectType, ProjectSchemaZod } from '@shared/projectTypes'
 
 interface NewProjectDialogProps {
   showbtn: boolean
@@ -25,16 +25,9 @@ interface NewProjectDialogProps {
 const NewProjectDialog = ({ showbtn, setActiveProject }: NewProjectDialogProps): JSX.Element => {
   const [showDialog, setShowDialog] = useState<boolean>(false)
   // eslint-disable-next-line no-control-regex
-  const fileNameRegex = /^[^<>:"/\\|?*\x00-\x1F]*$/
 
   const projectSchema = z.object({
-    name: z
-      .string()
-      .min(1, { message: 'The project name must contain at least 1 character' })
-      .max(100, { message: 'The project name must be shorter' })
-      .regex(fileNameRegex, {
-        message: 'Please remove any invalid characters'
-      })
+    name: ProjectSchemaZod.shape.project_name
   })
 
   const form = useForm<z.infer<typeof projectSchema>>({
