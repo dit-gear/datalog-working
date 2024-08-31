@@ -7,3 +7,7 @@ export function getFileExtension(filename: string): string | null {
     return null
   }
 }
+
+export const getFileName = (filePath: string): string => {
+  return filePath.split('/').pop() || filePath
+}

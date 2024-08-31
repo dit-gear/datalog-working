@@ -5,7 +5,6 @@ import icon from '../../resources/icon.png?asset'
 import { ProjectType } from '../shared/projectTypes'
 import { loadState } from './core/app-state/loader'
 import { setupIpcHandlers } from './core/setupIpcHandlers'
-import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 
 // Initialize the application
 app.setName('Datalog')
@@ -65,10 +64,6 @@ app.whenReady().then(() => {
   })
 
   setupIpcHandlers()
-
-  installExtension(REACT_DEVELOPER_TOOLS)
-    .then((name) => console.log(`Added Extension: ${name}`))
-    .catch((err) => console.log('An error occurred: ', err))
 
   loadState().then((res) => createWindow(res))
 

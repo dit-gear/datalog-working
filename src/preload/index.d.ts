@@ -1,5 +1,9 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 import {
+  ProjectType,
+  ProjectToUpdate,
+  UpdateProjectResult,
+  CreateNewProjectResult,
   saveEntryResult,
   OfflineFolderType,
   CopyDestination,
@@ -17,6 +21,7 @@ declare global {
       onNewProjectClicked: (callback: (data: boolean) => void) => void
       createNewProject: (projectName: string) => Promise<CreateNewProjectResult>
       onProjectLoaded: (callback: (project: ProjectType) => void) => void
+      updateProject: (project: ProjectToUpdate) => Promise<UpdateProjectResult>
       saveEntry: (entry: entryType) => Promise<saveEntryResult>
       loadEntries: () => Promise<entryType[]>
       findOcf: () => Promise<CopyDestination>

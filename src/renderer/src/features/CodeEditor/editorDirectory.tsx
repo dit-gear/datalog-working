@@ -1,6 +1,7 @@
 import { TabsContent } from '@components/ui/tabs'
 import { DirectoryFile } from '@shared/shared-types'
 import { useLoadedFile } from './loadedFileContext'
+import { getFileName } from '@renderer/utils/formatString'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -19,12 +20,6 @@ const EditorDirectory: React.FC<DirectoryDisplayProps> = ({
   type
 }: DirectoryDisplayProps) => {
   const { loadedFile, setLoadedFile } = useLoadedFile()
-
-  const getFileName = (filePath: string): string => {
-    return filePath.split('/').pop() || filePath
-  }
-
-  /*loadedFile?.path === file.path ? 'bg-accent text-accent-foreground' : ''*/
 
   const handleDelete = async (file: DirectoryFile): Promise<void> => {
     const response = await window.api.deleteFile(file)

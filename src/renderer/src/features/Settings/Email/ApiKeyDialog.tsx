@@ -22,14 +22,14 @@ import { Button } from '@components/ui/button'
 import { generatePassword } from '@renderer/utils/generatePassword'
 import { Form, FormField, FormItem, FormControl, FormLabel, FormMessage } from '@components/ui/form'
 import { useFormContext, useForm, SubmitHandler } from 'react-hook-form'
-import { emailApiType, emailApiZodObj } from './types'
+import { emailApiType, emailApiZodObj } from '@shared/projectTypes'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { schemaType } from '../Settings'
+import { formSchemaType } from '../types'
 
 const ApiKeyDialog: React.FC = () => {
   const [open, setOpen] = useState<boolean>(false)
   const [generateMessage, setGenerateMessage] = useState<string | null>(null)
-  const { setValue: setMasterValue } = useFormContext<schemaType>()
+  const { setValue: setMasterValue } = useFormContext<formSchemaType>()
 
   const defaultValues = {
     api_key: '',

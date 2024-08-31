@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, Dispatch, SetStateAction } from 'react'
 import { Button } from '@components/ui/button'
-import { Settings2 } from 'lucide-react'
-import { useForm, FormProvider } from 'react-hook-form'
+import { Settings2, Loader2 } from 'lucide-react'
+import { useForm, FormProvider, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@components/ui/form'
-
+import { removeEmptyFields, removePrefixFields } from '@renderer/utils/form'
 import { ProjectSettingsType } from '@shared/projectTypes'
 import { formSchemaType, formSchema, Scope } from './types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
@@ -13,12 +13,11 @@ import {
   Dialog,
   DialogContent,
   DialogFooter,
-  Dialogheader,
+  DialogHeader,
   DialogDescription,
   DialogTrigger,
   DialogClose,
-  DialogTitle,
-  DialogHeader
+  DialogTitle
 } from '@components/ui/dialog'
 import GeneralTab from './GeneralTab'
 import PathsTab from './PathsTab'
@@ -27,10 +26,12 @@ import EmailTab from './Email/EmailTab'
 
 interface SettingsDialogProps {
   defaults: ProjectSettingsType
+  setProject: Dispatch<SetStateAction<ProjectSettingsType>>
 }
 
-const Settings: React.FC<SettingsDialogProps> = ({ defaults }) => {
+const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
   const [scope, setScope] = useState<Scope>('project')
+  const [open, setOpen] = useState<boolean>(false)
 
   const defaultValues = useMemo(
     () => ({
@@ -51,8 +52,8 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults }) => {
       global_additional_parsing: defaults.global?.additional_parsing ?? undefined,
       global_emails: defaults.global?.emails ?? [],
       global_email_api: defaults.global?.email_api ?? undefined,
-      project_enable_parsing: false,
-      global_enable_parsing: false
+      project_enable_parsing: !!defaults.project?.additional_parsing,
+      global_enable_parsing: !!defaults.global?.additional_parsing
     }),
     [defaults]
   )
@@ -62,11 +63,39 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults }) => {
     mode: 'onBlur',
     resolver: zodResolver(formSchema)
   })
+  const {
+    handleSubmit,
+    formState: { isSubmitting, isSubmitSuccessful },
+    reset
+  } = form
 
-  console.log('1')
+  const onSubmit: SubmitHandler<formSchemaType> = async (data) => {
+    const cleanedData = removeEmptyFields(data, ['project_enable_parsing', 'global_enable_parsing'])
+    const projectfields = removePrefixFields(cleanedData, 'project')
+    const globalfields = removePrefixFields(cleanedData, 'global')
+    const update_email_api = {}
+    const update_settings = { project: projectfields, global: globalfields } as ProjectSettingsType
+
+    try {
+      const result = await window.api.updateProject({ update_settings, update_email_api })
+      if (result.success) {
+        setProject(result.project)
+        onOpenChange(false)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const onOpenChange = (open: boolean): void => {
+    setOpen(open)
+    if (open === false) {
+      reset(defaultValues)
+    }
+  }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="secondary" size="icon">
           <Settings2 className="h-4 w-4" />
@@ -80,55 +109,58 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults }) => {
         </DialogHeader>
         <FormProvider {...form}>
           <Form {...form}>
-            <Tabs
-              className="mx-auto w-[90vw] gap-2 container grid md:grid-cols-[220px_minmax(0,1fr)] overflow-y-auto"
-              defaultValue="general"
-              orientation="vertical"
-            >
-              <nav className="w-full shrink-0 md:sticky md:block">
-                <Tabs value={scope} onValueChange={(v) => setScope(v as Scope)}>
-                  <TabsList className="grid grid-cols-2 mt-2">
-                    <TabsTrigger value="project">This Project</TabsTrigger>
-                    <TabsTrigger value="global">Global</TabsTrigger>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Tabs
+                className="mx-auto w-[90vw] gap-2 container grid md:grid-cols-[220px_minmax(0,1fr)] overflow-y-auto"
+                defaultValue="general"
+                orientation="vertical"
+              >
+                <nav className="w-full shrink-0 md:sticky md:block">
+                  <Tabs value={scope} onValueChange={(v) => setScope(v as Scope)}>
+                    <TabsList className="grid grid-cols-2 mt-2">
+                      <TabsTrigger value="project">This Project</TabsTrigger>
+                      <TabsTrigger value="global">Global</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <TabsList className="flex flex-col justify-between items-start h-auto mt-2">
+                    <TabsTrigger className="w-full justify-start" value="general">
+                      General
+                    </TabsTrigger>
+                    <TabsTrigger className="w-full justify-start" value="paths">
+                      OCF/Proxies Paths
+                    </TabsTrigger>
+                    <TabsTrigger className="w-full justify-start" value="parsing">
+                      Parsing
+                    </TabsTrigger>
+                    <TabsTrigger className="w-full justify-start" value="email">
+                      Email
+                    </TabsTrigger>
                   </TabsList>
-                </Tabs>
-                <TabsList className="flex flex-col justify-between items-start h-auto mt-2">
-                  <TabsTrigger className="w-full justify-start" value="general">
-                    General
-                  </TabsTrigger>
-                  <TabsTrigger className="w-full justify-start" value="paths">
-                    OCF/Proxies Paths
-                  </TabsTrigger>
-                  <TabsTrigger className="w-full justify-start" value="parsing">
-                    Parsing
-                  </TabsTrigger>
-                  <TabsTrigger className="w-full justify-start" value="email">
-                    Email
-                  </TabsTrigger>
-                </TabsList>
-              </nav>
-              <TabsContent value="general">
-                <GeneralTab scope={scope} />
-              </TabsContent>
-              <TabsContent value="paths">
-                <PathsTab scope={scope} />
-              </TabsContent>
-              <TabsContent value="parsing">
-                <ParsingTab scope={scope} />
-              </TabsContent>
-              <TabsContent value="email">
-                <EmailTab scope={scope} />
-              </TabsContent>
+                </nav>
+                <TabsContent value="general">
+                  <GeneralTab scope={scope} />
+                </TabsContent>
+                <TabsContent value="paths">
+                  <PathsTab scope={scope} />
+                </TabsContent>
+                <TabsContent value="parsing">
+                  <ParsingTab scope={scope} />
+                </TabsContent>
+                <TabsContent value="email">
+                  <EmailTab scope={scope} />
+                </TabsContent>
 
-              <DialogFooter className="md:col-span-2 mt-auto">
-                <DialogClose asChild>
-                  <Button variant="ghost">Close</Button>
-                </DialogClose>
-                <Button disabled type="submit">
-                  Save
-                </Button>
-              </DialogFooter>
-            </Tabs>
+                <DialogFooter className="md:col-span-2 mt-auto">
+                  <DialogClose asChild>
+                    <Button variant="ghost">Close</Button>
+                  </DialogClose>
+                  <Button type="submit" disabled={isSubmitting || isSubmitSuccessful}>
+                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <></>}
+                    {isSubmitting ? 'Please wait' : isSubmitSuccessful ? 'Saved' : 'Save'}
+                  </Button>
+                </DialogFooter>
+              </Tabs>
+            </form>
           </Form>
         </FormProvider>
       </DialogContent>

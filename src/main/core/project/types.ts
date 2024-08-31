@@ -1,9 +1,4 @@
-import { ProjectType, ProjectRootType } from '../../../shared/projectTypes'
-export type CreateNewProjectResult = {
-  success: boolean
-  message?: string
-  project?: ProjectType
-}
+import { ProjectRootType } from '../../../shared/projectTypes'
 
 export type LoadProjectDataResult = {
   success: boolean

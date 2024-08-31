@@ -94,6 +94,12 @@ const emailSettings = z.object({
   api_key_encrypted: z.string()
 })
 
+export const emailApiZodObj = z.object({
+  provider: z.enum(['resend', 'sendgrid']),
+  api_key: z.string(),
+  api_secret: z.string().min(5, { message: 'Must be 5 or more characters long' })
+})
+
 export const emailZodObj = z.object({
   name: z.string(),
   show: z.object({ item: z.boolean(), root: z.boolean() }),
@@ -106,7 +112,7 @@ export const emailZodObj = z.object({
 })
 
 export const GlobalSchemaZod = z.object({
-  folder_template: z.string(),
+  folder_template: z.string().optional(),
   unit: z.string().optional(),
   default_ocf_paths: z.array(z.string()).optional(),
   default_proxies_path: z.string().optional(),
@@ -134,6 +140,7 @@ export const ProjectRootZod = ProjectSchemaZod.merge(
 export const GlobalSchemaZodNullable = GlobalSchemaZod.nullable()
 export type fieldType = z.infer<typeof fieldType>
 export type additionalParsing = z.infer<typeof additionalParsing>
+export type emailApiType = z.infer<typeof emailApiZodObj>
 export type ProjectSchemaType = z.infer<typeof ProjectSchemaZod>
 export type ProjectRootType = z.infer<typeof ProjectRootZod>
 export type ProjectSettingsType = z.infer<typeof ProjectSettingsZod>
@@ -142,4 +149,21 @@ export type ProjectType = {
   rootPath: string
   projectPath?: string
   data?: ProjectRootType
+}
+
+export type ProjectToUpdate = {
+  update_settings: ProjectSettingsType
+  update_email_api: emailApiType
+}
+
+export type UpdateProjectResult = {
+  success: boolean
+  message?: string
+  project?: ProjectType
+}
+
+export type CreateNewProjectResult = {
+  success: boolean
+  message?: string
+  project?: ProjectType
 }

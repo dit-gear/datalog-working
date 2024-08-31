@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { ProjectSchemaZod, GlobalSchemaZod } from '@shared/projectTypes'
+import { emailApiZodObj } from '@shared/projectTypes'
 
 export type Scope = 'project' | 'global'
 
@@ -23,7 +24,8 @@ export const formSchema = z
     global_emails: GlobalSchemaZod.shape.emails,
     global_email_api: GlobalSchemaZod.shape.email_api,
     project_enable_parsing: z.boolean(),
-    global_enable_parsing: z.boolean()
+    global_enable_parsing: z.boolean(),
+    new_email_api: emailApiZodObj.optional()
   })
   .superRefine((data, ctx) => {
     const { project_folder_template, global_folder_template } = data

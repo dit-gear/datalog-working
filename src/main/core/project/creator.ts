@@ -4,7 +4,7 @@ import fs from 'fs'
 import YAML from 'yaml'
 import { updateState } from '../app-state/updater' // Adjust the import path as necessary
 import { loadProject, loadProjectsInRootPath } from './loader'
-import { CreateNewProjectResult } from './types' // Adjust path as needed
+import { CreateNewProjectResult } from '@shared/projectTypes' // Adjust path as needed
 import { getRootPath, getActiveProjectPath } from '../app-state/state'
 import logger from '../logger'
 

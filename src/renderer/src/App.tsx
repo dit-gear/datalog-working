@@ -51,7 +51,7 @@ function App(): JSX.Element {
               <Button variant="secondary" size="icon">
                 <FolderSync className="h-4 w-4" />
               </Button>
-              <Settings defaults={project.data.settings} />
+              <Settings defaults={project.data.settings} setProject={setProject} />
             </div>
           ) : null}
         </div>
