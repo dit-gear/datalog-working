@@ -4,7 +4,7 @@ import { stateZod, state, error } from './types'
 import { ProjectType } from '../../../shared/projectTypes'
 import { decryptData } from '../../utils/encryption'
 import path from 'path'
-import { setRootPath, setActiveProjectPath } from './state'
+import { setRootPath, setActiveProjectPath, getAppPath } from './state'
 import logger from '../logger'
 import { ensureDirectoryExists } from '../../utils/crud'
 import { updateState } from './updater'
@@ -28,7 +28,8 @@ async function loadStateFromFile(filepath: string): Promise<state | error> {
 }
 
 async function loadConfig(): Promise<void> {
-  const configPath = path.join(app.getPath('userData'), 'config.json') as string
+  await ensureTemplateFoldersExistSync()
+  const configPath = path.join(getAppPath(), 'config.json') as string
   const defaultRootPath = path.join(app.getPath('documents'), 'Datalog')
   if (fs.existsSync(configPath)) {
     const config = await loadStateFromFile(configPath)
@@ -64,4 +65,15 @@ export async function loadState(): Promise<ProjectType> {
   await loadProjectsInRootPath()
   logger.info('No project to load, returning root path')
   return { rootPath: getRootPath() }
+}
+
+async function ensureTemplateFoldersExistSync(): Promise<void> {
+  const templates = path.join(getAppPath(), 'templates')
+  try {
+    ensureDirectoryExists(templates)
+    ensureDirectoryExists(path.join(templates, 'email'))
+    ensureDirectoryExists(path.join(templates, 'pdf'))
+  } catch {
+    logger.error('Could not check or create global template folder')
+  }
 }

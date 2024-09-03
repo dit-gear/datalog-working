@@ -1,14 +1,6 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
-import { ArrowUpRightFromSquare, MoreHorizontal, Trash2, Pencil, FileDown } from 'lucide-react'
+import { MoreHorizontal, Trash2, Pencil, FileDown } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +24,7 @@ const Datalogtable = ({ log }: DatalogtableProps): JSX.Element | null => {
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead>Index</TableHead>
           <TableHead>Shooting Day</TableHead>
           <TableHead>Shooting Date</TableHead>
           <TableHead>OCF Files</TableHead>
@@ -47,13 +40,9 @@ const Datalogtable = ({ log }: DatalogtableProps): JSX.Element | null => {
         {log && log.length > 0 ? (
           log.map((log, index) => (
             <TableRow key={index}>
-              <TableCell>
-                <Button variant="ghost" size="icon" className="ml-auto h-8 w-8 p-0">
-                  <ArrowUpRightFromSquare className="h-4 w-4" />
-                </Button>
-              </TableCell>
+              <TableCell>{log.Folder ? log.Folder : null}</TableCell>
               <TableCell className="font-medium">{log.Day}</TableCell>
-              <TableCell>{log.Date}</TableCell>
+              <TableCell>{log.Date ? log.Date : null}</TableCell>
               <TableCell>{log.Files ? log.Files : null}</TableCell>
               <TableCell>{log.Size ? log.Size : null}</TableCell>
               <TableCell>{log.ProxySize ? log.ProxySize : null}</TableCell>
@@ -66,9 +55,7 @@ const Datalogtable = ({ log }: DatalogtableProps): JSX.Element | null => {
                   : null}
               </TableCell>
               <TableCell>{log.Clips.length > 0 ? getVolumes(log.Clips) : null}</TableCell>
-              <TableCell className="text-right">
-                {log.Clips.length > 0 ? getReels(log.Clips).join(', ') : null}
-              </TableCell>
+              <TableCell>{log.Clips.length > 0 ? getReels(log.Clips).join(', ') : null}</TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

@@ -5,7 +5,7 @@ import { useForm, FormProvider, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@components/ui/form'
 import { removeEmptyFields, removePrefixFields } from '@renderer/utils/form'
-import { ProjectSettingsType } from '@shared/projectTypes'
+import { ProjectSettingsType, ProjectType } from '@shared/projectTypes'
 import { formSchemaType, formSchema, Scope } from './types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 
@@ -20,13 +20,13 @@ import {
   DialogTitle
 } from '@components/ui/dialog'
 import GeneralTab from './GeneralTab'
-import PathsTab from './PathsTab'
+import PathsTab from './Paths/PathsTab'
 import ParsingTab from './Parsing/ParsingTab'
 import EmailTab from './Email/EmailTab'
 
 interface SettingsDialogProps {
   defaults: ProjectSettingsType
-  setProject: Dispatch<SetStateAction<ProjectSettingsType>>
+  setProject: Dispatch<SetStateAction<ProjectType | undefined>>
 }
 
 const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
@@ -109,7 +109,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
         </DialogHeader>
         <FormProvider {...form}>
           <Form {...form}>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form id="settings" onSubmit={handleSubmit(onSubmit)}>
               <Tabs
                 className="mx-auto w-[90vw] gap-2 container grid md:grid-cols-[220px_minmax(0,1fr)] overflow-y-auto"
                 defaultValue="general"
@@ -154,7 +154,11 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
                   <DialogClose asChild>
                     <Button variant="ghost">Close</Button>
                   </DialogClose>
-                  <Button type="submit" disabled={isSubmitting || isSubmitSuccessful}>
+                  <Button
+                    form="settings"
+                    type="submit"
+                    disabled={isSubmitting || isSubmitSuccessful}
+                  >
                     {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <></>}
                     {isSubmitting ? 'Please wait' : isSubmitSuccessful ? 'Saved' : 'Save'}
                   </Button>

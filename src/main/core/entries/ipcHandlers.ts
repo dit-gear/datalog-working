@@ -26,17 +26,18 @@ export function setupEntriesIpcHandlers(): void {
       }
       const volumeName = getVolumeName(result.filePaths[0])
       const mhlFiles = await findFilesByType(result.filePaths[0], 'mhl')
-      const aleFiles = await findFilesByType(result.filePaths[0], 'ale')
+      //const aleFiles = await findFilesByType(result.filePaths[0], 'ale')
       if (mhlFiles.length === 0) {
         dialog.showErrorBox('Error', 'No MHL files found in the selected directory.')
         return
       } else {
-        const aleData = await processALE(aleFiles)
+        //const aleData = await processALE(aleFiles)
         const data = await processMHL(mhlFiles, mainWindow)
         // merge aleData and data that have the same Clip name
         const mergedData = data.map((item) => {
-          const aleItem = aleData.find((ale) => ale.Clip === item.Clip)
-          return { ...aleItem, ...item, Volume: volumeName }
+          //const aleItem = aleData.find((ale) => ale.Clip === item.Clip)
+          //return { ...aleItem, ...item, Volume: volumeName }
+          return { ...item, Volume: volumeName }
         })
 
         return { volume: [volumeName], data: mergedData }
@@ -96,20 +97,27 @@ export function setupEntriesIpcHandlers(): void {
   })
 
   ipcMain.handle('getFolderPath', async () => {
-    const result = await dialog.showOpenDialog({
-      properties: ['openDirectory']
-    })
-    if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
-      return null
-    } else {
-      return result.filePaths[0]
+    logger.info('FolderPath function started')
+    try {
+      const result = await dialog.showOpenDialog({
+        properties: ['openDirectory']
+      })
+      if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
+        logger.info('getFolderPath canceled')
+        return null
+      } else {
+        logger.info('sending back path')
+        return result.filePaths[0]
+      }
+    } catch (error) {
+      logger.error(`error ${error}`)
     }
   })
 
   ipcMain.handle('save-entry', async (_event, data: entryType) => {
     try {
       const yaml = YAML.stringify(data)
-      const filepath = path.join(getActiveProjectPath(), `${data.Folder}.yaml`)
+      const filepath = path.join(getActiveProjectPath(), `${data.Folder}.datalog`)
       fs.writeFileSync(filepath, yaml, 'utf8')
       return { success: true }
     } catch (error) {
@@ -120,9 +128,7 @@ export function setupEntriesIpcHandlers(): void {
 
   ipcMain.handle('load-entries', async () => {
     try {
-      const entriesPaths = (await findFilesByType(getActiveProjectPath(), 'yaml')).filter(
-        (filePath) => !path.basename(filePath).toLowerCase().includes('settings.yaml')
-      )
+      const entriesPaths = await findFilesByType(getActiveProjectPath(), 'datalog')
       const entries = entriesPaths.map((entryPath): entryType => {
         const entry = fs.readFileSync(entryPath, 'utf8')
         const parsedEntry = YAML.parse(entry)
@@ -135,3 +141,7 @@ export function setupEntriesIpcHandlers(): void {
     }
   })
 }
+
+/*const entriesPaths = (await findFilesByType(getActiveProjectPath(), 'yaml')).filter(
+        (filePath) => !path.basename(filePath).toLowerCase().includes('settings.yaml')
+      )*/

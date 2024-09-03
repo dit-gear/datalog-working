@@ -44,7 +44,7 @@ function App(): JSX.Element {
           {project?.data ? (
             <div className="flex justify-end gap-4">
               <Entrydialogtrigger
-                settings={project.data}
+                project={project.data}
                 previousEntries={entries}
                 refetch={handleEntriesLoad}
               />

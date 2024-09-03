@@ -2,13 +2,9 @@ import { ProjectToUpdate, UpdateProjectResult } from '@shared/projectTypes'
 import YAML from 'yaml'
 import fs from 'fs'
 import path from 'path'
-import {
-  getActiveProjectPath,
-  getRootPath,
-  getAppPath,
-  setActiveProjectPath
-} from '../app-state/state'
+import { getActiveProjectPath, getRootPath, getAppPath } from '../app-state/state'
 import { loadProject } from './loader'
+import { updateState } from '../app-state/updater'
 
 const getFileName = (filePath: string): string => {
   return filePath.split('/').pop() || filePath
@@ -28,8 +24,8 @@ export const updateProject = async ({
 
     if (newprojectname !== oldprojectname) {
       const newpath = path.join(getRootPath(), newprojectname)
-      await fs.renameSync(getActiveProjectPath(), newpath)
-      setActiveProjectPath(newpath)
+      fs.renameSync(getActiveProjectPath(), newpath)
+      await updateState({ newActiveProject: newpath })
     }
     const projectSettingsPath = path.join(getActiveProjectPath(), 'settings.yaml')
     const globalSettingsPath = path.join(getAppPath(), 'settings.yaml')

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { CardContent } from '@components/ui/card'
 import { useFormContext, useFieldArray } from 'react-hook-form'
-import { schemaType } from '../Settings'
+import { formSchemaType } from '../types'
 import { emailEditType } from './types'
 import {
   Accordion,
@@ -25,7 +25,7 @@ interface EmailProps {
 }
 
 const Emails: React.FC<EmailProps> = ({ scope }) => {
-  const { control } = useFormContext<schemaType>()
+  const { control } = useFormContext<formSchemaType>()
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: `${scope}_emails`

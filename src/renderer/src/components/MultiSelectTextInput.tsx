@@ -86,13 +86,21 @@ const MultiSelectTextInput = forwardRef<
 
       case 'Enter':
       case ' ':
-        if (!value.includes(inputValue)) {
+        if (inputValue && !value.includes(inputValue)) {
           onChange([...(value || []), inputValue])
           setInputValue('')
         }
         event.preventDefault()
         break
     }
+  }
+
+  const handleBlur = () => {
+    if (inputValue && !value.includes(inputValue)) {
+      onChange([...(value || []), inputValue])
+      setInputValue('')
+    }
+    onBlur()
   }
 
   const handleChange = (newValue: readonly Option[]): void => {
@@ -124,7 +132,7 @@ const MultiSelectTextInput = forwardRef<
       onKeyDown={handleKeyDown}
       placeholder={placeholder}
       value={value.map((option) => ({ label: option, value: option }))}
-      onBlur={onBlur}
+      onBlur={handleBlur}
       name={name}
       ref={ref}
       data-index={dataIndex}

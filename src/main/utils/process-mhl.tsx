@@ -23,7 +23,7 @@ const extensions = [
   '.m4v'
 ]
 
-function readAndParseMHLFiles(
+async function readAndParseMHLFiles(
   filePaths: string[],
   progressCallback: (progress: number) => void
 ): Promise<DestinationData[]> {
@@ -33,7 +33,7 @@ function readAndParseMHLFiles(
     const progress = processedFiles / filePaths.length
     progressCallback(progress) // Report progress
   }
-  return Promise.all(
+  const results = await Promise.all(
     filePaths.map(
       (filePath) =>
         new Promise<DestinationData[]>((resolve, reject) => {
@@ -63,9 +63,9 @@ function readAndParseMHLFiles(
                   extensions.some((ext) => row.file.toLowerCase().endsWith(ext))
                 )
                 // Process the data and group by common Clip name
-                const grouped = filteredFiles.reduce((acc, row) => {
+                const grouped = filteredFiles.reduce((acc, row_1) => {
                   // Extract the base clip name
-                  const baseClipName = row.file.split('/').pop()!.split('.')[0]
+                  const baseClipName = row_1.file.split('/').pop()!.split('.')[0]
 
                   // Initialize if not present
                   acc[baseClipName] = acc[baseClipName] || {
@@ -74,7 +74,7 @@ function readAndParseMHLFiles(
                   }
 
                   // Sum the sizes
-                  acc[baseClipName].Size += !isNaN(Number(row.size)) ? Number(row.size) : 0
+                  acc[baseClipName].Size += !isNaN(Number(row_1.size)) ? Number(row_1.size) : 0
 
                   return acc
                 }, {})
@@ -83,32 +83,32 @@ function readAndParseMHLFiles(
                 updateProgress()
                 resolve(combinedData)
               } else if (ascMhlValidator.success) {
-                const mhlData = ascMhlValidator.data
-                const filteredFiles = mhlData.hashlist.hashes.hash.filter((row) =>
-                  extensions.some((ext) => row.path.text.toLowerCase().endsWith(ext))
+                const mhlData_1 = ascMhlValidator.data
+                const filteredFiles_1 = mhlData_1.hashlist.hashes.hash.filter((row_2) =>
+                  extensions.some((ext_1) => row_2.path.text.toLowerCase().endsWith(ext_1))
                 )
                 // Process the data and group by common Clip name
-                const grouped = filteredFiles.reduce((acc, row) => {
+                const grouped_1 = filteredFiles_1.reduce((acc_1, row_3) => {
                   // Extract the base clip name
-                  const baseClipName = row.path.text.split('/').pop()!.split('.')[0]
+                  const baseClipName_1 = row_3.path.text.split('/').pop()!.split('.')[0]
 
                   // Initialize if not present
-                  acc[baseClipName] = acc[baseClipName] || {
-                    Clip: baseClipName,
+                  acc_1[baseClipName_1] = acc_1[baseClipName_1] || {
+                    Clip: baseClipName_1,
                     Size: 0
                   }
 
                   // Sum the sizes
-                  acc[baseClipName].Size += !isNaN(Number(row.path.size))
-                    ? Number(row.path.size)
+                  acc_1[baseClipName_1].Size += !isNaN(Number(row_3.path.size))
+                    ? Number(row_3.path.size)
                     : 0
 
-                  return acc
+                  return acc_1
                 }, {})
                 // Convert the grouped object into an array
-                const combinedData = Object.values(grouped) as DestinationData[]
+                const combinedData_1 = Object.values(grouped_1) as DestinationData[]
                 updateProgress()
-                resolve(combinedData)
+                resolve(combinedData_1)
               } else {
                 reject('Error parsing MHL file')
               }
@@ -118,11 +118,10 @@ function readAndParseMHLFiles(
           })
         })
     )
-  ).then((results) => {
-    const combinedData: DestinationData[] = []
-    results.forEach((data) => combinedData.push(...data))
-    return combinedData
-  })
+  )
+  const combinedData_2: DestinationData[] = []
+  results.forEach((data_2) => combinedData_2.push(...data_2))
+  return combinedData_2
 }
 
 async function processMHL(

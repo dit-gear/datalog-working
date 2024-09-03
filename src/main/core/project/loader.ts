@@ -50,9 +50,20 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
     if (!projectSettings) {
       throw new Error('Invalid project settings')
     }
+
+    const hasFolderTemplateInGlobal = globalSettings?.folder_template !== undefined
+    const hasFolderTemplateInProject = projectSettings.folder_template !== undefined
+
+    if (!hasFolderTemplateInGlobal && !hasFolderTemplateInProject) {
+      throw new Error(
+        'folder_template must be present in either global settings or project settings'
+      )
+    }
+    const folderTemplate = projectSettings.folder_template || globalSettings?.folder_template
     const data: ProjectRootType = {
       ...globalSettings,
       ...projectSettings,
+      folder_template: folderTemplate as string,
       settings: {
         project: projectSettings,
         ...(globalSettings && Object.keys(globalSettings).length > 0

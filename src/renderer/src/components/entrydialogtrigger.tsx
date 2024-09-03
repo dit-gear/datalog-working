@@ -7,13 +7,13 @@ import { Plus } from 'lucide-react'
 import Entrydialog from './entrydialog'
 
 interface EntrydialogProps {
-  settings: ProjectRootType
+  project: ProjectRootType
   previousEntries?: entryType[]
   refetch: () => void
 }
 
 const Entrydialogtrigger = ({
-  settings,
+  project,
   previousEntries,
   refetch
 }: EntrydialogProps): JSX.Element => {
@@ -29,7 +29,7 @@ const Entrydialogtrigger = ({
       <DialogContent className="sm:max-w-[80vw] h-[90vh]">
         {open && (
           <Entrydialog
-            settings={settings}
+            project={project}
             previousEntries={previousEntries}
             setOpen={setOpen}
             refetch={refetch}

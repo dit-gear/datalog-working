@@ -76,76 +76,76 @@ const ApiKeyDialog: React.FC = () => {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <FormField
-              key={'provider'}
-              control={control}
-              name={'provider'}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Provider</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectItem value="resend">Resend</SelectItem>
-                          <SelectItem value="sendgrid">Sendgrid</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            key={'provider'}
+            control={control}
+            name={'provider'}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Provider</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="resend">Resend</SelectItem>
+                        <SelectItem value="sendgrid">Sendgrid</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              key={'api_key'}
-              control={control}
-              name={'api_key'}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>API Key</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              key={'api_secret'}
-              control={control}
-              name={'api_secret'}
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex justify-between items-center">
-                    <FormLabel>Password</FormLabel>
-                    {generateMessage ? (
-                      <p>{generateMessage}</p>
-                    ) : (
-                      <Button size="sm" variant="link" onClick={handleGeneratePassword}>
-                        Generate
-                      </Button>
-                    )}
-                  </div>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="secondary">Cancel</Button>
-              </DialogClose>
-              <Button type="submit">Set</Button>
-            </DialogFooter>
-          </form>
+          <FormField
+            key={'api_key'}
+            control={control}
+            name={'api_key'}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>API Key</FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            key={'api_secret'}
+            control={control}
+            name={'api_secret'}
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex justify-between items-center">
+                  <FormLabel>Password</FormLabel>
+                  {generateMessage ? (
+                    <p>{generateMessage}</p>
+                  ) : (
+                    <Button size="sm" variant="link" onClick={handleGeneratePassword}>
+                      Generate
+                    </Button>
+                  )}
+                </div>
+                <FormControl>
+                  <Input type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="secondary">Cancel</Button>
+            </DialogClose>
+            <Button type="button" onClick={handleSubmit(onSubmit)}>
+              Set
+            </Button>
+          </DialogFooter>
         </Form>
       </DialogContent>
     </Dialog>

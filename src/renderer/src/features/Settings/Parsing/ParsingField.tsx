@@ -96,7 +96,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
         <div className="flex items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="icon" className="p-3" variant="ghost">
+              <Button type="button" size="icon" className="p-3" variant="ghost">
                 <MoreHorizontal />
               </Button>
             </DropdownMenuTrigger>

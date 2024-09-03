@@ -20,28 +20,37 @@ import {
   entryType,
   entrySchema
 } from '@shared/shared-types'
+import { datalogZod, datalogType } from '@shared/datalogTypes'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Papa from 'papaparse'
 import { timecodeToSeconds, getReels } from '../utils'
-import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
-import { Calendar } from '@components/ui/calendar'
-import { lightFormat } from 'date-fns'
+import DatePicker from './DatePicker'
 import { ProjectRootType } from '@shared/projectTypes'
-import replaceTags from '../utils/formatDynamicString'
+import replaceTags, { formatDate } from '../utils/formatDynamicString'
 import { Pencil } from 'lucide-react'
 import { useToast } from '@components/ui/use-toast'
 import formatDuration from '../utils/formatDuration'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormDescription,
+  FormMessage,
+  FormLabel
+} from './ui/form'
+import { parse } from 'date-fns'
 
 interface EntrydialogProps {
-  settings: ProjectRootType
+  project: ProjectRootType
   previousEntries?: entryType[]
   setOpen: (value: boolean) => void
   refetch: () => void
 }
 
 const Entrydialog = ({
-  settings,
+  project,
   previousEntries,
   setOpen,
   refetch
@@ -50,7 +59,7 @@ const Entrydialog = ({
   const [metadataCsv, setmetadataCsv] = useState<metadataCsv[]>([])
   const [copyDirectories, setCopyDirectories] = useState<CopyDestination[] | null>(null)
   const [offlineFolder, setOfflineFolder] = useState<OfflineFolderType | null>(null)
-  const [calendarOpen, setCalendarOpen] = useState<boolean>(false)
+
   const { toast } = useToast()
 
   function getNextDay(entries: entryType[]): number {
@@ -69,34 +78,35 @@ const Entrydialog = ({
   const defaultFolder = (): string => {
     const tags = {
       day: defaultDay,
-      date: new Date(),
-      projectName: settings.project_name,
-      unit: settings.unit
+      projectName: project.project_name,
+      unit: project.unit
     }
-    return replaceTags(settings.folder_template, tags)
+    return replaceTags(project.folder_template, tags)
   }
   // getDateBasedOnTime().toISOString().split('T')[0],
-  // Folder: replaceTags(settings.folder_template, defaultDay, new Date()),
-  const { register, watch, setValue, formState, handleSubmit, reset, control } = useForm({
+  // Folder: replaceTags(project.folder_template, defaultDay, new Date()),
+  const form = useForm({
     defaultValues: {
       Folder: defaultFolder(),
       Day: defaultDay,
-      Date: new Date(),
-      Unit: settings.unit ? settings.unit : '',
-      Files: 0,
-      Size: 0,
+      Date: formatDate(),
+      Unit: project.unit ? project.unit : '',
+      OCF: { Files: 0, Size: 0 },
+      Proxy: { Files: 0, Size: 0 },
       Duration: 0,
-      ProxySize: 0,
-      Clips: [] as combinedType[]
+      Clips: []
     },
     mode: 'all',
-    resolver: zodResolver(entrySchema)
+    resolver: zodResolver(datalogZod)
   })
+  console.log(formatDate())
 
-  const onSubmit = (data: entryType): void => {
-    // eslint-disable-next-line prefer-const
-    let entrytoSave: Partial<entryType> = {}
-    entrytoSave.Folder = data.Folder
+  const { register, watch, setValue, formState, handleSubmit, reset, control } = form
+
+  const onSubmit = (data: datalogType): void => {
+    //let entrytoSave: Partial<entryType> = {}
+    console.log(data)
+    /*entrytoSave.Folder = data.Folder
     entrytoSave.Day = data.Day
     entrytoSave.Date = data.Date
     if (data.Unit !== '') entrytoSave.Unit = data.Unit
@@ -114,7 +124,7 @@ const Entrydialog = ({
       } else {
         toast({ description: 'There was an issue saving the entry' })
       }
-    })
+    })*/
   }
 
   /*useEffect(() => {
@@ -236,8 +246,7 @@ const Entrydialog = ({
         .then((folder) => {
           if (folder) {
             setOfflineFolder(folder)
-            //setTotalProxySize(Math.floor(folder.folderSize / 1000000000));
-            setValue('ProxySize', Math.floor(folder.folderSize / 1000000000))
+            //setValue('ProxySize', Math.floor(folder.folderSize / 1000000000))
           }
         })
         .catch((e) => console.log('Catch Error: ', e))
@@ -246,24 +255,11 @@ const Entrydialog = ({
     }
   }
 
-  /*onst handleSetDocumentsFolder = async() => {
-    try {
-      window.electron.getDocumentsFolder().then(folder=> {
-        if (folder) {
-          setDocFolderPath(folder);
-        }}).catch(e => console.log('Catch Error: ', e));
-    } catch (error) {
-      console.error('Error selecting directory:', error);
-    }
-  };*/
-
   const calculateTotalSize = (array: combinedType[]): number => {
     return Math.floor(array.reduce((total, item) => total + item.Size, 0) / 1000000000)
   }
   const calculateTotalDuration = (array: combinedType[]): number => {
     const totalSeconds = array.reduce((total, item) => total + item.Duration, 0)
-    //const hours = Math.floor(totalSeconds / 3600);
-    //const minutes = totalSeconds % 60;
     return totalSeconds
   }
   useEffect(() => {
@@ -299,12 +295,10 @@ const Entrydialog = ({
       })
 
       const combinedArray = Array.from(combinedMap.values())
-      setValue('Files', combinedArray.length)
-      setValue('Size', calculateTotalSize(combinedArray))
+      //setValue('Files', combinedArray.length)
+      //setValue('Size', calculateTotalSize(combinedArray))
       setValue('Duration', calculateTotalDuration(combinedArray))
-      setValue('Clips', combinedArray, { shouldValidate: true })
-      //console.log('copyDirectories', copyDirectories)
-      console.log('combinedArray', combinedArray)
+      //setValue('Clips', combinedArray, { shouldValidate: true })
     }
   }, [copyDirectories, metadataCsv, offlineFolder])
 
@@ -321,13 +315,13 @@ const Entrydialog = ({
       day: daywatch,
       date: datewatch,
       unit: unitwatch !== '' ? unitwatch : undefined,
-      projectName: settings.project_name
+      projectName: project.project_name
     }
-    setValue('Folder', replaceTags(settings.folder_template, tags))
+    setValue('Folder', replaceTags(project.folder_template, tags))
   }, [daywatch, datewatch, unitwatch])
 
   return (
-    <>
+    <Form {...form}>
       <Tabs defaultValue="name" className="">
         <DialogHeader>
           <DialogTitle>New Shooting Day</DialogTitle>
@@ -335,9 +329,9 @@ const Entrydialog = ({
           <div>
             <div className="mx-auto max-w-7xl">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Stat key="stats-files" label="OCF Files" value={watch('Files')} warning={true} />
+                {/*<Stat key="stats-files" label="OCF Files" value={watch('Files')} warning={true} />
                 <Stat key="stats-size" label="OCF Size" value={watch('Size')} suffix="GB" />
-                <Stat key="stats-mxf" label="Proxies Size" value={watch('ProxySize')} suffix="GB" />
+                <Stat key="stats-mxf" label="Proxies Size" value={watch('ProxySize')} suffix="GB" />*/}
                 <Stat
                   key="stats-duration"
                   label="Duration"
@@ -365,9 +359,33 @@ const Entrydialog = ({
             <dt className="text-sm font-medium leading-6 text-white">Entry Naming</dt>
             <dd className="mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0">
               <div className="flex gap-10 mb-10">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="day">Day</Label>
-                  <Input
+                <FormField
+                  control={control}
+                  name="Day"
+                  rules={{
+                    max: { value: 999, message: 'The day must be less than or equal to 999' },
+                    min: { value: 1, message: 'The day must be greater than or equal to 1' },
+                    required: 'Day is required' // Optional: add required validation
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Day</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="day"
+                          type="number"
+                          min={1}
+                          max={999}
+                          value={field.value}
+                          onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                          className="w-16"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/*<Input
                     id="day"
                     type="number"
                     className={formState.errors.Day ? ' w-16 border-red-500' : 'w-16'}
@@ -376,43 +394,33 @@ const Entrydialog = ({
                       max: 999,
                       min: 1
                     })}
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Controller
-                    control={control}
-                    name="Date"
-                    render={({ field }) => (
-                      <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="date">Date</Label>
-                        <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                          <PopoverTrigger asChild>
-                            <Button id="date" variant={'outline'}>
-                              {field.value ? (
-                                lightFormat(field.value, 'yyyy-MM-dd')
-                              ) : (
-                                <p>Pick a date</p>
-                              )}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={(date) => {
-                                field.onChange(date), setCalendarOpen(false)
-                              }}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    )}
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="unit">Unit</Label>
-                  <Input id="unit" type="text" className="w-32" {...register('Unit')} />
-                </div>
+                  />*/}
+                <FormField
+                  control={control}
+                  name="Date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col justify-between pt-1">
+                      <FormLabel>Date</FormLabel>
+                      <FormControl>
+                        <DatePicker field={field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={control}
+                  name="Unit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Unit</FormLabel>
+                      <FormControl>
+                        <Input id="unit" type="text" className="w-32" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -460,60 +468,72 @@ const Entrydialog = ({
                 role="list"
                 className="divide-y divide-white/10 rounded-md border border-white/20 mb-2"
               >
-                {copyDirectories &&
-                  copyDirectories.map((directory, index) => (
-                    <li
-                      key={index}
-                      className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6"
-                    >
-                      <div className="flex w-0 flex-1 items-center">
-                        {/*<PaperClipIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />*/}
-                        <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                          <span className="flex-shrink-0 text-gray-400">Copy {index + 1}: </span>
-                          <span className="truncate font-medium">
-                            {directory.volume.length > 1
-                              ? directory.volume.join(', ')
-                              : directory.volume}
-                          </span>
-                          <span className="flex-shrink-0 text-gray-400">
-                            {`${directory.data.length} of ${watch('Files')}`}:{' '}
-                          </span>
+                {copyDirectories
+                  ? copyDirectories.map((directory, index) => (
+                      <li
+                        key={index}
+                        className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6"
+                      >
+                        <div className="flex w-0 flex-1 items-center">
+                          {/*<PaperClipIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />*/}
+                          <div className="ml-4 flex min-w-0 flex-1 gap-2">
+                            <span className="flex-shrink-0 text-gray-400">Copy {index + 1}: </span>
+                            <span className="truncate font-medium">
+                              {directory.volume.length > 1
+                                ? directory.volume.join(', ')
+                                : directory.volume}
+                            </span>
+                            <span className="flex-shrink-0 text-gray-400">
+                              {/*`${directory.data.length} of ${watch('Files')}`*/}:{' '}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                      <div className="ml-4 flex-shrink-0">
-                        <a
-                          href="#"
-                          onClick={() => handleRemoveCopyDestination(index)}
-                          className="font-medium text-indigo-400 hover:text-indigo-300"
+                        <div className="ml-4 flex-shrink-0">
+                          <a
+                            href="#"
+                            onClick={() => handleRemoveCopyDestination(index)}
+                            className="font-medium text-indigo-400 hover:text-indigo-300"
+                          >
+                            Remove
+                          </a>
+                        </div>
+                      </li>
+                    ))
+                  : project.default_ocf_paths && project.default_ocf_paths.length > 0
+                    ? project.default_ocf_paths.map((directory, index) => (
+                        <li
+                          key={index}
+                          className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6"
                         >
-                          Remove
-                        </a>
-                      </div>
-                    </li>
-                  ))}
-                {/*<li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
-                  <div className="flex w-0 flex-1 items-center">
-                    {/*<PaperClipIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
-                    <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                      <span className="truncate font-medium">coverletter_back_end_developer.pdf</span>
-                      <span className="flex-shrink-0 text-gray-400">Verified</span>
-                    </div>
-                  </div>
-                  <div className="ml-4 flex-shrink-0">
-                    <a href="#" className="font-medium text-indigo-400 hover:text-indigo-300">
-                      Remove
-                    </a>
-                  </div>
-                </li>*/}
+                          <div className="flex w-0 flex-1 items-center">
+                            {/*<PaperClipIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />*/}
+                            <div className="ml-4 flex min-w-0 flex-1 gap-2">
+                              <span className="flex-shrink-0 text-gray-400">
+                                Copy {index + 1}:{' '}
+                              </span>
+                              <span className="truncate font-medium text-gray-400">
+                                {directory}
+                              </span>
+                              <span className="flex-shrink-0 text-gray-400">
+                                {/*`${directory.data.length} of ${watch('Files')}`*/}:{' '}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="ml-4 flex-shrink-0">
+                            <a
+                              href="#"
+                              onClick={() => console.log('click')}
+                              className="font-medium text-indigo-400 hover:text-indigo-300"
+                            >
+                              Remove
+                            </a>
+                          </div>
+                        </li>
+                      ))
+                    : null}
               </ul>
               <div className="flex gap-2">
                 <Button onClick={handleAddCopyDestination}>{`Add OCF Copy Directory (mhl)`}</Button>
-                <Button disabled onClick={() => console.log('click')}>
-                  {`Add Reference Copy (CSV)`}
-                </Button>
-                <Button disabled onClick={() => console.log('click')}>
-                  Import from Silverstack
-                </Button>
               </div>
             </dd>
           </div>
@@ -529,9 +549,6 @@ const Entrydialog = ({
               />
               <Button onClick={() => document.getElementById('file-field')?.click()}>
                 Choose CSV file
-              </Button>
-              <Button disabled onClick={() => console.log('click')}>
-                Import from DaVinci Resolve
               </Button>
               {metadataPath}
             </dd>
@@ -562,7 +579,7 @@ const Entrydialog = ({
           Submit
         </Button>
       </DialogFooter>
-    </>
+    </Form>
   )
 }
 

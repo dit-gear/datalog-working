@@ -67,7 +67,7 @@ export const entrySchema = z.object({
     .int()
     .gte(1, { message: 'Day must be greater than or equal to 1' })
     .lte(999, { message: 'Day must be below 999' }),
-  Date: z.date(),
+  Date: z.string().date(),
   Unit: z.string().optional(),
   Files: z.number().min(1),
   Size: z.number().min(1),

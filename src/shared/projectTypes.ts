@@ -105,11 +105,13 @@ export const emailApiZodObj = z.object({
 })
 
 export const emailZodObj = z.object({
-  name: z.string(),
+  name: z.string().min(1, 'Template name are required'),
   show: z.object({ item: z.boolean(), root: z.boolean() }),
-  sender: z.string().email().optional(),
-  recipients: z.array(z.string().email()).optional(),
-  subject: z.string().optional(),
+  sender: z.string().email(),
+  recipients: z
+    .array(z.string().email({ message: 'Must be a vaild email' }))
+    .min(1, { message: 'Must contain at least one recipient' }),
+  subject: z.string().min(1, 'Subject are required'),
   attatchments: z.array(z.string()).optional(),
   body: z.string().optional(),
   template: z.string() // url to file.
@@ -150,6 +152,37 @@ export const ProjectRootZod = ProjectSchemaZod.merge(
     settings: ProjectSettingsZod
   })
 )
+
+  .refine(
+    (data) => {
+      // Check if folder_template is defined in either project or global settings
+      const projectFolderTemplate = data.settings.project.folder_template
+      const globalFolderTemplate = data.settings.global?.folder_template
+
+      // Ensure that folder_template exists in at least one of them
+      return !!projectFolderTemplate || !!globalFolderTemplate
+    },
+    {
+      message: 'folder_template must be present in either project or global settings'
+    }
+  )
+  .transform((data) => {
+    // Safely return a version of data with folder_template as a required string
+    const folder_template =
+      data.settings.project.folder_template || data.settings.global?.folder_template
+
+    // TypeScript check to ensure folder_template is not undefined
+    if (!folder_template) {
+      throw new Error('folder_template is required but was not found.')
+    }
+
+    // Return the complete object with folder_template included
+    return {
+      ...data,
+      folder_template
+    }
+  })
+
 export const GlobalSchemaZodNullable = GlobalSchemaZod.nullable()
 export type fieldType = z.infer<typeof fieldType>
 export type additionalParsing = z.infer<typeof additionalParsing>

@@ -51,11 +51,16 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
   }
   const form = useForm<emailType>({
     defaultValues: defaultValues,
-    mode: 'onChange',
+    mode: 'onSubmit',
     resolver: zodResolver(emailZodObj)
   })
 
-  const { control, handleSubmit, reset } = form
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = form
 
   let currentIndex = 0 // Initialize the index counter
 
@@ -69,7 +74,6 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
   }
   useEffect(() => {
     if (emailEdit) {
-      //console.log(emailEdit)
       reset(emailEdit.email)
       setOpen(true)
     }
@@ -86,7 +90,9 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="secondary">Add Email</Button>
+        <Button type="button" variant="secondary">
+          Add Email
+        </Button>
       </DialogTrigger>
       <DialogContent className="border p-4">
         <DialogHeader>
@@ -98,113 +104,117 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <FormField
-              control={control}
-              name={`name`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Template name</FormLabel>
-                  <FormControl>
-                    <Input {...field} data-index={assignIndex()} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name={`sender`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>From:</FormLabel>
-                  <FormControl>
-                    <Input {...field} data-index={assignIndex()} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name={`recipients`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>To:</FormLabel>
-                  <FormControl>
-                    <MultiSelectTextInput {...field} dataIndex={assignIndex()} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name={`subject`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subject</FormLabel>
-                  <FormControl>
-                    <Input {...field} data-index={assignIndex()} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name={`attatchments`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Attatchments</FormLabel>
-                  <FormControl>
-                    <MultiSelectTextInput {...field} dataIndex={assignIndex()} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name={`body`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Body</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} data-index={assignIndex()} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name={`template`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>React Email Template</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectItem value="Plain-Text">Plain Text</SelectItem>
-                          <SelectItem value="starter.jsx">starter.jsx</SelectItem>
-                          <SelectItem value="starter2.jsx">starter2.jsx</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter>
-              <Button type="submit">Save</Button>
-            </DialogFooter>
-          </form>
+          <FormField
+            control={control}
+            name={`name`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Template name</FormLabel>
+                <FormControl>
+                  <Input {...field} data-index={assignIndex()} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`sender`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>From:</FormLabel>
+                <FormControl>
+                  <Input {...field} data-index={assignIndex()} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`recipients`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>To:</FormLabel>
+                <FormControl>
+                  <MultiSelectTextInput {...field} dataIndex={assignIndex()} />
+                </FormControl>
+                {Array.isArray(errors.recipients) &&
+                  errors.recipients.length > 0 &&
+                  errors.recipients.map((error, index) => (
+                    <FormMessage key={index}>{error.message}</FormMessage>
+                  ))}
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`subject`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Subject</FormLabel>
+                <FormControl>
+                  <Input {...field} data-index={assignIndex()} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`attatchments`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Attatchments</FormLabel>
+                <FormControl>
+                  <MultiSelectTextInput {...field} dataIndex={assignIndex()} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`body`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Body</FormLabel>
+                <FormControl>
+                  <Textarea {...field} data-index={assignIndex()} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`template`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>React Email Template</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="Plain-Text">Plain Text</SelectItem>
+                        <SelectItem value="starter.jsx">starter.jsx</SelectItem>
+                        <SelectItem value="starter2.jsx">starter2.jsx</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <DialogFooter>
+            <Button type="button" onClick={handleSubmit(onSubmit)}>
+              Save
+            </Button>
+          </DialogFooter>
         </Form>
       </DialogContent>
     </Dialog>
