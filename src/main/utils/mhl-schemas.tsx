@@ -7,13 +7,13 @@ const creatorInfoSchema = z.object({
   username: z.string(),
   hostname: z.string(),
   tool: z.string(),
-  startdate: z.string(), // Or z.date() if you want to enforce Date objects
-  finishdate: z.string() // Or z.date() if you want to enforce Date objects
+  startdate: z.string(),
+  finishdate: z.string()
 })
 
 const hashItemSchema = z.object({
   file: z.string(),
-  size: z.number(),
+  size: z.string().transform((v) => parseInt(v, 10)),
   lastmodificationdate: z.string(),
   md5: z.string().length(32).optional().nullable(),
   sha1: z.string().length(40).optional().nullable(),
@@ -26,12 +26,12 @@ const hashItemSchema = z.object({
 const hashListSchema = z.object({
   creatorinfo: creatorInfoSchema,
   hash: z.array(hashItemSchema),
-  version: z.number()
+  version: z.string()
 })
 
 export const mhlSchema = z.object({
   '?xml': z.object({
-    version: z.number(),
+    version: z.string(),
     encoding: z.string()
   }),
   hashlist: hashListSchema

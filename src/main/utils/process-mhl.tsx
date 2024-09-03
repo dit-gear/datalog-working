@@ -22,6 +22,7 @@ const extensions = [
   '.mpeg',
   '.m4v'
 ]
+const sequentialFileTypes = new Set(['.dng', '.arx', '.ari', '.mxf', '.exr', '.r3d', '.braw'])
 
 async function readAndParseMHLFiles(
   filePaths: string[],
@@ -49,25 +50,36 @@ async function readAndParseMHLFiles(
               textNodeName: 'text',
               ignoreAttributes: false, // Do not ignore the attributes; integrate them directly
               parseNodeValue: false,
-              parseAttributeValue: true
+              parseTagValue: false,
+              parseAttributeValue: false
             }
-            const parser = new XMLParser(options)
+            const XMLparser = new XMLParser(options)
 
             if (XMLValidator.validate(fileData) === true) {
-              const parsed = parser.parse(fileData)
-              const mhlClassicValidator = mhlSchema.safeParse(parsed)
-              const ascMhlValidator = AscMhlschema.safeParse(parsed)
+              const parsedXML = XMLparser.parse(fileData)
+              //console.log(parsed)
+              const mhlClassicValidator = mhlSchema.safeParse(parsedXML)
+              const ascMhlValidator = AscMhlschema.safeParse(parsedXML)
+              if (mhlClassicValidator.error) {
+                console.error(mhlClassicValidator.error)
+              }
               if (mhlClassicValidator.success) {
                 const mhlData = mhlClassicValidator.data
                 const filteredFiles = mhlData.hashlist.hash.filter((row) =>
                   extensions.some((ext) => row.file.toLowerCase().endsWith(ext))
                 )
-                // Process the data and group by common Clip name
                 const grouped = filteredFiles.reduce((acc, row_1) => {
-                  // Extract the base clip name
-                  const baseClipName = row_1.file.split('/').pop()!.split('.')[0]
+                  const fileName = row_1.file.split('/').pop()!
+                  const extension = '.' + fileName.split('.').pop()?.toLowerCase()
 
-                  // Initialize if not present
+                  let baseClipName = fileName
+
+                  // Check if filetype is likely to be sequential and handle formating.
+                  if (sequentialFileTypes.has(extension)) {
+                    const match = fileName.match(/^(.*?)(?:[._]\d+)?\.[a-zA-Z0-9]+$/)
+                    baseClipName = match ? match[1] : fileName
+                  }
+
                   acc[baseClipName] = acc[baseClipName] || {
                     Clip: baseClipName,
                     Size: 0
@@ -80,6 +92,7 @@ async function readAndParseMHLFiles(
                 }, {})
                 // Convert the grouped object into an array
                 const combinedData = Object.values(grouped) as unknown as DestinationData[]
+                console.log(combinedData)
                 updateProgress()
                 resolve(combinedData)
               } else if (ascMhlValidator.success) {
