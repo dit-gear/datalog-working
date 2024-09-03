@@ -2,7 +2,8 @@ import { z } from 'zod'
 
 const DestinationDataSchema = z.object({
   Clip: z.string(),
-  Size: z.number()
+  Size: z.number(),
+  Hash: z.string().nullable()
 })
 
 const DestinationExtendedSchema = DestinationDataSchema.extend({

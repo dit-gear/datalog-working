@@ -68,28 +68,32 @@ async function readAndParseMHLFiles(
                 const filteredFiles = mhlData.hashlist.hash.filter((row) =>
                   extensions.some((ext) => row.file.toLowerCase().endsWith(ext))
                 )
-                const grouped = filteredFiles.reduce((acc, row_1) => {
-                  const fileName = row_1.file.split('/').pop()!
-                  const extension = '.' + fileName.split('.').pop()?.toLowerCase()
+                const grouped = filteredFiles.reduce(
+                  (acc, row_1) => {
+                    const fileName = row_1.file.split('/').pop()!
+                    const extension = '.' + fileName.split('.').pop()?.toLowerCase()
 
-                  let baseClipName = fileName
+                    let baseClipName = fileName
 
-                  // Check if filetype is likely to be sequential and handle formating.
-                  if (sequentialFileTypes.has(extension)) {
-                    const match = fileName.match(/^(.*?)(?:[._]\d+)?\.[a-zA-Z0-9]+$/)
-                    baseClipName = match ? match[1] : fileName
-                  }
+                    // Check if filetype is likely to be sequential and handle formating.
+                    if (sequentialFileTypes.has(extension)) {
+                      const match = fileName.match(/^(.*?)(?:[._]\d+)?\.[a-zA-Z0-9]+$/)
+                      baseClipName = match ? match[1] : fileName
+                    }
 
-                  acc[baseClipName] = acc[baseClipName] || {
-                    Clip: baseClipName,
-                    Size: 0
-                  }
+                    acc[baseClipName] = acc[baseClipName] || {
+                      Clip: baseClipName,
+                      Size: 0,
+                      Hash: row_1.md5 || row_1.sha1 || row_1.xxhash64 || row_1.xxhash64be || null
+                    }
 
-                  // Sum the sizes
-                  acc[baseClipName].Size += !isNaN(Number(row_1.size)) ? Number(row_1.size) : 0
+                    // Sum the sizes
+                    acc[baseClipName].Size += !isNaN(Number(row_1.size)) ? Number(row_1.size) : 0
 
-                  return acc
-                }, {})
+                    return acc
+                  },
+                  {} as Record<string, { Clip: string; Size: number; Hash: string | null }>
+                )
                 // Convert the grouped object into an array
                 const combinedData = Object.values(grouped) as unknown as DestinationData[]
                 console.log(combinedData)
