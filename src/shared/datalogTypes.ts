@@ -1,16 +1,6 @@
 import { z } from 'zod'
 
-const DestinationDataSchema = z.object({
-  Clip: z.string(),
-  Size: z.number(),
-  Hash: z.string().nullable()
-})
-
-const DestinationExtendedSchema = DestinationDataSchema.extend({
-  Copies: z.array(z.array(z.string()))
-})
-
-const Camera_Metadata = z.object({
+const Camera_MetadataZod = z.object({
   Camera_Model: z.string().optional(),
   Camera_Id: z.string().optional(),
   Reel: z.string().optional(),
@@ -26,16 +16,22 @@ const Camera_Metadata = z.object({
   LUT: z.string().optional()
 })
 
-const Clip = z
+const ProxyZod = z.object({
+  Path: z.string(),
+  Size: z.string()
+})
+
+export const ClipZod = z
   .object({
     Clip: z.string(),
-    Reel: z.string().optional(),
+    Size: z.number(),
+    Copies: z.array(z.object({ Volume: z.string(), Hash: z.string().nullable() })),
     Duration: z.number().optional(),
-    Camera: Camera_Metadata.optional()
+    Image: z.string().optional(),
+    Proxy: ProxyZod.optional()
   })
+  .extend(Camera_MetadataZod.shape)
   .catchall(z.string())
-
-//const Clip = DestinationExtendedSchema.extend(metadataCsvSchema)
 
 const Files = z.object({
   Files: z.number().int().nonnegative().finite(),
@@ -58,7 +54,8 @@ export const datalogZod = z.object({
   Proxy: Files.optional(),
   Duration: z.number().optional(),
   Reels: z.array(z.string()).optional(),
-  Clips: z.array(Clip).optional()
+  Clips: z.array(ClipZod).optional()
 })
 
-export type datalogType = z.infer<typeof datalogZod>
+export type ClipType = z.infer<typeof ClipZod>
+export type DatalogType = z.infer<typeof datalogZod>

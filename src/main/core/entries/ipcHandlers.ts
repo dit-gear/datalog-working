@@ -2,8 +2,8 @@ import { ipcMain, dialog } from 'electron'
 import fs from 'fs'
 import path from 'path'
 import YAML from 'yaml'
-import processALE from '../../utils/process-ale'
-import processMHL from '../../utils/process-mhl'
+import processALE from '../file-processing/camera/process-ale'
+import processMHL from '../file-processing/mhl/process-mhl'
 import getVolumeName from '../../utils/get-volume'
 import findFilesByType from '../../utils/find-files-by-type'
 import { FileInfo, entryType } from '../../../shared/shared-types'
@@ -26,24 +26,25 @@ export function setupEntriesIpcHandlers(): void {
       }
       const volumeName = getVolumeName(result.filePaths[0])
       const mhlFiles = await findFilesByType(result.filePaths[0], 'mhl')
-      //const aleFiles = await findFilesByType(result.filePaths[0], 'ale')
+      const aleFiles = await findFilesByType(result.filePaths[0], 'ale')
       if (mhlFiles.length === 0) {
         dialog.showErrorBox('Error', 'No MHL files found in the selected directory.')
         return
       } else {
-        //const aleData = await processALE(aleFiles)
+        const aleData = await processALE(aleFiles)
         const data = await processMHL(mhlFiles, mainWindow)
         // merge aleData and data that have the same Clip name
         const mergedData = data.map((item) => {
-          //const aleItem = aleData.find((ale) => ale.Clip === item.Clip)
-          //return { ...aleItem, ...item, Volume: volumeName }
-          return { ...item, Volume: volumeName }
+          const aleItem = aleData.find((ale) => ale.Clip === item.Clip)
+          return { ...aleItem, ...item, Volume: volumeName }
+          //return { ...item, Volume: volumeName } //temporary
         })
 
         return { volume: [volumeName], data: mergedData }
       }
     } catch (error) {
       dialog.showErrorBox('Error', 'Failed to read MHL files')
+      logger.error(error)
       return
     }
   })
