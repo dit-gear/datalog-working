@@ -72,6 +72,7 @@ function isClassicRow(row: classicRow | ascRow): row is classicRow {
 
 async function processFile(
   filePath: string,
+  path: string,
   extensions: string[],
   sequentialFileTypes: Set<string>
 ): Promise<ClipType[]> {
@@ -124,7 +125,7 @@ async function processFile(
         acc[baseClipName] = acc[baseClipName] || {
           Clip: baseClipName,
           Size: 0,
-          Copies: [{ Volume: filePath, Hash: md5 || sha1 || xxhash64 || xxhash64be || null }]
+          Copies: [{ Path: path, Hash: md5 || sha1 || xxhash64 || xxhash64be || null }]
         }
 
         // Sum the sizes
@@ -133,10 +134,7 @@ async function processFile(
 
         return acc
       },
-      {} as Record<
-        string,
-        { Clip: string; Size: number; Copies: { Volume: string; Hash: string | null }[] }
-      >
+      {} as Record<string, ClipType>
     )
 
     return Object.values(grouped) as ClipType[]
@@ -150,6 +148,7 @@ async function processFile(
 
 async function readAndParseMHLFiles(
   filePaths: string[],
+  path: string,
   progressCallback: (progress: number) => void
 ): Promise<ClipType[]> {
   let processedFiles = 0
@@ -161,7 +160,7 @@ async function readAndParseMHLFiles(
 
   const results: ClipType[][] = await Promise.all(
     filePaths.map(async (filePath) => {
-      const result = await processFile(filePath, extensions, sequentialFileTypes)
+      const result = await processFile(filePath, path, extensions, sequentialFileTypes)
       updateProgress()
       return result
     })
@@ -170,7 +169,7 @@ async function readAndParseMHLFiles(
   return results.flat() // Flatten the array of results
 }
 
-async function processMHL(mhlFiles: string[], mainWindow: BrowserWindow): Promise<ClipType[]> {
+async function processMHL(mhlFiles: string[], path: string): Promise<ClipType[]> {
   let progress = 0
   let isCancelled = false
   let showProgressFlag = false
@@ -178,27 +177,27 @@ async function processMHL(mhlFiles: string[], mainWindow: BrowserWindow): Promis
   const progressTimeout = setTimeout(() => {
     if (isCancelled) return
     showProgressFlag = true
-    mainWindow?.webContents.send('show-progress', 0)
+    //mainWindow?.webContents.send('show-progress', 0)
   }, 100)
 
   const progressCallback = (updatedProgress: number): void => {
     progress = updatedProgress
     console.log(`Current Progress: ${progress * 100}%`)
     if (showProgressFlag) {
-      mainWindow?.setProgressBar(progress)
-      mainWindow?.webContents.send('show-progress', true, progress)
+      //mainWindow?.setProgressBar(progress)
+      //mainWindow?.webContents.send('show-progress', true, progress)
     }
   }
 
   try {
-    progressTimeout
-    const data = await readAndParseMHLFiles(mhlFiles, progressCallback)
-    mainWindow.setProgressBar(-1) // Reset the progress bar
-    mainWindow.webContents.send('show-progress', false, -1)
-    clearTimeout(progressTimeout)
+    //progressTimeout
+    const data = await readAndParseMHLFiles(mhlFiles, path, progressCallback)
+    //mainWindow.setProgressBar(-1) // Reset the progress bar
+    //mainWindow.webContents.send('show-progress', false, -1)
+    //clearTimeout(progressTimeout)
     return data
   } catch (error) {
-    clearTimeout(progressTimeout)
+    //clearTimeout(progressTimeout)
     console.error('Error processing MHL files:', error)
     throw error // or handle it as needed
   }

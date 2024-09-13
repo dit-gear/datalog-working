@@ -2,18 +2,20 @@ import { ipcMain, dialog } from 'electron'
 import fs from 'fs'
 import path from 'path'
 import YAML from 'yaml'
-import processALE from '../file-processing/camera/process-ale'
-import processMHL from '../file-processing/mhl/process-mhl'
-import getVolumeName from '../../utils/get-volume'
 import findFilesByType from '../../utils/find-files-by-type'
-import { FileInfo, entryType } from '../../../shared/shared-types'
-import { getMainWindow } from '../../index'
+import { FileInfo } from '../../../shared/shared-types'
+import { DatalogType } from '@shared/datalogTypes'
 import { getActiveProjectPath } from '../app-state/state'
 import logger from '../logger'
+import ParseOCF from '../file-processing/parse-ocf'
 
 export function setupEntriesIpcHandlers(): void {
   ipcMain.handle('findOcf', async () => {
     try {
+      const res = await ParseOCF()
+      //console.table(res)
+      return res
+      /*
       const result = await dialog.showOpenDialog({
         properties: ['openDirectory']
       })
@@ -32,7 +34,7 @@ export function setupEntriesIpcHandlers(): void {
         return
       } else {
         const aleData = await processALE(aleFiles)
-        const data = await processMHL(mhlFiles, mainWindow)
+        const data = await processMHL(mhlFiles)
         // merge aleData and data that have the same Clip name
         const mergedData = data.map((item) => {
           const aleItem = aleData.find((ale) => ale.Clip === item.Clip)
@@ -41,7 +43,7 @@ export function setupEntriesIpcHandlers(): void {
         })
 
         return { volume: [volumeName], data: mergedData }
-      }
+      }*/
     } catch (error) {
       dialog.showErrorBox('Error', 'Failed to read MHL files')
       logger.error(error)
@@ -115,7 +117,7 @@ export function setupEntriesIpcHandlers(): void {
     }
   })
 
-  ipcMain.handle('save-entry', async (_event, data: entryType) => {
+  ipcMain.handle('save-entry', async (_event, data: DatalogType) => {
     try {
       const yaml = YAML.stringify(data)
       const filepath = path.join(getActiveProjectPath(), `${data.Folder}.datalog`)
@@ -129,8 +131,8 @@ export function setupEntriesIpcHandlers(): void {
 
   ipcMain.handle('load-entries', async () => {
     try {
-      const entriesPaths = await findFilesByType(getActiveProjectPath(), 'datalog')
-      const entries = entriesPaths.map((entryPath): entryType => {
+      const entriesPaths = await findFilesByType(getActiveProjectPath(), 'datalog', { maxDepth: 0 })
+      const entries = entriesPaths.map((entryPath): DatalogType => {
         const entry = fs.readFileSync(entryPath, 'utf8')
         const parsedEntry = YAML.parse(entry)
         return parsedEntry

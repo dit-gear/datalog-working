@@ -29,7 +29,7 @@ export async function updateState({ newRootPath, newActiveProject }: updateProps
   const activeProject = newActiveProject ? newActiveProject : ''
   await saveStateToFile({ rootPath, activeProject })
   newRootPath && setRootPath(newRootPath)
-  newActiveProject && setActiveProjectPath(newActiveProject)
+  setActiveProjectPath(activeProject)
   logger.debug('State updated')
 }
 

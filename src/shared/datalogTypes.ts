@@ -18,14 +18,19 @@ const Camera_MetadataZod = z.object({
 
 const ProxyZod = z.object({
   Path: z.string(),
-  Size: z.string()
+  Size: z.number().nonnegative().finite()
 })
 
 export const ClipZod = z
   .object({
     Clip: z.string(),
     Size: z.number(),
-    Copies: z.array(z.object({ Volume: z.string(), Hash: z.string().nullable() })),
+    Copies: z.array(
+      z.object({
+        Path: z.string(),
+        Hash: z.string().nullable()
+      })
+    ),
     Duration: z.number().optional(),
     Image: z.string().optional(),
     Proxy: ProxyZod.optional()
@@ -54,6 +59,7 @@ export const datalogZod = z.object({
   Proxy: Files.optional(),
   Duration: z.number().optional(),
   Reels: z.array(z.string()).optional(),
+  Copies: z.array(z.string()).optional(),
   Clips: z.array(ClipZod).optional()
 })
 

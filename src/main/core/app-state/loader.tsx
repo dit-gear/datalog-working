@@ -4,11 +4,17 @@ import { stateZod, state, error } from './types'
 import { ProjectType } from '../../../shared/projectTypes'
 import { decryptData } from '../../utils/encryption'
 import path from 'path'
-import { setRootPath, setActiveProjectPath, getAppPath } from './state'
+import {
+  setRootPath,
+  setActiveProjectPath,
+  getAppPath,
+  getRootPath,
+  getActiveProjectPath,
+  setActiveProject
+} from './state'
 import logger from '../logger'
 import { ensureDirectoryExists } from '../../utils/crud'
 import { updateState } from './updater'
-import { getRootPath, getActiveProjectPath } from './state'
 import { loadProject, loadProjectsInRootPath } from '../project/loader'
 
 async function loadStateFromFile(filepath: string): Promise<state | error> {
@@ -54,6 +60,7 @@ export async function loadState(): Promise<ProjectType> {
     const loadActiveProject = await loadProject(getActiveProjectPath())
     if (loadActiveProject.success) {
       await loadProjectsInRootPath()
+      loadActiveProject.data && setActiveProject(loadActiveProject.data)
       logger.info('Project loaded successfully')
       return {
         rootPath: getRootPath(),

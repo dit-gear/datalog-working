@@ -12,6 +12,7 @@ import {
   LoadedFile,
   Response
 } from '@shared/shared-types'
+import { ClipType } from '@shared/datalogTypes'
 
 declare global {
   interface Window {
@@ -24,7 +25,7 @@ declare global {
       updateProject: (project: ProjectToUpdate) => Promise<UpdateProjectResult>
       saveEntry: (entry: entryType) => Promise<saveEntryResult>
       loadEntries: () => Promise<entryType[]>
-      findOcf: () => Promise<CopyDestination>
+      findOcf: () => Promise<ClipType[]>
       showProgress: (show: boolean, progress: number) => void
       showProgressListener: (callback: (show: boolean, progress: number) => void) => () => void
       getOfflineFolderDetails: () => Promise<OfflineFolderType>

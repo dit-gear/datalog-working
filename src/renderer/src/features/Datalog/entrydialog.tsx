@@ -10,27 +10,20 @@ import { Label } from '@components/ui/label'
 import { Input } from '@components/ui/input'
 import { ScrollArea } from '@components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
-import Stat from './stat'
+import Stat from '../../components/stat'
 import { useState, useEffect } from 'react'
-import {
-  combinedType,
-  CopyDestination,
-  OfflineFolderType,
-  metadataCsv,
-  entryType,
-  entrySchema
-} from '@shared/shared-types'
-import { datalogZod, datalogType } from '@shared/datalogTypes'
+import { OfflineFolderType } from '@shared/shared-types'
+import { ClipType, datalogZod, DatalogType } from '@shared/datalogTypes'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Papa from 'papaparse'
-import { timecodeToSeconds, getReels } from '../utils'
-import DatePicker from './DatePicker'
+import { timecodeToSeconds, getReels } from '../../utils'
+import DatePicker from '../../components/DatePicker'
 import { ProjectRootType } from '@shared/projectTypes'
-import replaceTags, { formatDate } from '../utils/formatDynamicString'
+import replaceTags, { formatDate } from '../../utils/formatDynamicString'
 import { Pencil } from 'lucide-react'
 import { useToast } from '@components/ui/use-toast'
-import formatDuration from '../utils/formatDuration'
+import formatDuration from '../../utils/formatDuration'
 import {
   Form,
   FormControl,
@@ -39,12 +32,13 @@ import {
   FormDescription,
   FormMessage,
   FormLabel
-} from './ui/form'
-import { parse } from 'date-fns'
+} from '../../components/ui/form'
+import { CopyType } from './types'
+import { getCopiesFromClips } from './utils/getCopiesFromClips'
 
 interface EntrydialogProps {
   project: ProjectRootType
-  previousEntries?: entryType[]
+  previousEntries?: DatalogType[]
   setOpen: (value: boolean) => void
   refetch: () => void
 }
@@ -56,13 +50,15 @@ const Entrydialog = ({
   refetch
 }: EntrydialogProps): JSX.Element => {
   const [metadataPath, setMetadataPath] = useState<string>('')
-  const [metadataCsv, setmetadataCsv] = useState<metadataCsv[]>([])
-  const [copyDirectories, setCopyDirectories] = useState<CopyDestination[] | null>(null)
+  //const [metadataCsv, setmetadataCsv] = useState<metadataCsv[]>([])
   const [offlineFolder, setOfflineFolder] = useState<OfflineFolderType | null>(null)
+
+  const [clips, setClips] = useState<ClipType[]>([])
+  const [copies, setCopies] = useState<CopyType[]>([])
 
   const { toast } = useToast()
 
-  function getNextDay(entries: entryType[]): number {
+  function getNextDay(entries: DatalogType[]): number {
     let highestDay = entries[0].Day
 
     for (const entry of entries) {
@@ -103,7 +99,7 @@ const Entrydialog = ({
 
   const { register, watch, setValue, formState, handleSubmit, reset, control } = form
 
-  const onSubmit = (data: datalogType): void => {
+  const onSubmit = (data: DatalogType): void => {
     //let entrytoSave: Partial<entryType> = {}
     console.log(data)
     /*entrytoSave.Folder = data.Folder
@@ -158,19 +154,21 @@ const Entrydialog = ({
               Take: item['Take'],
               QC: item['ReviewedByReviewersNotes']
             }))
-            setmetadataCsv(filteredData)
+            //setmetadataCsv(filteredData)
           }
         }
       })
     }
   }
 
-  const handleRemoveCopyDestination = (indexToRemove: number): void => {
+  const handleRemoveCopyDestination = (pathToRemove: string | string[]): void => {
+    // call remove function in render
+    /*
     setCopyDirectories((currentDirectories) =>
       currentDirectories ? currentDirectories.filter((_, index) => index !== indexToRemove) : null
-    )
+    )*/
   }
-
+  /*
   const mergeDataIfClipsAreMissing = (
     destination: CopyDestination,
     copyDirectories: CopyDestination[]
@@ -211,27 +209,15 @@ const Entrydialog = ({
     }
 
     return updatedCopyDirectories
-  }
+  }*/
 
   const handleAddCopyDestination = async (): Promise<void> => {
     try {
       window.api
         .findOcf()
-        .then((destination) => {
-          if (destination) {
-            if (Array.isArray(copyDirectories)) {
-              console.log('destination', destination)
-              console.log('copyDirectories', copyDirectories)
-              const updatedCopyDirectories = mergeDataIfClipsAreMissing(
-                destination,
-                copyDirectories
-              )
-              console.log('updatedCopyDirectories', updatedCopyDirectories)
-              setCopyDirectories(updatedCopyDirectories)
-            } else {
-              setCopyDirectories([destination])
-            }
-          }
+        .then((clips) => {
+          clips && setClips(clips)
+          setCopies(getCopiesFromClips(clips))
         })
         .catch((e) => console.log('Catch Error: ', e))
     } catch (error) {
@@ -254,15 +240,15 @@ const Entrydialog = ({
       console.error('Error selecting directory:', error)
     }
   }
-
+  /*
   const calculateTotalSize = (array: combinedType[]): number => {
     return Math.floor(array.reduce((total, item) => total + item.Size, 0) / 1000000000)
   }
   const calculateTotalDuration = (array: combinedType[]): number => {
     const totalSeconds = array.reduce((total, item) => total + item.Duration, 0)
     return totalSeconds
-  }
-  useEffect(() => {
+  }*/
+  /*useEffect(() => {
     if (copyDirectories) {
       const combinedMap = new Map<string, combinedType>()
 
@@ -300,7 +286,7 @@ const Entrydialog = ({
       setValue('Duration', calculateTotalDuration(combinedArray))
       //setValue('Clips', combinedArray, { shouldValidate: true })
     }
-  }, [copyDirectories, metadataCsv, offlineFolder])
+  }, [copyDirectories, metadataCsv, offlineFolder])*/
 
   //const [date, setDate] = useState<Date | undefined>(getDateBasedOnTime())
   const [folderEdit, setFolderEdit] = useState<boolean>(false)
@@ -468,8 +454,8 @@ const Entrydialog = ({
                 role="list"
                 className="divide-y divide-white/10 rounded-md border border-white/20 mb-2"
               >
-                {copyDirectories
-                  ? copyDirectories.map((directory, index) => (
+                {copies
+                  ? copies.map((copy, index) => (
                       <li
                         key={index}
                         className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6"
@@ -479,19 +465,33 @@ const Entrydialog = ({
                           <div className="ml-4 flex min-w-0 flex-1 gap-2">
                             <span className="flex-shrink-0 text-gray-400">Copy {index + 1}: </span>
                             <span className="truncate font-medium">
-                              {directory.volume.length > 1
-                                ? directory.volume.join(', ')
-                                : directory.volume}
+                              {Array.isArray(copy.path) ? (
+                                copy.path.map((item) => (
+                                  <>
+                                    {item.volume}
+                                    <span className="text-gray-400">
+                                      {item.relativePath}
+                                      {', '}
+                                    </span>
+                                  </>
+                                ))
+                              ) : (
+                                <>
+                                  {copy.path.volume}
+                                  <span className="text-gray-400">{copy.path.relativePath}</span>
+                                </>
+                              )}
                             </span>
                             <span className="flex-shrink-0 text-gray-400">
-                              {/*`${directory.data.length} of ${watch('Files')}`*/}:{' '}
+                              {/*`${directory.data.length} of ${watch('Files')}`*/} -{' '}
+                              {copy.count[0]} of {copy.count[1]} Clips
                             </span>
                           </div>
                         </div>
                         <div className="ml-4 flex-shrink-0">
                           <a
                             href="#"
-                            onClick={() => handleRemoveCopyDestination(index)}
+                            onClick={() => handleRemoveCopyDestination(copy.path)}
                             className="font-medium text-indigo-400 hover:text-indigo-300"
                           >
                             Remove
@@ -564,6 +564,7 @@ const Entrydialog = ({
         <TabsContent value="clips" className="h-full">
           <ScrollArea className="h-96">
             {/* Will crash, fix: <Cliptable clips={watch('Clips')} />*/}
+            {JSON.stringify(clips)}
           </ScrollArea>
         </TabsContent>
       </Tabs>

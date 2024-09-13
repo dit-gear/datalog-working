@@ -1,27 +1,31 @@
 import fs from 'fs'
 import path from 'path'
+import logger from '../core/logger'
 
 interface FindFilesOptions {
   includeFileName?: string
   excludeFileName?: string
+  maxDepth?: number
 }
 
 export default async function findFilesByType(
   directory: string,
   fileType: string,
-  options: FindFilesOptions = {}
+  options: FindFilesOptions = {},
+  currentDepth: number = 0
 ): Promise<string[]> {
   let files: string[] = []
 
   try {
     const filesAndDirs = fs.readdirSync(directory, { withFileTypes: true })
-
     for (const dirent of filesAndDirs) {
       const fullPath = path.join(directory, dirent.name)
-
       if (dirent.isDirectory()) {
+        if (options.maxDepth !== undefined && currentDepth >= options.maxDepth) {
+          continue // Skip this directory and do not recurse further
+        }
         // Recursively process directories
-        files = files.concat(await findFilesByType(fullPath, fileType, options))
+        files = files.concat(await findFilesByType(fullPath, fileType, options, currentDepth + 1))
       } else {
         const fileExtension = path.extname(dirent.name).toLowerCase()
         const fileName = path.basename(dirent.name)
@@ -52,7 +56,7 @@ export default async function findFilesByType(
       }
     }
   } catch (error) {
-    console.error('Error reading directory:', error)
+    logger.warn(`Error reading ${fileType} in ${directory}. Errormessage: ${error}`)
   }
   return files
 }

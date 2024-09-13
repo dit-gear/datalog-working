@@ -85,26 +85,29 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
 
 export async function loadProjectsInRootPath(): Promise<void> {
   const yamlFiles = await findFilesByType(getRootPath(), 'yaml', {
-    includeFileName: 'settings.yaml'
+    includeFileName: 'settings.yaml', maxDepth: 1
   })
 
-  const projects = await Promise.all(
-    yamlFiles?.map(async (filePath) => {
-      const project = fs.readFileSync(filePath, 'utf8')
-      const folderPath = path.dirname(filePath)
-      const yaml = YAML.parse(project)
-      const parsedYaml = ProjectSchemaZod.parse(yaml)
-      const projectPath = getActiveProjectPath()
-      return {
-        project: parsedYaml.project_name,
-        path: folderPath,
-        active: projectPath ? projectPath === folderPath : false
-      }
-    })
-  )
+  const projects =
+    yamlFiles && yamlFiles.length > 0
+      ? await Promise.all(
+          yamlFiles?.map(async (filePath) => {
+            const project = fs.readFileSync(filePath, 'utf8')
+            const folderPath = path.dirname(filePath)
+            const yaml = YAML.parse(project)
+            const parsedYaml = ProjectSchemaZod.parse(yaml)
+            const projectPath = getActiveProjectPath()
+            return {
+              project: parsedYaml.project_name,
+              path: folderPath,
+              active: projectPath ? projectPath === folderPath : false
+            }
+          })
+        )
+      : []
 
   const menu = Menu.buildFromTemplate(
-    menuTemplate(projects && projects) as (MenuItemConstructorOptions | MenuItem)[]
+    menuTemplate(projects) as (MenuItemConstructorOptions | MenuItem)[]
   )
   Menu.setApplicationMenu(menu)
 }

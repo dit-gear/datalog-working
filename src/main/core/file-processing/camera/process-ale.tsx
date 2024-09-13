@@ -85,7 +85,6 @@ async function processALE(filePaths: string[]): Promise<ClipType[]> {
         result.Duration = timecodeToTime(item.duration, FPS) // Convert timecode to duration in seconds
       }
     }
-    console.table(result)
     return result
   }
 

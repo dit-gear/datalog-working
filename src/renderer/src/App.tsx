@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { entryType } from '@shared/shared-types'
+import { DatalogType } from '@shared/datalogTypes'
 import { ProjectType } from '@shared/projectTypes'
 import NewProjectDialog from './components/newProjectDialog'
-import Entrydialogtrigger from '@components/entrydialogtrigger'
+import Entrydialogtrigger from './features/Datalog/entrydialogtrigger'
 import Settings from './features/Settings/Settings'
 import Datalogtable from './components/datalogtable'
 import ProgressDialog from './components/progressdialog'
@@ -12,11 +12,11 @@ import { FolderSync } from 'lucide-react'
 
 function App(): JSX.Element {
   const [project, setProject] = useState<ProjectType>()
-  const [entries, setEntries] = useState<entryType[]>()
+  const [logs, setLogs] = useState<DatalogType[]>()
 
   const handleEntriesLoad = (): void => {
     window.api.loadEntries().then((entries) => {
-      setEntries(entries)
+      setLogs(entries)
       console.log('Entries loaded', entries)
     })
   }
@@ -45,7 +45,7 @@ function App(): JSX.Element {
             <div className="flex justify-end gap-4">
               <Entrydialogtrigger
                 project={project.data}
-                previousEntries={entries}
+                previousEntries={logs}
                 refetch={handleEntriesLoad}
               />
               <Button variant="secondary" size="icon">
@@ -55,9 +55,9 @@ function App(): JSX.Element {
             </div>
           ) : null}
         </div>
-        {entries && (
+        {logs && (
           <div className="grow">
-            <Datalogtable log={entries} />
+            <Datalogtable log={logs} />
           </div>
         )}
 
