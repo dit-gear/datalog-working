@@ -31,6 +31,7 @@ if (process.contextIsolated) {
       removePdfGeneratedListener: (callback) =>
         ipcRenderer.removeListener('pdf-generated', callback),
       findOcf: () => ipcRenderer.invoke('findOcf'),
+      removeLogPath: (paths: string[]) => ipcRenderer.invoke('removeLogPath', paths),
       showProgressListener: (callback) => {
         const handler = (event, show, progress) => callback(show, progress)
         ipcRenderer.on('show-progress', handler)

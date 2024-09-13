@@ -63,25 +63,21 @@ export const getCopiesFromClips = (clips: ClipType[]): CopyType[] => {
     }
   })
 
+  return groups.map((group) => ({
+    paths: group.Paths.map(formatPath),
+    clips: [...group.Clips],
+    count: [group.Clips.size, total]
+  }))
+}
+
+/*
   return groups.map((group) => {
-    const path = group.Paths.length > 1 ? group.Paths : group.Paths[0]
-    // If there are multiple paths, format each one; otherwise, format the single path
-    const formattedPath = Array.isArray(path)
-      ? path.map((p) => formatPath(p)) // Map over each path if it's an array
-      : formatPath(path) // Format a single path
+    const formattedPath = group.Paths.map((p) => formatPath(p)) // Map over each path if it's an array
+   // Format a single path
 
     return {
-      path: formattedPath,
+      paths: formattedPath,
       clips: Array.from(group.Clips),
       count: [group.Clips.size, total] // Convert Set back to an array for output
     }
-  })
-
-  /*
-
-  return Object.values(uniqueClipGroups).map(({ paths, clips }) => ({
-    path: paths.length === 1 ? paths[0] : paths, // If only one path, return it as a string; otherwise, an array of strings
-    clips, // Flat array of clips
-    count: [clips.length, total] as [number, number] // Count as a tuple
-  }))*/
-}
+  })*/

@@ -2,53 +2,20 @@ import { ipcMain, dialog } from 'electron'
 import fs from 'fs'
 import path from 'path'
 import YAML from 'yaml'
-import findFilesByType from '../../utils/find-files-by-type'
-import { FileInfo } from '../../../shared/shared-types'
-import { DatalogType } from '@shared/datalogTypes'
-import { getActiveProjectPath } from '../app-state/state'
-import logger from '../logger'
-import ParseOCF from '../file-processing/parse-ocf'
+import { FileInfo } from '../../../../shared/shared-types'
+import { DatalogType, ResponseWithClips } from '@shared/datalogTypes'
+import { getActiveProjectPath } from '../../app-state/state'
+import logger from '../../logger'
+import ParseOCF from './parse-ocf'
+import removeOcf from './remove-ocf'
 
-export function setupEntriesIpcHandlers(): void {
-  ipcMain.handle('findOcf', async () => {
-    try {
-      const res = await ParseOCF()
-      //console.table(res)
-      return res
-      /*
-      const result = await dialog.showOpenDialog({
-        properties: ['openDirectory']
-      })
+export function setupDatalogBuilderIpcHandlers(): void {
+  ipcMain.handle('findOcf', async (): Promise<ResponseWithClips> => {
+    return await ParseOCF()
+  })
 
-      if (result.canceled) return // Handle user canceling the dialog
-      const mainWindow = getMainWindow()
-      if (!mainWindow) {
-        logger.error('No main window')
-        return
-      }
-      const volumeName = getVolumeName(result.filePaths[0])
-      const mhlFiles = await findFilesByType(result.filePaths[0], 'mhl')
-      const aleFiles = await findFilesByType(result.filePaths[0], 'ale')
-      if (mhlFiles.length === 0) {
-        dialog.showErrorBox('Error', 'No MHL files found in the selected directory.')
-        return
-      } else {
-        const aleData = await processALE(aleFiles)
-        const data = await processMHL(mhlFiles)
-        // merge aleData and data that have the same Clip name
-        const mergedData = data.map((item) => {
-          const aleItem = aleData.find((ale) => ale.Clip === item.Clip)
-          return { ...aleItem, ...item, Volume: volumeName }
-          //return { ...item, Volume: volumeName } //temporary
-        })
-
-        return { volume: [volumeName], data: mergedData }
-      }*/
-    } catch (error) {
-      dialog.showErrorBox('Error', 'Failed to read MHL files')
-      logger.error(error)
-      return
-    }
+  ipcMain.handle('removeLogPath', async (_, paths: string[]): Promise<ResponseWithClips> => {
+    return await removeOcf(paths)
   })
 
   ipcMain.handle('getOfflineFolderDetails', async () => {
@@ -128,23 +95,4 @@ export function setupEntriesIpcHandlers(): void {
       return { success: false }
     }
   })
-
-  ipcMain.handle('load-entries', async () => {
-    try {
-      const entriesPaths = await findFilesByType(getActiveProjectPath(), 'datalog', { maxDepth: 0 })
-      const entries = entriesPaths.map((entryPath): DatalogType => {
-        const entry = fs.readFileSync(entryPath, 'utf8')
-        const parsedEntry = YAML.parse(entry)
-        return parsedEntry
-      })
-      return entries
-    } catch (error) {
-      dialog.showErrorBox('Error', 'Failed to load entries')
-      return []
-    }
-  })
 }
-
-/*const entriesPaths = (await findFilesByType(getActiveProjectPath(), 'yaml')).filter(
-        (filePath) => !path.basename(filePath).toLowerCase().includes('settings.yaml')
-      )*/

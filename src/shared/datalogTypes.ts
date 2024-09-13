@@ -36,7 +36,7 @@ export const ClipZod = z
     Proxy: ProxyZod.optional()
   })
   .extend(Camera_MetadataZod.shape)
-  .catchall(z.string())
+//.catchall(z.string())
 
 const Files = z.object({
   Files: z.number().int().nonnegative().finite(),
@@ -65,3 +65,7 @@ export const datalogZod = z.object({
 
 export type ClipType = z.infer<typeof ClipZod>
 export type DatalogType = z.infer<typeof datalogZod>
+
+export type ResponseWithClips =
+  | { success: true; clips: ClipType[] }
+  | { success: false; error: string; cancelled?: boolean }

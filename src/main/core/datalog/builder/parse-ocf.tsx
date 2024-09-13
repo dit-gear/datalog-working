@@ -1,12 +1,11 @@
 import { dialog } from 'electron'
-import logger from '../logger'
-import findFilesByType from '../../utils/find-files-by-type'
-import processMHL from './mhl/process-mhl'
-import processALE from './camera/process-ale'
-import { getActiveProject, setActiveProject } from '../app-state/state'
-import { getNewEntryClips, setNewEntryClips } from '../entries/newentry-state'
-import { ClipType } from '@shared/datalogTypes'
-import { getMainWindow } from 'src/main'
+import logger from '../../logger'
+import findFilesByType from '../../../utils/find-files-by-type'
+import processMHL from '../../file-processing/mhl/process-mhl'
+import processALE from '../../file-processing/camera/process-ale'
+import { getActiveProject } from '../../app-state/state'
+import { getBuilderClips, setBuilderClips } from './builder-state'
+import { ClipType, ResponseWithClips } from '@shared/datalogTypes'
 
 const ParseCameraMetadata = async (filePath: string): Promise<ClipType[]> => {
   const [aleFiles, xmlFiles] = await Promise.all([
@@ -28,18 +27,19 @@ const ParseCameraMetadata = async (filePath: string): Promise<ClipType[]> => {
   return [...aleData, ...xmlData]
 }
 
-const ParseOCF = async (paths: string[] = []): Promise<ClipType[] | void> => {
+const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
   try {
     if (paths.length === 0) {
       const result = await dialog.showOpenDialog({
         properties: ['openDirectory']
       })
 
-      if (result.canceled) return
+      if (result.canceled)
+        return { success: false, error: 'User cancelled operation', cancelled: true }
       paths = [result.filePaths[0]]
     }
 
-    const existingClips = getNewEntryClips()
+    const existingClips = getBuilderClips()
 
     // Create a map of existing clips for fast lookup
     const existingClipMap = new Map<string, ClipType>(
@@ -54,7 +54,8 @@ const ParseOCF = async (paths: string[] = []): Promise<ClipType[] | void> => {
         const mhlFiles = await findFilesByType(path, 'mhl')
 
         if (mhlFiles.length === 0) {
-          dialog.showErrorBox('Error', 'No MHL files found in the selected directory.')
+          const message = 'No MHL files found in the selected directory.'
+          dialog.showErrorBox('Error', message)
           return
         }
 
@@ -100,11 +101,12 @@ const ParseOCF = async (paths: string[] = []): Promise<ClipType[] | void> => {
       ...existingClips.map((clip) => existingClipMap.get(clip.Clip) || clip), // Update existing clips with merged Copies
       ...mergedWithMetadata // Add newly parsed clips
     ]
-    setNewEntryClips(updatedClips)
-    return updatedClips
+    setBuilderClips(updatedClips)
+    return { success: true, clips: updatedClips }
   } catch (error) {
-    logger.error(`Error parsing OCF: ${error}`)
-    return
+    const message = error instanceof Error ? error.message : 'An unknown error occurred.'
+    logger.error(`Error parsing OCF: ${message}`)
+    return { success: false, error: message }
   }
 }
 

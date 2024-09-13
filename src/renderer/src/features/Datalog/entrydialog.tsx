@@ -35,6 +35,7 @@ import {
 } from '../../components/ui/form'
 import { CopyType } from './types'
 import { getCopiesFromClips } from './utils/getCopiesFromClips'
+import { PathType } from './types'
 
 interface EntrydialogProps {
   project: ProjectRootType
@@ -161,65 +162,33 @@ const Entrydialog = ({
     }
   }
 
-  const handleRemoveCopyDestination = (pathToRemove: string | string[]): void => {
-    // call remove function in render
-    /*
-    setCopyDirectories((currentDirectories) =>
-      currentDirectories ? currentDirectories.filter((_, index) => index !== indexToRemove) : null
-    )*/
-  }
-  /*
-  const mergeDataIfClipsAreMissing = (
-    destination: CopyDestination,
-    copyDirectories: CopyDestination[]
-  ): CopyDestination[] => {
-    // Collect all clips from destination into a Set for easy comparison
-    const destinationClips = new Set(destination.data.map((d) => d.Clip))
-
-    // Flag to check if destination was merged into any existing copy
-    let destinationMerged = false
-
-    const updatedCopyDirectories = copyDirectories.map((copy) => {
-      // Collect all clips in the current copyDirectory into a Set
-      const copyClips = new Set(copy.data.map((d) => d.Clip))
-
-      // Determine if any destination clips are missing in the current copy
-      const isMissingClips = Array.from(destinationClips).some((clip) => !copyClips.has(clip))
-
-      // Additionally check if there are any overlapping clips to prevent merging in such cases
-      const hasOverlappingClips = Array.from(destinationClips).some((clip) => copyClips.has(clip))
-
-      if (isMissingClips && !hasOverlappingClips) {
-        // Merge volumes and ensure uniqueness
-        const newVolumes = Array.from(new Set([...copy.volume, ...destination.volume]))
-
-        // Merge data ensuring no duplicate clips
-        const newData = [...copy.data, ...destination.data.filter((d) => !copyClips.has(d.Clip))]
-
-        destinationMerged = true
-        return { volume: newVolumes, data: newData }
-      }
-
-      return copy
-    })
-
-    // If destination was not merged due to overlap, add it as a new copyDirectory
-    if (!destinationMerged) {
-      updatedCopyDirectories.push(destination)
-    }
-
-    return updatedCopyDirectories
-  }*/
-
-  const handleAddCopyDestination = async (): Promise<void> => {
+  const handleRemoveCopy = async (paths: PathType[]): Promise<void> => {
+    const fullPaths = paths.map((item) => item.full)
+    console.log(fullPaths)
     try {
-      window.api
-        .findOcf()
-        .then((clips) => {
-          clips && setClips(clips)
-          setCopies(getCopiesFromClips(clips))
-        })
-        .catch((e) => console.log('Catch Error: ', e))
+      const res = await window.api.removeLogPath(fullPaths)
+      if (res.success) {
+        console.log(res)
+        setClips(res.clips)
+        setCopies(getCopiesFromClips(res.clips))
+      } else {
+        console.error(res.error)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const handleAddCopy = async (): Promise<void> => {
+    try {
+      const res = await window.api.findOcf()
+      if (res.success) {
+        setClips(res.clips)
+        setCopies(getCopiesFromClips(res.clips))
+      } else {
+        if (res.cancelled) return
+        console.error(res.error)
+      }
     } catch (error) {
       console.error('Error selecting directory:', error)
     }
@@ -464,24 +433,17 @@ const Entrydialog = ({
                           {/*<PaperClipIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />*/}
                           <div className="ml-4 flex min-w-0 flex-1 gap-2">
                             <span className="flex-shrink-0 text-gray-400">Copy {index + 1}: </span>
-                            <span className="truncate font-medium">
-                              {Array.isArray(copy.path) ? (
-                                copy.path.map((item) => (
-                                  <>
-                                    {item.volume}
-                                    <span className="text-gray-400">
-                                      {item.relativePath}
-                                      {', '}
-                                    </span>
-                                  </>
-                                ))
-                              ) : (
-                                <>
-                                  {copy.path.volume}
-                                  <span className="text-gray-400">{copy.path.relativePath}</span>
-                                </>
-                              )}
-                            </span>
+
+                            {copy.paths.map((item, index) => (
+                              <span className="truncate font-medium">
+                                {item.volume}
+                                <span className="text-gray-400">
+                                  {item.relativePath}
+                                  {index < copy.paths.length - 1 && ', '}
+                                </span>
+                              </span>
+                            ))}
+
                             <span className="flex-shrink-0 text-gray-400">
                               {/*`${directory.data.length} of ${watch('Files')}`*/} -{' '}
                               {copy.count[0]} of {copy.count[1]} Clips
@@ -491,7 +453,7 @@ const Entrydialog = ({
                         <div className="ml-4 flex-shrink-0">
                           <a
                             href="#"
-                            onClick={() => handleRemoveCopyDestination(copy.path)}
+                            onClick={() => handleRemoveCopy(copy.paths)}
                             className="font-medium text-indigo-400 hover:text-indigo-300"
                           >
                             Remove
@@ -533,7 +495,7 @@ const Entrydialog = ({
                     : null}
               </ul>
               <div className="flex gap-2">
-                <Button onClick={handleAddCopyDestination}>{`Add OCF Copy Directory (mhl)`}</Button>
+                <Button onClick={handleAddCopy}>{`Add OCF Copy Directory (mhl)`}</Button>
               </div>
             </dd>
           </div>

@@ -5,7 +5,7 @@ export type PathType = {
 }
 
 export type CopyType = {
-  path: PathType | PathType[]
+  paths: PathType[]
   clips: string[]
   count: [number, number]
 }

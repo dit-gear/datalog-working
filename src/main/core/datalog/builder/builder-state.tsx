@@ -2,8 +2,8 @@ import { ClipType } from '@shared/datalogTypes'
 
 let newEntryClips: ClipType[] = []
 
-export const getNewEntryClips = (): ClipType[] => newEntryClips || []
-export const setNewEntryClips = (newClips: ClipType[]): void => {
+export const getBuilderClips = (): ClipType[] => newEntryClips || []
+export const setBuilderClips = (newClips: ClipType[]): void => {
   newEntryClips = newClips
 }
 

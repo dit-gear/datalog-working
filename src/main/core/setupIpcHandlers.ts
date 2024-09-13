@@ -1,7 +1,9 @@
 import { setuProjectIpcHandlers } from './project/ipcHandlers'
-import { setupEntriesIpcHandlers } from './entries/ipcHandlers'
+import { setupDatalogBuilderIpcHandlers } from './datalog/builder/ipcHandlers'
+import { setupDatalogLoadingIpcHandlers } from './datalog/loader/ipcHandlers'
 
 export function setupIpcHandlers(): void {
   setuProjectIpcHandlers()
-  setupEntriesIpcHandlers()
+  setupDatalogBuilderIpcHandlers()
+  setupDatalogLoadingIpcHandlers()
 }
