@@ -29,9 +29,8 @@ declare global {
       removeLogPath: (paths: string[]) => Promise<ResponseWithClips>
       showProgress: (show: boolean, progress: number) => void
       showProgressListener: (callback: (show: boolean, progress: number) => void) => () => void
-      getOfflineFolderDetails: () => Promise<OfflineFolderType>
-      getDocumentsFolder: () => Promise<string>
-      getFolderPath: () => Promise<string | null>
+      getProxies: () => Promise<ResponseWithClips>
+      removeProxies: () => Promise<ResponseWithClips>
       onDirectoryLoaded: (
         callback: (event: Electron.IpcRendererEvent, files: DirectoryFile[]) => void
       ) => void

@@ -57,6 +57,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-linter-browserify": "^9.8.0",
     "fast-xml-parser": "^4.3.6",
+    "fluent-ffmpeg": "^2.1.3",
     "lucide-react": "^0.436.0",
     "papaparse": "^5.4.1",
     "react-day-picker": "^8.10.1",

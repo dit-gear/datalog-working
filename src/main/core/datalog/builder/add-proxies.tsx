@@ -2,31 +2,68 @@ import { dialog } from 'electron'
 import fs from 'fs'
 import path from 'path'
 import { FileInfo } from './types'
-import { ResponseWithClips } from '@shared/datalogTypes'
+import { ClipType, ResponseWithClips } from '@shared/datalogTypes'
+import { getBuilderClips, setBuilderClips } from './builder-state'
+import logger from '../../logger'
+import { getProxyMetadata } from './utils/proxy-metadata'
 
-const getProxyFolderDetails = (dirPath: string): { folderSize: number; files: FileInfo[] } => {
-  const entries = fs.readdirSync(dirPath, { withFileTypes: true })
-  let folderSize = 0
-  const fileDetails: FileInfo[] = []
+const extensions = new Set(['.mov', '.mxf', '.mp4'])
 
-  for (const entry of entries) {
-    const fullPath = path.join(dirPath, entry.name)
-    const stats = fs.statSync(fullPath)
+const getProxys = async (directory: string, clips: ClipType[]): Promise<FileInfo[]> => {
+  try {
+    const files = fs.readdirSync(directory)
 
-    if (entry.isDirectory()) {
-      const subfolderDetails = getProxyFolderDetails(fullPath)
-      folderSize += subfolderDetails.folderSize
-      fileDetails.push(...subfolderDetails.files)
-    } else if (entry.isFile()) {
-      folderSize += stats.size
-      fileDetails.push({
-        filename: entry.name.split('.')[0],
-        size: stats.size
-      })
-    }
+    const proxyPromises = files.map(async (file) => {
+      const filePath = path.join(directory, file)
+      const fileStats = fs.statSync(filePath)
+
+      if (fileStats.isDirectory()) {
+        return await getProxys(filePath, clips)
+      }
+
+      if (fileStats.isFile()) {
+        const ext = path.extname(file).toLowerCase()
+
+        if (extensions.has(ext)) {
+          const filenameWithoutExt = path.basename(file, ext)
+          const matchedClip = clips.find((clip) => clip.Clip === filenameWithoutExt)
+
+          if (matchedClip) {
+            const { Codec, Resolution } = await getProxyMetadata(filePath)
+            return {
+              filename: filenameWithoutExt,
+              Size: fileStats.size,
+              Format: ext.slice(1).toUpperCase(),
+              ...(Codec && { Codec }),
+              ...(Resolution && { Resolution })
+            }
+          }
+        }
+      }
+      return null
+    })
+    const proxies = await Promise.all(proxyPromises)
+    return proxies.flat().filter((proxy): proxy is FileInfo => proxy !== null)
+  } catch (error) {
+    throw error
   }
+}
 
-  return { folderSize, files: fileDetails }
+const matchClips = (clips: ClipType[], proxies: FileInfo[], directory: string): ClipType[] => {
+  return clips.map((clip) => {
+    const matchedFile = proxies.find((proxy) => proxy.filename === clip.Clip)
+
+    if (matchedFile) {
+      return {
+        ...clip,
+        Proxy: {
+          Path: directory,
+          ...(({ filename, ...rest }) => rest)(matchedFile)
+        }
+      }
+    }
+    return clip
+  })
 }
 
 const addProxies = async (folderPath?: string): Promise<ResponseWithClips> => {
@@ -41,12 +78,18 @@ const addProxies = async (folderPath?: string): Promise<ResponseWithClips> => {
       }
       folderPath = result.filePaths[0]
     }
+    const clips = getBuilderClips()
+    const proxys = await getProxys(folderPath, clips)
+    if (proxys.length === 0) return { success: false, error: 'No Proxies could be found in folder' }
 
-    const { folderSize, files: fileDetails } = getProxyFolderDetails(folderPath)
+    const updatedClips = matchClips(clips, proxys, folderPath)
 
-    return { success: true, clips: [] }
+    setBuilderClips(updatedClips)
+
+    return { success: true, clips: updatedClips }
   } catch (error) {
     const message = `Error while getting proxies: ${error instanceof Error ? error.message : 'unknown error'}`
+    logger.error(message)
     return { success: false, error: message }
   }
 }

@@ -190,23 +190,34 @@ const Entrydialog = ({
         console.error(res.error)
       }
     } catch (error) {
-      console.error('Error selecting directory:', error)
+      console.error(error)
     }
   }
 
-  const handleSetOfflineDestination = async (): Promise<void> => {
+  const handleGetProxies = async (): Promise<void> => {
     try {
-      window.api
-        .getOfflineFolderDetails()
-        .then((folder) => {
-          if (folder) {
-            setOfflineFolder(folder)
-            //setValue('ProxySize', Math.floor(folder.folderSize / 1000000000))
-          }
-        })
-        .catch((e) => console.log('Catch Error: ', e))
+      const res = await window.api.getProxies()
+      if (res.success) {
+        setClips(res.clips)
+      } else {
+        if (res.cancelled) return
+        console.error(res.error)
+      }
     } catch (error) {
-      console.error('Error selecting directory:', error)
+      console.error(error)
+    }
+  }
+
+  const handleRemoveProxies = async (): Promise<void> => {
+    try {
+      const res = await window.api.removeProxies()
+      if (res.success) {
+        setClips(res.clips)
+      } else {
+        console.error(res.error)
+      }
+    } catch (error) {
+      console.error(error)
     }
   }
   /*
@@ -500,6 +511,16 @@ const Entrydialog = ({
             </dd>
           </div>
           <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+            <dt className="text-sm font-medium leading-6 text-white">Proxies folder</dt>
+            <dd className="flex mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 gap-4 items-center">
+              <Button onClick={handleGetProxies}>Choose folder</Button>
+              <Button onClick={handleRemoveProxies} variant="outline">
+                Clear
+              </Button>
+              {offlineFolder?.folderPath ? offlineFolder.folderPath : null}
+            </dd>
+          </div>
+          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
             <dt className="text-sm font-medium leading-6 text-white">Import Metadata</dt>
             <dd className="flex mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 gap-4 items-center">
               <input
@@ -513,13 +534,6 @@ const Entrydialog = ({
                 Choose CSV file
               </Button>
               {metadataPath}
-            </dd>
-          </div>
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm font-medium leading-6 text-white">Proxies folder</dt>
-            <dd className="flex mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 gap-4 items-center">
-              <Button onClick={handleSetOfflineDestination}>Choose folder</Button>
-              {offlineFolder?.folderPath ? offlineFolder.folderPath : null}
             </dd>
           </div>
         </TabsContent>

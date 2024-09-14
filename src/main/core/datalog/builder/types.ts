@@ -1,4 +1,7 @@
 export type FileInfo = {
   filename: string
-  size: number
+  Format: string
+  Codec?: string
+  Resolution?: string
+  Size: number
 }

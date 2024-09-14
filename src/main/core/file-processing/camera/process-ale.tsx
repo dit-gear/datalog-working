@@ -63,7 +63,7 @@ async function processALE(filePaths: string[]): Promise<ClipType[]> {
     // Assign the fields directly based on the desired mappings
     result.Clip = item.name
 
-    NotEmpty(item.camera_model) && (result.Camera_Model = item.camera_model)
+    /*NotEmpty(item.camera_model) && (result.Camera_Model = item.camera_model)
     NotEmpty(item.camera_id) && (result.Camera_Id = item.camera_id)
     NotEmpty(item.reel_name) && (result.Reel = item.reel_name)
     NotEmpty(item.fps) && (result.FPS = item.fps)
@@ -76,7 +76,22 @@ async function processALE(filePaths: string[]): Promise<ClipType[]> {
     NotEmpty(item.gamma) && (result.Gamma = item.gamma)
     NotEmpty(item.white_balance) && (result.WB = item.white_balance)
     NotEmpty(item.cc_shift) && (result.Tint = item.cc_shift)
-    NotEmpty(item.look_name) && (result.LUT = item.look_name)
+    NotEmpty(item.look_name) && (result.LUT = item.look_name)*/
+
+    if (NotEmpty(item.camera_model)) result.Camera_Model = item.camera_model
+    if (NotEmpty(item.camera_id)) result.Camera_Id = item.camera_id
+    if (NotEmpty(item.reel_name)) result.Reel = item.reel_name
+    if (NotEmpty(item.fps)) result.FPS = item.fps
+    if (NotEmpty(item.sensor_fps)) result.Sensor_FPS = item.sensor_fps
+    if (NotEmpty(item.lens_type)) result.Lens = item.lens_type
+    if (NotEmpty(item.focus_distance_unit)) result.Focal_Lenght = item.focal_length
+    if (NotEmpty(item.frame_width, item.frame_height))
+      result.Resolution = `${item.frame_width}x${item.frame_height}`
+    if (NotEmpty(item.original_video)) result.Codec = item.original_video
+    if (NotEmpty(item.gamma)) result.Gamma = item.gamma
+    if (NotEmpty(item.white_balance)) result.WB = item.white_balance
+    if (NotEmpty(item.cc_shift)) result.Tint = item.cc_shift
+    if (NotEmpty(item.look_name)) result.LUT = item.look_name
 
     // Special handling for duration based on FPS
     if (item.duration && item.fps) {

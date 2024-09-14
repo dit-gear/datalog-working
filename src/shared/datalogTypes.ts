@@ -18,7 +18,10 @@ const Camera_MetadataZod = z.object({
 
 const ProxyZod = z.object({
   Path: z.string(),
-  Size: z.number().nonnegative().finite()
+  Size: z.number().nonnegative().finite(),
+  Format: z.string().optional(),
+  Codec: z.string().optional(),
+  Resolution: z.string().optional()
 })
 
 export const ClipZod = z

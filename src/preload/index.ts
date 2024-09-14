@@ -37,9 +37,8 @@ if (process.contextIsolated) {
         ipcRenderer.on('show-progress', handler)
         return () => ipcRenderer.removeListener('show-progress', handler)
       },
-      getOfflineFolderDetails: () => ipcRenderer.invoke('getOfflineFolderDetails'),
-      getDocumentsFolder: () => ipcRenderer.invoke('getDocumentsFolder'),
-      getFolderPath: () => ipcRenderer.invoke('getFolderPath'),
+      getProxies: () => ipcRenderer.invoke('getProxies'),
+      removeProxies: () => ipcRenderer.invoke('removeProxies'),
       getInitialDir: () => ipcRenderer.invoke('get-initial-data'),
       onDirChanged: (callback) => ipcRenderer.on('directory-changed', callback),
       removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
