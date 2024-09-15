@@ -2,15 +2,74 @@ export const removeEmptyFields = (
   data: Record<string, any>,
   keysToRemove: string[] = []
 ): Record<string, any> => {
-  return Object.fromEntries(
-    Object.entries(data).filter(([key, value]) => {
-      if (value === undefined) return false
-      if (Array.isArray(value)) return value.length > 0
-      if (typeof value === 'string') return value.trim() !== ''
-      if (keysToRemove.includes(key)) return false
-      return true
-    })
-  )
+  const result: Record<string, any> = {}
+
+  for (const key in data) {
+    if (!Object.prototype.hasOwnProperty.call(data, key)) {
+      continue
+    }
+
+    if (keysToRemove.includes(key)) {
+      continue
+    }
+
+    const value = data[key]
+
+    if (value === undefined || value === null) {
+      continue
+    }
+
+    if (typeof value === 'string') {
+      const trimmedValue = value.trim()
+      if (trimmedValue !== '') {
+        result[key] = trimmedValue
+      }
+      continue
+    }
+
+    if (Array.isArray(value)) {
+      const cleanedArray: (string | number | object)[] = []
+      for (const item of value) {
+        let cleanedItem = item
+
+        if (typeof item === 'object' && item !== null) {
+          cleanedItem = removeEmptyFields(item, keysToRemove)
+          if (Object.keys(cleanedItem).length === 0) {
+            continue
+          }
+        }
+
+        if (
+          cleanedItem === undefined ||
+          cleanedItem === null ||
+          cleanedItem === '' ||
+          (Array.isArray(cleanedItem) && cleanedItem.length === 0)
+        ) {
+          continue
+        }
+
+        cleanedArray.push(cleanedItem)
+      }
+
+      if (cleanedArray.length > 0) {
+        result[key] = cleanedArray
+      }
+      continue
+    }
+
+    if (typeof value === 'object') {
+      const cleanedObject = removeEmptyFields(value, keysToRemove)
+      if (Object.keys(cleanedObject).length > 0) {
+        result[key] = cleanedObject
+      }
+      continue
+    }
+
+    // For all other data types (number, boolean, etc.)
+    result[key] = value
+  }
+
+  return result
 }
 
 export const removePrefixFields = (data: Record<string, any>, prefix: string) => {

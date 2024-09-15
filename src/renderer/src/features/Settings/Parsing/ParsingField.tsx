@@ -40,7 +40,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
   })
   const activeName = useWatch({
     control,
-    name: `${scope}_additional_parsing.fields.${index}.name`
+    name: `${scope}_additional_parsing.fields.${index}.value_key`
   })
   const [showRegex, setShowRegex] = useState((field.options?.regex?.length ?? 0) > 0)
 
@@ -54,9 +54,9 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
       setValue(`${scope}_additional_parsing.fields.${index}.options.regex`, '')
     }
     if (type === 'duration') {
-      setValue(`${scope}_additional_parsing.fields.${index}.name`, 'duration')
+      setValue(`${scope}_additional_parsing.fields.${index}.value_key`, 'duration')
     } else if (activeName === 'duration') {
-      setValue(`${scope}_additional_parsing.fields.${index}.name`, '')
+      setValue(`${scope}_additional_parsing.fields.${index}.value_key`, '')
     }
     setValue(`${scope}_additional_parsing.fields.${index}.options.type`, type as fieldType)
   }
@@ -69,12 +69,13 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
       <div className="flex gap-10 justify-between py-4 pl-4 pr-5 text-sm leading-6">
         <FormField
           control={control}
-          name={`${scope}_additional_parsing.fields.${index}.name`}
+          name={`${scope}_additional_parsing.fields.${index}.value_key`}
+          disabled={activeType === 'duration'}
           render={({ field }) => (
             <FormItem className="w-full">
-              <FormLabel>Name / Key</FormLabel>
+              <FormLabel>Value Key</FormLabel>
               <FormControl>
-                <Input {...field} disabled={activeType === 'duration'} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -82,10 +83,10 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
         />
         <FormField
           control={control}
-          name={`${scope}_additional_parsing.fields.${index}.field`}
+          name={`${scope}_additional_parsing.fields.${index}.column`}
           render={({ field }) => (
             <FormItem className="w-full">
-              <FormLabel className="">Value Field</FormLabel>
+              <FormLabel className="">CSV Column Name</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -147,6 +148,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
 
               <DropdownMenuCheckboxItem
                 checked={showRegex}
+                disabled={activeType === 'array' || activeType === 'object'}
                 onCheckedChange={(v) => {
                   setShowRegex(v),
                     setValue(`${scope}_additional_parsing.fields.${index}.options.regex`, '')
@@ -170,7 +172,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
           name={`${scope}_additional_parsing.fields.${index}.options.regex`}
           render={({ field }) => (
             <FormItem className="w-64 m-4">
-              <FormLabel className="">Regex</FormLabel>
+              <FormLabel className="">Value Extraction Regex (Optional)</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>

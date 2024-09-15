@@ -70,7 +70,10 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
   } = form
 
   const onSubmit: SubmitHandler<formSchemaType> = async (data) => {
-    const cleanedData = removeEmptyFields(data, ['project_enable_parsing', 'global_enable_parsing'])
+    const cleanedData = removeEmptyFields(data, [
+      'project_enable_parsing',
+      'global_enable_parsing'
+    ]) as formSchemaType
     const projectfields = removePrefixFields(cleanedData, 'project')
     const globalfields = removePrefixFields(cleanedData, 'global')
     const update_email_api = {}
@@ -127,7 +130,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
                       General
                     </TabsTrigger>
                     <TabsTrigger className="w-full justify-start" value="paths">
-                      OCF/Proxies Paths
+                      Default Paths
                     </TabsTrigger>
                     <TabsTrigger className="w-full justify-start" value="parsing">
                       Parsing

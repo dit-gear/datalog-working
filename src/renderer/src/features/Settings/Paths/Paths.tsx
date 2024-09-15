@@ -21,14 +21,13 @@ const Paths = ({ scope }: PathsTabProps): ReactElement => {
 
   const watch = useWatch({ control, name: `${scope}_default_proxies_path` })
 
-  const handleAddOcfPath = (): void => {
+  const handleAddOcfPath = async (): Promise<void> => {
     try {
-      window.api.getFolderPath().then((folderPath) => {
-        if (typeof folderPath === 'string') {
-          // @ts-ignore
-          append(folderPath)
-        } else return
-      })
+      const res = await window.api.getFolderPath()
+      if (res.success) {
+        // @ts-ignore
+        append(res.data)
+      } else console.log(res.error)
     } catch (error) {
       console.error(error)
     }
@@ -36,11 +35,10 @@ const Paths = ({ scope }: PathsTabProps): ReactElement => {
 
   const handleAddProxiesPath = async (): Promise<void> => {
     try {
-      window.api.getFolderPath().then((folderPath) => {
-        if (typeof folderPath === 'string') {
-          setValue(`${scope}_default_proxies_path`, folderPath)
-        } else return
-      })
+      const res = await window.api.getFolderPath()
+      if (res.success) {
+        setValue(`${scope}_default_proxies_path`, res.data)
+      } else console.log(res.error)
     } catch (error) {
       console.error(error)
     }

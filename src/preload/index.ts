@@ -23,6 +23,7 @@ if (process.contextIsolated) {
       onNewProjectClicked: (callback) => ipcRenderer.on('new-project', callback),
       createNewProject: (projectName) => ipcRenderer.invoke('create-new-project', projectName),
       updateProject: (project) => ipcRenderer.invoke('update-project', project),
+      getFolderPath: () => ipcRenderer.invoke('getFolderPath'),
       saveEntry: (entry) => ipcRenderer.invoke('save-entry', entry),
       loadEntries: () => ipcRenderer.invoke('load-entries'),
       generatePdf: (docDefinition, filepath) =>

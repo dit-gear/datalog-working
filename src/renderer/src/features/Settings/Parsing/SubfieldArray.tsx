@@ -35,7 +35,7 @@ const SubfieldArray: React.FC<SubfieldArrayProps> = ({ type, scope, parentIndex 
     if (type !== 'object') {
       remove()
     } else if (fields.length === 0) {
-      append({ name: '' })
+      append({ value_key: '' })
     }
   }, [type])
 
@@ -50,10 +50,10 @@ const SubfieldArray: React.FC<SubfieldArrayProps> = ({ type, scope, parentIndex 
             >
               <FormField
                 control={control}
-                name={`${scope}_additional_parsing.fields.${parentIndex}.subfields.${index}.name`}
+                name={`${scope}_additional_parsing.fields.${parentIndex}.subfields.${index}.value_key`}
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Name / Key</FormLabel>
+                    <FormLabel>Value Key</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -64,13 +64,10 @@ const SubfieldArray: React.FC<SubfieldArrayProps> = ({ type, scope, parentIndex 
                 )}
               />
               <FormItem className="w-full">
-                <FormLabel>Value Field</FormLabel>
+                <FormLabel>Order</FormLabel>
                 <FormControl>
                   <Input {...field} disabled placeholder={`[${index}]`} />
                 </FormControl>
-                <FormDescription className="text-sm text-gray-500 italic">
-                  {/* You can add a description here if needed */}
-                </FormDescription>
               </FormItem>
               <div className="flex items-center">
                 <Button
@@ -87,7 +84,7 @@ const SubfieldArray: React.FC<SubfieldArrayProps> = ({ type, scope, parentIndex 
         </div>
         <div className="flex mx-4 mb-5">
           <FormMessage>{subfieldErrors?.message}</FormMessage>
-          <Button className="ml-auto" onClick={() => append({ name: '' })}>
+          <Button className="ml-auto" onClick={() => append({ value_key: '' })}>
             Add Key
           </Button>
         </div>

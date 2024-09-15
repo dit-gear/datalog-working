@@ -11,7 +11,7 @@ const PathsTab = ({ scope }: EmailTabProps): ReactElement => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>OCF / Proxies Paths</CardTitle>
+        <CardTitle>Default Paths</CardTitle>
         <CardDescription>
           You can optionally add default paths with dynamic tags to streamline your workflow.
         </CardDescription>

@@ -46,3 +46,7 @@ export type Response = {
   success: boolean
   error?: string
 }
+
+export type ResponseWithString =
+  | { success: true; data: string }
+  | { success: false; error: string; cancelled?: boolean }

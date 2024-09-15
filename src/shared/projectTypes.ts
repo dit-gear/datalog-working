@@ -15,15 +15,15 @@ const options = z
   })
   .optional()
 
-const subfields = z.array(z.object({ name: z.string().min(1).max(80) })).optional()
+const subfields = z.array(z.object({ value_key: z.string().min(1).max(80) })).optional()
 const additionalParsing = z.object({
-  clip: z.object({ field: z.string().min(1).max(80), regex: z.string().max(60).optional() }),
+  clip: z.object({ column: z.string().min(1).max(80), regex: z.string().max(60).optional() }),
   fields: z
     .array(
       z
         .object({
-          name: z.string().min(1).max(80),
-          field: z.string().min(1).max(80),
+          value_key: z.string().min(1).max(80),
+          column: z.string().min(1).max(80),
           subfields: subfields,
           options: options
         })
@@ -58,14 +58,14 @@ const additionalParsing = z.object({
           if (data.subfields) {
             const seenSubfieldNames = new Set<string>()
             data.subfields.forEach((subfield, subfieldIndex) => {
-              if (seenSubfieldNames.has(subfield.name)) {
+              if (seenSubfieldNames.has(subfield.value_key)) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
                   message: 'Key must be unique',
                   path: ['subfields', subfieldIndex, 'name']
                 })
               } else {
-                seenSubfieldNames.add(subfield.name)
+                seenSubfieldNames.add(subfield.value_key)
               }
             })
           }
@@ -76,17 +76,17 @@ const additionalParsing = z.object({
       const seenNames = new Set<string>(reservedNames)
 
       fields.forEach((field, index) => {
-        if (seenNames.has(field.name)) {
-          const message = reservedNames.includes(field.name.toLowerCase())
-            ? `"${field.name}" is reserved and cannot be used.`
+        if (seenNames.has(field.value_key)) {
+          const message = reservedNames.includes(field.value_key.toLowerCase())
+            ? `"${field.value_key}" is reserved and cannot be used.`
             : 'Key must be unique'
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: message,
-            path: [index, 'name']
+            path: [index, 'value_key']
           })
         } else {
-          seenNames.add(field.name)
+          seenNames.add(field.value_key)
         }
       })
     })

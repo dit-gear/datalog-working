@@ -19,8 +19,7 @@ const ParsingTab = ({ scope }: ParsingTabProps): ReactElement => {
       <CardHeader>
         <CardTitle>Parsing</CardTitle>
         <CardDescription>
-          You can optionally import more metadata to merge with your clips. Enabling this feature
-          will allow you to select an CSV file to import.
+          You can optionally import more metadata to merge with your clips.
         </CardDescription>
       </CardHeader>
       <CardContent>

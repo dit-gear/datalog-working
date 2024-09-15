@@ -10,7 +10,8 @@ import {
   InitialDir,
   DirectoryFile,
   LoadedFile,
-  Response
+  Response,
+  ResponseWithString
 } from '@shared/shared-types'
 import { ClipType, ResponseWithClips } from '@shared/datalogTypes'
 
@@ -23,6 +24,7 @@ declare global {
       createNewProject: (projectName: string) => Promise<CreateNewProjectResult>
       onProjectLoaded: (callback: (project: ProjectType) => void) => void
       updateProject: (project: ProjectToUpdate) => Promise<UpdateProjectResult>
+      getFolderPath: () => Promise<ResponseWithString>
       saveEntry: (entry: entryType) => Promise<saveEntryResult>
       loadEntries: () => Promise<entryType[]>
       findOcf: () => Promise<ResponseWithClips>

@@ -56,7 +56,7 @@ const DurationFields: React.FC<DurationFieldsProps> = ({ scope, index }) => {
             name={`${scope}_additional_parsing.fields.${index}.options.fps`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>FPS Field</FormLabel>
+                <FormLabel>CSV Column Name for FPS</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -75,7 +75,7 @@ const DurationFields: React.FC<DurationFieldsProps> = ({ scope, index }) => {
             <p className="text-sm text-blue-200">
               Duration will be stored in milliseconds. <br /> Specify the unit of your field for
               automatic conversion. If the duration is in timecode or frames, you must also specify
-              a field for frames per second.
+              a CSV column for frames per second.
             </p>
           </div>
         </div>
