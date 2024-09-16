@@ -530,7 +530,10 @@ const Entrydialog = ({
                 accept=".csv"
                 onChange={handleFileChange}
               />
-              <Button onClick={() => document.getElementById('file-field')?.click()}>
+              <Button
+                onClick={() => document.getElementById('file-field')?.click()}
+                disabled={!project.additional_parsing}
+              >
                 Choose CSV file
               </Button>
               {metadataPath}

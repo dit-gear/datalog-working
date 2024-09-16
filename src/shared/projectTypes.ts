@@ -8,7 +8,6 @@ const reservedNames = ['settings', 'shared', 'templates']
 
 const options = z
   .object({
-    type: fieldType,
     regex: z.string().optional(),
     unit: z.enum(['ms', 's', 'tc', 'frames']).optional(),
     fps: z.string().max(80).optional()
@@ -24,11 +23,12 @@ const additionalParsing = z.object({
         .object({
           value_key: z.string().min(1).max(80),
           column: z.string().min(1).max(80),
+          type: fieldType,
           subfields: subfields,
           options: options
         })
         .superRefine((data, ctx) => {
-          const { type } = data.options || {}
+          const { type } = data || {}
           if (type === 'object' && (!data.subfields || data.subfields.length === 0)) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,

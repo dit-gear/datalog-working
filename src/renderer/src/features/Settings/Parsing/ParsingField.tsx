@@ -36,7 +36,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
   const { control, setValue } = useFormContext<formSchemaType>()
   const activeType = useWatch({
     control,
-    name: `${scope}_additional_parsing.fields.${index}.options.type`
+    name: `${scope}_additional_parsing.fields.${index}.type`
   })
   const activeName = useWatch({
     control,
@@ -45,9 +45,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
   const [showRegex, setShowRegex] = useState((field.options?.regex?.length ?? 0) > 0)
 
   const fields = useWatch({ control, name: `${scope}_additional_parsing.fields` })
-  const durationExists = fields?.some(
-    (field, i) => i !== index && field.options?.type === 'duration'
-  )
+  const durationExists = fields?.some((field, i) => i !== index && field.type === 'duration')
 
   const handleTypeChange = (type: string): void => {
     if (type !== 'string') {
@@ -58,7 +56,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
     } else if (activeName === 'duration') {
       setValue(`${scope}_additional_parsing.fields.${index}.value_key`, '')
     }
-    setValue(`${scope}_additional_parsing.fields.${index}.options.type`, type as fieldType)
+    setValue(`${scope}_additional_parsing.fields.${index}.type`, type as fieldType)
   }
 
   return (
@@ -110,7 +108,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
                   <DropdownMenuSubContent>
                     <FormField
                       control={control}
-                      name={`${scope}_additional_parsing.fields.${index}.options.type`}
+                      name={`${scope}_additional_parsing.fields.${index}.type`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>

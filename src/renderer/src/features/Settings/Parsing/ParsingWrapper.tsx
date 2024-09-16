@@ -113,10 +113,7 @@ const ParsingWrapper: React.FC<ParsingWrapperProps> = ({ scope }) => {
             />
           ))}
         </div>
-        <Button
-          type="button"
-          onClick={() => append({ value_key: '', column: '', options: { type: 'string' } })}
-        >
+        <Button type="button" onClick={() => append({ value_key: '', column: '', type: 'string' })}>
           Add field
         </Button>
       </dd>
