@@ -106,14 +106,18 @@ async function processFile(
     const grouped = filteredFiles.reduce(
       (acc, row) => {
         const isClassic = isClassicRow(row)
-        const fileName = isClassic ? row.file.split('/').pop()! : row.path.text.split('/').pop()!
-        const extension = '.' + fileName.split('.').pop()?.toLowerCase()
+        const fileNameWithExtension = isClassic
+          ? row.file.split('/').pop()!
+          : row.path.text.split('/').pop()!
+        const extension = '.' + fileNameWithExtension.split('.').pop()?.toLowerCase()
+
+        const fileName = fileNameWithExtension.slice(0, -extension.length)
 
         let baseClipName = fileName
 
         // Check if file type is likely to be sequential and handle formatting.
         if (sequentialFileTypes.has(extension)) {
-          const match = fileName.match(/^(.*?)(?:[._]\d+)?\.[a-zA-Z0-9]+$/)
+          const match = fileNameWithExtension.match(/^(.*?)(?:[._]\d+)?\.[a-zA-Z0-9]+$/)
           baseClipName = match ? match[1] : fileName
         }
 

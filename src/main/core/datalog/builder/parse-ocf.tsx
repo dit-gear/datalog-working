@@ -31,6 +31,7 @@ const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
   try {
     if (paths.length === 0) {
       const result = await dialog.showOpenDialog({
+        title: 'Select an OCF path',
         properties: ['openDirectory']
       })
 

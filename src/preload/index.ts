@@ -40,6 +40,7 @@ if (process.contextIsolated) {
       },
       getProxies: () => ipcRenderer.invoke('getProxies'),
       removeProxies: () => ipcRenderer.invoke('removeProxies'),
+      getCsvMetadata: () => ipcRenderer.invoke('getCsvMetadata'),
       getInitialDir: () => ipcRenderer.invoke('get-initial-data'),
       onDirChanged: (callback) => ipcRenderer.on('directory-changed', callback),
       removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),

@@ -8,6 +8,7 @@ import ParseOCF from './parse-ocf'
 import removeOcf from './remove-ocf'
 import addProxies from './add-proxies'
 import removeProxies from './remove-proxies'
+import parseCsv from './parse-csv'
 
 export function setupDatalogBuilderIpcHandlers(): void {
   ipcMain.handle('findOcf', async (): Promise<ResponseWithClips> => {
@@ -24,6 +25,10 @@ export function setupDatalogBuilderIpcHandlers(): void {
 
   ipcMain.handle('removeProxies', async (): Promise<ResponseWithClips> => {
     return await removeProxies()
+  })
+
+  ipcMain.handle('getCsvMetadata', async (): Promise<ResponseWithClips> => {
+    return await parseCsv()
   })
 
   ipcMain.handle('save-entry', async (_event, data: DatalogType) => {

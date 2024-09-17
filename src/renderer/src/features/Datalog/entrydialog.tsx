@@ -220,6 +220,21 @@ const Entrydialog = ({
       console.error(error)
     }
   }
+
+  const handleGetCsv = async (): Promise<void> => {
+    try {
+      const res = await window.api.getCsvMetadata()
+      if (res.success) {
+        //setClips(res.clips)
+        console.log(res.clips)
+      } else {
+        if (res.cancelled) return
+        console.error(res.error)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
   /*
   const calculateTotalSize = (array: combinedType[]): number => {
     return Math.floor(array.reduce((total, item) => total + item.Size, 0) / 1000000000)
@@ -536,6 +551,7 @@ const Entrydialog = ({
               >
                 Choose CSV file
               </Button>
+              <Button onClick={handleGetCsv}>Select CSV file</Button>
               {metadataPath}
             </dd>
           </div>

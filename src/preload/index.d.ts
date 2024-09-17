@@ -33,6 +33,7 @@ declare global {
       showProgressListener: (callback: (show: boolean, progress: number) => void) => () => void
       getProxies: () => Promise<ResponseWithClips>
       removeProxies: () => Promise<ResponseWithClips>
+      getCsvMetadata: () => Promise<ResponseWithClips>
       onDirectoryLoaded: (
         callback: (event: Electron.IpcRendererEvent, files: DirectoryFile[]) => void
       ) => void
