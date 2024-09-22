@@ -144,7 +144,7 @@ const parseCsv = async (path?: string): Promise<ResponseWithClips> => {
         ...dataRow // Spread the `dataRow` into the matched clip to add the new fields
       }
     }
-
+    setBuilderClips(clips)
     return { success: true, clips }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown error'

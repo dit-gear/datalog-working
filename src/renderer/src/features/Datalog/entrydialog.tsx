@@ -8,16 +8,15 @@ import {
 import { Button } from '@components/ui/button'
 import { Label } from '@components/ui/label'
 import { Input } from '@components/ui/input'
-import { ScrollArea } from '@components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import Stat from '../../components/stat'
 import { useState, useEffect } from 'react'
 import { OfflineFolderType } from '@shared/shared-types'
 import { ClipType, datalogZod, DatalogType } from '@shared/datalogTypes'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Papa from 'papaparse'
-import { timecodeToSeconds, getReels } from '../../utils'
+import { getReels } from '../../utils'
 import DatePicker from '../../components/DatePicker'
 import { ProjectRootType } from '@shared/projectTypes'
 import replaceTags, { formatDate } from '../../utils/formatDynamicString'
@@ -29,13 +28,13 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormDescription,
   FormMessage,
   FormLabel
 } from '../../components/ui/form'
 import { CopyType } from './types'
 import { getCopiesFromClips } from './utils/getCopiesFromClips'
 import { PathType } from './types'
+import { DynamicTable } from '@components/data-table/DynamicTable'
 
 interface EntrydialogProps {
   project: ProjectRootType
@@ -130,38 +129,6 @@ const Entrydialog = ({
     }
   }, [formState])*/
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const files = e.target.files
-    if (files && files[0]) {
-      const file = files[0]
-      setMetadataPath(file?.name)
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        beforeFirstChunk: function (chunk) {
-          const rows = chunk.split('\n')
-          const headers = rows[0].split(',').map((header) => header.replace(/[\s-]+/g, ''))
-          rows[0] = headers.join(',')
-          return rows.join('\n')
-        },
-        complete: function (results) {
-          if (results.data) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const filteredData = results.data.map((item: any) => ({
-              Clip: item['ReelName'],
-              Duration: timecodeToSeconds(item['DurationTC'], 25),
-              Scene: item['Scene'],
-              Shot: item['Shot'],
-              Take: item['Take'],
-              QC: item['ReviewedByReviewersNotes']
-            }))
-            //setmetadataCsv(filteredData)
-          }
-        }
-      })
-    }
-  }
-
   const handleRemoveCopy = async (paths: PathType[]): Promise<void> => {
     const fullPaths = paths.map((item) => item.full)
     console.log(fullPaths)
@@ -225,8 +192,7 @@ const Entrydialog = ({
     try {
       const res = await window.api.getCsvMetadata()
       if (res.success) {
-        //setClips(res.clips)
-        console.log(res.clips)
+        setClips(res.clips)
       } else {
         if (res.cancelled) return
         console.error(res.error)
@@ -300,6 +266,12 @@ const Entrydialog = ({
     }
     setValue('Folder', replaceTags(project.folder_template, tags))
   }, [daywatch, datewatch, unitwatch])
+
+  const data = [
+    { name: 'John Doe', age: 30, role: 'Engineer' },
+    { name: 'Jane Doe', age: 25, role: 'Designer' },
+    { name: 'Alice', age: 28, role: 'Product Manager' }
+  ]
 
   return (
     <Form {...form}>
@@ -537,28 +509,17 @@ const Entrydialog = ({
           <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
             <dt className="text-sm font-medium leading-6 text-white">Import Metadata</dt>
             <dd className="flex mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 gap-4 items-center">
-              <input
-                id="file-field"
-                className="hidden"
-                type="file"
-                accept=".csv"
-                onChange={handleFileChange}
-              />
-              <Button
-                onClick={() => document.getElementById('file-field')?.click()}
-                disabled={!project.additional_parsing}
-              >
-                Choose CSV file
-              </Button>
               <Button onClick={handleGetCsv}>Select CSV file</Button>
               {metadataPath}
             </dd>
           </div>
         </TabsContent>
         <TabsContent value="clips" className="h-full">
-          <ScrollArea className="h-96">
+          <ScrollArea className="h-[50vh] w-[75vw] overflow-hidden" type="auto">
             {/* Will crash, fix: <Cliptable clips={watch('Clips')} />*/}
-            {JSON.stringify(clips)}
+            <DynamicTable data={clips} />
+            <ScrollBar orientation="vertical" />
+            <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </TabsContent>
       </Tabs>

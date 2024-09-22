@@ -1,4 +1,4 @@
-import { useState, useMemo, Dispatch, SetStateAction } from 'react'
+import { useState, useEffect, Dispatch, SetStateAction } from 'react'
 import { Button } from '@components/ui/button'
 import { Settings2, Loader2 } from 'lucide-react'
 import { useForm, FormProvider, SubmitHandler } from 'react-hook-form'
@@ -34,47 +34,44 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
   const [scope, setScope] = useState<Scope>('project')
   const [open, setOpen] = useState<boolean>(false)
 
-  const defaultValues = useMemo(
-    () => ({
-      project_project_name: defaults.project?.project_name ?? '',
-      project_folder_template: defaults.project?.folder_template ?? '',
-      project_unit: defaults.project?.unit ?? '',
-      project_default_ocf_paths: defaults.project?.default_ocf_paths ?? [],
-      project_default_proxies_path: defaults.project?.default_proxies_path ?? '',
-      project_parse_camera_metadata: defaults.project?.parse_camera_metadata ?? true,
-      project_additional_parsing: defaults.project?.additional_parsing ?? undefined,
-      project_emails: defaults.project?.emails ?? [],
-      project_email_api: defaults.project?.email_api ?? undefined,
-      global_folder_template: defaults.global?.folder_template ?? '',
-      global_unit: defaults.global?.unit ?? '',
-      global_default_ocf_paths: defaults.global?.default_ocf_paths ?? [],
-      global_default_proxies_path: defaults.global?.default_proxies_path ?? '',
-      global_parse_camera_metadata: defaults.global?.parse_camera_metadata ?? true,
-      global_additional_parsing: defaults.global?.additional_parsing ?? undefined,
-      global_emails: defaults.global?.emails ?? [],
-      global_email_api: defaults.global?.email_api ?? undefined,
-      project_enable_parsing: !!defaults.project?.additional_parsing,
-      global_enable_parsing: !!defaults.global?.additional_parsing
-    }),
-    [defaults]
-  )
+  useEffect(() => {
+    reset(defaultValues(defaults))
+  }, [defaults])
+
+  const defaultValues = (defaults: ProjectSettingsType) => ({
+    project_project_name: defaults.project?.project_name ?? '',
+    project_folder_template: defaults.project?.folder_template ?? '',
+    project_unit: defaults.project?.unit ?? '',
+    project_default_ocf_paths: defaults.project?.default_ocf_paths ?? [],
+    project_default_proxies_path: defaults.project?.default_proxies_path ?? '',
+    project_parse_camera_metadata: defaults.project?.parse_camera_metadata ?? true,
+    project_additional_parsing: defaults.project?.additional_parsing ?? undefined,
+    project_emails: defaults.project?.emails ?? [],
+    project_email_api: defaults.project?.email_api ?? undefined,
+    global_folder_template: defaults.global?.folder_template ?? '',
+    global_unit: defaults.global?.unit ?? '',
+    global_default_ocf_paths: defaults.global?.default_ocf_paths ?? [],
+    global_default_proxies_path: defaults.global?.default_proxies_path ?? '',
+    global_parse_camera_metadata: defaults.global?.parse_camera_metadata ?? true,
+    global_additional_parsing: defaults.global?.additional_parsing ?? undefined,
+    global_emails: defaults.global?.emails ?? [],
+    global_email_api: defaults.global?.email_api ?? undefined,
+    project_enable_parsing: !!defaults.project?.additional_parsing,
+    global_enable_parsing: !!defaults.global?.additional_parsing
+  })
 
   const form = useForm<formSchemaType>({
-    defaultValues: defaultValues,
+    defaultValues: defaultValues(defaults),
     mode: 'onBlur',
     resolver: zodResolver(formSchema)
   })
   const {
     handleSubmit,
     formState: { isSubmitting, isSubmitSuccessful },
-    formState,
     reset
   } = form
 
-  console.log(formState)
-
   const onSubmit: SubmitHandler<formSchemaType> = async (data) => {
-    console.log('data to submit:', data)
     const cleanedData = removeEmptyFields(data, [
       'project_enable_parsing',
       'global_enable_parsing'
@@ -84,12 +81,11 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
     const update_email_api = {}
     const update_settings = { project: projectfields, global: globalfields } as ProjectSettingsType
 
-    console.log('submitted:', update_settings)
-
     try {
       const result = await window.api.updateProject({ update_settings, update_email_api })
       if (result.success) {
         setProject(result.project)
+        console.log('project should be set with:', result.project)
         onOpenChange(false)
       }
     } catch (error) {
@@ -100,7 +96,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
   const onOpenChange = (open: boolean): void => {
     setOpen(open)
     if (open === false) {
-      reset(defaultValues)
+      reset(defaultValues(defaults))
     }
   }
 

@@ -9,12 +9,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@components/ui/dropdown-menu'
-import { entryType } from '@shared/shared-types'
 import formatDuration from '@renderer/utils/formatDuration'
 import { getVolumes, getReels } from '../utils'
 
 interface DatalogtableProps {
-  log?: entryType[]
+  log?: any[]
 }
 
 const Datalogtable = ({ log }: DatalogtableProps): JSX.Element | null => {
@@ -91,7 +90,9 @@ const Datalogtable = ({ log }: DatalogtableProps): JSX.Element | null => {
             </TableRow>
           ))
         ) : (
-          <div className="flex flex-col">No entries</div>
+          <TableRow className="flex flex-col">
+            <TableCell>No entries</TableCell>
+          </TableRow>
         )}
       </TableBody>
     </Table>
