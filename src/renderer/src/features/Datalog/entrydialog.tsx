@@ -461,7 +461,7 @@ const Entrydialog = ({
                             <span className="flex-shrink-0 text-gray-400">Copy {index + 1}: </span>
 
                             {copy.paths.map((item, index) => (
-                              <span className="truncate font-medium">
+                              <span key={index} className="truncate font-medium">
                                 {item.volume}
                                 <span className="text-gray-400">
                                   {item.relativePath}
@@ -471,7 +471,6 @@ const Entrydialog = ({
                             ))}
 
                             <span className="flex-shrink-0 text-gray-400">
-                              {/*`${directory.data.length} of ${watch('Files')}`*/} -{' '}
                               {copy.count[0]} of {copy.count[1]} Clips
                             </span>
                           </div>

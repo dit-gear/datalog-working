@@ -8,6 +8,7 @@ import { removeEmptyFields, removePrefixFields } from '@renderer/utils/form'
 import { ProjectSettingsType, ProjectType } from '@shared/projectTypes'
 import { formSchemaType, formSchema, Scope } from './types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
+import { ScrollArea } from '@components/ui/scroll-area'
 
 import {
   Dialog,
@@ -66,10 +67,14 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
   const {
     handleSubmit,
     formState: { isSubmitting, isSubmitSuccessful },
+    formState,
     reset
   } = form
 
+  console.log(formState)
+
   const onSubmit: SubmitHandler<formSchemaType> = async (data) => {
+    console.log('data to submit:', data)
     const cleanedData = removeEmptyFields(data, [
       'project_enable_parsing',
       'global_enable_parsing'
@@ -78,6 +83,8 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
     const globalfields = removePrefixFields(cleanedData, 'global')
     const update_email_api = {}
     const update_settings = { project: projectfields, global: globalfields } as ProjectSettingsType
+
+    console.log('submitted:', update_settings)
 
     try {
       const result = await window.api.updateProject({ update_settings, update_email_api })
@@ -105,7 +112,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className=" w-[100vw] h-[100vh] max-w-[100vw] max-h-[100vh] bg-black/40 backdrop-blur-sm">
+      <DialogContent className=" w-[100vw] h-[100vh] max-w-[100vw] max-h-[100vh] pt-0 bg-black/40 backdrop-blur-sm">
         <DialogHeader className="hidden">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>Settings</DialogDescription>
@@ -140,20 +147,22 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
                     </TabsTrigger>
                   </TabsList>
                 </nav>
-                <TabsContent value="general">
-                  <GeneralTab scope={scope} />
-                </TabsContent>
-                <TabsContent value="paths">
-                  <PathsTab scope={scope} />
-                </TabsContent>
-                <TabsContent value="parsing">
-                  <ParsingTab scope={scope} />
-                </TabsContent>
-                <TabsContent value="email">
-                  <EmailTab scope={scope} />
-                </TabsContent>
+                <ScrollArea className="h-[90vh]">
+                  <TabsContent value="general">
+                    <GeneralTab scope={scope} />
+                  </TabsContent>
+                  <TabsContent value="paths">
+                    <PathsTab scope={scope} />
+                  </TabsContent>
+                  <TabsContent value="parsing" className="mt-0 pt-2">
+                    <ParsingTab scope={scope} />
+                  </TabsContent>
+                  <TabsContent value="email">
+                    <EmailTab scope={scope} />
+                  </TabsContent>
+                </ScrollArea>
 
-                <DialogFooter className="md:col-span-2 mt-auto">
+                <DialogFooter className="md:col-span-2 mt-2">
                   <DialogClose asChild>
                     <Button variant="ghost">Close</Button>
                   </DialogClose>

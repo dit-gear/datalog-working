@@ -1,4 +1,4 @@
-import { useFieldArray, useFormContext } from 'react-hook-form'
+import { useFieldArray, useFormContext, FieldError } from 'react-hook-form'
 import { formSchemaType } from '../types'
 import { fieldType } from '@shared/projectTypes'
 import {
@@ -29,17 +29,21 @@ const SubfieldArray: React.FC<SubfieldArrayProps> = ({ type, scope, parentIndex 
     name: `${scope}_additional_parsing.fields.${parentIndex}.subfields` // unique name for your Field Array
   })
 
-  const subfieldErrors = errors.project_additional_parsing?.fields?.[parentIndex]?.subfields
+  const subfieldErrors: FieldError | undefined =
+    errors.project_additional_parsing?.fields?.[parentIndex] &&
+    'subfields' in errors.project_additional_parsing?.fields?.[parentIndex]
+      ? (errors.project_additional_parsing?.fields?.[parentIndex].subfields as FieldError)
+      : undefined
 
   useEffect(() => {
-    if (type !== 'object') {
+    if (type !== 'list_of_mapped_objects') {
       remove()
     } else if (fields.length === 0) {
       append({ value_key: '' })
     }
   }, [type])
 
-  if (type === 'object') {
+  if (type === 'list_of_mapped_objects') {
     return (
       <>
         <div className="divide-y divide-white/10 rounded-md border border-white/20 mb-2 mx-4">
