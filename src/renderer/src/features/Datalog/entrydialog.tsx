@@ -22,7 +22,7 @@ import { ProjectRootType } from '@shared/projectTypes'
 import replaceTags, { formatDate } from '../../utils/formatDynamicString'
 import { Pencil } from 'lucide-react'
 import { useToast } from '@components/ui/use-toast'
-import formatDuration from '../../utils/formatDuration'
+import { formatDuration } from '../../utils/format-duration'
 import {
   Form,
   FormControl,
@@ -302,8 +302,8 @@ const Entrydialog = ({
           <div className="flex justify-center">
             <TabsList className="grid grid-cols-3 w-[400px] mt-4">
               <TabsTrigger value="name">Name</TabsTrigger>
-              <TabsTrigger value="paths">Paths</TabsTrigger>
-              <TabsTrigger value="clips">Clips</TabsTrigger>
+              <TabsTrigger value="paths">Import</TabsTrigger>
+              <TabsTrigger value="clips">Preview</TabsTrigger>
             </TabsList>
           </div>
         </DialogHeader>

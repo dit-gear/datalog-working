@@ -1,5 +1,4 @@
 import { ResponseWithClips } from '@shared/datalogTypes'
-import { fieldType } from '@shared/projectTypes'
 import { dialog } from 'electron'
 import fs from 'fs'
 import Papa from 'papaparse'
@@ -78,8 +77,6 @@ const parseCsv = async (path?: string): Promise<ResponseWithClips> => {
     }*/
 
     const clips = getBuilderClips()
-
-    const updatedClips = clips.map((clip) => ({ ...clip })) // Copy original clips for immutability
 
     // Pre-compile the regex for `settings.clip.regex`, if available
     let clipRegex: RegExp | null = null

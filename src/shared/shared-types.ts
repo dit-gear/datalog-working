@@ -3,6 +3,7 @@ import { z } from 'zod'
 export type durationType = {
   hours?: number
   minutes?: number
+  seconds?: number
 }
 
 export type FileInfo = {

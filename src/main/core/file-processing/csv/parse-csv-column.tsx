@@ -204,7 +204,9 @@ function parseListOfMappedObjects(
 
   const records = value.split(primary_delimiter)
 
-  return records.map((record) => {
+  dataRow[value_key] = dataRow[value_key] || []
+
+  records.map((record) => {
     const fields = record.split(secondary_delimiter).map((field) => field.trim())
     const mappedObject: Record<string, string> = {}
     fields.forEach((field, index) => {
@@ -213,8 +215,10 @@ function parseListOfMappedObjects(
         mappedObject[key] = field
       }
     })
-    return (dataRow[value_key] = mappedObject)
+    ;(dataRow[value_key] as Record<string, string>[]).push(mappedObject)
+    //return (dataRow[value_key] = mappedObject)
   })
+  return dataRow[value_key] as Record<string, string>[]
 }
 
 function parseDuration(field: DurationFieldType, row: Row, dataRow: DataRow): number {

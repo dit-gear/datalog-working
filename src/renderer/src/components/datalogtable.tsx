@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@components/ui/dropdown-menu'
-import formatDuration from '@renderer/utils/formatDuration'
+import { formatDuration } from '@renderer/utils/format-duration'
 import { getVolumes, getReels } from '../utils'
 
 interface DatalogtableProps {
