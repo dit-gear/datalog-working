@@ -32,12 +32,6 @@ const getMaxCopies = (data: RowData[]): number => {
   }, 0)
 }
 
-const getNestedValue = (obj: any, path: string): any => {
-  return path.split('.').reduce((accumulator, currentKey) => {
-    return accumulator ? accumulator[currentKey] : undefined
-  }, obj)
-}
-
 export const generateColumns = (data: RowData[]): ColumnDef<RowData>[] => {
   if (!data.length) return []
 

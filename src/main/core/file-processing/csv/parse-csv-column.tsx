@@ -1,7 +1,5 @@
 import {
-  subFieldsType,
   Field,
-  timeUnitsType,
   StringFieldType,
   ListOfStringsFieldType,
   KeyValueObjFieldType,

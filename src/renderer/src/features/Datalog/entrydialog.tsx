@@ -10,7 +10,6 @@ import { Label } from '@components/ui/label'
 import { Input } from '@components/ui/input'
 import { ScrollArea, ScrollBar } from '@components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
-import Stat from '../../components/stat'
 import { useState, useEffect } from 'react'
 import { ClipType, datalogZod, DatalogType } from '@shared/datalogTypes'
 import { useForm } from 'react-hook-form'
@@ -20,7 +19,6 @@ import { ProjectRootType } from '@shared/projectTypes'
 import replaceTags, { formatDate } from '../../utils/formatDynamicString'
 import { Pencil } from 'lucide-react'
 import { useToast } from '@components/ui/use-toast'
-import { formatDuration } from '../../utils/format-duration'
 import {
   Form,
   FormControl,
@@ -50,7 +48,6 @@ const Entrydialog = ({
   setOpen,
   refetch
 }: EntrydialogProps): JSX.Element => {
-  const [clips, setClips] = useState<ClipType[]>([])
   const [copies, setCopies] = useState<CopyType[]>([])
 
   const { toast } = useToast()
