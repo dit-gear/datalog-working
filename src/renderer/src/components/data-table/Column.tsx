@@ -2,8 +2,8 @@ import { ColumnDef } from '@tanstack/react-table'
 import { RowData } from './types'
 import { formatBytes } from '@renderer/utils/format-bytes'
 import getVolumeName from '@renderer/features/Datalog/utils/get-volume'
-import { formatDurationToString } from '@renderer/utils/format-duration'
 import Cell from './Cell'
+import DurationCell from './Duration'
 import { flattenData } from './flattenData'
 
 const formatHeader = (key: string): JSX.Element => {
@@ -85,8 +85,9 @@ export const generateColumns = (data: RowData[]): ColumnDef<RowData>[] => {
         if ((key === 'Size' || key === 'Proxy.Size') && typeof value === 'number') {
           return <span className="whitespace-nowrap">{formatBytes(value)}</span>
         }
-        if (key === 'Duration' && typeof value === 'number') {
-          return <span className="whitespace-nowrap">{formatDurationToString(value)}</span>
+        if (key === 'Duration') {
+          const v = typeof value === 'number' ? value : 0
+          return <DurationCell row={row} column={column} value={v} />
         }
         if (key === 'Clip') return <span className="whitespace-nowrap">{value}</span>
         if (Array.isArray(value)) {

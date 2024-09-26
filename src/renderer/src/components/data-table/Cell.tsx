@@ -35,7 +35,7 @@ const Cell = ({ row, column, totalRows }) => {
       name={`Clips.${row.id}.${column.id}`}
       control={control}
       render={({ field }) => {
-        const inputWidth = calculateWidth(field.value, 5, 60, 2)
+        const inputWidth = calculateWidth(field.value, 5, 60, 4)
         return (
           <FormItem className="inline-flex">
             <FormControl>
@@ -43,7 +43,7 @@ const Cell = ({ row, column, totalRows }) => {
                 {...field}
                 id={`cell-${row.index}-${column.id}`}
                 onKeyDown={handleKeyDown}
-                className="-p-2 border-none transition-width duration-200 hover:bg[inherit]"
+                className="-ml-2 border-none transition-width duration-200 hover:bg[inherit]"
                 style={{ width: inputWidth }}
               />
             </FormControl>

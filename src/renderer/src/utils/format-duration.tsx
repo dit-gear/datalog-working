@@ -28,3 +28,8 @@ export const formatDurationToString = (time: number, isMilliseconds?: boolean): 
 
   return parts.join(', ')
 }
+
+export function formatDurationToMS(hours: number, minutes: number, seconds: number): number {
+  const milliseconds = hours * 3600000 + minutes * 60000 + seconds * 1000
+  return milliseconds
+}
