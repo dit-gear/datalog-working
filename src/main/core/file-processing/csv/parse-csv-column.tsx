@@ -146,11 +146,11 @@ function parseKeyValueString(
   field: KeyValueObjFieldType,
   row: Row,
   dataRow: DataRow
-): { [key: string]: string | null } {
+): { [key: string]: string } {
   const { value_key, column, primary_delimiter = ';', secondary_delimiter = ':' } = field
   const value = row[column] ?? ''
 
-  const result: { [key: string]: string | null } = {}
+  const result: { [key: string]: string } = {}
   const pairs = value.split(primary_delimiter)
 
   for (const pair of pairs) {
@@ -161,7 +161,7 @@ function parseKeyValueString(
     const [key, value] = pair.split(secondary_delimiter, 2).map((s) => s.trim())
 
     if (key) {
-      result[key] = value !== undefined && value !== '' ? value : null
+      result[key] = value !== undefined && value !== '' ? value : ''
     }
   }
 

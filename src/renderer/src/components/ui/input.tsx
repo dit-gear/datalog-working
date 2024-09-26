@@ -4,8 +4,26 @@ import { cn } from '@components/lib/utils'
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, onKeyDown, ...props }, ref) => {
+    // Internal onKeyDown handler for Input component
+    const handleInternalKeyDown = (e) => {
+      // Handle Cmd+A (or Ctrl+A) to select all text
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a') {
+        e.currentTarget.select()
+      }
+
+    }
+
+    // Merged onKeyDown handler
+    const handleKeyDown = (e) => {
+      handleInternalKeyDown(e) // Call internal handler
+
+      if (onKeyDown) {
+        onKeyDown(e) // Call external handler passed via props
+      }
+    }
+
     return (
       <input
         type={type}
@@ -14,11 +32,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className
         )}
         ref={ref}
+        onKeyDown={handleKeyDown} // Use merged handler
         {...props}
       />
     )
   }
 )
-Input.displayName = 'Input'
-
-export { Input }

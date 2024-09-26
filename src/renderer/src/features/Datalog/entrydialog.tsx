@@ -12,11 +12,9 @@ import { ScrollArea, ScrollBar } from '@components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import Stat from '../../components/stat'
 import { useState, useEffect } from 'react'
-import { OfflineFolderType } from '@shared/shared-types'
 import { ClipType, datalogZod, DatalogType } from '@shared/datalogTypes'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { getReels } from '../../utils'
 import DatePicker from '../../components/DatePicker'
 import { ProjectRootType } from '@shared/projectTypes'
 import replaceTags, { formatDate } from '../../utils/formatDynamicString'
@@ -35,6 +33,9 @@ import { CopyType } from './types'
 import { getCopiesFromClips } from './utils/getCopiesFromClips'
 import { PathType } from './types'
 import { DynamicTable } from '@components/data-table/DynamicTable'
+import Reels from './stats/reels'
+import Duration from './stats/duration'
+import { mergeDirtyValues } from './utils/merge-clips'
 
 interface EntrydialogProps {
   project: ProjectRootType
@@ -49,10 +50,6 @@ const Entrydialog = ({
   setOpen,
   refetch
 }: EntrydialogProps): JSX.Element => {
-  const [metadataPath, setMetadataPath] = useState<string>('')
-  //const [metadataCsv, setmetadataCsv] = useState<metadataCsv[]>([])
-  const [offlineFolder, setOfflineFolder] = useState<OfflineFolderType | null>(null)
-
   const [clips, setClips] = useState<ClipType[]>([])
   const [copies, setCopies] = useState<CopyType[]>([])
 
@@ -79,8 +76,7 @@ const Entrydialog = ({
     }
     return replaceTags(project.folder_template, tags)
   }
-  // getDateBasedOnTime().toISOString().split('T')[0],
-  // Folder: replaceTags(project.folder_template, defaultDay, new Date()),
+
   const form = useForm({
     defaultValues: {
       Folder: defaultFolder(),
@@ -90,9 +86,11 @@ const Entrydialog = ({
       OCF: { Files: 0, Size: 0 },
       Proxy: { Files: 0, Size: 0 },
       Duration: 0,
+      Reels: [],
+      Copies: [],
       Clips: []
     },
-    mode: 'all',
+    mode: 'onSubmit',
     resolver: zodResolver(datalogZod)
   })
   console.log(formatDate())
@@ -100,18 +98,9 @@ const Entrydialog = ({
   const { register, watch, setValue, formState, handleSubmit, reset, control } = form
 
   const onSubmit = (data: DatalogType): void => {
-    //let entrytoSave: Partial<entryType> = {}
     console.log(data)
-    /*entrytoSave.Folder = data.Folder
-    entrytoSave.Day = data.Day
-    entrytoSave.Date = data.Date
-    if (data.Unit !== '') entrytoSave.Unit = data.Unit
-    entrytoSave.Files = data.Files
-    entrytoSave.Size = data.Size
-    entrytoSave.Duration = data.Duration
-    entrytoSave.ProxySize = data.ProxySize
-    entrytoSave.Clips = data.Clips
-    window.api.saveEntry(entrytoSave).then((res) => {
+    // DISABLED IN TESTING
+    /*window.api.saveEntry(entrytoSave).then((res) => {
       if (res.success) {
         toast({ description: 'Data saved' })
         reset()
@@ -123,11 +112,17 @@ const Entrydialog = ({
     })*/
   }
 
-  /*useEffect(() => {
-    if (formState.errors) {
-      console.log(formState.errors)
+  const updateClips = (newClips: ClipType[], setcopies = false) => {
+    const dirtyFields = form.formState.dirtyFields.Clips
+    const currentClips = form.getValues().Clips
+
+    const mergedClips = mergeDirtyValues(dirtyFields, currentClips, newClips)
+
+    form.reset({ ...form.getValues(), Clips: mergedClips }, { keepDirty: true })
+    if (setcopies) {
+      setCopies(getCopiesFromClips(newClips))
     }
-  }, [formState])*/
+  }
 
   const handleRemoveCopy = async (paths: PathType[]): Promise<void> => {
     const fullPaths = paths.map((item) => item.full)
@@ -135,9 +130,7 @@ const Entrydialog = ({
     try {
       const res = await window.api.removeLogPath(fullPaths)
       if (res.success) {
-        console.log(res)
-        setClips(res.clips)
-        setCopies(getCopiesFromClips(res.clips))
+        updateClips(res.clips, true)
       } else {
         console.error(res.error)
       }
@@ -150,8 +143,7 @@ const Entrydialog = ({
     try {
       const res = await window.api.findOcf()
       if (res.success) {
-        setClips(res.clips)
-        setCopies(getCopiesFromClips(res.clips))
+        updateClips(res.clips, true)
       } else {
         if (res.cancelled) return
         console.error(res.error)
@@ -165,7 +157,7 @@ const Entrydialog = ({
     try {
       const res = await window.api.getProxies()
       if (res.success) {
-        setClips(res.clips)
+        updateClips(res.clips)
       } else {
         if (res.cancelled) return
         console.error(res.error)
@@ -179,7 +171,7 @@ const Entrydialog = ({
     try {
       const res = await window.api.removeProxies()
       if (res.success) {
-        setClips(res.clips)
+        updateClips(res.clips)
       } else {
         console.error(res.error)
       }
@@ -192,7 +184,7 @@ const Entrydialog = ({
     try {
       const res = await window.api.getCsvMetadata()
       if (res.success) {
-        setClips(res.clips)
+        updateClips(res.clips)
       } else {
         if (res.cancelled) return
         console.error(res.error)
@@ -201,61 +193,11 @@ const Entrydialog = ({
       console.error(error)
     }
   }
-  /*
-  const calculateTotalSize = (array: combinedType[]): number => {
-    return Math.floor(array.reduce((total, item) => total + item.Size, 0) / 1000000000)
-  }
-  const calculateTotalDuration = (array: combinedType[]): number => {
-    const totalSeconds = array.reduce((total, item) => total + item.Duration, 0)
-    return totalSeconds
-  }*/
-  /*useEffect(() => {
-    if (copyDirectories) {
-      const combinedMap = new Map<string, combinedType>()
-
-      copyDirectories.forEach((copy) => {
-        copy.data.forEach((item) => {
-          const existingEntry = combinedMap.get(item.Clip)
-          const resolve = metadataCsv.find((resolveItem) => resolveItem.Clip === item.Clip)
-          const proxy = offlineFolder?.files.find((file) => file.filename === item.Clip)
-
-          if (existingEntry) {
-            if (!existingEntry.Volumes.includes(item.Volume)) {
-              existingEntry.Volumes.push(item.Volume)
-            }
-          } else {
-            // eslint-disable-next-line prefer-const
-            let newEntry: combinedType = {
-              ...item,
-              Duration: item.Duration || resolve?.Duration || 0,
-              Proxy: proxy ? true : false,
-              Volumes: [item.Volume]
-            }
-            if (item.Scene || resolve?.Scene) newEntry.Scene = item.Scene || resolve?.Scene
-            if (resolve?.Shot) newEntry.Shot = resolve?.Shot
-            if (item.Take || resolve?.Take) newEntry.Take = item.Take || resolve?.Take
-            if (resolve?.QC) newEntry.QC = resolve?.QC
-
-            combinedMap.set(item.Clip, newEntry)
-          }
-        })
-      })
-
-      const combinedArray = Array.from(combinedMap.values())
-      //setValue('Files', combinedArray.length)
-      //setValue('Size', calculateTotalSize(combinedArray))
-      setValue('Duration', calculateTotalDuration(combinedArray))
-      //setValue('Clips', combinedArray, { shouldValidate: true })
-    }
-  }, [copyDirectories, metadataCsv, offlineFolder])*/
-
-  //const [date, setDate] = useState<Date | undefined>(getDateBasedOnTime())
   const [folderEdit, setFolderEdit] = useState<boolean>(false)
 
   const daywatch = watch('Day')
   const datewatch = watch('Date')
   const unitwatch = watch('Unit')
-  const clipswatch = watch('Clips')
 
   useEffect(() => {
     const tags = {
@@ -266,12 +208,6 @@ const Entrydialog = ({
     }
     setValue('Folder', replaceTags(project.folder_template, tags))
   }, [daywatch, datewatch, unitwatch])
-
-  const data = [
-    { name: 'John Doe', age: 30, role: 'Engineer' },
-    { name: 'Jane Doe', age: 25, role: 'Designer' },
-    { name: 'Alice', age: 28, role: 'Product Manager' }
-  ]
 
   return (
     <Form {...form}>
@@ -285,25 +221,16 @@ const Entrydialog = ({
                 {/*<Stat key="stats-files" label="OCF Files" value={watch('Files')} warning={true} />
                 <Stat key="stats-size" label="OCF Size" value={watch('Size')} suffix="GB" />
                 <Stat key="stats-mxf" label="Proxies Size" value={watch('ProxySize')} suffix="GB" />*/}
-                <Stat
-                  key="stats-duration"
-                  label="Duration"
-                  duration={formatDuration(watch('Duration'))}
-                />
-                <Stat
-                  key="stats-reels"
-                  label="Reels"
-                  value={getReels(clipswatch).join(', ')}
-                  small
-                />
+                <Duration />
+                <Reels />
               </div>
             </div>
           </div>
           <div className="flex justify-center">
             <TabsList className="grid grid-cols-3 w-[400px] mt-4">
-              <TabsTrigger value="name">Name</TabsTrigger>
-              <TabsTrigger value="paths">Import</TabsTrigger>
-              <TabsTrigger value="clips">Preview</TabsTrigger>
+              <TabsTrigger value="name">1. Name</TabsTrigger>
+              <TabsTrigger value="paths">2. Import</TabsTrigger>
+              <TabsTrigger value="clips">3. Preview</TabsTrigger>
             </TabsList>
           </div>
         </DialogHeader>
@@ -338,16 +265,6 @@ const Entrydialog = ({
                     </FormItem>
                   )}
                 />
-                {/*<Input
-                    id="day"
-                    type="number"
-                    className={formState.errors.Day ? ' w-16 border-red-500' : 'w-16'}
-                    {...register('Day', {
-                      valueAsNumber: true,
-                      max: 999,
-                      min: 1
-                    })}
-                  />*/}
                 <FormField
                   control={control}
                   name="Date"
@@ -421,75 +338,42 @@ const Entrydialog = ({
                 role="list"
                 className="divide-y divide-white/10 rounded-md border border-white/20 mb-2"
               >
-                {copies
-                  ? copies.map((copy, index) => (
-                      <li
-                        key={index}
-                        className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6"
-                      >
-                        <div className="flex w-0 flex-1 items-center">
-                          {/*<PaperClipIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />*/}
-                          <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                            <span className="flex-shrink-0 text-gray-400">Copy {index + 1}: </span>
+                {copies.map((copy, index) => (
+                  <li
+                    key={index}
+                    className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6"
+                  >
+                    <div className="flex w-0 flex-1 items-center">
+                      {/*<PaperClipIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />*/}
+                      <div className="ml-4 flex min-w-0 flex-1 gap-2">
+                        <span className="flex-shrink-0 text-gray-400">Copy {index + 1}: </span>
 
-                            {copy.paths.map((item, index) => (
-                              <span key={index} className="truncate font-medium">
-                                {item.volume}
-                                <span className="text-gray-400">
-                                  {item.relativePath}
-                                  {index < copy.paths.length - 1 && ', '}
-                                </span>
-                              </span>
-                            ))}
-
-                            <span className="flex-shrink-0 text-gray-400">
-                              {copy.count[0]} of {copy.count[1]} Clips
+                        {copy.paths.map((item, index) => (
+                          <span key={index} className="truncate font-medium">
+                            {item.volume}
+                            <span className="text-gray-400">
+                              {item.relativePath}
+                              {index < copy.paths.length - 1 && ', '}
                             </span>
-                          </div>
-                        </div>
-                        <div className="ml-4 flex-shrink-0">
-                          <a
-                            href="#"
-                            onClick={() => handleRemoveCopy(copy.paths)}
-                            className="font-medium text-indigo-400 hover:text-indigo-300"
-                          >
-                            Remove
-                          </a>
-                        </div>
-                      </li>
-                    ))
-                  : project.default_ocf_paths && project.default_ocf_paths.length > 0
-                    ? project.default_ocf_paths.map((directory, index) => (
-                        <li
-                          key={index}
-                          className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6"
-                        >
-                          <div className="flex w-0 flex-1 items-center">
-                            {/*<PaperClipIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />*/}
-                            <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                              <span className="flex-shrink-0 text-gray-400">
-                                Copy {index + 1}:{' '}
-                              </span>
-                              <span className="truncate font-medium text-gray-400">
-                                {directory}
-                              </span>
-                              <span className="flex-shrink-0 text-gray-400">
-                                {/*`${directory.data.length} of ${watch('Files')}`*/}:{' '}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="ml-4 flex-shrink-0">
-                            <a
-                              href="#"
-                              onClick={() => console.log('click')}
-                              className="font-medium text-indigo-400 hover:text-indigo-300"
-                            >
-                              Remove
-                            </a>
-                          </div>
-                        </li>
-                      ))
-                    : null}
+                          </span>
+                        ))}
+
+                        <span className="flex-shrink-0 text-gray-400">
+                          {copy.count[0]} of {copy.count[1]} Clips
+                        </span>
+                      </div>
+                    </div>
+                    <div className="ml-4 flex-shrink-0">
+                      <a
+                        href="#"
+                        onClick={() => handleRemoveCopy(copy.paths)}
+                        className="font-medium text-indigo-400 hover:text-indigo-300"
+                      >
+                        Remove
+                      </a>
+                    </div>
+                  </li>
+                ))}
               </ul>
               <div className="flex gap-2">
                 <Button onClick={handleAddCopy}>{`Add OCF Copy Directory (mhl)`}</Button>
@@ -503,21 +387,18 @@ const Entrydialog = ({
               <Button onClick={handleRemoveProxies} variant="outline">
                 Clear
               </Button>
-              {offlineFolder?.folderPath ? offlineFolder.folderPath : null}
             </dd>
           </div>
           <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
             <dt className="text-sm font-medium leading-6 text-white">Import Metadata</dt>
             <dd className="flex mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 gap-4 items-center">
               <Button onClick={handleGetCsv}>Select CSV file</Button>
-              {metadataPath}
             </dd>
           </div>
         </TabsContent>
         <TabsContent value="clips" className="h-full">
           <ScrollArea className="h-[50vh] w-[75vw] overflow-hidden" type="auto">
-            {/* Will crash, fix: <Cliptable clips={watch('Clips')} />*/}
-            <DynamicTable data={clips} />
+            <DynamicTable />
             <ScrollBar orientation="vertical" />
             <ScrollBar orientation="horizontal" />
           </ScrollArea>

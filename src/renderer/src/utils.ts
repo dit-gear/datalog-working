@@ -1,4 +1,4 @@
-import { clipsType } from '@shared/shared-types'
+import { ClipType } from '@shared/datalogTypes'
 
 export function timecodeToSeconds(timecode: string, frameRate: number): number {
   const parts = timecode.split(':').map(Number)
@@ -55,25 +55,23 @@ export const extractDay = (input: string) => {
   }
 }
 
-export const getVolumes = (clips: clipsType[]): string[] => {
-  const volumesSet: Set<string> = new Set()
-
-  for (const clip of clips) {
-    for (const volume of clip.Volumes) {
-      volumesSet.add(volume)
-    }
-  }
-
-  return Array.from(volumesSet)
-}
-export const getReels = (clips: clipsType[]): string[] => {
+export const getReels = (clips: ClipType[]): string[] => {
   const reelsSet: Set<string> = new Set()
+  let clipsWithoutReel = 0
 
   for (const clip of clips) {
     if (clip.Reel) {
       reelsSet.add(clip.Reel)
+    } else {
+      clipsWithoutReel++
     }
   }
+  const reelsArray = Array.from(reelsSet)
 
-  return Array.from(reelsSet)
+  // Append the count of clips without a Reel
+  if (clipsWithoutReel) {
+    reelsArray.push(`+ ${clipsWithoutReel} other clip${clipsWithoutReel >= 2 ? 's' : ''}`)
+  }
+
+  return reelsArray
 }
