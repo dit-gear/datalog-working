@@ -41,7 +41,7 @@ export const ClipZod = z
   .extend(Camera_MetadataZod.shape)
 //.catchall(z.string())
 
-const Files = z.object({
+export const Files = z.object({
   Files: z.number().int().nonnegative().finite(),
   Size: z.number().nonnegative().finite()
 })
@@ -66,6 +66,7 @@ export const datalogZod = z.object({
   Clips: z.array(ClipZod).optional()
 })
 
+export type FilesType = z.infer<typeof Files>
 export type ClipType = z.infer<typeof ClipZod>
 export type DatalogType = z.infer<typeof datalogZod>
 

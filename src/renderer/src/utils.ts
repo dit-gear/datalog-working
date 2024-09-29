@@ -54,24 +54,3 @@ export const extractDay = (input: string) => {
     return input
   }
 }
-
-export const getReels = (clips: ClipType[]): string[] => {
-  const reelsSet: Set<string> = new Set()
-  let clipsWithoutReel = 0
-
-  for (const clip of clips) {
-    if (clip.Reel) {
-      reelsSet.add(clip.Reel)
-    } else {
-      clipsWithoutReel++
-    }
-  }
-  const reelsArray = Array.from(reelsSet)
-
-  // Append the count of clips without a Reel
-  if (clipsWithoutReel) {
-    reelsArray.push(`+ ${clipsWithoutReel} other clip${clipsWithoutReel >= 2 ? 's' : ''}`)
-  }
-
-  return reelsArray
-}

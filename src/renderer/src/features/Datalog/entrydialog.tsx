@@ -33,6 +33,8 @@ import { PathType } from './types'
 import { DynamicTable } from '@components/data-table/DynamicTable'
 import Reels from './stats/reels'
 import Duration from './stats/duration'
+import Ocf from './stats/ocf'
+import Proxy from './stats/proxy'
 import { mergeDirtyValues } from './utils/merge-clips'
 
 interface EntrydialogProps {
@@ -80,8 +82,8 @@ const Entrydialog = ({
       Day: defaultDay,
       Date: formatDate(),
       Unit: project.unit ? project.unit : '',
-      OCF: { Files: 0, Size: 0 },
-      Proxy: { Files: 0, Size: 0 },
+      OCF: {},
+      Proxy: {},
       Duration: 0,
       Reels: [],
       Copies: [],
@@ -90,7 +92,6 @@ const Entrydialog = ({
     mode: 'onSubmit',
     resolver: zodResolver(datalogZod)
   })
-  console.log(formatDate())
 
   const { register, watch, setValue, formState, handleSubmit, reset, control } = form
 
@@ -215,9 +216,8 @@ const Entrydialog = ({
           <div>
             <div className="mx-auto max-w-7xl">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {/*<Stat key="stats-files" label="OCF Files" value={watch('Files')} warning={true} />
-                <Stat key="stats-size" label="OCF Size" value={watch('Size')} suffix="GB" />
-                <Stat key="stats-mxf" label="Proxies Size" value={watch('ProxySize')} suffix="GB" />*/}
+                <Ocf />
+                <Proxy />
                 <Duration />
                 <Reels />
               </div>

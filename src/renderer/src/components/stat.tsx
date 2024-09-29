@@ -1,36 +1,17 @@
-import { durationType } from '@shared/shared-types'
+import { ReactNode } from 'react'
+
 interface StatProps {
   label: string
-  value?: string | number
-  duration?: durationType
-  suffix?: string
-  small?: boolean
   warning?: boolean
+  children: ReactNode
 }
 
-const Stat = ({ label, value, duration, suffix, small, warning }: StatProps): JSX.Element => {
+const Stat: React.FC<StatProps> = ({ label, warning, children }) => {
   return (
-    <div className="px-4 py-6 sm:px-6 lg:px-8 rounded-lg border border-white/10">
+    <div className="min-h-32 max-h-64 h-full transition-[height] duration-200 px-4 py-6 sm:px-6 lg:px-8 rounded-lg border border-white/10 animate ">
       <p className="text-sm font-medium leading-6 text-gray-400">{label}</p>
       <p className="mt-2 flex items-baseline gap-x-2">
-        {small ? (
-          <span className="text-sm font-semibold tracking-tight text-white">{value}</span>
-        ) : (
-          <span className="text-4xl font-semibold tracking-tight text-white">{value}</span>
-        )}
-        {duration?.hours ? (
-          <>
-            <span className="text-4xl font-semibold tracking-tight text-white">
-              {duration?.hours}
-            </span>
-            <span className="text-sm text-gray-400">h</span>
-          </>
-        ) : null}
-        <span className="text-4xl font-semibold tracking-tight text-white">
-          {duration?.minutes}
-        </span>
-        {duration ? <span className="text-sm text-gray-400">min</span> : null}
-        {suffix ? <span className="text-sm text-gray-400">{suffix}</span> : null}
+        {children}
         {warning ? <p>⚠️</p> : null}
       </p>
     </div>

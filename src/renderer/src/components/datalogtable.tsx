@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger
 } from '@components/ui/dropdown-menu'
 import { formatDuration } from '@renderer/utils/format-duration'
-import { getReels } from '../utils'
 
 interface DatalogtableProps {
   log?: any[]
@@ -54,7 +53,9 @@ const Datalogtable = ({ log }: DatalogtableProps): JSX.Element | null => {
                   : null}
               </TableCell>
               <TableCell>{/*log.Clips.length > 0 ? getVolumes(log.Clips) : null*/}</TableCell>
-              <TableCell>{log.Clips.length > 0 ? getReels(log.Clips).join(', ') : null}</TableCell>
+              <TableCell>
+                {/*log.Clips.length > 0 ? getReels(log.Clips).join(', ') : null*/}
+              </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
