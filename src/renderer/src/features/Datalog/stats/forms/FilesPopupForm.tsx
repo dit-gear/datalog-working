@@ -5,6 +5,7 @@ import { Input } from '@components/ui/input'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { FilesType } from '@shared/datalogTypes'
 import { Button } from '@components/ui/button'
+import { deepEqual } from '@renderer/utils/compare'
 
 interface FilesPopupFormProps {
   value: FilesType
@@ -41,9 +42,15 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
   }, [value])
 
   const onSubmit: SubmitHandler<FilesType> = (data): void => {
-    let { Size, ...rest } = data
-    Size = Size * BYTES_IN_GB // Convert from GB to Bytes
-    const updated = { ...rest, Size }
+    const { Size, ...rest } = data
+    const sizeInBytes = Size * BYTES_IN_GB // Convert from GB to Bytes
+    const updated = { ...rest, Size: sizeInBytes }
+
+    const defaultsInGB = {
+      ...defaults,
+      Size: Math.round(defaults.Size / BYTES_IN_GB)
+    }
+    if (deepEqual(data, defaultsInGB)) return
     update(updated) // in Bytes
     reset(data) // in GB
   }
@@ -66,24 +73,6 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
             </div>
             <div className="grid gap-2">
               <FormField
-                name="Files"
-                render={({ field }) => (
-                  <FormItem className="grid grid-cols-3 items-center gap-4">
-                    <FormLabel>Clips</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={field.value}
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
-                        onBlur={field.onBlur}
-                        className="col-span-2 h-8"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
                 name="Size"
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-3 items-center gap-4">
@@ -95,6 +84,24 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
                         step={1}
                         value={field.value}
                         onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                        onBlur={field.onBlur}
+                        className="col-span-2 h-8"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="Files"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-3 items-center gap-4">
+                    <FormLabel>Clips</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={field.value}
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
                         onBlur={field.onBlur}
                         className="col-span-2 h-8"
                       />

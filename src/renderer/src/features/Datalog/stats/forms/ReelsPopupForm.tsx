@@ -4,6 +4,7 @@ import { FormControl, FormField, FormItem, Form } from '@components/ui/form'
 import { Textarea } from '@components/ui/textarea'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { Button } from '@components/ui/button'
+import { deepEqual } from '@renderer/utils/compare'
 
 interface ReelsPopupFormProps {
   value: string
@@ -38,6 +39,8 @@ export const ReelsPopupForm: React.FC<ReelsPopupFormProps> = ({
   const onSubmit: SubmitHandler<ReelsType> = (data): void => {
     let array = data.reels.split(/[\s,]+/)
     if (array.length === 1 && array[0] === '') array = []
+    if (deepEqual(array, defaults)) return
+    console.log('will update')
     update(array)
     reset(data)
   }

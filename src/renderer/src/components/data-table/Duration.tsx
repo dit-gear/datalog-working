@@ -1,5 +1,5 @@
 import { useFormContext, useWatch } from 'react-hook-form'
-import { DurationPopupForm } from '../DurationPopupForm'
+import { DurationPopupForm } from '../../features/Datalog/stats/forms/DurationPopupForm'
 import { formatDurationToString } from '@renderer/utils/format-duration'
 
 const DurationCell = ({ row, column, value }) => {
@@ -20,3 +20,7 @@ const DurationCell = ({ row, column, value }) => {
   )
 }
 export default DurationCell
+
+/*
+
+*/

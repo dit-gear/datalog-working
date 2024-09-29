@@ -8,9 +8,9 @@ import { Button } from '@components/ui/button'
 
 interface DurationPopupFormProps {
   value: number
-  defaults: number
+  defaults?: number
   update: (data: number) => void
-  clear: () => void
+  clear?: () => void
   children: React.ReactNode
   sec?: boolean
 }
@@ -36,6 +36,7 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
 
   const onSubmit: SubmitHandler<durationType> = (data): void => {
     const duration = formatDurationToMS(data.hours, data.minutes, sec ? data.seconds : 0)
+    if (duration === defaults) return
     update(duration)
     reset(data)
   }
@@ -93,16 +94,18 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
                 />
               )}
             </div>
-            <Button
-              size="sm"
-              onClick={() => {
-                const { hours, minutes, seconds } = formatDuration(defaults)
-                reset({ hours: hours, minutes: minutes, ...(sec && { seconds: seconds }) })
-                clear()
-              }}
-            >
-              Reset
-            </Button>
+            {clear && defaults && (
+              <Button
+                size="sm"
+                onClick={() => {
+                  const { hours, minutes, seconds } = formatDuration(defaults)
+                  reset({ hours: hours, minutes: minutes, ...(sec && { seconds: seconds }) })
+                  clear?.()
+                }}
+              >
+                Reset
+              </Button>
+            )}
           </div>
         </Form>
       </PopoverContent>

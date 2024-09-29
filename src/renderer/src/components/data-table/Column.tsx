@@ -2,7 +2,7 @@ import { ColumnDef } from '@tanstack/react-table'
 import { RowData } from './types'
 import { formatBytes } from '@renderer/utils/format-bytes'
 import getVolumeName from '@renderer/features/Datalog/utils/get-volume'
-import Cell from './Cell'
+import FormCell from './FormCell'
 import DurationCell from './Duration'
 import { flattenData } from './flattenData'
 
@@ -109,7 +109,7 @@ export const generateColumns = (data: RowData[]): ColumnDef<RowData>[] => {
         }
 
         // Handle other types
-        return <Cell row={row} column={column} totalRows={data.length} />
+        return <FormCell prefix="Clips" row={row} column={column} totalRows={data.length} />
       }
     }
   })

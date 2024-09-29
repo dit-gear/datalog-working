@@ -8,7 +8,7 @@ const calculateWidth = (value = '', minChars = 1, maxChars = 50, extraChars = 2)
   return `${clampedLength + extraChars}ch`
 }
 
-const Cell = ({ row, column, totalRows }) => {
+const FormCell = ({ prefix, row, column, totalRows }) => {
   const { control } = useFormContext()
   const handleKeyDown = (e) => {
     if (e.key === 'Tab') {
@@ -28,11 +28,10 @@ const Cell = ({ row, column, totalRows }) => {
       }
     }
   }
-  //console.log('Field name:', `Clips.${row.id}.${column.id}`);
 
   return (
     <FormField
-      name={`Clips.${row.id}.${column.id}`}
+      name={`${prefix}.${row.id}.${column.id}`}
       control={control}
       render={({ field }) => {
         const inputWidth = calculateWidth(field.value, 5, 60, 4)
@@ -54,4 +53,4 @@ const Cell = ({ row, column, totalRows }) => {
   )
 }
 
-export default Cell
+export default FormCell

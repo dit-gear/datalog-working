@@ -31,10 +31,11 @@ import { CopyType } from './types'
 import { getCopiesFromClips } from './utils/getCopiesFromClips'
 import { PathType } from './types'
 import { DynamicTable } from '@components/data-table/DynamicTable'
-import Reels from './stats/reels'
-import Duration from './stats/duration'
-import Ocf from './stats/ocf'
-import Proxy from './stats/proxy'
+//import Reels from './stats/reels'
+//import Duration from './stats/duration'
+//import Ocf from './stats/ocf'
+//import Proxy from './stats/proxy'
+import StatsPanel from './stats/statspanel'
 import { mergeDirtyValues } from './utils/merge-clips'
 
 interface EntrydialogProps {
@@ -95,6 +96,8 @@ const Entrydialog = ({
 
   const { register, watch, setValue, formState, handleSubmit, reset, control } = form
 
+  console.log('rerendered root')
+
   const onSubmit = (data: DatalogType): void => {
     console.log(data)
     // DISABLED IN TESTING
@@ -124,7 +127,6 @@ const Entrydialog = ({
 
   const handleRemoveCopy = async (paths: PathType[]): Promise<void> => {
     const fullPaths = paths.map((item) => item.full)
-    console.log(fullPaths)
     try {
       const res = await window.api.removeLogPath(fullPaths)
       if (res.success) {
@@ -215,12 +217,7 @@ const Entrydialog = ({
           <DialogDescription>Create a summary of the shooting day</DialogDescription>
           <div>
             <div className="mx-auto max-w-7xl">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Ocf />
-                <Proxy />
-                <Duration />
-                <Reels />
-              </div>
+              <StatsPanel />
             </div>
           </div>
           <div className="flex justify-center">
