@@ -20,7 +20,3 @@ const DurationCell = ({ row, column, value }) => {
   )
 }
 export default DurationCell
-
-/*
-
-*/

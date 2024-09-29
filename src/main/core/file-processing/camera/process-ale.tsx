@@ -99,7 +99,7 @@ async function processALE(filePaths: string[]): Promise<ClipType[]> {
     if (item.duration && item.fps) {
       const FPS = parseFloat(item.fps)
       if (item.duration.includes(':') && !isNaN(FPS)) {
-        result.Duration = timecodeToTime(item.duration, FPS) // Convert timecode to duration in seconds
+        result.Duration = timecodeToTime(item.duration, FPS)
       }
     }
     return result

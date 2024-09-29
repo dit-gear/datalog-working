@@ -3,10 +3,11 @@ import { useFormContext, useWatch } from 'react-hook-form'
 import { ReelsPopupForm } from './forms/ReelsPopupForm'
 import { getReels } from '@renderer/utils/format-reel'
 import Stat from '@components/stat'
+import { ClipType } from '@shared/datalogTypes'
 
 const Reels = () => {
   const { setValue } = useFormContext()
-  const clips = useWatch({ name: 'Clips' }) || []
+  const clips: ClipType[] = useWatch({ name: 'Clips' }) || []
   const fixedReels = useWatch({ name: 'Reels' }) as string[] | undefined
 
   const [value, setValueState] = useState<string[]>([])
@@ -21,7 +22,7 @@ const Reels = () => {
     const computedValue = hasFixedValue ? fixedReels : computedDefaults
     setValueState(computedValue)
 
-    const formattedDisplay = formatReelsDisplayValue(computedValue)
+    const formattedDisplay = formatReelsDisplayValue(hasFixedValue ? fixedReels : clips)
     setDisplayValue(formattedDisplay.displayValue)
   }, [clips, fixedReels])
 
@@ -47,7 +48,7 @@ const getReelsValueFromClips = (clips): string[] => {
   return getReels(clips) || []
 }
 
-const formatReelsDisplayValue = (reels: string[]) => {
+const formatReelsDisplayValue = (reels: string[] | ClipType[]) => {
   if (!reels || reels.length === 0) {
     return { displayValue: null }
   }

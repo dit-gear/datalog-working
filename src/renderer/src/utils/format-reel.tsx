@@ -109,10 +109,9 @@ export function getReels(clips: ClipType[] | string[], options: getReelsOptions 
     }
   }
   const reelsArray = Array.from(reelsSet)
+
   if (!options.grouped) return reelsArray
   const groups = groupReels(reelsArray)
-
-  // Append the count of clips without a Reel
   if (clipsWithoutReel) {
     groups.push(`+ ${clipsWithoutReel} other clip${clipsWithoutReel > 1 ? 's' : ''}`)
   }
