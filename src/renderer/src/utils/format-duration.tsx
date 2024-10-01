@@ -12,7 +12,6 @@ export const formatDuration = (time: number, isMilliseconds: boolean = true): du
 }
 
 export const formatDurationToString = (time: number, isMilliseconds?: boolean): string => {
-  console.log(time)
   const totalSeconds = isMilliseconds ? time / 1000 : time
 
   // If duration is less than 10 seconds, format seconds with one decimal

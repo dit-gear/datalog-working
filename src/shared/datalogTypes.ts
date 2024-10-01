@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { Field, ProjectRootType } from './projectTypes'
 
 const Camera_MetadataZod = z.object({
   Camera_Model: z.string().optional(),
@@ -39,11 +40,11 @@ export const ClipZod = z
     Proxy: ProxyZod.optional()
   })
   .extend(Camera_MetadataZod.shape)
-//.catchall(z.string())
+//.catchall(DynamicKeySchema)
 
 export const Files = z.object({
-  Files: z.number().int().nonnegative().finite(),
-  Size: z.number().nonnegative().finite()
+  Files: z.number().int().nonnegative().finite().optional(),
+  Size: z.number().nonnegative().finite().optional()
 })
 
 export const datalogZod = z.object({
@@ -73,3 +74,52 @@ export type DatalogType = z.infer<typeof datalogZod>
 export type ResponseWithClips =
   | { success: true; clips: ClipType[] }
   | { success: false; error: string; cancelled?: boolean }
+
+// Dynamic fields on Clip
+
+const mapTypeToZod = (field: Field): z.ZodTypeAny | undefined => {
+  switch (field.type) {
+    case 'string':
+      return z.string().optional()
+    case 'list_of_strings':
+      return z.array(z.string()).optional()
+    case 'list_of_field_arrays':
+      return z.array(z.array(z.string())).optional()
+    case 'key-value_object':
+      return z.record(z.string(), z.string().optional()).optional()
+    case 'list_of_mapped_objects':
+      const subfieldobjects: Record<string, z.ZodTypeAny> = {}
+      const { subfields } = field
+      subfields.forEach((subfield) => {
+        subfieldobjects[subfield.value_key] = z.string().optional()
+      })
+      return z.object(subfieldobjects).optional()
+    default:
+      return undefined
+  }
+}
+
+const buildAdditionalFieldsSchema = (project: ProjectRootType) => {
+  const additionalFields: Record<string, z.ZodTypeAny> = {}
+
+  if (project.additional_parsing?.fields) {
+    for (const field of project.additional_parsing.fields) {
+      if (field.type === 'duration') {
+        continue
+      }
+      const zodSchema = mapTypeToZod(field)
+
+      if (zodSchema) {
+        additionalFields[field.value_key] = zodSchema // Add only if schema is defined
+      }
+    }
+  }
+
+  return additionalFields
+}
+
+export const ClipDynamicZod = (project: ProjectRootType): z.ZodObject<any> => {
+  const zodSchema = ClipZod.extend(buildAdditionalFieldsSchema(project)) // Use project here
+  console.log(zodSchema.shape)
+  return zodSchema
+}

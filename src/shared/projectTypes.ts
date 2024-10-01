@@ -12,9 +12,6 @@ const fieldType = z.enum([
 export const primitiveTypesZod = fieldType.exclude(['duration'])
 export const specialTypesZod = fieldType.extract(['duration'])
 
-//export type specialTypes = z.infer<typeof specialTypes>
-//export type primitiveTypes = z.infer<typeof primitiveTypes>
-
 export const delimiters = z.enum([',', ';', '|', ':', '='])
 
 const fileNameRegex = /^[^<>:"/\\|?*\x00-\x1F]*$/
@@ -47,34 +44,6 @@ function validateRegex(pattern: string, path: (string | number)[], ctx: z.Refine
   }
 }
 
-const options = z
-  .object({
-    regex: z
-      .string()
-      .max(100, 'Regex pattern is too long')
-      .refine((pattern) => !/(.*\+.*\+|\*\*|\?\?)/.test(pattern), {
-        message: 'Pattern contains dangerous constructs (e.g., nested quantifiers).'
-      })
-      .refine(
-        (pattern) => {
-          try {
-            new RegExp(pattern)
-            return true
-          } catch (e) {
-            return false
-          }
-        },
-        {
-          message: 'Invalid regular expression syntax.'
-        }
-      )
-      .optional(),
-    primary_delimiter: delimiters.optional(),
-    secondary_delimiter: delimiters.optional(),
-    unit: timeUnits.optional(),
-    fps: z.string().max(80).optional()
-  })
-  .optional()
 const subfields = z.array(z.object({ value_key: z.string().min(1).max(80) })).nonempty()
 
 const value_key = z.string().min(1).max(80)
@@ -299,7 +268,6 @@ export const ProjectRootZod = ProjectSchemaZod.merge(
 
 export const GlobalSchemaZodNullable = GlobalSchemaZod.nullable()
 export type fieldType = z.infer<typeof fieldType>
-export type fieldOptions = z.infer<typeof options>
 export type subFieldsType = z.infer<typeof subfields>
 export type Field = z.infer<typeof field>
 export type additionalParsing = z.infer<typeof additionalParsing>

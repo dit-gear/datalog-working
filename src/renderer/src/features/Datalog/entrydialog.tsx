@@ -11,8 +11,8 @@ import { Input } from '@components/ui/input'
 import { ScrollArea, ScrollBar } from '@components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { useState, useEffect } from 'react'
-import { ClipType, datalogZod, DatalogType } from '@shared/datalogTypes'
-import { useForm } from 'react-hook-form'
+import { ClipType, datalogZod, DatalogType, ClipDynamicZod } from '@shared/datalogTypes'
+import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import DatePicker from '../../components/DatePicker'
 import { ProjectRootType } from '@shared/projectTypes'
@@ -31,12 +31,9 @@ import { CopyType } from './types'
 import { getCopiesFromClips } from './utils/getCopiesFromClips'
 import { PathType } from './types'
 import { DynamicTable } from '@components/data-table/DynamicTable'
-//import Reels from './stats/reels'
-//import Duration from './stats/duration'
-//import Ocf from './stats/ocf'
-//import Proxy from './stats/proxy'
 import StatsPanel from './stats/statspanel'
 import { mergeDirtyValues } from './utils/merge-clips'
+import { removeEmptyFields } from '@renderer/utils/form'
 
 interface EntrydialogProps {
   project: ProjectRootType
@@ -83,23 +80,25 @@ const Entrydialog = ({
       Day: defaultDay,
       Date: formatDate(),
       Unit: project.unit ? project.unit : '',
-      OCF: {},
-      Proxy: {},
-      Duration: 0,
+      OCF: undefined, // {}
+      Proxy: undefined, // {}
+      Duration: undefined,
       Reels: [],
       Copies: [],
       Clips: []
     },
     mode: 'onSubmit',
-    resolver: zodResolver(datalogZod)
+    resolver: zodResolver(ClipDynamicZod(project))
   })
 
   const { register, watch, setValue, formState, handleSubmit, reset, control } = form
 
-  console.log('rerendered root')
+  console.log(formState)
 
-  const onSubmit = (data: DatalogType): void => {
-    console.log(data)
+  const onSubmit: SubmitHandler<DatalogType> = (data): void => {
+    console.log('unclean:', data)
+    //const cleanedData = removeEmptyFields(data)
+    // console.log(cleanedData)
     // DISABLED IN TESTING
     /*window.api.saveEntry(entrytoSave).then((res) => {
       if (res.success) {
@@ -404,7 +403,7 @@ const Entrydialog = ({
         </DialogClose>
         <Button
           variant="default"
-          disabled={!formState.isValid}
+          //disabled={!formState.isValid}
           onClick={() => handleSubmit(onSubmit)()}
         >
           Submit
