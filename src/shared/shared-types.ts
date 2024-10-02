@@ -43,10 +43,7 @@ export type InitialDir = {
   path: Path
 }
 
-export type Response = {
-  success: boolean
-  error?: string
-}
+export type Response = { success: true } | { success: false; error: string }
 
 export type ResponseWithString =
   | { success: true; data: string }

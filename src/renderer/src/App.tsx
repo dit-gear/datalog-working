@@ -14,11 +14,17 @@ function App(): JSX.Element {
   const [project, setProject] = useState<ProjectType>()
   const [logs, setLogs] = useState<DatalogType[]>()
 
-  const handleEntriesLoad = (): void => {
-    window.api.loadEntries().then((entries) => {
-      setLogs(entries)
-      console.log('Entries loaded', entries)
-    })
+  const handleEntriesLoad = async (): Promise<void> => {
+    try {
+      const res = await window.api.loadDatalogs()
+      if (res.success) {
+        setLogs(res.datalogs)
+      } else {
+        console.error(res.error)
+      }
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const handleProjectLoad = (project: ProjectType): void => {

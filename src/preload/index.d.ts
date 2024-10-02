@@ -4,7 +4,6 @@ import {
   ProjectToUpdate,
   UpdateProjectResult,
   CreateNewProjectResult,
-  saveEntryResult,
   OfflineFolderType,
   CopyDestination,
   InitialDir,
@@ -13,7 +12,12 @@ import {
   Response,
   ResponseWithString
 } from '@shared/shared-types'
-import { ClipType, ResponseWithClips } from '@shared/datalogTypes'
+import {
+  ClipType,
+  DatalogType,
+  ResponseWithClips,
+  ResponseWithDatalogs
+} from '@shared/datalogTypes'
 
 declare global {
   interface Window {
@@ -25,8 +29,8 @@ declare global {
       onProjectLoaded: (callback: (project: ProjectType) => void) => void
       updateProject: (project: ProjectToUpdate) => Promise<UpdateProjectResult>
       getFolderPath: () => Promise<ResponseWithString>
-      saveEntry: (entry: entryType) => Promise<saveEntryResult>
-      loadEntries: () => Promise<entryType[]>
+      updateDatalog: (datalog: DatalogType) => Promise<Response>
+      loadDatalogs: () => Promise<ResponseWithDatalogs>
       findOcf: () => Promise<ResponseWithClips>
       removeLogPath: (paths: string[]) => Promise<ResponseWithClips>
       showProgress: (show: boolean, progress: number) => void

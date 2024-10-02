@@ -11,7 +11,7 @@ import { Input } from '@components/ui/input'
 import { ScrollArea, ScrollBar } from '@components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { useState, useEffect } from 'react'
-import { ClipType, datalogZod, DatalogType, ClipDynamicZod } from '@shared/datalogTypes'
+import { ClipType, datalogZod, DatalogType, DatalogDynamicZod } from '@shared/datalogTypes'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import DatePicker from '../../components/DatePicker'
@@ -88,28 +88,31 @@ const Entrydialog = ({
       Clips: []
     },
     mode: 'onSubmit',
-    resolver: zodResolver(ClipDynamicZod(project))
+    resolver: zodResolver(DatalogDynamicZod(project, { transformDurationToReadable: true }))
   })
 
   const { register, watch, setValue, formState, handleSubmit, reset, control } = form
 
   console.log(formState)
 
-  const onSubmit: SubmitHandler<DatalogType> = (data): void => {
+  const onSubmit: SubmitHandler<DatalogType> = async (data): Promise<void> => {
     console.log('unclean:', data)
-    //const cleanedData = removeEmptyFields(data)
-    // console.log(cleanedData)
-    // DISABLED IN TESTING
-    /*window.api.saveEntry(entrytoSave).then((res) => {
+    const cleanedData = removeEmptyFields(data) as DatalogType
+    try {
+      const res = await window.api.updateDatalog(cleanedData)
       if (res.success) {
         toast({ description: 'Data saved' })
         reset()
         refetch()
         setOpen(false)
       } else {
-        toast({ description: 'There was an issue saving the entry' })
+        console.error(res.error)
+        toast({ description: `There was an issue saving the entry: ${res.error}` })
       }
-    })*/
+    } catch (error) {
+      console.error(error)
+      toast({ description: 'There was an issue saving the entry' })
+    }
   }
 
   const updateClips = (newClips: ClipType[], setcopies = false) => {

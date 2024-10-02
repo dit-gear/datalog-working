@@ -103,7 +103,7 @@ function parseListOfStrings(field: ListOfStringsFieldType, row, dataRow): string
   const value = row[column] ?? ''
 
   if (delimiter !== undefined) {
-    return (dataRow[value_key] = value.split(delimiter))
+    return (dataRow[value_key] = value.split(delimiter).map((item: string) => item.trim()))
   } else {
     // Define common separators
     const separators = [',', ';', '|', '\t', ' ', ':']
@@ -135,7 +135,7 @@ function parseListOfStrings(field: ListOfStringsFieldType, row, dataRow): string
     if (maxCount === 0) {
       return (dataRow[value_key] = [value])
     } else {
-      return (dataRow[value_key] = value.split(maxSeparator))
+      return (dataRow[value_key] = value.split(maxSeparator).map((item: string) => item.trim()))
     }
   }
 }

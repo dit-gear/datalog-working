@@ -75,6 +75,10 @@ export type ResponseWithClips =
   | { success: true; clips: ClipType[] }
   | { success: false; error: string; cancelled?: boolean }
 
+export type ResponseWithDatalogs =
+  | { success: true; datalogs: DatalogType[] }
+  | { success: false; error: string }
+
 // Dynamic fields on Clip
 
 const mapTypeToZod = (field: Field): z.ZodTypeAny | undefined => {
@@ -93,7 +97,7 @@ const mapTypeToZod = (field: Field): z.ZodTypeAny | undefined => {
       subfields.forEach((subfield) => {
         subfieldobjects[subfield.value_key] = z.string().optional()
       })
-      return z.object(subfieldobjects).optional()
+      return z.array(z.object(subfieldobjects)).optional()
     default:
       return undefined
   }
@@ -119,7 +123,81 @@ const buildAdditionalFieldsSchema = (project: ProjectRootType) => {
 }
 
 export const ClipDynamicZod = (project: ProjectRootType): z.ZodObject<any> => {
-  const zodSchema = ClipZod.extend(buildAdditionalFieldsSchema(project)) // Use project here
-  console.log(zodSchema.shape)
+  const zodSchema = ClipZod.extend(buildAdditionalFieldsSchema(project))
   return zodSchema
+}
+
+function msToReadable(ms: number): string {
+  const hours = Math.floor(ms / (1000 * 60 * 60))
+  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60))
+  const seconds = Math.floor((ms % (1000 * 60)) / 1000)
+  const milliseconds = ms % 1000
+
+  return `${String(hours)}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`
+}
+
+function readableToMs(readable: string): number {
+  const [time, ms = '0'] = readable.split('.')
+  const [hours, minutes, seconds] = time.split(':').map(Number)
+  return hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000 + Number(ms.padEnd(3, '0'))
+}
+
+interface DatalogDynamicZodOptions {
+  transformDurationToReadable?: boolean
+  transformDurationToMs?: boolean
+}
+
+export const DatalogDynamicZod = (
+  project: ProjectRootType | undefined,
+  { transformDurationToReadable, transformDurationToMs }: DatalogDynamicZodOptions = {}
+): z.ZodObject<any> => {
+  let datalogBase = datalogZod as z.ZodObject<any>
+
+  const getTransformedClipSchema = () => {
+    let transformedClipZod = project ? ClipDynamicZod(project) : (ClipZod as z.ZodObject<any>)
+    if (transformDurationToReadable) {
+      transformedClipZod = transformedClipZod.omit({ Duration: true }).extend({
+        Duration: z
+          .number()
+          .transform((val) => msToReadable(val))
+          .optional()
+      })
+    } else if (transformDurationToMs) {
+      transformedClipZod = transformedClipZod.omit({ Duration: true }).extend({
+        Duration: z
+          .string()
+          .transform((val) => readableToMs(val))
+          .optional()
+      })
+    }
+    return transformedClipZod
+  }
+
+  // Apply duration transformations
+  if (transformDurationToReadable) {
+    datalogBase = datalogBase.omit({ Duration: true }).extend({
+      Duration: z
+        .number()
+        .transform((val) => msToReadable(val))
+        .optional()
+    })
+  } else if (transformDurationToMs) {
+    datalogBase = datalogBase.omit({ Duration: true }).extend({
+      Duration: z
+        .string()
+        .transform((val) => readableToMs(val))
+        .optional()
+    })
+  }
+
+  // Apply project-specific transformations
+  if (project) {
+    const ClipSchema = getTransformedClipSchema()
+    //const ClipSchema = ClipDynamicZod(project)
+    datalogBase = datalogBase.omit({ Clips: true }).extend({
+      Clips: z.array(ClipSchema).optional()
+    })
+  }
+
+  return datalogBase
 }

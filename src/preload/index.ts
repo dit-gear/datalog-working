@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import { LoadedFile, DirectoryFile } from '../shared/shared-types'
+import { DatalogType } from '@shared/datalogTypes'
 
 // Custom APIs for renderer
 const api = {}
@@ -24,8 +25,8 @@ if (process.contextIsolated) {
       createNewProject: (projectName) => ipcRenderer.invoke('create-new-project', projectName),
       updateProject: (project) => ipcRenderer.invoke('update-project', project),
       getFolderPath: () => ipcRenderer.invoke('getFolderPath'),
-      saveEntry: (entry) => ipcRenderer.invoke('save-entry', entry),
-      loadEntries: () => ipcRenderer.invoke('load-entries'),
+      updateDatalog: (datalog: DatalogType) => ipcRenderer.invoke('update-datalog', datalog),
+      loadDatalogs: () => ipcRenderer.invoke('load-datalogs'),
       generatePdf: (docDefinition, filepath) =>
         ipcRenderer.send('generate-pdf', docDefinition, filepath),
       onPdfGenerated: (callback) => ipcRenderer.on('pdf-generated', callback),
