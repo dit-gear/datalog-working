@@ -1,7 +1,7 @@
 type FormatBytesOptions = {
   asTuple?: boolean
 }
-export function formatBytes(bytes: number, options?: { asTuple: true }): [number, string]
+export function formatBytes(bytes: number, options: { asTuple: true }): [number, string]
 export function formatBytes(bytes: number, options?: { asTuple?: false }): string
 export function formatBytes(
   bytes: number,

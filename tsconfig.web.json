@@ -5,9 +5,9 @@
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.tsx",
     "src/preload/*.d.ts",
-    "src/shared/*.ts",
-    "src/main/core/app-state/**/*.tsx"
-  ],
+    "src/shared/**/*.ts",
+    "src/main/core/app-state/state.tsx"
+],
   "compilerOptions": {
     "composite": true,
     "jsx": "react-jsx",

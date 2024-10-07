@@ -1,4 +1,4 @@
-import { ClipType } from '@shared/datalogTypes'
+import { ClipType } from '../datalogTypes'
 
 type ReelInfo = {
   reel: string
@@ -88,7 +88,7 @@ function groupReels(reelsArray: string[]): string[] {
   return Reels
 }
 
-type getReelsOptions = {
+export type getReelsOptions = {
   grouped?: boolean
 }
 

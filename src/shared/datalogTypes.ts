@@ -40,7 +40,6 @@ export const ClipZod = z
     Proxy: ProxyZod.optional()
   })
   .extend(Camera_MetadataZod.shape)
-//.catchall(DynamicKeySchema)
 
 export const Files = z.object({
   Files: z.number().int().nonnegative().finite().optional(),
@@ -147,10 +146,12 @@ interface DatalogDynamicZodOptions {
   transformDurationToMs?: boolean
 }
 
-export const DatalogDynamicZod = (
+type DatalogZodShape = typeof datalogZod extends z.ZodObject<infer S> ? S : never
+
+export const DatalogDynamicZod = <T extends Record<string, any>>(
   project: ProjectRootType | undefined,
   { transformDurationToReadable, transformDurationToMs }: DatalogDynamicZodOptions = {}
-): z.ZodObject<any> => {
+): z.ZodObject<z.ZodRawShape & T> => {
   let datalogBase = datalogZod as z.ZodObject<any>
 
   const getTransformedClipSchema = () => {
@@ -190,14 +191,25 @@ export const DatalogDynamicZod = (
     })
   }
 
-  // Apply project-specific transformations
   if (project) {
     const ClipSchema = getTransformedClipSchema()
-    //const ClipSchema = ClipDynamicZod(project)
     datalogBase = datalogBase.omit({ Clips: true }).extend({
       Clips: z.array(ClipSchema).optional()
     })
   }
 
-  return datalogBase
+  return datalogBase as z.ZodObject<z.ZodRawShape & T>
 }
+
+const reelsOptions = z.object({ grouped: z.boolean().optional() }).optional()
+
+export type DatalogDynamicType = DatalogType & Record<string, any>
+const datalogWithMethods = datalogZod.extend({
+  getOCFFiles: z.function().returns(z.number()),
+  getOCFSize: z.function().returns(z.number()),
+  getProxyFiles: z.function().returns(z.number()),
+  getProxySize: z.function().returns(z.number()),
+  getDuration: z.function().returns(z.number()),
+  getReels: z.function().args(reelsOptions).returns(z.array(z.string()))
+})
+export type DatalogWithMethods = z.infer<typeof datalogWithMethods>

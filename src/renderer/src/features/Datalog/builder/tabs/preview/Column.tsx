@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { RowData } from './types'
-import { formatBytes } from '@renderer/utils/format-bytes'
+import { formatBytes } from '@shared/utils/format-bytes'
 import getVolumeName from '@renderer/features/Datalog/utils/get-volume'
 import FormCell from './FormCell'
 import DurationCell from './Duration'

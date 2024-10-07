@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogTrigger } from '@components/ui/dialog'
-import { entryType } from '@shared/shared-types'
+import { DatalogType } from '@shared/datalogTypes'
 import { ProjectRootType } from '@shared/projectTypes'
 import { Button } from '@components/ui/button'
 import { Plus } from 'lucide-react'
-import Entrydialog from './entrydialog'
+import Builderdialog from './builderDialog'
 
 interface EntrydialogProps {
   project: ProjectRootType
-  previousEntries?: entryType[]
+  previousEntries?: DatalogType[]
   refetch: () => void
 }
 
-const Entrydialogtrigger = ({
+const BuilderdialogTrigger = ({
   project,
   previousEntries,
   refetch
@@ -28,7 +28,7 @@ const Entrydialogtrigger = ({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[80vw] h-[90vh]">
         {open && (
-          <Entrydialog
+          <Builderdialog
             project={project}
             previousEntries={previousEntries}
             setOpen={setOpen}
@@ -40,4 +40,4 @@ const Entrydialogtrigger = ({
   )
 }
 
-export default Entrydialogtrigger
+export default BuilderdialogTrigger

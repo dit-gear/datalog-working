@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { FilesType } from '@shared/datalogTypes'
 import { FilesPopupForm } from './forms/FilesPopupForm'
 import { useFormContext, useWatch } from 'react-hook-form'
-import { formatBytes } from '@renderer/utils/format-bytes'
+import { formatBytes } from '@shared/utils/format-bytes'
 import Stat from '@components/stat'
 
 const Ocf = () => {
@@ -55,7 +55,7 @@ const getOcfValueFromClips = (clips): FilesType => {
 }
 
 const formatOcfDisplayValue = (value: FilesType) => {
-  if (!value || value.Files === 0) {
+  if (!value || value.Files === 0 || !value.Size) {
     return { displayValue: null }
   }
   const [sizeValue, sizeUnit] = formatBytes(value.Size, { asTuple: true })

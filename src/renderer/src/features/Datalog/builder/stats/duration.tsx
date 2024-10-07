@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { DurationPopupForm } from './forms/DurationPopupForm'
 import Stat from '@components/stat'
-import { formatDuration } from '@renderer/utils/format-duration'
+import { formatDuration } from '@shared/utils/format-duration'
 
 const Duration = () => {
   const { setValue } = useFormContext()

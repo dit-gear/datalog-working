@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { ReelsPopupForm } from './forms/ReelsPopupForm'
-import { getReels } from '@renderer/utils/format-reel'
+import { getReels } from '@shared/utils/format-reel'
 import Stat from '@components/stat'
 import { ClipType } from '@shared/datalogTypes'
 

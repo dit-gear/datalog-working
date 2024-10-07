@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react'
 import { DatalogType } from '@shared/datalogTypes'
 import { ProjectType } from '@shared/projectTypes'
 import NewProjectDialog from './components/newProjectDialog'
-import Entrydialogtrigger from './features/Datalog/entrydialogtrigger'
+import BuilderdialogTrigger from './features/Datalog/builder/builderDialogTrigger'
 import Settings from './features/Settings/Settings'
-import Datalogtable from './components/datalogtable'
+import Table from './features/Datalog/table/Table'
 import ProgressDialog from './components/progressdialog'
 import { Toaster } from '@components/ui/toaster'
 import { Button } from '@components/ui/button'
 import { FolderSync } from 'lucide-react'
+import NestedTableExample from './features/Datalog/testtable'
 
 function App(): JSX.Element {
   const [project, setProject] = useState<ProjectType>()
@@ -49,7 +50,7 @@ function App(): JSX.Element {
         <div>
           {project?.data ? (
             <div className="flex justify-end gap-4">
-              <Entrydialogtrigger
+              <BuilderdialogTrigger
                 project={project.data}
                 previousEntries={logs}
                 refetch={handleEntriesLoad}
@@ -63,7 +64,8 @@ function App(): JSX.Element {
         </div>
         {logs && (
           <div className="grow">
-            <Datalogtable log={logs} />
+            <Table logs={logs} />
+            <NestedTableExample />
           </div>
         )}
 

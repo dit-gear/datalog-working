@@ -1,7 +1,7 @@
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import { FormControl, FormField, FormItem, FormLabel, Form } from '@components/ui/form'
 import { Input } from '@components/ui/input'
-import { formatDuration, formatDurationToMS } from '@renderer/utils/format-duration'
+import { formatDuration, formatDurationToMS } from '@shared/utils/format-duration'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { durationType } from '@shared/shared-types'
 import { Button } from '@components/ui/button'

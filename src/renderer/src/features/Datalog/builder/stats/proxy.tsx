@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { FilesType } from '@shared/datalogTypes'
 import { FilesPopupForm } from './forms/FilesPopupForm'
-import { formatBytes } from '@renderer/utils/format-bytes'
+import { formatBytes } from '@shared/utils/format-bytes'
 import Stat from '@components/stat'
 
 const Proxy = () => {

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import DataTable from './DataTable'
+import DataTable from '../../../../../components/DataTable'
 import { useFieldArray } from 'react-hook-form'
 import { flattenData } from './flattenData'
 import { generateColumns } from './Column'
