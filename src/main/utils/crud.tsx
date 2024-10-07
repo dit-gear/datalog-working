@@ -2,16 +2,15 @@ import { shell } from 'electron'
 import { Response } from '../../shared/shared-types'
 import fs from 'fs'
 import logger from '../core/logger'
+import Errorhandler from './Errorhandler'
 
 export async function moveFileToTrash(filePath: string): Promise<Response> {
-  return shell
-    .trashItem(filePath)
-    .then(() => {
-      return { success: true }
-    })
-    .catch((error) => {
-      return { success: false, error: (error as Error).message }
-    })
+  try {
+    await shell.trashItem(filePath)
+    return { success: true }
+  } catch (error) {
+    return Errorhandler(error)
+  }
 }
 
 export function ensureDirectoryExists(dirPath: string): void {

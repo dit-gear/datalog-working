@@ -11,8 +11,9 @@ import {
 import { Checkbox } from '@components/ui/checkbox'
 import { MoreHorizontal, Trash2, Pencil, FileDown } from 'lucide-react'
 import { Button } from '@components/ui/button'
+import { DatalogType } from '@shared/datalogTypes'
 
-export const Columns: ColumnDef<LogSum>[] = [
+export const Columns = (handleDelete: (datalog: DatalogType) => void): ColumnDef<LogSum>[] => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -69,6 +70,7 @@ export const Columns: ColumnDef<LogSum>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
+      const datalog = row.original.raw
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -94,7 +96,10 @@ export const Columns: ColumnDef<LogSum>[] = [
               <span>Datalog</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-800 hover:text-red-900">
+            <DropdownMenuItem
+              className="text-red-800 hover:text-red-900"
+              onClick={() => handleDelete(datalog)}
+            >
               <Trash2 className="mr-2 h-4 w-4" />
               <span>Delete</span>
             </DropdownMenuItem>

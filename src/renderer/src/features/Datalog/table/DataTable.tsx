@@ -24,34 +24,6 @@ const DataTable = <TData extends object>({
     onRowSelectionChange: setRowSelection
   })
 
-  /*const toggleRowSelection = (rowIndex: number, event: React.MouseEvent) => {
-    const rowId = table.getRowModel().rows[rowIndex].id
-    let currentSelection = { ...rowSelection }
-
-    if (event.shiftKey && lastSelectedRowIndex !== null) {
-      // Handle Shift + Click: select range of rows between last selected and clicked row
-      const start = Math.min(lastSelectedRowIndex, rowIndex)
-      const end = Math.max(lastSelectedRowIndex, rowIndex)
-
-      for (let i = start; i <= end; i++) {
-        const rowIdToSelect = table.getRowModel().rows[i].id
-        currentSelection[rowIdToSelect] = true // Mark row as selected
-      }
-    } else if (event.ctrlKey || event.metaKey) {
-      // Handle Ctrl + Click (or Command on Mac): toggle the individual row
-      if (currentSelection[rowId]) {
-        delete currentSelection[rowId] // Deselect the row
-      } else {
-        currentSelection[rowId] = true // Select the row
-      }
-    } else {
-      // Simple Click: select only the clicked row (deselect all others)
-      //currentSelection = { [rowId]: true }
-    }
-
-    setRowSelection(currentSelection) // Update selection state
-    setLastSelectedRowIndex(rowIndex) // Remember the last selected row for Shift + Click
-  }*/
   const toggleRowSelection = (rowIndex: number, event: React.MouseEvent) => {
     event.preventDefault() // Prevent text selection when using Shift or Ctrl/Cmd clicks
 

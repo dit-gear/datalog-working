@@ -64,7 +64,7 @@ function App(): JSX.Element {
         </div>
         {logs && (
           <div className="grow">
-            <Table logs={logs} />
+            <Table logs={logs} refetch={handleEntriesLoad} />
             <NestedTableExample />
           </div>
         )}

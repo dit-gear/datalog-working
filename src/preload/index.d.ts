@@ -30,6 +30,7 @@ declare global {
       updateProject: (project: ProjectToUpdate) => Promise<UpdateProjectResult>
       getFolderPath: () => Promise<ResponseWithString>
       updateDatalog: (datalog: DatalogType) => Promise<Response>
+      deleteDatalog: (datalog: DatalogType) => Promise<Response>
       loadDatalogs: () => Promise<ResponseWithDatalogs>
       findOcf: () => Promise<ResponseWithClips>
       removeLogPath: (paths: string[]) => Promise<ResponseWithClips>
