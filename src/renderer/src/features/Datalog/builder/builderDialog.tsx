@@ -28,6 +28,7 @@ import Name from './tabs/name'
 interface BuilderdialogProps {
   project: ProjectRootType
   previousEntries?: DatalogType[]
+  selected?: DatalogType
   setOpen: (value: boolean) => void
   refetch: () => void
 }
@@ -35,10 +36,13 @@ interface BuilderdialogProps {
 const Builderdialog = ({
   project,
   previousEntries,
+  selected,
   setOpen,
   refetch
 }: BuilderdialogProps): JSX.Element => {
-  const [copies, setCopies] = useState<CopyType[]>([])
+  const [copies, setCopies] = useState<CopyType[]>(
+    selected && selected.Clips ? getCopiesFromClips(selected.Clips) : []
+  )
 
   const { toast } = useToast()
 
@@ -66,16 +70,16 @@ const Builderdialog = ({
 
   const form = useForm({
     defaultValues: {
-      Folder: defaultFolder(),
-      Day: defaultDay,
-      Date: formatDate(),
-      Unit: project.unit ? project.unit : '',
-      OCF: undefined, // {}
-      Proxy: undefined, // {}
-      Duration: undefined,
-      Reels: [],
-      Copies: [],
-      Clips: []
+      Folder: selected ? selected.Folder : defaultFolder(),
+      Day: selected ? selected.Day : defaultDay,
+      Date: selected ? selected.Date : formatDate(),
+      Unit: selected ? selected.Unit : project.unit ? project.unit : '',
+      OCF: selected ? selected.OCF : undefined,
+      Proxy: selected ? selected.Proxy : undefined, // {}
+      Duration: selected ? selected.Duration : undefined,
+      Reels: selected ? selected.Reels : [],
+      Copies: selected ? selected.Copies : [],
+      Clips: selected ? selected.Clips : []
     },
     mode: 'onSubmit',
     resolver: zodResolver(DatalogDynamicZod(project, { transformDurationToReadable: true }))

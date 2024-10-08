@@ -16,7 +16,7 @@ const DurationCell = ({ row, column, value }) => {
   return (
     <DurationPopupForm value={value} update={update} sec>
       <span className="whitespace-nowrap">
-        {formatDuration(valueInSync, { asString: true, unit: 's' })}
+        {formatDuration(valueInSync, { asString: true, unit: 'ms' })}
       </span>
     </DurationPopupForm>
   )

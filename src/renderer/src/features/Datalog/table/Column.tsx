@@ -13,7 +13,10 @@ import { MoreHorizontal, Trash2, Pencil, FileDown } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import { DatalogType } from '@shared/datalogTypes'
 
-export const Columns = (handleDelete: (datalog: DatalogType) => void): ColumnDef<LogSum>[] => [
+export const Columns = (handlers: {
+  handleDelete: (datalog: DatalogType) => void
+  handleEdit: (datalog: DatalogType) => void
+}): ColumnDef<LogSum>[] => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -82,7 +85,7 @@ export const Columns = (handleDelete: (datalog: DatalogType) => void): ColumnDef
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handlers.handleEdit(datalog)}>
               <Pencil className="mr-2 h-4 w-4" />
               <span>Edit</span>
             </DropdownMenuItem>
@@ -98,7 +101,7 @@ export const Columns = (handleDelete: (datalog: DatalogType) => void): ColumnDef
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-red-800 hover:text-red-900"
-              onClick={() => handleDelete(datalog)}
+              onClick={() => handlers.handleDelete(datalog)}
             >
               <Trash2 className="mr-2 h-4 w-4" />
               <span>Delete</span>

@@ -1,15 +1,17 @@
+import React, { useMemo } from 'react'
 import DataTable from './DataTable'
 import { getOCFSize, getProxySize, getDuration, getReels } from '@shared/utils/datalog-methods'
 import { DatalogType } from '@shared/datalogTypes'
 import { LogSum } from './types'
 import { Columns } from './Column'
 
-interface tableprops {
+interface TableProps {
   logs: DatalogType[]
   refetch: () => void
+  handleEdit: (datalog: DatalogType) => void
 }
 
-const Table = ({ logs, refetch }: tableprops) => {
+const Table: React.FC<TableProps> = React.memo(({ logs, refetch, handleEdit }) => {
   const handleDelete = async (datalog: DatalogType) => {
     try {
       const res = await window.api.deleteDatalog(datalog)
@@ -22,6 +24,8 @@ const Table = ({ logs, refetch }: tableprops) => {
       console.error(error)
     }
   }
+
+  const handlers = useMemo(() => ({ handleDelete, handleEdit }), [handleDelete, handleEdit])
 
   const DatalogRows = (logs: DatalogType[]): LogSum[] => {
     return logs.map((data) => ({
@@ -37,7 +41,9 @@ const Table = ({ logs, refetch }: tableprops) => {
     }))
   }
 
-  return <DataTable columns={Columns(handleDelete)} data={DatalogRows(logs)} />
-}
+  const columns = useMemo(() => Columns(handlers), [handlers])
+
+  return <DataTable columns={columns} data={DatalogRows(logs)} />
+})
 
 export default Table

@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { DatalogType } from '@shared/datalogTypes'
 import { ProjectType } from '@shared/projectTypes'
 import NewProjectDialog from './components/newProjectDialog'
 import BuilderdialogTrigger from './features/Datalog/builder/builderDialogTrigger'
+import Builderdialog from './features/Datalog/builder/builderDialog'
+import { Dialog, DialogContent, DialogTrigger } from '@components/ui/dialog'
+import { Plus } from 'lucide-react'
 import Settings from './features/Settings/Settings'
 import Table from './features/Datalog/table/Table'
 import ProgressDialog from './components/progressdialog'
@@ -14,6 +17,8 @@ import NestedTableExample from './features/Datalog/testtable'
 function App(): JSX.Element {
   const [project, setProject] = useState<ProjectType>()
   const [logs, setLogs] = useState<DatalogType[]>()
+  const [logEdit, setLogEdit] = useState<DatalogType>()
+  const [builderOpen, setBuilderOpen] = useState<boolean>(false)
 
   const handleEntriesLoad = async (): Promise<void> => {
     try {
@@ -34,6 +39,16 @@ function App(): JSX.Element {
     handleEntriesLoad()
   }
 
+  const handleBuilderClose = (open) => {
+    if (logEdit) setLogEdit(undefined)
+    setBuilderOpen(open)
+  }
+
+  const handleItemToEdit = useCallback((datalog: DatalogType): void => {
+    setLogEdit(datalog)
+    setBuilderOpen(true)
+  }, [])
+
   useEffect(() => {
     window.api.onProjectLoaded((project) => {
       handleProjectLoad(project)
@@ -50,11 +65,25 @@ function App(): JSX.Element {
         <div>
           {project?.data ? (
             <div className="flex justify-end gap-4">
-              <BuilderdialogTrigger
-                project={project.data}
-                previousEntries={logs}
-                refetch={handleEntriesLoad}
-              />
+              <Dialog open={builderOpen} onOpenChange={handleBuilderClose}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    New Shooting Day
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[80vw] h-[90vh]">
+                  {builderOpen && (
+                    <Builderdialog
+                      project={project.data}
+                      previousEntries={logs}
+                      selected={logEdit}
+                      setOpen={setBuilderOpen}
+                      refetch={handleEntriesLoad}
+                    />
+                  )}
+                </DialogContent>
+              </Dialog>
               <Button variant="secondary" size="icon">
                 <FolderSync className="h-4 w-4" />
               </Button>
@@ -64,7 +93,7 @@ function App(): JSX.Element {
         </div>
         {logs && (
           <div className="grow">
-            <Table logs={logs} refetch={handleEntriesLoad} />
+            <Table logs={logs} refetch={handleEntriesLoad} handleEdit={handleItemToEdit} />
             <NestedTableExample />
           </div>
         )}
