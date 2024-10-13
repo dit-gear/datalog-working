@@ -39,7 +39,7 @@ export const Name = ({ project }: Nameprops) => {
 
   return (
     <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-      <dt className="text-sm font-medium leading-6 text-white">Entry Naming</dt>
+      <dt className="text-sm font-medium leading-6 text-white"></dt>
       <dd className="mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0">
         <div className="flex gap-10 mb-10">
           <FormField
@@ -97,7 +97,7 @@ export const Name = ({ project }: Nameprops) => {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="folder">Entry Name</Label>
+          <Label htmlFor="folder">Log Name</Label>
           <div className="flex w-full max-w-sm items-center space-x-2">
             <Input
               id="folder"

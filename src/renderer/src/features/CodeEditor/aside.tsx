@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef } from 'react'
 import { Tabs, TabsList, TabsTrigger } from '@components/ui/tabs'
 import NewTemplateDialog, { NewTemplateDialogHandle } from './newTemplateDialog'
 import EditorDirectory from './editorDirectory'

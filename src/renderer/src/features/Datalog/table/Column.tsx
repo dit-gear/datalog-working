@@ -92,11 +92,11 @@ export const Columns = (handlers: {
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <FileDown className="mr-2 h-4 w-4" />
-              <span>QC Report</span>
+              <span>Export</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <FileDown className="mr-2 h-4 w-4" />
-              <span>Datalog</span>
+              <span>Send</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

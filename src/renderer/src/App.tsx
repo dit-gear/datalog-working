@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { DatalogType } from '@shared/datalogTypes'
 import { ProjectType } from '@shared/projectTypes'
 import NewProjectDialog from './components/newProjectDialog'
-import BuilderdialogTrigger from './features/Datalog/builder/builderDialogTrigger'
 import Builderdialog from './features/Datalog/builder/builderDialog'
 import { Dialog, DialogContent, DialogTrigger } from '@components/ui/dialog'
 import { Plus } from 'lucide-react'
@@ -12,7 +11,6 @@ import ProgressDialog from './components/progressdialog'
 import { Toaster } from '@components/ui/toaster'
 import { Button } from '@components/ui/button'
 import { FolderSync } from 'lucide-react'
-import NestedTableExample from './features/Datalog/testtable'
 
 function App(): JSX.Element {
   const [project, setProject] = useState<ProjectType>()
@@ -94,7 +92,6 @@ function App(): JSX.Element {
         {logs && (
           <div className="grow">
             <Table logs={logs} refetch={handleEntriesLoad} handleEdit={handleItemToEdit} />
-            <NestedTableExample />
           </div>
         )}
 
