@@ -269,7 +269,7 @@ const Editor = ({ loadedFile }: EditorProps) => {
   }
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="min-h-[200px] w-full border">
+    <ResizablePanelGroup direction="horizontal" className="min-h-[200px] w-full border-x">
       <ResizablePanel className="flex flex-col m-2 gap-2">
         <div className="flex items-center justify-between">
           <span className="font-semibold">Editor</span>

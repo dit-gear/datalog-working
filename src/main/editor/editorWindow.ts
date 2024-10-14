@@ -17,7 +17,10 @@ export function createEditorWindow(): void {
   editorWindow = new BrowserWindow({
     width: 1600,
     height: 1000,
+    backgroundColor: '#090909',
     autoHideMenuBar: true,
+    frame: false,
+    titleBarStyle: 'hiddenInset',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

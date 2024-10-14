@@ -54,7 +54,7 @@ function App(): JSX.Element {
   }, [])
 
   return (
-    <>
+    <div className="border-t">
       <div className="container flex flex-col mx-auto w-full h-dvh sm:px-6 lg:px-8 bg-zinc-950">
         <div>
           <h1 className="text-2xl mt-2 font-bold text-white">Datalog.email</h1>
@@ -115,7 +115,7 @@ function App(): JSX.Element {
       </div>
       <ProgressDialog />
       <Toaster />
-    </>
+    </div>
   )
 }
 

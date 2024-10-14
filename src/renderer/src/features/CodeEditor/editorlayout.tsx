@@ -4,7 +4,7 @@ import { LoadedFileProvider } from './loadedFileContext'
 
 const Editorlayout = (): JSX.Element => {
   return (
-    <div className="h-dvh">
+    <div className="h-dvh border-t">
       <div className="flex h-full flex-row gap-2">
         <LoadedFileProvider>
           <Aside />

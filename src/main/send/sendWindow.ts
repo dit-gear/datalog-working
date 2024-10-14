@@ -14,6 +14,7 @@ export function createSendWindow(): void {
   sendWindow = new BrowserWindow({
     width: 1200,
     height: 760,
+    backgroundColor: '#090909',
     autoHideMenuBar: true,
     minimizable: false,
     maximizable: false,

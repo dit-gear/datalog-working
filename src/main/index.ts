@@ -21,8 +21,11 @@ export function createWindow(loadedProject: ProjectType): void {
   mainWindow = new BrowserWindow({
     width: 1600,
     height: 1000,
+    backgroundColor: '240 10% 3.9%',
     show: false,
     autoHideMenuBar: true,
+    frame: false,
+    titleBarStyle: 'hiddenInset',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

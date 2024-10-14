@@ -100,7 +100,7 @@ const Send = () => {
                 value="email"
                 className="border-t border-l border-r rounded-t-lg px-4 pb-2"
               >
-                Email
+                Email Preview
               </TabsTrigger>
               <TabsTrigger
                 value="datalog.pdf"
