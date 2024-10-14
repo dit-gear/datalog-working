@@ -14,11 +14,11 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', {
       onRootPathChanged: (callback) =>
-        ipcRenderer.on('root-path-changed', (event, dirFolderPath) => {
+        ipcRenderer.on('root-path-changed', (_, dirFolderPath) => {
           callback(dirFolderPath)
         }),
       onProjectLoaded: (callback) =>
-        ipcRenderer.on('project-loaded', (event, project) => {
+        ipcRenderer.on('project-loaded', (_, project) => {
           callback(project)
         }),
       onNewProjectClicked: (callback) => ipcRenderer.on('new-project', callback),

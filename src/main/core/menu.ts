@@ -3,6 +3,7 @@ import { getMainWindow } from '../index'
 import { handleChangeProject } from './project/manager'
 import { handleRootDirChange } from './app-state/updater'
 import { createEditorWindow } from '../editor/editorWindow'
+import { createSendWindow } from '../send/sendWindow'
 
 type ProjectItem = {
   project: string
@@ -99,14 +100,7 @@ export const menuTemplate = (projects: ProjectItem[] | undefined): MenuItemConst
     submenu: [{ label: 'Launch Template Editor', click: (): void => createEditorWindow() }]
   },
   {
-    label: 'Edit',
-    submenu: [
-      { label: 'Undo', role: 'undo' },
-      { label: 'Redo', role: 'redo' },
-      { type: 'separator' },
-      { label: 'Cut', role: 'cut' },
-      { label: 'Copy', role: 'copy' },
-      { label: 'Paste', role: 'paste' }
-    ]
+    label: 'Send',
+    submenu: [{ label: 'Sending', click: (): void => createSendWindow() }]
   }
 ]
