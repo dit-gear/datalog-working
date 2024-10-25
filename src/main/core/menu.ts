@@ -65,16 +65,7 @@ const buildContextMenu = (projects: ProjectItem[] | null): Menu => {
         },
         {
           label: 'New Project',
-          click: async (): Promise<void> => {
-            const mainWindow = await getMainWindow()
-            if (mainWindow.webContents.isLoading()) {
-              mainWindow.webContents.once('did-finish-load', () => {
-                mainWindow.webContents.send('new-project', true)
-              })
-            } else {
-              mainWindow.webContents.send('new-project', true)
-            }
-          }
+          click: () => handleOpenModalInDatalog('new-project')
         },
         { type: 'separator' },
         { label: 'Change Root Folder', click: (): Promise<void> => handleRootDirChange() }
@@ -82,7 +73,7 @@ const buildContextMenu = (projects: ProjectItem[] | null): Menu => {
     },
 
     { label: 'Code Editor', click: (): void => createEditorWindow() }, // Opens code editor window.
-    { label: 'Project Settings' }, // Opens main window and open settings modal.
+    { label: 'Project Settings', click: () => handleOpenModalInDatalog('project-settings') }, // Opens main window and open settings modal.
     { type: 'separator' },
     { label: 'Help', submenu: [{ label: 'Docs' }, { label: 'Discord' }] },
     { label: 'About' },

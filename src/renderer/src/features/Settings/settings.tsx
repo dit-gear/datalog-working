@@ -1,6 +1,6 @@
 import { useState, useEffect, Dispatch, SetStateAction } from 'react'
 import { Button } from '@components/ui/button'
-import { Settings2, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useForm, FormProvider, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@components/ui/form'
@@ -11,12 +11,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { ScrollArea } from '@components/ui/scroll-area'
 
 import {
-  Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogDescription,
-  DialogTrigger,
   DialogClose,
   DialogTitle
 } from '@components/ui/dialog'
@@ -28,11 +26,12 @@ import EmailTab from './Email/EmailTab'
 interface SettingsDialogProps {
   defaults: ProjectSettingsType
   setProject: Dispatch<SetStateAction<ProjectType | undefined>>
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
 }
 
-const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
+const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject, open, setOpen }) => {
   const [scope, setScope] = useState<Scope>('project')
-  const [open, setOpen] = useState<boolean>(false)
 
   useEffect(() => {
     reset(defaultValues(defaults))
@@ -86,97 +85,84 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
       if (result.success) {
         setProject(result.project)
         console.log('project should be set with:', result.project)
-        onOpenChange(false)
+        setOpen(false)
       }
     } catch (error) {
       console.log(error)
     }
   }
 
-  const onOpenChange = (open: boolean): void => {
-    setOpen(open)
-    if (open === false) {
+  useEffect(() => {
+    if (!open) {
       reset(defaultValues(defaults))
     }
-  }
+  }, [open])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="secondary" size="icon">
-          <Settings2 className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
-
-      <DialogContent className=" w-[100vw] h-[100vh] max-w-[100vw] max-h-[100vh] bg-black/40 backdrop-blur-sm">
-        <DialogHeader className="hidden">
-          <DialogTitle>Settings</DialogTitle>
-          <DialogDescription>Settings</DialogDescription>
-        </DialogHeader>
-        <FormProvider {...form}>
-          <Form {...form}>
-            <form id="settings" onSubmit={handleSubmit(onSubmit)}>
-              <Tabs
-                className="mx-auto w-[90vw] gap-2 container grid md:grid-cols-[220px_minmax(0,1fr)] overflow-y-auto"
-                defaultValue="general"
-                orientation="vertical"
-              >
-                <nav className="w-full shrink-0 md:sticky md:block">
-                  <Tabs value={scope} onValueChange={(v) => setScope(v as Scope)}>
-                    <TabsList className="grid grid-cols-2 mt-2">
-                      <TabsTrigger value="project">This Project</TabsTrigger>
-                      <TabsTrigger value="global">Global</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                  <TabsList className="flex flex-col justify-between items-start h-auto mt-2">
-                    <TabsTrigger className="w-full justify-start" value="general">
-                      General
-                    </TabsTrigger>
-                    <TabsTrigger className="w-full justify-start" value="paths">
-                      Default Paths
-                    </TabsTrigger>
-                    <TabsTrigger className="w-full justify-start" value="parsing">
-                      Parsing
-                    </TabsTrigger>
-                    <TabsTrigger className="w-full justify-start" value="email">
-                      Email
-                    </TabsTrigger>
+    <DialogContent className=" w-[100vw] h-[100vh] max-w-[100vw] max-h-[100vh] bg-black/40 backdrop-blur-sm">
+      <DialogHeader className="hidden">
+        <DialogTitle>Settings</DialogTitle>
+        <DialogDescription>Settings</DialogDescription>
+      </DialogHeader>
+      <FormProvider {...form}>
+        <Form {...form}>
+          <form id="settings" onSubmit={handleSubmit(onSubmit)}>
+            <Tabs
+              className="mx-auto w-[90vw] gap-2 container grid md:grid-cols-[220px_minmax(0,1fr)] overflow-y-auto"
+              defaultValue="general"
+              orientation="vertical"
+            >
+              <nav className="w-full shrink-0 md:sticky md:block">
+                <Tabs value={scope} onValueChange={(v) => setScope(v as Scope)}>
+                  <TabsList className="grid grid-cols-2 mt-2">
+                    <TabsTrigger value="project">This Project</TabsTrigger>
+                    <TabsTrigger value="global">Global</TabsTrigger>
                   </TabsList>
-                </nav>
-                <ScrollArea className="h-[90vh]">
-                  <TabsContent value="general">
-                    <GeneralTab scope={scope} />
-                  </TabsContent>
-                  <TabsContent value="paths">
-                    <PathsTab scope={scope} />
-                  </TabsContent>
-                  <TabsContent value="parsing" className="mt-0 pt-2">
-                    <ParsingTab scope={scope} />
-                  </TabsContent>
-                  <TabsContent value="email">
-                    <EmailTab scope={scope} />
-                  </TabsContent>
-                </ScrollArea>
+                </Tabs>
+                <TabsList className="flex flex-col justify-between items-start h-auto mt-2">
+                  <TabsTrigger className="w-full justify-start" value="general">
+                    General
+                  </TabsTrigger>
+                  <TabsTrigger className="w-full justify-start" value="paths">
+                    Default Paths
+                  </TabsTrigger>
+                  <TabsTrigger className="w-full justify-start" value="parsing">
+                    Parsing
+                  </TabsTrigger>
+                  <TabsTrigger className="w-full justify-start" value="email">
+                    Email
+                  </TabsTrigger>
+                </TabsList>
+              </nav>
+              <ScrollArea className="h-[90vh]">
+                <TabsContent value="general">
+                  <GeneralTab scope={scope} />
+                </TabsContent>
+                <TabsContent value="paths">
+                  <PathsTab scope={scope} />
+                </TabsContent>
+                <TabsContent value="parsing" className="mt-0 pt-2">
+                  <ParsingTab scope={scope} />
+                </TabsContent>
+                <TabsContent value="email">
+                  <EmailTab scope={scope} />
+                </TabsContent>
+              </ScrollArea>
 
-                <DialogFooter className="md:col-span-2 mt-2">
-                  <DialogClose asChild>
-                    <Button variant="ghost">Close</Button>
-                  </DialogClose>
-                  <Button
-                    form="settings"
-                    type="submit"
-                    disabled={isSubmitting || isSubmitSuccessful}
-                  >
-                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <></>}
-                    {isSubmitting ? 'Please wait' : isSubmitSuccessful ? 'Saved' : 'Save'}
-                  </Button>
-                </DialogFooter>
-              </Tabs>
-            </form>
-          </Form>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+              <DialogFooter className="md:col-span-2 mt-2">
+                <DialogClose asChild>
+                  <Button variant="ghost">Close</Button>
+                </DialogClose>
+                <Button form="settings" type="submit" disabled={isSubmitting || isSubmitSuccessful}>
+                  {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <></>}
+                  {isSubmitting ? 'Please wait' : isSubmitSuccessful ? 'Saved' : 'Save'}
+                </Button>
+              </DialogFooter>
+            </Tabs>
+          </form>
+        </Form>
+      </FormProvider>
+    </DialogContent>
   )
 }
 

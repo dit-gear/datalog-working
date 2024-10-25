@@ -21,9 +21,6 @@ if (process.contextIsolated) {
         ipcRenderer.on('project-loaded', (_, project) => {
           callback(project)
         }),
-      onNewProjectClicked: (callback) => ipcRenderer.on('new-project', callback),
-      onNewShootingDayClicked: (callback: () => void) =>
-        ipcRenderer.on('new-shooting-day', () => callback()),
       onOpenModalInDatalog: (callback: (modal: OpenModalTypes) => void) =>
         ipcRenderer.on('open-modal-datalogWindow', (_, modal: OpenModalTypes) => {
           callback(modal)

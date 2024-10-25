@@ -25,8 +25,6 @@ declare global {
     electron: ElectronAPI
     api: {
       onRootPathChanged: (callback: (dirFolderPath: string) => void) => void
-      onNewProjectClicked: (callback: (data: boolean) => void) => void
-      onNewShootingDayClicked: (callback: () => void) => void
       onOpenModalInDatalog: (callback: (modal: OpenModalTypes) => void) => void
       createNewProject: (projectName: string) => Promise<CreateNewProjectResult>
       onProjectLoaded: (callback: (project: ProjectType) => void) => void

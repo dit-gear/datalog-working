@@ -4,19 +4,21 @@ import { ProjectType } from '@shared/projectTypes'
 import NewProjectDialog from './components/newProjectDialog'
 import Builderdialog from './features/Datalog/builder/builderDialog'
 import { Dialog, DialogContent, DialogTrigger } from '@components/ui/dialog'
-import { Plus } from 'lucide-react'
+import { Plus, Send as SendIcon } from 'lucide-react'
 import Settings from './features/Settings/Settings'
 import Table from './features/Datalog/table/Table'
 import ProgressDialog from './components/progressdialog'
 import { Toaster } from '@components/ui/toaster'
 import { Button } from '@components/ui/button'
-import { FolderSync } from 'lucide-react'
+import { Settings2 as SettingsIcon } from 'lucide-react'
 
 function App(): JSX.Element {
   const [project, setProject] = useState<ProjectType>()
   const [logs, setLogs] = useState<DatalogType[]>()
   const [logEdit, setLogEdit] = useState<DatalogType>()
   const [builderOpen, setBuilderOpen] = useState<boolean>(false)
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
+  const [newProjectOpen, setNewProjectOpen] = useState<boolean>(false)
 
   const handleEntriesLoad = async (): Promise<void> => {
     try {
@@ -54,23 +56,20 @@ function App(): JSX.Element {
   }, [])
 
   useEffect(() => {
-    window.api.onNewShootingDayClicked(() => {
-      if (builderOpen) return
-      setBuilderOpen(true)
-    })
-  }, [])
-  useEffect(() => {
     window.api.onOpenModalInDatalog((modal) => {
+      // Todo: Handle so that only one is opened at the same time.
       switch (modal) {
         case 'new-shooting-day':
           if (builderOpen) return
           setBuilderOpen(true)
           break
         case 'project-settings':
-          // do something
+          if (settingsOpen) return
+          setSettingsOpen(true)
           break
         case 'new-project':
-          //do something
+          if (newProjectOpen) return
+          setNewProjectOpen(true)
           break
         default:
           break
@@ -88,6 +87,10 @@ function App(): JSX.Element {
         <div>
           {project?.data ? (
             <div className="flex justify-end gap-4">
+              <Button>
+                <SendIcon className="mr-2 h-4 w-4" />
+                Send
+              </Button>
               <Dialog open={builderOpen} onOpenChange={handleBuilderClose}>
                 <DialogTrigger asChild>
                   <Button>
@@ -107,8 +110,19 @@ function App(): JSX.Element {
                   )}
                 </DialogContent>
               </Dialog>
-
-              <Settings defaults={project.data.settings} setProject={setProject} />
+              <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="secondary" size="icon">
+                    <SettingsIcon className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <Settings
+                  defaults={project.data.settings}
+                  setProject={setProject}
+                  open={settingsOpen}
+                  setOpen={setSettingsOpen}
+                />
+              </Dialog>
             </div>
           ) : null}
         </div>
@@ -129,10 +143,21 @@ function App(): JSX.Element {
         )}
         <div className="flex flex-col mt-4 place-items-center gap-4">
           {project?.rootPath && (
-            <NewProjectDialog
-              showbtn={project?.projectPath ? false : true}
-              setActiveProject={handleProjectLoad}
-            />
+            <Dialog open={newProjectOpen} onOpenChange={setNewProjectOpen}>
+              {!project?.projectPath && (
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    New Project
+                  </Button>
+                </DialogTrigger>
+              )}
+              <NewProjectDialog
+                setActiveProject={handleProjectLoad}
+                open={newProjectOpen}
+                setOpen={setNewProjectOpen}
+              />
+            </Dialog>
           )}
         </div>
       </div>
