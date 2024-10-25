@@ -30,7 +30,7 @@ export async function updateState({ newRootPath, newActiveProject }: updateProps
   await saveStateToFile({ rootPath, activeProject })
   newRootPath && setRootPath(newRootPath)
   setActiveProjectPath(activeProject)
-  logger.debug('State updated')
+  logger.debug(`State updated. Root: ${rootPath} Project: ${activeProject}`)
 }
 
 export const handleRootDirChange = async (): Promise<void> => {
@@ -40,16 +40,21 @@ export const handleRootDirChange = async (): Promise<void> => {
   if (result.canceled) {
     return
   } else {
-    const newRootPath = result.filePaths[0].endsWith('/Datalog')
-      ? result.filePaths[0]
-      : path.join(result.filePaths[0], 'Datalog')
-    if (!fs.existsSync(newRootPath)) {
-      fs.mkdirSync(newRootPath)
+    try {
+      const newRootPath = result.filePaths[0].endsWith('/Datalog')
+        ? result.filePaths[0]
+        : path.join(result.filePaths[0], 'Datalog')
+      if (!fs.existsSync(newRootPath)) {
+        fs.mkdirSync(newRootPath)
+      }
+      updateState({ newRootPath })
+      await loadProjectsInRootPath()
+      const mainWindow = await getMainWindow()
+      mainWindow?.webContents.send('project-loaded', {
+        newRootPath
+      })
+    } catch (error) {
+      logger.error(`Error changing root: ${error}`)
     }
-    updateState({ newRootPath })
-    await loadProjectsInRootPath()
-    getMainWindow()?.webContents.send('project-loaded', {
-      newRootPath
-    })
   }
 }

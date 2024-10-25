@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import { LoadedFile, DirectoryFile } from '../shared/shared-types'
+import { LoadedFile, DirectoryFile, OpenModalTypes } from '../shared/shared-types'
 import { DatalogType } from '@shared/datalogTypes'
 
 // Custom APIs for renderer
@@ -22,6 +22,12 @@ if (process.contextIsolated) {
           callback(project)
         }),
       onNewProjectClicked: (callback) => ipcRenderer.on('new-project', callback),
+      onNewShootingDayClicked: (callback: () => void) =>
+        ipcRenderer.on('new-shooting-day', () => callback()),
+      onOpenModalInDatalog: (callback: (modal: OpenModalTypes) => void) =>
+        ipcRenderer.on('open-modal-datalogWindow', (_, modal: OpenModalTypes) => {
+          callback(modal)
+        }),
       createNewProject: (projectName) => ipcRenderer.invoke('create-new-project', projectName),
       updateProject: (project) => ipcRenderer.invoke('update-project', project),
       getFolderPath: () => ipcRenderer.invoke('getFolderPath'),

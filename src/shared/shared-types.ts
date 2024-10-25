@@ -1,5 +1,3 @@
-import { z } from 'zod'
-
 export type durationType = {
   hours: number
   minutes: number
@@ -48,3 +46,5 @@ export type Response = { success: true } | { success: false; error: string }
 export type ResponseWithString =
   | { success: true; data: string }
   | { success: false; error: string; cancelled?: boolean }
+
+export type OpenModalTypes = 'new-project' | 'new-shooting-day' | 'project-settings'

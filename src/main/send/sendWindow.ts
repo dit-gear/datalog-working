@@ -14,6 +14,7 @@ export function createSendWindow(): void {
   sendWindow = new BrowserWindow({
     width: 1200,
     height: 760,
+    show: false,
     backgroundColor: '#090909',
     autoHideMenuBar: true,
     minimizable: false,
@@ -34,6 +35,10 @@ export function createSendWindow(): void {
   } else {
     sendWindow.loadFile(join(__dirname, '../renderer/send.html'))
   }
+
+  sendWindow.on('ready-to-show', () => {
+    sendWindow?.show()
+  })
 
   sendWindow.on('closed', () => {
     sendWindow = null

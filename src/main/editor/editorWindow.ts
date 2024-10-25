@@ -20,6 +20,7 @@ export function createEditorWindow(): void {
     backgroundColor: '#090909',
     autoHideMenuBar: true,
     frame: false,
+    show: false,
     titleBarStyle: 'hiddenInset',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -41,6 +42,10 @@ export function createEditorWindow(): void {
 
   editorWindow.webContents.once('did-finish-load', () => {
     watchDirectories(editorWindow!, getActiveProjectPath(), getAppPath())
+  })
+
+  editorWindow.on('ready-to-show', () => {
+    editorWindow?.show()
   })
 
   setupIpcHandlers()

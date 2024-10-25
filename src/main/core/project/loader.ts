@@ -1,10 +1,10 @@
 import path from 'path'
 import fs from 'fs'
-import { dialog, Menu, MenuItemConstructorOptions, MenuItem, app } from 'electron'
+import { dialog, app } from 'electron'
 import YAML from 'yaml'
 import { LoadProjectDataResult } from './types'
 import findFilesByType from '../../utils/find-files-by-type'
-import { getRootPath, getActiveProjectPath } from '../app-state/state'
+import { getRootPath, getActiveProjectPath, setProjectsInRootPath } from '../app-state/state'
 import {
   ProjectSchemaZod,
   GlobalSchemaZodNullable,
@@ -12,7 +12,7 @@ import {
 } from '../../../shared/projectTypes'
 import logger from '../logger'
 import { ZodType } from 'zod'
-import { menuTemplate } from '../menu'
+import { updateTray } from '../menu'
 
 const parseSettingsFile = async <T>(filePath: string, schema: ZodType<T>): Promise<T | null> => {
   if (fs.existsSync(filePath)) {
@@ -85,7 +85,8 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
 
 export async function loadProjectsInRootPath(): Promise<void> {
   const yamlFiles = await findFilesByType(getRootPath(), 'yaml', {
-    includeFileName: 'settings.yaml', maxDepth: 1
+    includeFileName: 'settings.yaml',
+    maxDepth: 1
   })
 
   const projects =
@@ -105,9 +106,6 @@ export async function loadProjectsInRootPath(): Promise<void> {
           })
         )
       : []
-
-  const menu = Menu.buildFromTemplate(
-    menuTemplate(projects) as (MenuItemConstructorOptions | MenuItem)[]
-  )
-  Menu.setApplicationMenu(menu)
+  setProjectsInRootPath(projects)
+  updateTray()
 }

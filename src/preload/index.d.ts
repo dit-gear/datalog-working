@@ -10,7 +10,8 @@ import {
   DirectoryFile,
   LoadedFile,
   Response,
-  ResponseWithString
+  ResponseWithString,
+  OpenModalTypes
 } from '@shared/shared-types'
 import {
   ClipType,
@@ -25,6 +26,8 @@ declare global {
     api: {
       onRootPathChanged: (callback: (dirFolderPath: string) => void) => void
       onNewProjectClicked: (callback: (data: boolean) => void) => void
+      onNewShootingDayClicked: (callback: () => void) => void
+      onOpenModalInDatalog: (callback: (modal: OpenModalTypes) => void) => void
       createNewProject: (projectName: string) => Promise<CreateNewProjectResult>
       onProjectLoaded: (callback: (project: ProjectType) => void) => void
       updateProject: (project: ProjectToUpdate) => Promise<UpdateProjectResult>

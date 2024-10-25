@@ -37,7 +37,7 @@ function App(): JSX.Element {
     handleEntriesLoad()
   }
 
-  const handleBuilderClose = (open) => {
+  const handleBuilderClose = (open: boolean) => {
     if (logEdit) setLogEdit(undefined)
     setBuilderOpen(open)
   }
@@ -50,6 +50,31 @@ function App(): JSX.Element {
   useEffect(() => {
     window.api.onProjectLoaded((project) => {
       handleProjectLoad(project)
+    })
+  }, [])
+
+  useEffect(() => {
+    window.api.onNewShootingDayClicked(() => {
+      if (builderOpen) return
+      setBuilderOpen(true)
+    })
+  }, [])
+  useEffect(() => {
+    window.api.onOpenModalInDatalog((modal) => {
+      switch (modal) {
+        case 'new-shooting-day':
+          if (builderOpen) return
+          setBuilderOpen(true)
+          break
+        case 'project-settings':
+          // do something
+          break
+        case 'new-project':
+          //do something
+          break
+        default:
+          break
+      }
     })
   }, [])
 
@@ -82,9 +107,7 @@ function App(): JSX.Element {
                   )}
                 </DialogContent>
               </Dialog>
-              <Button variant="secondary" size="icon">
-                <FolderSync className="h-4 w-4" />
-              </Button>
+
               <Settings defaults={project.data.settings} setProject={setProject} />
             </div>
           ) : null}

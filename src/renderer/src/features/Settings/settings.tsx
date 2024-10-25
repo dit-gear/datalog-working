@@ -108,7 +108,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject }) => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className=" w-[100vw] h-[100vh] max-w-[100vw] max-h-[100vh] pt-0 bg-black/40 backdrop-blur-sm">
+      <DialogContent className=" w-[100vw] h-[100vh] max-w-[100vw] max-h-[100vh] bg-black/40 backdrop-blur-sm">
         <DialogHeader className="hidden">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>Settings</DialogDescription>

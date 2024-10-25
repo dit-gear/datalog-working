@@ -1,23 +1,54 @@
-import { app, shell, BrowserWindow, session } from 'electron'
+import { app, shell, BrowserWindow, session, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { ProjectType } from '../shared/projectTypes'
 import { loadState } from './core/app-state/loader'
 import { setupIpcHandlers } from './core/setupIpcHandlers'
+import { getRootPath, getActiveProjectPath, getActiveProject } from './core/app-state/state'
 
 // Initialize the application
 app.setName('Datalog')
 
-let mainWindow: BrowserWindow
+let mainWindow: BrowserWindow | null = null
 
 // Getter function to access mainWindow
-export function getMainWindow(): BrowserWindow | undefined {
-  return mainWindow
+export async function getMainWindow(): Promise<BrowserWindow> {
+  return await ensureMainWindow()
+}
+
+async function ensureMainWindow(): Promise<BrowserWindow> {
+  await openMainWindow()
+  return mainWindow!
+}
+
+export async function openMainWindow(): Promise<void> {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore()
+    }
+    if (!mainWindow.isVisible() || !mainWindow.isFocused()) {
+      mainWindow.show()
+      mainWindow.focus()
+    }
+    mainWindow.focus()
+  } else {
+    await createWindow()
+  }
 }
 
 // Function to create the main window
-export function createWindow(loadedProject: ProjectType): void {
+async function createWindow(): Promise<void> {
+  const rootPath = getRootPath()
+  const projectPath = getActiveProjectPath()
+  const data = getActiveProject()
+
+  const loadedProject: ProjectType = {
+    rootPath,
+    ...(projectPath && { projectPath }),
+    ...(data && { data })
+  }
+
   mainWindow = new BrowserWindow({
     width: 1600,
     height: 1000,
@@ -40,7 +71,11 @@ export function createWindow(loadedProject: ProjectType): void {
   })
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show() // Show the window when it's ready to be shown
+    mainWindow && mainWindow.show() // Show the window when it's ready to be shown
+  })
+
+  mainWindow.on('closed', () => {
+    mainWindow = null
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -67,12 +102,11 @@ app.whenReady().then(() => {
   })
 
   setupIpcHandlers()
-
-  loadState().then((res) => createWindow(res))
+  loadState()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      loadState().then((res) => createWindow(res))
+      openMainWindow()
     }
   })
 })

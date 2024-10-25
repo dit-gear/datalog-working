@@ -12,14 +12,14 @@ if (!fs.existsSync(logDir)) {
 
 // Configure Winston Logger
 const logger = winston.createLogger({
-  level: 'info', // Set the default log level
+  level: 'debug', // Set the default log level
   format: winston.format.combine(
     winston.format.timestamp({
       format: 'YYYY-MM-DD HH:mm:ss'
     }),
-    winston.format.printf(
-      (info) => `${info.timestamp} [${info.level.toUpperCase()}]: ${info.message}`
-    ),
+    winston.format.printf(({ level, message, timestamp }) => {
+      return `${timestamp} ${level}: ${message}`
+    }),
     winston.format.errors({ stack: true })
   ),
   transports: [
