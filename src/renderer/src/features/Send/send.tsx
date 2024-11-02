@@ -7,9 +7,25 @@ import { Button } from '@components/ui/button'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@components/ui/resizable'
 import { Tabs, TabsTrigger, TabsContent } from '@components/ui/tabs'
 import { TabsList } from '@radix-ui/react-tabs'
+import { Settings } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
+import { Select, SelectContent, SelectItem, SelectValue } from '@components/ui/select'
+import { SelectTrigger } from '@components/SelectIconTrigger'
+import { emailType } from '@shared/projectTypes'
 
-const Send = () => {
+interface SendProps {
+  defaults: emailType | null
+}
+
+const Send = ({ defaults }: SendProps) => {
   const form = useForm({
+    defaultValues: {
+      recipients: defaults?.recipients ?? [],
+      subject: defaults?.subject ?? '',
+      attatchments: defaults?.attatchments ?? [],
+      message: defaults?.message ?? '',
+      reacttemplate: defaults?.template ?? ''
+    },
     mode: 'onSubmit'
   })
   const { control } = form
@@ -18,75 +34,64 @@ const Send = () => {
       <ResizablePanelGroup className="flex-grow pb-20" direction="horizontal">
         <ResizablePanel className="px-8 mt-4" defaultSize={40} maxSize={75}>
           <Form {...form}>
-            <FormField
-              control={control}
-              name={`sender`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>From:</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/*<FormField
-        control={control}
-        name={`recipients`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>To:</FormLabel>
-            <FormControl>
-              <MultiSelectTextInput {...field} />
-            </FormControl>
-            {Array.isArray(errors.recipients) &&
+            <div className="flex flex-col flex-grow gap-4 h-full pb-4">
+              <FormField
+                control={control}
+                name={`recipients`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>To:</FormLabel>
+                    <FormControl>
+                      <MultiSelectTextInput dataIndex={0} {...field} />
+                    </FormControl>
+                    {/*Array.isArray(errors.recipients) &&
               errors.recipients.length > 0 &&
               errors.recipients.map((error, index) => (
                 <FormMessage key={index}>{error.message}</FormMessage>
-              ))}
-          </FormItem>
-        )}
-      />*/}
-            <FormField
-              control={control}
-              name={`subject`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subject</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/*<FormField
-        control={control}
-        name={`attatchments`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Attatchments</FormLabel>
-            <FormControl>
-              <MultiSelectTextInput {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />*/}
-            <FormField
-              control={control}
-              name={`body`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Body</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              ))*/}
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name={`subject`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Subject</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name={`message`}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col flex-grow h-full">
+                    <FormLabel>Message</FormLabel>
+                    <FormControl className="flex-grow h-full">
+                      <Textarea {...field} className="h-full resize-none" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name={`attatchments`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Attatchments</FormLabel>
+                    <FormControl>
+                      <MultiSelectTextInput dataIndex={1} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </Form>
         </ResizablePanel>
         <ResizableHandle withHandle />
@@ -100,7 +105,17 @@ const Send = () => {
                 value="email"
                 className="border-t border-l border-r rounded-t-lg px-4 pb-2"
               >
-                Email Preview
+                <span className="flex gap-4 h-4 items-center">
+                  Email Preview
+                  <Select defaultValue={'datalog.jsx'}>
+                    <SelectTrigger></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="datalog.jsx">datalog.jsx</SelectItem>
+                      <SelectItem value="dark">logilog.jsx</SelectItem>
+                      <SelectItem value="system">lensreport.jsx</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </span>
               </TabsTrigger>
               <TabsTrigger
                 value="datalog.pdf"

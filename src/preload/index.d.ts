@@ -19,6 +19,7 @@ import {
   ResponseWithClips,
   ResponseWithDatalogs
 } from '@shared/datalogTypes'
+import { ProjectRootType } from '@shared/projectTypes'
 
 declare global {
   interface Window {
@@ -52,6 +53,7 @@ declare global {
       onResponseReadFile: (callback: (file: LoadedFile | { error: string }) => void) => void
       saveFile: (file: LoadedFile) => Promise<Response>
       deleteFile: (file: DirectoryFile) => Promise<Response>
+      initSendWindow: (callback: (project: ProjectRootType | null) => void) => void
     }
   }
 }

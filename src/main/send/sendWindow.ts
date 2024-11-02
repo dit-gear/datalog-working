@@ -2,6 +2,7 @@ import { BrowserWindow } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../../resources/icon.png?asset'
+import { getActiveProject } from '../core/app-state/state'
 
 let sendWindow: BrowserWindow | null = null
 
@@ -35,6 +36,11 @@ export function createSendWindow(): void {
   } else {
     sendWindow.loadFile(join(__dirname, '../renderer/send.html'))
   }
+
+  sendWindow.webContents.on('did-finish-load', () => {
+    const activeProject = getActiveProject()
+    sendWindow?.webContents.send('init-sendwindow', activeProject)
+  })
 
   sendWindow.on('ready-to-show', () => {
     sendWindow?.show()

@@ -196,7 +196,7 @@ export const emailZodObj = z.object({
     .min(1, { message: 'Must contain at least one recipient' }),
   subject: z.string().min(1, 'Subject are required'),
   attatchments: z.array(z.string()).optional(),
-  body: z.string().optional(),
+  message: z.string().optional(),
   template: z.string() // url to file.
 })
 
@@ -272,6 +272,7 @@ export type subFieldsType = z.infer<typeof subfields>
 export type Field = z.infer<typeof field>
 export type additionalParsing = z.infer<typeof additionalParsing>
 export type emailApiType = z.infer<typeof emailApiZodObj>
+export type emailType = z.infer<typeof emailZodObj>
 export type ProjectSchemaType = z.infer<typeof ProjectSchemaZod>
 export type ProjectRootType = z.infer<typeof ProjectRootZod>
 export type ProjectSettingsType = z.infer<typeof ProjectSettingsZod>

@@ -46,7 +46,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
     sender: '',
     recipients: [],
     subject: '',
-    body: '',
+    message: '',
     template: 'Plain-Text'
   }
   const form = useForm<emailType>({
@@ -175,10 +175,10 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
           />
           <FormField
             control={control}
-            name={`body`}
+            name={`message`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Body</FormLabel>
+                <FormLabel>Message</FormLabel>
                 <FormControl>
                   <Textarea {...field} data-index={assignIndex()} />
                 </FormControl>

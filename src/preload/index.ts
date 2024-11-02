@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import { LoadedFile, DirectoryFile, OpenModalTypes } from '../shared/shared-types'
 import { DatalogType } from '@shared/datalogTypes'
+import { ProjectRootType } from '@shared/projectTypes'
 
 // Custom APIs for renderer
 const api = {}
@@ -53,7 +54,11 @@ if (process.contextIsolated) {
       onResponseReadFile: (callback: (file: LoadedFile | { error: string }) => void) =>
         ipcRenderer.on('response-read-file', (_, file) => callback(file)),
       saveFile: (file: LoadedFile) => ipcRenderer.invoke('save-file', file),
-      deleteFile: (file: DirectoryFile) => ipcRenderer.invoke('delete-file', file)
+      deleteFile: (file: DirectoryFile) => ipcRenderer.invoke('delete-file', file),
+      initSendWindow: (callback: (project: ProjectRootType | null) => void) =>
+        ipcRenderer.on('init-sendwindow', (_, project: ProjectRootType | null) => {
+          callback(project)
+        })
     })
   } catch (error) {
     console.error(error)

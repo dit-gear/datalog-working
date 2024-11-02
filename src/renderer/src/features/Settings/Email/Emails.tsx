@@ -68,8 +68,8 @@ const Emails: React.FC<EmailProps> = ({ scope }) => {
                   <p>{email.recipients?.join(', ')}</p>
                   <p>Subject:</p>
                   <p>{email.subject}</p>
-                  <p>Email Body:</p>
-                  <p>{email.body}</p>
+                  <p>Email Message:</p>
+                  <p>{email.message}</p>
                   <p>React template:</p>
                   <p>{email.template}</p>
                 </AccordionContent>
