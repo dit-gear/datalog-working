@@ -19,7 +19,7 @@ import {
   ResponseWithClips,
   ResponseWithDatalogs
 } from '@shared/datalogTypes'
-import { ProjectRootType } from '@shared/projectTypes'
+import { ProjectRootType, TemplateDirectoryFile } from '@shared/projectTypes'
 
 declare global {
   interface Window {
@@ -42,17 +42,17 @@ declare global {
       removeProxies: () => Promise<ResponseWithClips>
       getCsvMetadata: () => Promise<ResponseWithClips>
       onDirectoryLoaded: (
-        callback: (event: Electron.IpcRendererEvent, files: DirectoryFile[]) => void
+        callback: (event: Electron.IpcRendererEvent, files: TemplateDirectoryFile[]) => void
       ) => void
       getInitialDir: () => Promise<InitialDir>
       onDirChanged: (
-        callback: (event: Electron.IpcRendererEvent, files: DirectoryFile[]) => void
+        callback: (event: Electron.IpcRendererEvent, files: TemplateDirectoryFile[]) => void
       ) => void
       removeAllListeners: (channel: string) => void
-      requestReadFile: (file: DirectoryFile) => void
+      requestReadFile: (file: TemplateDirectoryFile) => void
       onResponseReadFile: (callback: (file: LoadedFile | { error: string }) => void) => void
       saveFile: (file: LoadedFile) => Promise<Response>
-      deleteFile: (file: DirectoryFile) => Promise<Response>
+      deleteFile: (file: TemplateDirectoryFile) => Promise<Response>
       initSendWindow: (callback: (project: ProjectRootType | null) => void) => void
     }
   }

@@ -1,7 +1,8 @@
 import { BrowserWindow } from 'electron'
 import fs from 'fs'
 import { join } from 'path'
-import { DirectoryFile, InitialDir } from '../../shared/shared-types'
+import { InitialDir } from '../../shared/shared-types'
+import { TemplateDirectoryFile } from '@shared/projectTypes'
 
 function ensureDirectoryExists(dirPath: string): void {
   if (!fs.existsSync(dirPath)) {
@@ -9,7 +10,7 @@ function ensureDirectoryExists(dirPath: string): void {
   }
 }
 
-function getDirectories(projectPath: string, appPath: string): DirectoryFile[] {
+function getDirectories(projectPath: string, appPath: string): TemplateDirectoryFile[] {
   return [
     { path: join(projectPath, 'templates/email'), type: 'email', scope: 'project' },
     { path: join(projectPath, 'templates/pdf'), type: 'pdf', scope: 'project' },
@@ -22,7 +23,7 @@ function loadDirectory(
   dirPath: string,
   type: 'email' | 'pdf',
   scope: 'project' | 'global'
-): DirectoryFile[] {
+): TemplateDirectoryFile[] {
   try {
     const files = fs
       .readdirSync(dirPath)
@@ -40,7 +41,7 @@ function loadDirectory(
   }
 }
 
-function loadAllDirectories(projectPath: string, appPath: string): DirectoryFile[] {
+function loadAllDirectories(projectPath: string, appPath: string): TemplateDirectoryFile[] {
   const directories = getDirectories(projectPath, appPath)
   directories.forEach((dir) => ensureDirectoryExists(dir.path))
   return directories.flatMap((dir) =>

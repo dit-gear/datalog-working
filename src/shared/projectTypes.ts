@@ -230,9 +230,16 @@ const ProjectSettingsZod = z.object({
   global: GlobalSchemaZod.optional()
 })
 
+const TemplateDirectoryFileZod = z.object({
+  path: z.string(),
+  type: z.enum(['email', 'pdf']),
+  scope: z.enum(['project', 'global'])
+})
+
 export const ProjectRootZod = ProjectSchemaZod.merge(
   z.object({
-    settings: ProjectSettingsZod
+    settings: ProjectSettingsZod,
+    templatesDir: z.array(TemplateDirectoryFileZod)
   })
 )
 
@@ -273,6 +280,7 @@ export type Field = z.infer<typeof field>
 export type additionalParsing = z.infer<typeof additionalParsing>
 export type emailApiType = z.infer<typeof emailApiZodObj>
 export type emailType = z.infer<typeof emailZodObj>
+export type TemplateDirectoryFile = z.infer<typeof TemplateDirectoryFileZod>
 export type ProjectSchemaType = z.infer<typeof ProjectSchemaZod>
 export type ProjectRootType = z.infer<typeof ProjectRootZod>
 export type ProjectSettingsType = z.infer<typeof ProjectSettingsZod>

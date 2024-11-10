@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { DirectoryFile, Path } from '@shared/shared-types'
+import { Path } from '@shared/shared-types'
+import { TemplateDirectoryFile } from '@shared/projectTypes'
 
 const useInitialDir = () => {
-  const [dir, setDir] = useState<DirectoryFile[]>([])
+  const [dir, setDir] = useState<TemplateDirectoryFile[]>([])
   const [path, setPath] = useState<Path>({ project: '', global: '' } as Path)
   const [loading, setLoading] = useState(true)
 
@@ -24,7 +25,7 @@ const useInitialDir = () => {
 
     const handleDirectoryChanged = (
       _event: Electron.IpcRendererEvent,
-      files: DirectoryFile[]
+      files: TemplateDirectoryFile[]
     ): void => {
       //console.log('Received directory-changed:', files)
       setDir(files)

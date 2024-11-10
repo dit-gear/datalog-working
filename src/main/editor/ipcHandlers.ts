@@ -1,7 +1,8 @@
 import { ipcMain } from 'electron'
 import fs from 'fs'
 import path from 'path'
-import { DirectoryFile, LoadedFile } from '../../shared/shared-types'
+import { LoadedFile } from '../../shared/shared-types'
+import { TemplateDirectoryFile } from '@shared/projectTypes'
 import { moveFileToTrash } from '../utils/crud'
 import { getActiveProjectPath, getAppPath } from '../core/app-state/state'
 import { sendInitialDirectories } from '../utils/editor-file-handler'
@@ -13,7 +14,7 @@ export function setupIpcHandlers(): void {
   })
 
   // Handle reading a file
-  ipcMain.on('request-read-file', (event, file: DirectoryFile) => {
+  ipcMain.on('request-read-file', (event, file: TemplateDirectoryFile) => {
     try {
       const ext = path.extname(file.path).toLowerCase()
       const content = fs.readFileSync(file.path, 'utf8')
@@ -50,7 +51,7 @@ export function setupIpcHandlers(): void {
   })
 
   // Handle deleting a file
-  ipcMain.handle('delete-file', async (_event, file: DirectoryFile) => {
+  ipcMain.handle('delete-file', async (_event, file: TemplateDirectoryFile) => {
     return moveFileToTrash(file.path)
   })
 }

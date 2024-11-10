@@ -1,8 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import { LoadedFile, DirectoryFile, OpenModalTypes } from '../shared/shared-types'
+import { LoadedFile, OpenModalTypes } from '../shared/shared-types'
 import { DatalogType } from '@shared/datalogTypes'
-import { ProjectRootType } from '@shared/projectTypes'
+import { ProjectRootType, TemplateDirectoryFile } from '@shared/projectTypes'
 
 // Custom APIs for renderer
 const api = {}
@@ -50,11 +50,11 @@ if (process.contextIsolated) {
       getInitialDir: () => ipcRenderer.invoke('get-initial-data'),
       onDirChanged: (callback) => ipcRenderer.on('directory-changed', callback),
       removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
-      requestReadFile: (file: DirectoryFile) => ipcRenderer.send('request-read-file', file),
+      requestReadFile: (file: TemplateDirectoryFile) => ipcRenderer.send('request-read-file', file),
       onResponseReadFile: (callback: (file: LoadedFile | { error: string }) => void) =>
         ipcRenderer.on('response-read-file', (_, file) => callback(file)),
       saveFile: (file: LoadedFile) => ipcRenderer.invoke('save-file', file),
-      deleteFile: (file: DirectoryFile) => ipcRenderer.invoke('delete-file', file),
+      deleteFile: (file: TemplateDirectoryFile) => ipcRenderer.invoke('delete-file', file),
       initSendWindow: (callback: (project: ProjectRootType | null) => void) =>
         ipcRenderer.on('init-sendwindow', (_, project: ProjectRootType | null) => {
           callback(project)

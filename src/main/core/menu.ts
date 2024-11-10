@@ -34,17 +34,27 @@ const buildContextMenu = (projects: ProjectItem[] | null): Menu => {
       enabled: false
     },
 
-    { label: 'Show Datalog', click: (): Promise<void> => openMainWindow() }, // Opens main window
+    {
+      label: 'Show Datalog',
+      click: (): Promise<void> => openMainWindow(),
+      enabled: Boolean(activeProject)
+    }, // Opens main window
     { type: 'separator' },
-    { label: 'Send', submenu: [{ label: 'Datalog', click: (): void => createSendWindow() }] }, // Will open Send window
+    {
+      label: 'Send',
+      submenu: [{ label: 'Datalog', click: (): void => createSendWindow() }],
+      enabled: Boolean(activeProject)
+    }, // Will open Send window
     {
       label: 'Export',
-      submenu: [{ label: 'Datalog', click: (): void => console.log('Export clicked') }]
+      submenu: [{ label: 'Datalog', click: (): void => console.log('Export clicked') }],
+      enabled: Boolean(activeProject)
     },
     { type: 'separator' },
     {
       label: 'New Shooting Day',
-      click: () => handleOpenModalInDatalog('new-shooting-day')
+      click: () => handleOpenModalInDatalog('new-shooting-day'),
+      enabled: Boolean(activeProject)
     },
     { type: 'separator' },
     {
@@ -73,7 +83,11 @@ const buildContextMenu = (projects: ProjectItem[] | null): Menu => {
     },
 
     { label: 'Code Editor', click: (): void => createEditorWindow() }, // Opens code editor window.
-    { label: 'Project Settings', click: () => handleOpenModalInDatalog('project-settings') }, // Opens main window and open settings modal.
+    {
+      label: 'Project Settings',
+      click: () => handleOpenModalInDatalog('project-settings'),
+      enabled: Boolean(activeProject)
+    }, // Opens main window and open settings modal.
     { type: 'separator' },
     { label: 'Help', submenu: [{ label: 'Docs' }, { label: 'Discord' }] },
     { label: 'About' },

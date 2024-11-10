@@ -4,7 +4,12 @@ import { dialog, app } from 'electron'
 import YAML from 'yaml'
 import { LoadProjectDataResult } from './types'
 import findFilesByType from '../../utils/find-files-by-type'
-import { getRootPath, getActiveProjectPath, setProjectsInRootPath } from '../app-state/state'
+import {
+  getRootPath,
+  getActiveProjectPath,
+  setProjectsInRootPath,
+  setActiveProject
+} from '../app-state/state'
 import {
   ProjectSchemaZod,
   GlobalSchemaZodNullable,
@@ -13,6 +18,7 @@ import {
 import logger from '../logger'
 import { ZodType } from 'zod'
 import { updateTray } from '../menu'
+import { updateProjectFolder } from './updater'
 
 const parseSettingsFile = async <T>(filePath: string, schema: ZodType<T>): Promise<T | null> => {
   if (fs.existsSync(filePath)) {
@@ -59,6 +65,9 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
         'folder_template must be present in either global settings or project settings'
       )
     }
+    if (projectSettings.project_name !== path.basename(selectedProjectpath)) {
+      await updateProjectFolder(projectSettings.project_name)
+    }
     const folderTemplate = projectSettings.folder_template || globalSettings?.folder_template
     const data: ProjectRootType = {
       ...globalSettings,
@@ -69,8 +78,11 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
         ...(globalSettings && Object.keys(globalSettings).length > 0
           ? { global: globalSettings }
           : {})
-      }
+      },
+      templatesDir: []
     }
+    setActiveProject(data)
+    updateTray()
     return { success: true, data }
   } catch (error) {
     const errorMessage = (error as Error).message
@@ -83,29 +95,21 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
   }
 }
 
-export async function loadProjectsInRootPath(): Promise<void> {
+export const loadProjectsInRootPath = async (): Promise<void> => {
+  const projectPath = getActiveProjectPath()
+
   const yamlFiles = await findFilesByType(getRootPath(), 'yaml', {
     includeFileName: 'settings.yaml',
     maxDepth: 1
   })
-
-  const projects =
-    yamlFiles && yamlFiles.length > 0
-      ? await Promise.all(
-          yamlFiles?.map(async (filePath) => {
-            const project = fs.readFileSync(filePath, 'utf8')
-            const folderPath = path.dirname(filePath)
-            const yaml = YAML.parse(project)
-            const parsedYaml = ProjectSchemaZod.parse(yaml)
-            const projectPath = getActiveProjectPath()
-            return {
-              project: parsedYaml.project_name,
-              path: folderPath,
-              active: projectPath ? projectPath === folderPath : false
-            }
-          })
-        )
-      : []
+  const projects = yamlFiles.map((filePath) => {
+    const folderPath = path.dirname(filePath)
+    return {
+      project: path.basename(folderPath), // Folder name
+      path: folderPath, // Full path to the folder
+      active: projectPath ? projectPath === folderPath : false
+    }
+  })
   setProjectsInRootPath(projects)
   updateTray()
 }

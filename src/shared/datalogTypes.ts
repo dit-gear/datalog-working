@@ -36,7 +36,7 @@ export const ClipZod = z
       })
     ),
     Duration: z.number().optional(),
-    Image: z.string().optional(),
+    Image: z.string().optional(), // Not in use
     Proxy: ProxyZod.optional()
   })
   .extend(Camera_MetadataZod.shape)
@@ -62,7 +62,7 @@ export const datalogZod = z.object({
   Proxy: Files.optional(),
   Duration: z.number().optional(),
   Reels: z.array(z.string()).optional(),
-  Copies: z.array(z.string()).optional(),
+  Copies: z.array(z.string()).optional(), // Move to within OCF
   Clips: z.array(ClipZod).optional()
 })
 

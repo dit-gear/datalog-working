@@ -1,3 +1,5 @@
+import { TemplateDirectoryFile } from './projectTypes'
+
 export type durationType = {
   hours: number
   minutes: number
@@ -24,20 +26,14 @@ export type Path = {
   global: string
 }
 
-export type DirectoryFile = {
-  path: string
-  type: 'email' | 'pdf'
-  scope: 'project' | 'global'
-}
-
-export type LoadedFile = DirectoryFile & {
+export type LoadedFile = TemplateDirectoryFile & {
   content: string
   filetype: 'jsx' | 'tsx'
   isNewFile?: boolean
 }
 
 export type InitialDir = {
-  dir: DirectoryFile[]
+  dir: TemplateDirectoryFile[]
   path: Path
 }
 
