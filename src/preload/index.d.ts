@@ -33,7 +33,8 @@ declare global {
       getFolderPath: () => Promise<ResponseWithString>
       updateDatalog: (datalog: DatalogType) => Promise<Response>
       deleteDatalog: (datalog: DatalogType) => Promise<Response>
-      loadDatalogs: () => Promise<ResponseWithDatalogs>
+      //loadDatalogs: () => Promise<ResponseWithDatalogs>
+      onDatalogsLoaded: (callback: (datalogs: DatalogType[]) => void) => void
       findOcf: () => Promise<ResponseWithClips>
       removeLogPath: (paths: string[]) => Promise<ResponseWithClips>
       showProgress: (show: boolean, progress: number) => void

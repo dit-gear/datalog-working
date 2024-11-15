@@ -2,11 +2,12 @@ import { updateState } from '../app-state/updater'
 import { setActiveProject } from '../app-state/state'
 import { Notification } from 'electron'
 import logger from '../logger'
+import { closeProjectWatchers } from '../app-state/watchers/projectWatchers/manager'
 
-export const deleteActiveProject = async () => {
-  await updateState({})
+export const unloadActiveProject = async () => {
+  await Promise.allSettled([closeProjectWatchers(), updateState({})])
   setActiveProject(null)
-  // Add closeProjectWatchers-function, update any browser state.
+
   if (Notification.isSupported()) {
     new Notification({
       title: 'Project Unmounted',

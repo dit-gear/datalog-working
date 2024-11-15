@@ -1,6 +1,7 @@
 import path from 'path'
+import { join } from 'path'
 import fs from 'fs'
-import { dialog, app } from 'electron'
+import { dialog } from 'electron'
 import YAML from 'yaml'
 import { LoadProjectDataResult } from './types'
 import findFilesByType from '../../utils/find-files-by-type'
@@ -8,17 +9,20 @@ import {
   getRootPath,
   getActiveProjectPath,
   setProjectsInRootPath,
-  setActiveProject
+  setActiveProject,
+  getAppPath
 } from '../app-state/state'
 import {
   ProjectSchemaZod,
   GlobalSchemaZodNullable,
-  ProjectRootType
+  ProjectRootType,
+  TemplateDirectoryFile
 } from '../../../shared/projectTypes'
 import logger from '../logger'
 import { ZodType } from 'zod'
 import { updateTray } from '../menu'
 import { updateProjectFolder } from './updater'
+import { ensureDirectoryExists } from '../../utils/crud'
 
 const parseSettingsFile = async <T>(filePath: string, schema: ZodType<T>): Promise<T | null> => {
   if (fs.existsSync(filePath)) {
@@ -38,8 +42,52 @@ const parseSettingsFile = async <T>(filePath: string, schema: ZodType<T>): Promi
   return null
 }
 
+const getTemplateDirectories = (projectPath: string, appPath: string): TemplateDirectoryFile[] => {
+  return [
+    { path: join(projectPath, 'templates/email'), type: 'email', scope: 'project' },
+    { path: join(projectPath, 'templates/pdf'), type: 'pdf', scope: 'project' },
+    { path: join(appPath, 'templates/email'), type: 'email', scope: 'global' },
+    { path: join(appPath, 'templates/pdf'), type: 'pdf', scope: 'global' }
+  ]
+}
+
+const loadTemplateDirectory = async (
+  dir: TemplateDirectoryFile
+): Promise<TemplateDirectoryFile[]> => {
+  const { path: dirPath, type, scope } = dir
+
+  await ensureDirectoryExists(dirPath)
+
+  try {
+    const files = fs
+      .readdirSync(dirPath)
+      .filter((file) => file.endsWith('.jsx') || file.endsWith('.tsx'))
+      .map((file) => ({
+        path: join(dirPath, file),
+        type,
+        scope
+      }))
+    logger.debug(`Loaded templates from ${dirPath}:`, files)
+    return files
+  } catch (error) {
+    logger.error(`loadTemplateDirectory: Failed to read directory ${dirPath}:`, error)
+    return []
+  }
+}
+
+const loadTemplates = async (
+  projectPath: string,
+  appPath: string
+): Promise<TemplateDirectoryFile[]> => {
+  const directories = getTemplateDirectories(projectPath, appPath)
+
+  const templates = await Promise.all(directories.map(loadTemplateDirectory))
+  return templates.flat()
+}
+
 export const loadProject = async (selectedProjectpath: string): Promise<LoadProjectDataResult> => {
-  const globalFilePath = path.join(app.getPath('userData'), 'settings.yaml')
+  logger.debug('loadProject started')
+  const globalFilePath = path.join(getAppPath(), 'settings.yaml')
   if (!fs.existsSync(globalFilePath)) {
     fs.writeFileSync(globalFilePath, '', 'utf8')
   }
@@ -50,17 +98,20 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
   }
 
   try {
-    const globalSettings = await parseSettingsFile(globalFilePath, GlobalSchemaZodNullable)
-    const projectSettings = await parseSettingsFile(projectFilePath, ProjectSchemaZod)
+    const [globalSettings, projectSettings] = await Promise.all([
+      fs.existsSync(globalFilePath)
+        ? parseSettingsFile(globalFilePath, GlobalSchemaZodNullable)
+        : Promise.resolve(undefined),
+      parseSettingsFile(projectFilePath, ProjectSchemaZod)
+    ])
 
     if (!projectSettings) {
       throw new Error('Invalid project settings')
     }
 
-    const hasFolderTemplateInGlobal = globalSettings?.folder_template !== undefined
-    const hasFolderTemplateInProject = projectSettings.folder_template !== undefined
+    const folderTemplateExist = projectSettings.folder_template || globalSettings?.folder_template
 
-    if (!hasFolderTemplateInGlobal && !hasFolderTemplateInProject) {
+    if (!folderTemplateExist) {
       throw new Error(
         'folder_template must be present in either global settings or project settings'
       )
@@ -68,6 +119,7 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
     if (projectSettings.project_name !== path.basename(selectedProjectpath)) {
       await updateProjectFolder(projectSettings.project_name)
     }
+    const templatesDir = await loadTemplates(selectedProjectpath, getAppPath())
     const folderTemplate = projectSettings.folder_template || globalSettings?.folder_template
     const data: ProjectRootType = {
       ...globalSettings,
@@ -79,10 +131,11 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
           ? { global: globalSettings }
           : {})
       },
-      templatesDir: []
+      templatesDir
     }
     setActiveProject(data)
     updateTray()
+    logger.debug(`${data.project_name} loaded`)
     return { success: true, data }
   } catch (error) {
     const errorMessage = (error as Error).message
@@ -96,6 +149,7 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
 }
 
 export const loadProjectsInRootPath = async (): Promise<void> => {
+  logger.debug('loadProjectInRootPath started')
   const projectPath = getActiveProjectPath()
 
   const yamlFiles = await findFilesByType(getRootPath(), 'yaml', {
@@ -110,6 +164,7 @@ export const loadProjectsInRootPath = async (): Promise<void> => {
       active: projectPath ? projectPath === folderPath : false
     }
   })
+  logger.debug('Loaded projects in root path')
   setProjectsInRootPath(projects)
   updateTray()
 }

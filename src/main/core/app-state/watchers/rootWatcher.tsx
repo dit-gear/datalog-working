@@ -3,7 +3,9 @@ import { getActiveProjectPath, getRootPath } from '../state'
 import logger from '../../logger'
 import { loadProjectsInRootPath } from '../../project/loader'
 import { updateProjectNameFromFolderRename } from '../../project/updater'
-import { deleteActiveProject } from '../../project/delete'
+import { unloadActiveProject } from '../../project/unload'
+
+let rootWatcher: FSWatcher | null = null
 
 export const initRootWatcher = async () => {
   let debounceTimeout: NodeJS.Timeout | null = null
@@ -12,14 +14,14 @@ export const initRootWatcher = async () => {
   const renamedDirs: Set<{ oldPath: string; newPath: string }> = new Set()
   let pendingUnlink: string | null = null
 
-  const rootWatcher = chokidar.watch(getRootPath(), {
+  rootWatcher = chokidar.watch(getRootPath(), {
     ignoreInitial: true,
     depth: 0,
     awaitWriteFinish: true
   })
 
   await new Promise((resolve) => {
-    rootWatcher.on('ready', () => {
+    rootWatcher?.on('ready', () => {
       logger.debug('rootWatcher ready')
       resolve(true)
     })
@@ -60,20 +62,16 @@ export const initRootWatcher = async () => {
 
   async function processDirectoryChanges() {
     logger.debug('Processing directory changes')
-    //console.table(Array.of(addedDirs))
-    //console.table(Array.of(removedDirs))
-    //console.table(Array.of(renamedDirs))
-    //console.table(Array.of(pendingUnlink))
     const activeProjectPath = getActiveProjectPath()
 
     if (activeProjectPath && pendingUnlink === activeProjectPath) {
-      console.log(`Active project path deleted: ${activeProjectPath}`)
-      await deleteActiveProject()
+      logger.debug(`Active project path deleted: ${activeProjectPath}`)
+      await unloadActiveProject()
     }
 
     const renamedProject = [...renamedDirs].find((entry) => entry.oldPath === activeProjectPath)
     if (renamedProject) {
-      console.log('Renamed active project detected')
+      logger.debug('Renamed active project detected')
       await updateProjectNameFromFolderRename(renamedProject.newPath)
     }
 
@@ -84,101 +82,20 @@ export const initRootWatcher = async () => {
     removedDirs.clear()
     renamedDirs.clear()
   }
-
-  process.on('SIGINT', async () => {
-    console.log('Received SIGINT. Shutting down...')
-    await closeRootWatcher(rootWatcher)
-    process.exit()
-  })
-
-  process.on('SIGTERM', async () => {
-    console.log('Received SIGTERM. Shutting down...')
-    await closeRootWatcher(rootWatcher)
-    process.exit()
-  })
-
-  process.on('beforeExit', async () => {
-    console.log('Application is exiting. Cleaning up resources...')
-    await closeRootWatcher(rootWatcher)
-  })
 }
 
-async function closeRootWatcher(watcher: FSWatcher) {
-  if (watcher) {
-    console.log('Closing root watcher...')
-    await watcher.close()
-    console.log('Root watcher closed.')
-  }
-}
-/*
-const initWatchers = (projectPath: string, appPath: string) => {
-  let quitHandlerRegistered = false
-
-  const projectWatcher = chokidar.watch(projectPath, { ignoreInitial: true, depth: 0 })
-  const settingsWatcher = chokidar.watch(`${projectPath}/settings.yaml`, { ignoreInitial: true })
-
-  const datalogsWatcher = chokidar.watch(`${projectPath}/*.datalog`, { ignoreInitial: true })
-
-  settingsWatcher.on('change', () => {
-    loadProject(getActiveProjectPath())
-  })
-
-  const closeWatchers = () => {
-    settingsWatcher.close()
-    datalogsWatcher.close()
-    logger.debug('Watchers closed')
-  }
-  if (!quitHandlerRegistered) {
-    app.on('before-quit', closeWatchers)
-    quitHandlerRegistered = true
-  }
-}
-
-const initTemplateWatcher = () => {
-  const projectPath = getActiveProjectPath()
-  const appPath = getAppPath()
-  if (projectPath) {
-    const directories = [
-      `${projectPath}/templates/email`,
-      `${projectPath}/templates/pdf`,
-      `${appPath}/templates/email`,
-      `${appPath}/templates/pdf`
-    ]
-
-    // Ensure directories exist
-    directories.forEach((dir) => ensureDirectoryExists(dir))
-
-    const templatesWatcher = chokidar.watch(*/
-//directories.map((dir) => `${dir}/**/*.{jsx,tsx}`),
-/*{ ignoreInitial: true }
-    )
-    templatesWatcher.on('ready', () => logger.debug('TemplateWatcher has started and is ready'))
-    templatesWatcher.on('error', (error) => logger.error('TemplateWatcher error:', error))
-    templatesWatcher.on('add', (filePath) => updateTemplatesDir(filePath, 'add'))
-    templatesWatcher.on('unlink', (filePath) => updateTemplatesDir(filePath, 'remove'))
+export const closeRootWatcher = async () => {
+  if (rootWatcher) {
+    try {
+      logger.debug('Closing root watcher...')
+      await rootWatcher.close()
+      logger.debug('Root watcher closed.')
+    } catch (error) {
+      logger.error('Failed to close rootWatcher:', error)
+    } finally {
+      rootWatcher = null
+    }
   } else {
-    logger.debug('No active project to watch for TemplateWatcher')
+    logger.debug('rootWatcher is already closed or was never initialized.')
   }
 }
-
-function updateTemplatesDir(filePath: string, action: 'add' | 'remove') {
-  const activeProject = getActiveProject()
-  if (!activeProject) return
-
-  const { templatesDir } = activeProject
-
-  if (action === 'add') {
-    // Determine file type and scope based on file path
-    const type = filePath.includes('/email') ? 'email' : 'pdf'
-    const scope = filePath.includes('/project') ? 'project' : 'global'
-
-    // Add the new file entry to templatesDir
-    const newTemplate: TemplateDirectoryFile = { path: filePath, type, scope }
-    activeProject.templatesDir = [...templatesDir, newTemplate]
-  } else if (action === 'remove') {
-    // Remove the file entry from templatesDir
-    activeProject.templatesDir = templatesDir.filter((template) => template.path !== filePath)
-  }
-  // Update active project with modified templatesDir
-  setActiveProject(activeProject)
-}*/

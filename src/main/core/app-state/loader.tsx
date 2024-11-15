@@ -17,6 +17,7 @@ import { ensureDirectoryExists } from '../../utils/crud'
 import { updateState } from './updater'
 import { loadProject, loadProjectsInRootPath } from '../project/loader'
 import { initRootWatcher } from './watchers/rootWatcher'
+import { initProjectWatchers } from './watchers/projectWatchers/manager'
 
 async function loadStateFromFile(filepath: string): Promise<state | error> {
   try {
@@ -66,6 +67,7 @@ export async function loadState(): Promise<ProjectType> {
     if (loadActiveProject.success) {
       await loadProjectsInRootPath()
       await initRootWatcher()
+      await initProjectWatchers()
       logger.info('Project loaded successfully')
       return {
         rootPath: getRootPath(),

@@ -31,7 +31,11 @@ if (process.contextIsolated) {
       getFolderPath: () => ipcRenderer.invoke('getFolderPath'),
       updateDatalog: (datalog: DatalogType) => ipcRenderer.invoke('update-datalog', datalog),
       deleteDatalog: (datalog: DatalogType) => ipcRenderer.invoke('delete-datalog', datalog),
-      loadDatalogs: () => ipcRenderer.invoke('load-datalogs'),
+      //loadDatalogs: () => ipcRenderer.invoke('load-datalogs'),
+      onDatalogsLoaded: (callback: (datalogs: DatalogType[]) => void) =>
+        ipcRenderer.invoke('datalogs-loaded', (_, datalogs: DatalogType[]) => {
+          callback(datalogs)
+        }),
       generatePdf: (docDefinition, filepath) =>
         ipcRenderer.send('generate-pdf', docDefinition, filepath),
       onPdfGenerated: (callback) => ipcRenderer.on('pdf-generated', callback),

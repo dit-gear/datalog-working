@@ -1,4 +1,4 @@
-import { ProjectToUpdate, UpdateProjectResult } from '@shared/projectTypes'
+import { ProjectToUpdate, UpdateProjectResult, ProjectType } from '@shared/projectTypes'
 import YAML from 'yaml'
 import fs from 'fs'
 import path from 'path'
@@ -6,6 +6,7 @@ import { getActiveProjectPath, getRootPath, getAppPath, getActiveProject } from 
 import { loadProject } from './loader'
 import { updateState } from '../app-state/updater'
 import logger from '../logger'
+import { getMainWindow } from '../../index'
 
 const getFileName = (filePath: string): string => {
   return filePath.split('/').pop() || filePath
@@ -43,8 +44,25 @@ export const updateProjectNameFromFolderRename = async (projectPath: string) => 
 }
 
 export const updateProjectFromFile = async () => {
-  if (savingInProgress) return
+  if (savingInProgress || renamingInProgress) return
   await loadProject(getActiveProjectPath())
+  const rootPath = getRootPath()
+  const projectPath = getActiveProjectPath()
+  const data = getActiveProject()
+
+  const loadedProject: ProjectType = {
+    rootPath,
+    ...(projectPath && { projectPath }),
+    ...(data && { data })
+  }
+  const mainWindow = await getMainWindow()
+  if (mainWindow?.webContents.isLoading()) {
+    mainWindow.webContents.once('did-finish-load', () => {
+      mainWindow?.webContents.send('project-loaded', loadedProject)
+    })
+  } else {
+    mainWindow?.webContents.send('project-loaded', loadedProject)
+  }
 }
 
 export const updateProjectFolder = async (newprojectname: string) => {
@@ -54,7 +72,7 @@ export const updateProjectFolder = async (newprojectname: string) => {
     // stop project watchers
     fs.renameSync(getActiveProjectPath(), newpath)
     await updateState({ newActiveProject: newpath })
-    //restart project watchers
+    //reinitialize project watchers
   } finally {
     renamingInProgress = false
   }

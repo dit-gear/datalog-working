@@ -1,5 +1,5 @@
 import { Menu, app, Tray, nativeImage } from 'electron'
-import { getMainWindow, openMainWindow } from '../index'
+import { getMainWindow } from '../index'
 import { OpenModalTypes } from '@shared/shared-types'
 import { getTray, setTray, getProjectsInRootPath } from './app-state/state'
 import { handleChangeProject } from './project/manager'
@@ -15,13 +15,13 @@ type ProjectItem = {
 }
 
 const handleOpenModalInDatalog = async (modal: OpenModalTypes): Promise<void> => {
-  const mainWindow = await getMainWindow()
-  if (mainWindow.webContents.isLoading()) {
+  const mainWindow = await getMainWindow({ ensureOpen: true })
+  if (mainWindow?.webContents.isLoading()) {
     mainWindow.webContents.once('did-finish-load', () => {
       mainWindow.webContents.send('open-modal-datalogWindow', modal)
     })
   } else {
-    mainWindow.webContents.send('open-modal-datalogWindow', modal)
+    mainWindow?.webContents.send('open-modal-datalogWindow', modal)
   }
 }
 
@@ -36,7 +36,7 @@ const buildContextMenu = (projects: ProjectItem[] | null): Menu => {
 
     {
       label: 'Show Datalog',
-      click: (): Promise<void> => openMainWindow(),
+      click: () => getMainWindow({ ensureOpen: true }),
       enabled: Boolean(activeProject)
     }, // Opens main window
     { type: 'separator' },

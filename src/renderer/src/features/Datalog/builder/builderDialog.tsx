@@ -30,15 +30,13 @@ interface BuilderdialogProps {
   previousEntries?: DatalogType[]
   selected?: DatalogType
   setOpen: (value: boolean) => void
-  refetch: () => void
 }
 
 const Builderdialog = ({
   project,
   previousEntries,
   selected,
-  setOpen,
-  refetch
+  setOpen
 }: BuilderdialogProps): JSX.Element => {
   const [copies, setCopies] = useState<CopyType[]>(
     selected && selected.Clips ? getCopiesFromClips(selected.Clips) : []
@@ -97,7 +95,6 @@ const Builderdialog = ({
       if (res.success) {
         toast({ description: 'Data saved' })
         reset()
-        refetch()
         setOpen(false)
       } else {
         console.error(res.error)

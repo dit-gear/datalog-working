@@ -7,19 +7,13 @@ import { Columns } from './Column'
 
 interface TableProps {
   logs: DatalogType[]
-  refetch: () => void
   handleEdit: (datalog: DatalogType) => void
 }
 
-const Table: React.FC<TableProps> = React.memo(({ logs, refetch, handleEdit }) => {
+const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
   const handleDelete = async (datalog: DatalogType) => {
     try {
-      const res = await window.api.deleteDatalog(datalog)
-      if (res.success) {
-        refetch()
-      } else {
-        console.error(res.error)
-      }
+      await window.api.deleteDatalog(datalog)
     } catch (error) {
       console.error(error)
     }

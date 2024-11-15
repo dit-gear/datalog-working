@@ -9,14 +9,9 @@ import Builderdialog from './builderDialog'
 interface EntrydialogProps {
   project: ProjectRootType
   previousEntries?: DatalogType[]
-  refetch: () => void
 }
 
-const BuilderdialogTrigger = ({
-  project,
-  previousEntries,
-  refetch
-}: EntrydialogProps): JSX.Element => {
+const BuilderdialogTrigger = ({ project, previousEntries }: EntrydialogProps): JSX.Element => {
   const [open, setOpen] = useState(false)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -28,12 +23,7 @@ const BuilderdialogTrigger = ({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[80vw] h-[90vh]">
         {open && (
-          <Builderdialog
-            project={project}
-            previousEntries={previousEntries}
-            setOpen={setOpen}
-            refetch={refetch}
-          />
+          <Builderdialog project={project} previousEntries={previousEntries} setOpen={setOpen} />
         )}
       </DialogContent>
     </Dialog>

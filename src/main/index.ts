@@ -5,7 +5,15 @@ import icon from '../../resources/icon.png?asset'
 import { ProjectType } from '../shared/projectTypes'
 import { loadState } from './core/app-state/loader'
 import { setupIpcHandlers } from './core/setupIpcHandlers'
-import { getRootPath, getActiveProjectPath, getActiveProject } from './core/app-state/state'
+import {
+  getRootPath,
+  getActiveProjectPath,
+  getActiveProject,
+  datalogs
+} from './core/app-state/state'
+import { openWindow } from './utils/open-window'
+import { closeAllWatchers } from './core/app-state/watchers/closing'
+import logger from './core/logger'
 
 // Initialize the application
 app.setName('Datalog')
@@ -13,28 +21,15 @@ app.setName('Datalog')
 let mainWindow: BrowserWindow | null = null
 
 // Getter function to access mainWindow
-export async function getMainWindow(): Promise<BrowserWindow> {
-  return await ensureMainWindow()
-}
-
-async function ensureMainWindow(): Promise<BrowserWindow> {
-  await openMainWindow()
-  return mainWindow!
-}
-
-export async function openMainWindow(): Promise<void> {
+export async function getMainWindow({ ensureOpen = false } = {}): Promise<BrowserWindow | null> {
   if (mainWindow) {
-    if (mainWindow.isMinimized()) {
-      mainWindow.restore()
+    if (ensureOpen) {
+      openWindow(mainWindow)
     }
-    if (!mainWindow.isVisible() || !mainWindow.isFocused()) {
-      mainWindow.show()
-      mainWindow.focus()
-    }
-    mainWindow.focus()
   } else {
     await createWindow()
   }
+  return mainWindow
 }
 
 // Function to create the main window
@@ -67,7 +62,10 @@ async function createWindow(): Promise<void> {
 
   // **Handling did-finish-load event**
   mainWindow.webContents.on('did-finish-load', () => {
+    const loadedDatalogs = Array.from(datalogs().values())
+    logger.debug(loadedDatalogs.length > 0 ? loadedDatalogs : 'no datalogs to load')
     mainWindow?.webContents.send('project-loaded', loadedProject) // Send a message to the renderer
+    mainWindow?.webContents.send('datalogs-loaded', loadedDatalogs)
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -106,7 +104,7 @@ app.whenReady().then(() => {
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      openMainWindow()
+      getMainWindow({ ensureOpen: true })
     }
   })
 })
@@ -115,5 +113,39 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
+  }
+})
+
+process.on('SIGINT', async () => {
+  logger.debug('SIGINT received. Shutting down...')
+  await closeAllWatchers()
+  process.exit(0)
+})
+
+process.on('SIGTERM', async () => {
+  logger.debug('SIGTERM received. Shutting down...')
+  await closeAllWatchers()
+  process.exit(0)
+})
+
+const flushWinstonLogs = async (): Promise<void> => {
+  return new Promise((resolve) => {
+    logger.on('finish', resolve) // Resolves when all logs are flushed
+    logger.end() // Ends the logger and flushes all pending logs
+  })
+}
+
+app.on('will-quit', async (event) => {
+  event.preventDefault()
+
+  try {
+    logger.debug('App is quitting. Performing cleanup...')
+    await closeAllWatchers()
+    await flushWinstonLogs()
+    console.log('Cleanup complete. Quitting app.') // logger has ended, using console.
+  } catch (error) {
+    console.error('Error during app quit cleanup:', error)
+  } finally {
+    app.exit()
   }
 })

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { DatalogType } from '@shared/datalogTypes'
+import { DatalogDynamicZod, DatalogType } from '@shared/datalogTypes'
 import { ProjectType } from '@shared/projectTypes'
 import NewProjectDialog from './components/newProjectDialog'
 import Builderdialog from './features/Datalog/builder/builderDialog'
@@ -20,7 +20,7 @@ function App(): JSX.Element {
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
   const [newProjectOpen, setNewProjectOpen] = useState<boolean>(false)
 
-  const handleEntriesLoad = async (): Promise<void> => {
+  /*const handleEntriesLoad = async (): Promise<void> => {
     try {
       const res = await window.api.loadDatalogs()
       if (res.success) {
@@ -31,12 +31,11 @@ function App(): JSX.Element {
     } catch (error) {
       console.error(error)
     }
-  }
+  }*/
 
   const handleProjectLoad = (project: ProjectType): void => {
     console.log('Project loaded', project)
     setProject(project)
-    handleEntriesLoad()
   }
 
   const handleBuilderClose = (open: boolean) => {
@@ -52,6 +51,12 @@ function App(): JSX.Element {
   useEffect(() => {
     window.api.onProjectLoaded((project) => {
       handleProjectLoad(project)
+    })
+  }, [])
+
+  useEffect(() => {
+    window.api.onDatalogsLoaded((datalogs: DatalogType[]) => {
+      setLogs(datalogs)
     })
   }, [])
 
@@ -105,7 +110,6 @@ function App(): JSX.Element {
                       previousEntries={logs}
                       selected={logEdit}
                       setOpen={setBuilderOpen}
-                      refetch={handleEntriesLoad}
                     />
                   )}
                 </DialogContent>
@@ -128,7 +132,7 @@ function App(): JSX.Element {
         </div>
         {logs && (
           <div className="grow">
-            <Table logs={logs} refetch={handleEntriesLoad} handleEdit={handleItemToEdit} />
+            <Table logs={logs} handleEdit={handleItemToEdit} />
           </div>
         )}
 

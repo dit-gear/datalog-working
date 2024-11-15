@@ -78,6 +78,10 @@ export type ResponseWithDatalogs =
   | { success: true; datalogs: DatalogType[] }
   | { success: false; error: string }
 
+export type ResponseWithDatalog =
+  | { success: true; datalog: DatalogType }
+  | { success: false; error: string }
+
 // Dynamic fields on Clip
 
 const mapTypeToZod = (field: Field): z.ZodTypeAny | undefined => {
