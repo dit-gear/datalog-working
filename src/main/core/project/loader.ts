@@ -87,11 +87,11 @@ const loadTemplates = async (
 
 export const loadProject = async (selectedProjectpath: string): Promise<LoadProjectDataResult> => {
   logger.debug('loadProject started')
-  const globalFilePath = path.join(getAppPath(), 'settings.yaml')
+  const globalFilePath = path.join(getAppPath(), 'config.yaml')
   if (!fs.existsSync(globalFilePath)) {
     fs.writeFileSync(globalFilePath, '', 'utf8')
   }
-  const projectFilePath = path.join(selectedProjectpath, 'settings.yaml')
+  const projectFilePath = path.join(selectedProjectpath, 'config.yaml')
   if (!fs.existsSync(projectFilePath)) {
     logger.error('No settings file found in project')
     return { success: false, message: 'Project not found' }
@@ -143,7 +143,7 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
     logger.error(errorMessage)
     return {
       success: false,
-      message: `${errorMessage}. Check error logs and correct any issues in settings.yaml`
+      message: `${errorMessage}. Check error logs and correct any issues in config.yaml`
     }
   }
 }
@@ -153,7 +153,7 @@ export const loadProjectsInRootPath = async (): Promise<void> => {
   const projectPath = getActiveProjectPath()
 
   const yamlFiles = await findFilesByType(getRootPath(), 'yaml', {
-    includeFileName: 'settings.yaml',
+    includeFileName: 'config.yaml',
     maxDepth: 1
   })
   const projects = yamlFiles.map((filePath) => {

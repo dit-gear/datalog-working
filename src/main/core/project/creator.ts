@@ -25,7 +25,7 @@ async function createTemplateFolder(basePath: string): Promise<void> {
 
 async function createProject(projectName: string): Promise<CreateNewProjectResult> {
   const newProjectPath = path.join(getRootPath(), projectName)
-  const filepath = path.join(newProjectPath, 'settings.yaml')
+  const filepath = path.join(newProjectPath, 'config.yaml')
   const defaultYaml = {
     project_name: projectName,
     folder_template: 'D<dd>_<yymmdd>'

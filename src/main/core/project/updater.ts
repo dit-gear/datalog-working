@@ -29,7 +29,7 @@ export const updateProjectNameFromFolderRename = async (projectPath: string) => 
   const projectYaml = YAML.stringify(project.settings.project)
   await updateState({ newActiveProject: projectPath })
   try {
-    const projectSettingsPath = path.join(getActiveProjectPath(), 'settings.yaml')
+    const projectSettingsPath = path.join(getActiveProjectPath(), 'config.yaml')
     fs.writeFileSync(projectSettingsPath, projectYaml, 'utf-8')
     const result = await loadProject(getActiveProjectPath())
     if (result.success) {
@@ -92,8 +92,8 @@ export const updateProject = async ({
     if (newprojectname !== oldprojectname && !renamingInProgress) {
       await updateProjectFolder(newprojectname)
     }
-    const projectSettingsPath = path.join(getActiveProjectPath(), 'settings.yaml')
-    const globalSettingsPath = path.join(getAppPath(), 'settings.yaml')
+    const projectSettingsPath = path.join(getActiveProjectPath(), 'config.yaml')
+    const globalSettingsPath = path.join(getAppPath(), 'config.yaml')
     savingInProgress = true
     try {
       fs.writeFileSync(projectSettingsPath, projectYaml, 'utf8')

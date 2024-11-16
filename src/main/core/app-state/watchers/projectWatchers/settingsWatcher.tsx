@@ -9,7 +9,7 @@ let settingsWatcher: FSWatcher | null = null
 export const initSettingsWatcher = async () => {
   const projectPath = getActiveProjectPath()
   if (!projectPath) throw Error
-  settingsWatcher = chokidar.watch(`${projectPath}/settings.yaml`, { ignoreInitial: true })
+  settingsWatcher = chokidar.watch(`${projectPath}/config.yaml`, { ignoreInitial: true })
 
   settingsWatcher.on('ready', () => {
     logger.debug('settingsWatcher started')

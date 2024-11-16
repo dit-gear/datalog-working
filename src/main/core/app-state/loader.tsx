@@ -38,7 +38,7 @@ async function loadStateFromFile(filepath: string): Promise<state | error> {
 async function loadConfig(): Promise<void> {
   try {
     await ensureTemplateFoldersExistSync()
-    const configPath = path.join(getAppPath(), 'config.json') as string
+    const configPath = path.join(getAppPath(), 'appconfig.json') as string
     const defaultRootPath = path.join(app.getPath('documents'), 'Datalog')
     if (fs.existsSync(configPath)) {
       const config = await loadStateFromFile(configPath)

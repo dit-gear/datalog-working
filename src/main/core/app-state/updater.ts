@@ -15,7 +15,7 @@ interface updateProps {
 
 async function saveStateToFile(data: state): Promise<error | undefined> {
   try {
-    const filePath = path.join(app.getPath('userData'), 'config.json')
+    const filePath = path.join(app.getPath('userData'), 'appconfig.json')
     const encryptedData = encryptData(data)
     fs.writeFileSync(filePath, JSON.stringify(encryptedData), 'utf8')
     return

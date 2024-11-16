@@ -20,19 +20,6 @@ function App(): JSX.Element {
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
   const [newProjectOpen, setNewProjectOpen] = useState<boolean>(false)
 
-  /*const handleEntriesLoad = async (): Promise<void> => {
-    try {
-      const res = await window.api.loadDatalogs()
-      if (res.success) {
-        setLogs(res.datalogs)
-      } else {
-        console.error(res.error)
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }*/
-
   const handleProjectLoad = (project: ProjectType): void => {
     console.log('Project loaded', project)
     setProject(project)
@@ -56,6 +43,7 @@ function App(): JSX.Element {
 
   useEffect(() => {
     window.api.onDatalogsLoaded((datalogs: DatalogType[]) => {
+      console.log(`datalogs: ${datalogs}`)
       setLogs(datalogs)
     })
   }, [])

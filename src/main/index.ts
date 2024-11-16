@@ -63,7 +63,6 @@ async function createWindow(): Promise<void> {
   // **Handling did-finish-load event**
   mainWindow.webContents.on('did-finish-load', () => {
     const loadedDatalogs = Array.from(datalogs().values())
-    logger.debug(loadedDatalogs.length > 0 ? loadedDatalogs : 'no datalogs to load')
     mainWindow?.webContents.send('project-loaded', loadedProject) // Send a message to the renderer
     mainWindow?.webContents.send('datalogs-loaded', loadedDatalogs)
   })
