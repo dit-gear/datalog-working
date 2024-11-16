@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Input } from '@components/ui/input'
 import { FormField, FormItem, FormControl, FormLabel, FormMessage, Form } from '@components/ui/form'
+import { TemplateDirectoryFile } from '@shared/projectTypes'
 import {
   Select,
   SelectContent,
@@ -25,19 +26,22 @@ import {
 import MultiSelectTextInput from '@components/MultiSelectTextInput'
 import { Button } from '@components/ui/button'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { getFileName } from '@renderer/utils/formatString'
 
 interface EmailTemplateProps {
   append: (email: emailType) => void
   update: (index: number, email: emailType) => void
   emailEdit: emailEditType | null
   setEmailEdit: (edit: emailEditType | null) => void
+  templates: TemplateDirectoryFile[]
 }
 
 const EmailTemplate: React.FC<EmailTemplateProps> = ({
   append,
   update,
   emailEdit,
-  setEmailEdit
+  setEmailEdit,
+  templates
 }) => {
   const [open, setOpen] = useState<boolean>(false)
   const defaultValues = {
@@ -200,8 +204,13 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
                     <SelectContent>
                       <SelectGroup>
                         <SelectItem value="Plain-Text">Plain Text</SelectItem>
-                        <SelectItem value="starter.jsx">starter.jsx</SelectItem>
-                        <SelectItem value="starter2.jsx">starter2.jsx</SelectItem>
+                        {templates
+                          .filter((template) => template.type === 'email')
+                          .map((template) => (
+                            <SelectItem key={template.path} value={template.path}>
+                              {getFileName(template.path)}
+                            </SelectItem>
+                          ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>

@@ -110,6 +110,7 @@ function App(): JSX.Element {
                 </DialogTrigger>
                 <Settings
                   defaults={project.data.settings}
+                  templates={project.data.templatesDir}
                   setProject={setProject}
                   open={settingsOpen}
                   setOpen={setSettingsOpen}

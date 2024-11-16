@@ -3,6 +3,7 @@ import { CardContent } from '@components/ui/card'
 import { useFormContext, useFieldArray } from 'react-hook-form'
 import { formSchemaType } from '../types'
 import { emailEditType } from './types'
+import { TemplateDirectoryFile } from '@shared/projectTypes'
 import {
   Accordion,
   AccordionContent,
@@ -19,12 +20,14 @@ import { MoreHorizontal } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import EmailTemplate from './EmailTemplate'
 import ApiKeyDialog from './ApiKeyDialog'
+import { getFileName } from '@renderer/utils/formatString'
 
 interface EmailProps {
   scope: 'project' | 'global'
+  templates: TemplateDirectoryFile[]
 }
 
-const Emails: React.FC<EmailProps> = ({ scope }) => {
+const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
   const { control } = useFormContext<formSchemaType>()
   const { fields, append, remove, update } = useFieldArray({
     control,
@@ -71,7 +74,7 @@ const Emails: React.FC<EmailProps> = ({ scope }) => {
                   <p>Email Message:</p>
                   <p>{email.message}</p>
                   <p>React template:</p>
-                  <p>{email.template}</p>
+                  <p>{getFileName(email.template)}</p>
                 </AccordionContent>
               </AccordionItem>
             ))}
@@ -81,6 +84,7 @@ const Emails: React.FC<EmailProps> = ({ scope }) => {
             update={update}
             emailEdit={emailEdit}
             setEmailEdit={setEmailEdit}
+            templates={templates}
           />
         </dd>
       </div>

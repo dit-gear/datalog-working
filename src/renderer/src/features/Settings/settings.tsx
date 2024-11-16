@@ -5,7 +5,7 @@ import { useForm, FormProvider, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@components/ui/form'
 import { removeEmptyFields, removePrefixFields } from '@renderer/utils/form'
-import { ProjectSettingsType, ProjectType } from '@shared/projectTypes'
+import { ProjectSettingsType, ProjectType, TemplateDirectoryFile } from '@shared/projectTypes'
 import { formSchemaType, formSchema, Scope } from './types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { ScrollArea } from '@components/ui/scroll-area'
@@ -25,12 +25,19 @@ import EmailTab from './Email/EmailTab'
 
 interface SettingsDialogProps {
   defaults: ProjectSettingsType
+  templates: TemplateDirectoryFile[]
   setProject: Dispatch<SetStateAction<ProjectType | undefined>>
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
 }
 
-const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject, open, setOpen }) => {
+const Settings: React.FC<SettingsDialogProps> = ({
+  defaults,
+  templates,
+  setProject,
+  open,
+  setOpen
+}) => {
   const [scope, setScope] = useState<Scope>('project')
 
   useEffect(() => {
@@ -145,7 +152,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, setProject, open, s
                   <ParsingTab scope={scope} />
                 </TabsContent>
                 <TabsContent value="email">
-                  <EmailTab scope={scope} />
+                  <EmailTab scope={scope} templates={templates} />
                 </TabsContent>
               </ScrollArea>
 

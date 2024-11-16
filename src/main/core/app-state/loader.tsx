@@ -9,8 +9,7 @@ import {
   setActiveProjectPath,
   getAppPath,
   getRootPath,
-  getActiveProjectPath,
-  setActiveProject
+  getActiveProjectPath
 } from './state'
 import logger from '../logger'
 import { ensureDirectoryExists } from '../../utils/crud'
