@@ -38,7 +38,7 @@ const NewProjectDialog = ({
   })
 
   function onSubmit(values: z.infer<typeof projectSchema>): void {
-    window.api.createNewProject(values.name).then((result) => {
+    window.mainApi.createNewProject(values.name).then((result) => {
       if (result.success && result.project) {
         console.log('Project created successfully')
         setActiveProject(result.project)

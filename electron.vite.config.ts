@@ -17,7 +17,8 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
-          mainPreload: resolve(__dirname, 'src/preload/index.ts'),
+          mainPreload: resolve(__dirname, 'src/preload/main/mainPreload.ts'),
+          editorWindow: resolve(__dirname, 'src/preload/editor/editorPreload.ts'),
           sendPreload: resolve(__dirname, 'src/preload/send/sendPreload.ts')
         }
       }

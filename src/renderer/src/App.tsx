@@ -36,20 +36,20 @@ function App(): JSX.Element {
   }, [])
 
   useEffect(() => {
-    window.api.onProjectLoaded((project) => {
+    window.mainApi.onProjectLoaded((project) => {
       handleProjectLoad(project)
     })
   }, [])
 
   useEffect(() => {
-    window.api.onDatalogsLoaded((datalogs: DatalogType[]) => {
+    window.mainApi.onDatalogsLoaded((datalogs: DatalogType[]) => {
       console.log(`datalogs: ${datalogs}`)
       setLogs(datalogs)
     })
   }, [])
 
   useEffect(() => {
-    window.api.onOpenModalInDatalog((modal) => {
+    window.mainApi.onOpenModalInDatalog((modal) => {
       // Todo: Handle so that only one is opened at the same time.
       switch (modal) {
         case 'new-shooting-day':
@@ -80,7 +80,7 @@ function App(): JSX.Element {
         <div>
           {project?.data ? (
             <div className="flex justify-end gap-4">
-              <Button onClick={() => window.api.openSendWindow()}>
+              <Button onClick={() => window.sendApi.openSendWindow()}>
                 <SendIcon className="mr-2 h-4 w-4" />
                 Send
               </Button>

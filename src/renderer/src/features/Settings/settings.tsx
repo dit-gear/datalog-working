@@ -88,7 +88,7 @@ const Settings: React.FC<SettingsDialogProps> = ({
     const update_settings = { project: projectfields, global: globalfields } as ProjectSettingsType
 
     try {
-      const result = await window.api.updateProject({ update_settings, update_email_api })
+      const result = await window.mainApi.updateProject({ update_settings, update_email_api })
       if (result.success) {
         setProject(result.project)
         console.log('project should be set with:', result.project)

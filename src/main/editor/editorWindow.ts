@@ -1,7 +1,12 @@
 import { BrowserWindow } from 'electron'
 import { join } from 'path'
 import { watchDirectories } from '../utils/editor-file-handler'
-import { getActiveProjectPath, getActiveProject, getAppPath, datalogs } from '../core/app-state/state'
+import {
+  getActiveProjectPath,
+  getActiveProject,
+  getAppPath,
+  datalogs
+} from '../core/app-state/state'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../../resources/icon.png?asset'
 import { setupIpcHandlers } from './ipcHandlers'
@@ -24,7 +29,7 @@ export function createEditorWindow(): void {
     titleBarStyle: 'hiddenInset',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, '../preload/editorPreload.js'),
       sandbox: false,
       contextIsolation: true,
       nodeIntegration: false

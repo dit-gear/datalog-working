@@ -91,7 +91,7 @@ const Builderdialog = ({
     console.log('unclean:', data)
     const cleanedData = removeEmptyFields(data) as DatalogType
     try {
-      const res = await window.api.updateDatalog(cleanedData)
+      const res = await window.mainApi.updateDatalog(cleanedData)
       if (res.success) {
         toast({ description: 'Data saved' })
         reset()
@@ -121,7 +121,7 @@ const Builderdialog = ({
   const handleRemoveCopy = async (paths: PathType[]): Promise<void> => {
     const fullPaths = paths.map((item) => item.full)
     try {
-      const res = await window.api.removeLogPath(fullPaths)
+      const res = await window.mainApi.removeLogPath(fullPaths)
       if (res.success) {
         updateClips(res.clips, true)
       } else {
@@ -134,7 +134,7 @@ const Builderdialog = ({
 
   const handleAddCopy = async (): Promise<void> => {
     try {
-      const res = await window.api.findOcf()
+      const res = await window.mainApi.findOcf()
       if (res.success) {
         updateClips(res.clips, true)
       } else {
@@ -148,7 +148,7 @@ const Builderdialog = ({
 
   const handleGetProxies = async (): Promise<void> => {
     try {
-      const res = await window.api.getProxies()
+      const res = await window.mainApi.getProxies()
       if (res.success) {
         updateClips(res.clips)
       } else {
@@ -162,7 +162,7 @@ const Builderdialog = ({
 
   const handleRemoveProxies = async (): Promise<void> => {
     try {
-      const res = await window.api.removeProxies()
+      const res = await window.mainApi.removeProxies()
       if (res.success) {
         updateClips(res.clips)
       } else {
@@ -175,7 +175,7 @@ const Builderdialog = ({
 
   const handleGetCsv = async (): Promise<void> => {
     try {
-      const res = await window.api.getCsvMetadata()
+      const res = await window.mainApi.getCsvMetadata()
       if (res.success) {
         updateClips(res.clips)
       } else {

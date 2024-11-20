@@ -10,7 +10,7 @@ const EditorWrapper = () => {
   const { loadedFile, setLoadedFile } = useLoadedFile()
 
   useEffect(() => {
-    window.api.onResponseReadFile((response) => {
+    window.editorApi.onResponseReadFile((response) => {
       handleApiResponse(response, (loadedFile: LoadedFile) => {
         setLoadedFile(loadedFile)
       })

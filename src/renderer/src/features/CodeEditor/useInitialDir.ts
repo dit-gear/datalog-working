@@ -10,7 +10,7 @@ const useInitialDir = () => {
   useEffect(() => {
     const fetchInitialData = async (): Promise<void> => {
       try {
-        const data = await window.api.getInitialDir()
+        const data = await window.editorApi.getInitialDir()
         const { dir, path } = data
         setDir(dir)
         setPath(path)
@@ -31,11 +31,11 @@ const useInitialDir = () => {
       setDir(files)
     }
 
-    window.api.onDirChanged(handleDirectoryChanged)
+    window.editorApi.onDirChanged(handleDirectoryChanged)
 
     // Cleanup listeners on unmount
     return (): void => {
-      window.api.removeAllListeners('directory-changed')
+      window.editorApi.removeAllListeners('directory-changed')
     }
   }, [])
 

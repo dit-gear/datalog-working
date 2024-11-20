@@ -17,7 +17,7 @@ export const LoadedFileProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (!loading && dir.length > 0 && !loadedFile) {
       const firstFile = dir.find((file) => file.type === 'email' || file.type === 'pdf')
       if (firstFile) {
-        window.api.requestReadFile(firstFile)
+        window.editorApi.requestReadFile(firstFile)
       }
     }
   }, [dir, loading, loadedFile])

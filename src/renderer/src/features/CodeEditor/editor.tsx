@@ -255,7 +255,7 @@ const Editor = ({ loadedFile }: EditorProps) => {
     if (isFormatOnSave) {
       codeToSave = await formatter(editorContent)
     }
-    const response = await window.api.saveFile({ ...loadedFile, content: codeToSave })
+    const response = await window.editorApi.saveFile({ ...loadedFile, content: codeToSave })
     if (response.success) {
       console.log('File saved successfully')
     } else {

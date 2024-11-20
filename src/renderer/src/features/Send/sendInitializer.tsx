@@ -8,7 +8,7 @@ const SendInitializer = () => {
   const [projectTemplates, setProjectTemplates] = useState<TemplateDirectoryFile[]>([])
 
   useEffect(() => {
-    window.send.initSendWindow((project) => {
+    window.sendApi.initSendWindow((project) => {
       const emails = project?.emails
       const templates = project?.templatesDir
       if (emails) setProjectEmails(emails)

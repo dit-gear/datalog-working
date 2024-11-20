@@ -14,7 +14,7 @@ const sendApi = {
 
 if (process.contextIsolated) {
   try {
-    contextBridge.exposeInMainWorld('send', sendApi)
+    contextBridge.exposeInMainWorld('sendApi', sendApi)
   } catch (error) {
     console.error(error)
   }

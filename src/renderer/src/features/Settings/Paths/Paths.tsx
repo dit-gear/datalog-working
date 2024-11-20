@@ -23,7 +23,7 @@ const Paths = ({ scope }: PathsTabProps): ReactElement => {
 
   const handleAddOcfPath = async (): Promise<void> => {
     try {
-      const res = await window.api.getFolderPath()
+      const res = await window.mainApi.getFolderPath()
       if (res.success) {
         // @ts-ignore
         append(res.data)
@@ -35,7 +35,7 @@ const Paths = ({ scope }: PathsTabProps): ReactElement => {
 
   const handleAddProxiesPath = async (): Promise<void> => {
     try {
-      const res = await window.api.getFolderPath()
+      const res = await window.mainApi.getFolderPath()
       if (res.success) {
         setValue(`${scope}_default_proxies_path`, res.data)
       } else console.log(res.error)

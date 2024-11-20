@@ -13,7 +13,7 @@ interface TableProps {
 const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
   const handleDelete = async (datalog: DatalogType) => {
     try {
-      await window.api.deleteDatalog(datalog)
+      await window.mainApi.deleteDatalog(datalog)
     } catch (error) {
       console.error(error)
     }

@@ -9,7 +9,7 @@ export const EmailPreview = () => {
 
   const fetchFileContent = async (email: string) => {
     try {
-      const content = await window.send.getFileContent(email)
+      const content = await window.sendApi.getFileContent(email)
       if (previewWorkerRef.current) {
         previewWorkerRef.current.postMessage({ code: content, type: 'email' })
       }

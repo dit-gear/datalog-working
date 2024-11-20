@@ -63,7 +63,7 @@ const NewTemplateDialog = forwardRef<NewTemplateDialogHandle>((_, ref) => {
       filetype: fileType,
       isNewFile: true
     }
-    window.api
+    window.editorApi
       .saveFile(File)
       .then((response) => {
         if (response.success) {

@@ -14,7 +14,7 @@ const ProgressDialog = (): JSX.Element => {
   const [progressBar, setProgressBar] = useState<number>(0)
 
   useEffect(() => {
-    const deregister = window.api.showProgressListener((show, progress) => {
+    const deregister = window.mainApi.showProgressListener((show, progress) => {
       setShowProgress(show)
       setProgressBar(progress)
     })

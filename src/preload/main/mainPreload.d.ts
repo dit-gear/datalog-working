@@ -1,30 +1,18 @@
-import { ElectronAPI } from '@electron-toolkit/preload'
 import {
   ProjectType,
   ProjectToUpdate,
   UpdateProjectResult,
   CreateNewProjectResult,
-  OfflineFolderType,
-  CopyDestination,
-  InitialDir,
-  DirectoryFile,
-  LoadedFile,
   Response,
   ResponseWithString,
   OpenModalTypes
 } from '@shared/shared-types'
-import {
-  ClipType,
-  DatalogType,
-  ResponseWithClips,
-  ResponseWithDatalogs
-} from '@shared/datalogTypes'
-import { ProjectRootType, TemplateDirectoryFile } from '@shared/projectTypes'
+import { DatalogType, ResponseWithClips } from '@shared/datalogTypes'
+import { TemplateDirectoryFile } from '@shared/projectTypes'
 
 declare global {
   interface Window {
-    electron: ElectronAPI
-    api: {
+    mainApi: {
       onRootPathChanged: (callback: (dirFolderPath: string) => void) => void
       onOpenModalInDatalog: (callback: (modal: OpenModalTypes) => void) => void
       createNewProject: (projectName: string) => Promise<CreateNewProjectResult>
@@ -33,7 +21,6 @@ declare global {
       getFolderPath: () => Promise<ResponseWithString>
       updateDatalog: (datalog: DatalogType) => Promise<Response>
       deleteDatalog: (datalog: DatalogType) => Promise<Response>
-      //loadDatalogs: () => Promise<ResponseWithDatalogs>
       onDatalogsLoaded: (callback: (datalogs: DatalogType[]) => void) => void
       findOcf: () => Promise<ResponseWithClips>
       removeLogPath: (paths: string[]) => Promise<ResponseWithClips>
@@ -45,15 +32,6 @@ declare global {
       onDirectoryLoaded: (
         callback: (event: Electron.IpcRendererEvent, files: TemplateDirectoryFile[]) => void
       ) => void
-      getInitialDir: () => Promise<InitialDir>
-      onDirChanged: (
-        callback: (event: Electron.IpcRendererEvent, files: TemplateDirectoryFile[]) => void
-      ) => void
-      removeAllListeners: (channel: string) => void
-      requestReadFile: (file: TemplateDirectoryFile) => void
-      onResponseReadFile: (callback: (file: LoadedFile | { error: string }) => void) => void
-      saveFile: (file: LoadedFile) => Promise<Response>
-      deleteFile: (file: TemplateDirectoryFile) => Promise<Response>
     }
   }
 }

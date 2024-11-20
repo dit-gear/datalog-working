@@ -150,7 +150,7 @@ const Send = ({ defaults, projectTemplates }: SendProps) => {
           </ResizablePanel>
         </ResizablePanelGroup>
         <div className="fixed bottom-0 left-0 w-full flex justify-end gap-4 p-4 border-t">
-          <Button variant="ghost" onClick={() => window.send.closeSendWindow()}>
+          <Button variant="ghost" onClick={() => window.sendApi.closeSendWindow()}>
             Cancel
           </Button>
           <Button>Send</Button>
