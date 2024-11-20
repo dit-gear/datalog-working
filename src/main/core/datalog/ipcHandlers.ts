@@ -8,6 +8,7 @@ import removeProxies from './builder/remove-proxies'
 import parseCsv from './builder/parse-csv'
 import updateDatalog from './updater'
 import deleteDatalog from './delete'
+import { createSendWindow } from '../../send/sendWindow'
 
 export function setupDatalogIpcHandlers(): void {
   ipcMain.handle('findOcf', async (): Promise<ResponseWithClips> => {
@@ -33,10 +34,12 @@ export function setupDatalogIpcHandlers(): void {
   ipcMain.handle('update-datalog', async (_, datalog: DatalogType): Promise<Response> => {
     return await updateDatalog(datalog)
   })
-  /*ipcMain.handle('load-datalogs', async (): Promise<ResponseWithDatalogs> => {
-    return await loadDatalogs()
-  })*/
+
   ipcMain.handle('delete-datalog', async (_, datalog: DatalogType): Promise<Response> => {
     return await deleteDatalog(datalog)
+  })
+
+  ipcMain.on('open-send-window', () => {
+    createSendWindow()
   })
 }

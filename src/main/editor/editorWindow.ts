@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron'
 import { join } from 'path'
 import { watchDirectories } from '../utils/editor-file-handler'
-import { getActiveProjectPath, getAppPath } from '../core/app-state/state'
+import { getActiveProjectPath, getActiveProject, getAppPath, datalogs } from '../core/app-state/state'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../../resources/icon.png?asset'
 import { setupIpcHandlers } from './ipcHandlers'
@@ -26,7 +26,8 @@ export function createEditorWindow(): void {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
-      contextIsolation: true
+      contextIsolation: true,
+      nodeIntegration: false
     }
   })
 
@@ -41,7 +42,9 @@ export function createEditorWindow(): void {
   })
 
   editorWindow.webContents.once('did-finish-load', () => {
-    watchDirectories(editorWindow!, getActiveProjectPath(), getAppPath())
+    const loadedDatalogs = Array.from(datalogs().values())
+    //watchDirectories(editorWindow!, getActiveProjectPath(), getAppPath())
+    editorWindow?.webContents.send('init-editorwindow', 'data')
   })
 
   editorWindow.on('ready-to-show', () => {

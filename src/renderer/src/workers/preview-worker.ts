@@ -2,16 +2,19 @@ import React from 'react'
 import ReactDOMServer from 'react-dom/server'
 import { transform } from 'sucrase'
 import { pdf } from '@react-pdf/renderer'
+import { DatalogType } from '@shared/datalogTypes'
+import { Datalog } from '@shared/utils/datalog-methods'
 
 // `${transpiledCode}\nreturn Emailtest;`
 
 interface PreviewWorkerRequest {
   code: string
   type: 'email' | 'pdf'
+  datalogData: DatalogType
 }
 
 self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void> => {
-  const { code, type } = event.data
+  const { code, type, datalogData } = event.data
   let components: Record<string, unknown> = {}
 
   try {
@@ -87,6 +90,8 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
       }
     }
 
+    const datalog = new Datalog(datalogData)
+
     const transpiledCode = transform(code, {
       transforms: ['typescript', 'jsx', 'imports'],
       preserveDynamicImport: true
@@ -102,7 +107,7 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
     const Component = new Function('React', ...Object.keys(components), 'data', wrappedCode)(
       React,
       ...Object.values(components),
-      data
+      datalog
     )
 
     let renderedContent

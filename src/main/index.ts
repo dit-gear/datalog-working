@@ -54,7 +54,7 @@ async function createWindow(): Promise<void> {
     titleBarStyle: 'hiddenInset',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, '../preload/mainPreload.js'),
       sandbox: false,
       contextIsolation: true
     }

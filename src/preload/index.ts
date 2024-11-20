@@ -7,12 +7,32 @@ import { ProjectRootType, TemplateDirectoryFile } from '@shared/projectTypes'
 // Custom APIs for renderer
 const api = {}
 
+const editorApi = {
+  initEditorWindow: (
+    callback: (data: { project: ProjectRootType | null; datalogs: DatalogType[] }) => void
+  ) =>
+    ipcRenderer.on(
+      'init-editor-window',
+      (_, data: { project: ProjectRootType | null; datalogs: DatalogType[] }) => {
+        callback(data)
+      }
+    ),
+  onDirChanged: (callback) => ipcRenderer.on('directory-changed', callback),
+  removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
+  requestReadFile: (file: TemplateDirectoryFile) => ipcRenderer.send('request-read-file', file),
+  onResponseReadFile: (callback: (file: LoadedFile | { error: string }) => void) =>
+    ipcRenderer.on('response-read-file', (_, file) => callback(file)),
+  saveFile: (file: LoadedFile) => ipcRenderer.invoke('save-file', file),
+  deleteFile: (file: TemplateDirectoryFile) => ipcRenderer.invoke('delete-file', file)
+}
+
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
 if (process.contextIsolated) {
   try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
+    //contextBridge.exposeInMainWorld('electron', electronAPI)
+    contextBridge.exposeInMainWorld('editor', editorApi)
     contextBridge.exposeInMainWorld('api', {
       onRootPathChanged: (callback) =>
         ipcRenderer.on('root-path-changed', (_, dirFolderPath) => {
@@ -52,18 +72,23 @@ if (process.contextIsolated) {
       getProxies: () => ipcRenderer.invoke('getProxies'),
       removeProxies: () => ipcRenderer.invoke('removeProxies'),
       getCsvMetadata: () => ipcRenderer.invoke('getCsvMetadata'),
-      getInitialDir: () => ipcRenderer.invoke('get-initial-data'),
+      //getInitialDir: () => ipcRenderer.invoke('get-initial-data'),
+      initEditorWindow: (
+        callback: (data: { project: ProjectRootType | null; datalogs: DatalogType[] }) => void
+      ) =>
+        ipcRenderer.on(
+          'init-editor-window',
+          (_, data: { project: ProjectRootType | null; datalogs: DatalogType[] }) => {
+            callback(data)
+          }
+        ),
       onDirChanged: (callback) => ipcRenderer.on('directory-changed', callback),
       removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
       requestReadFile: (file: TemplateDirectoryFile) => ipcRenderer.send('request-read-file', file),
       onResponseReadFile: (callback: (file: LoadedFile | { error: string }) => void) =>
         ipcRenderer.on('response-read-file', (_, file) => callback(file)),
       saveFile: (file: LoadedFile) => ipcRenderer.invoke('save-file', file),
-      deleteFile: (file: TemplateDirectoryFile) => ipcRenderer.invoke('delete-file', file),
-      initSendWindow: (callback: (project: ProjectRootType | null) => void) =>
-        ipcRenderer.on('init-sendwindow', (_, project: ProjectRootType | null) => {
-          callback(project)
-        })
+      deleteFile: (file: TemplateDirectoryFile) => ipcRenderer.invoke('delete-file', file)
     })
   } catch (error) {
     console.error(error)

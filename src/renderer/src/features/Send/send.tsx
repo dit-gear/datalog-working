@@ -7,17 +7,18 @@ import { Button } from '@components/ui/button'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@components/ui/resizable'
 import { Tabs, TabsTrigger, TabsContent } from '@components/ui/tabs'
 import { TabsList } from '@radix-ui/react-tabs'
-import { Settings } from 'lucide-react'
-import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
-import { Select, SelectContent, SelectItem, SelectValue } from '@components/ui/select'
+import { Select, SelectContent, SelectItem } from '@components/ui/select'
 import { SelectTrigger } from '@components/SelectIconTrigger'
-import { emailType } from '@shared/projectTypes'
+import { emailType, TemplateDirectoryFile } from '@shared/projectTypes'
+import { getFileName } from '@renderer/utils/formatString'
+import { EmailPreview } from './emailPreview'
 
 interface SendProps {
   defaults: emailType | null
+  projectTemplates: TemplateDirectoryFile[]
 }
 
-const Send = ({ defaults }: SendProps) => {
+const Send = ({ defaults, projectTemplates }: SendProps) => {
   const form = useForm({
     defaultValues: {
       recipients: defaults?.recipients ?? [],
@@ -31,9 +32,9 @@ const Send = ({ defaults }: SendProps) => {
   const { control } = form
   return (
     <div className="min-h-[calc(100vh-36px)] border-t flex flex-col">
-      <ResizablePanelGroup className="flex-grow pb-20" direction="horizontal">
-        <ResizablePanel className="px-8 mt-4" defaultSize={40} maxSize={75}>
-          <Form {...form}>
+      <Form {...form}>
+        <ResizablePanelGroup className="flex-grow pb-20" direction="horizontal">
+          <ResizablePanel className="px-8 mt-4" defaultSize={40} maxSize={75}>
             <div className="flex flex-col flex-grow gap-4 h-full pb-4">
               <FormField
                 control={control}
@@ -92,47 +93,69 @@ const Send = ({ defaults }: SendProps) => {
                 )}
               />
             </div>
-          </Form>
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel className="mx-8 overflow-visible" defaultSize={60} maxSize={75}>
-          <Tabs defaultValue="email" className="overflow-visible">
-            <TabsList
-              className="absolute -mt-10 overflow-visible z-20 flex gap-1"
-              style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-            >
-              <TabsTrigger
-                value="email"
-                className="border-t border-l border-r rounded-t-lg px-4 pb-2"
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel className="mx-8 overflow-visible" defaultSize={60} maxSize={75}>
+            <Tabs defaultValue="email" className="overflow-visible h-full">
+              <TabsList
+                className="absolute -mt-10 overflow-visible z-20 flex gap-1"
+                style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
               >
-                <span className="flex gap-4 h-4 items-center">
-                  Email Preview
-                  <Select defaultValue={'datalog.jsx'}>
-                    <SelectTrigger></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="datalog.jsx">datalog.jsx</SelectItem>
-                      <SelectItem value="dark">logilog.jsx</SelectItem>
-                      <SelectItem value="system">lensreport.jsx</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="datalog.pdf"
-                className="border-t border-l border-r rounded-t-lg px-4 pb-2"
-              >
-                datalog.pdf
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="email">email</TabsContent>
-            <TabsContent value="datalog.pdf">pdf</TabsContent>
-          </Tabs>
-        </ResizablePanel>
-      </ResizablePanelGroup>
-      <div className="fixed bottom-0 left-0 w-full flex justify-end gap-4 p-4 border-t">
-        <Button variant="ghost">Cancel</Button>
-        <Button>Send</Button>
-      </div>
+                <TabsTrigger
+                  value="email"
+                  className="border-t border-l border-r rounded-t-lg px-4 pb-2"
+                >
+                  <span className="flex gap-4 h-4 items-center">
+                    Email Preview
+                    <FormField
+                      control={control}
+                      name="reacttemplate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Select
+                              defaultValue={field.value}
+                              onValueChange={(value) => field.onChange(value)} // Update the form state
+                            >
+                              <SelectTrigger />
+                              <SelectContent>
+                                <SelectItem value="plain-text">Plain-text</SelectItem>
+                                {projectTemplates
+                                  .filter((template) => template.type === 'email')
+                                  .map((template) => (
+                                    <SelectItem key={template.path} value={template.path}>
+                                      {getFileName(template.path)}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="datalog.pdf"
+                  className="border-t border-l border-r rounded-t-lg px-4 pb-2"
+                >
+                  datalog.pdf
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="email" className="h-full w-full">
+                <EmailPreview />
+              </TabsContent>
+              <TabsContent value="datalog.pdf">pdf</TabsContent>
+            </Tabs>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+        <div className="fixed bottom-0 left-0 w-full flex justify-end gap-4 p-4 border-t">
+          <Button variant="ghost" onClick={() => window.send.closeSendWindow()}>
+            Cancel
+          </Button>
+          <Button>Send</Button>
+        </div>
+      </Form>
     </div>
   )
 }

@@ -13,7 +13,15 @@ export default defineConfig({
     }
   },
   preload: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin()],
+    build: {
+      rollupOptions: {
+        input: {
+          mainPreload: resolve(__dirname, 'src/preload/index.ts'),
+          sendPreload: resolve(__dirname, 'src/preload/send/sendPreload.ts')
+        }
+      }
+    }
   },
   renderer: {
     resolve: {
@@ -28,8 +36,9 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
-          browser: resolve(__dirname, 'src/renderer/index.html'),
-          editor: resolve(__dirname, 'src/renderer/editor.html')
+          mainWindow: resolve(__dirname, 'src/renderer/index.html'),
+          editorWindow: resolve(__dirname, 'src/renderer/editor.html'),
+          sendWindow: resolve(__dirname, 'src/renderer/send.html')
         }
       }
     }

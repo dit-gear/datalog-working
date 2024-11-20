@@ -1,8 +1,9 @@
-import { BrowserWindow } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../../resources/icon.png?asset'
 import { getActiveProject } from '../core/app-state/state'
+import { setupIpcHandlers } from './ipcHandlers'
 
 let sendWindow: BrowserWindow | null = null
 
@@ -25,11 +26,12 @@ export function createSendWindow(): void {
     titleBarStyle: 'hiddenInset',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, '../preload/sendPreload.js'),
       sandbox: false,
       contextIsolation: true
     }
   })
+  setupIpcHandlers()
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     sendWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/send.html`)
@@ -50,8 +52,7 @@ export function createSendWindow(): void {
     sendWindow = null
   })
 
-  /*sendWindow.webContents.once('did-finish-load', () => {
-    watchDirectories(editorWindow!, getActiveProjectPath(), getAppPath())
-  })*/
-  //setupIpcHandlers()
+  ipcMain.on('close-send-window', () => {
+    sendWindow?.close()
+  })
 }

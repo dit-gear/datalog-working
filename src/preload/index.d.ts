@@ -54,7 +54,6 @@ declare global {
       onResponseReadFile: (callback: (file: LoadedFile | { error: string }) => void) => void
       saveFile: (file: LoadedFile) => Promise<Response>
       deleteFile: (file: TemplateDirectoryFile) => Promise<Response>
-      initSendWindow: (callback: (project: ProjectRootType | null) => void) => void
     }
   }
 }

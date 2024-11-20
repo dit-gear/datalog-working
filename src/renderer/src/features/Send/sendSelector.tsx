@@ -2,13 +2,14 @@ import { useState } from 'react'
 import Send from './send'
 import { Select, SelectContent, SelectItem, SelectValue } from '@components/ui/select'
 import { SelectTrigger } from '@components/SelectIconTrigger'
-import { emailType } from '@shared/projectTypes'
+import { emailType, TemplateDirectoryFile } from '@shared/projectTypes'
 
 interface SendSelectorProps {
   projectEmails: emailType[]
+  projectTemplates: TemplateDirectoryFile[]
 }
 
-const SendSelector = ({ projectEmails }: SendSelectorProps) => {
+const SendSelector = ({ projectEmails, projectTemplates }: SendSelectorProps) => {
   const [selectedEmail, setSelectedEmail] = useState<emailType | null>(null)
 
   const handleSelectChange = (value: string) => {
@@ -48,7 +49,11 @@ const SendSelector = ({ projectEmails }: SendSelectorProps) => {
           </SelectContent>
         </Select>
       </div>
-      <Send key={selectedEmail ? selectedEmail.name : 'none'} defaults={selectedEmail} />
+      <Send
+        key={selectedEmail ? selectedEmail.name : 'none'}
+        defaults={selectedEmail}
+        projectTemplates={projectTemplates}
+      />
     </div>
   )
 }
