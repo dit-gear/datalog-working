@@ -2,7 +2,7 @@
 import { ipcMain } from 'electron'
 import fs from 'fs/promises'
 
-export function setupIpcHandlers(): void {
+export function setupSendIpcHandlers(): void {
   ipcMain.handle('get-file-content', async (_event, filePath: string) => {
     try {
       await fs.access(filePath)

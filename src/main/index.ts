@@ -4,7 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { ProjectType } from '../shared/projectTypes'
 import { loadState } from './core/app-state/loader'
-import { setupIpcHandlers } from './core/setupIpcHandlers'
+import { setupIpcHandlers } from './setupIpcHandlers'
 import {
   getRootPath,
   getActiveProjectPath,

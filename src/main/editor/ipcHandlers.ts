@@ -1,16 +1,47 @@
 import { ipcMain } from 'electron'
 import fs from 'fs'
 import path from 'path'
-import { LoadedFile } from '../../shared/shared-types'
+import { LoadedFile, InitialEditorData } from '../../shared/shared-types'
 import { TemplateDirectoryFile } from '@shared/projectTypes'
 import { moveFileToTrash } from '../utils/crud'
-import { getActiveProjectPath, getAppPath } from '../core/app-state/state'
-import { sendInitialDirectories } from '../utils/editor-file-handler'
+import { getEditorWindow } from './editorWindow'
+import {
+  getActiveProjectPath,
+  getAppPath,
+  getActiveProject,
+  datalogs
+} from '../core/app-state/state'
+import logger from '../core/logger'
 
-export function setupIpcHandlers(): void {
+export function setupEditorIpcHandlers(): void {
   // Handle fetching initial data
-  ipcMain.handle('get-initial-data', () => {
-    return sendInitialDirectories(getActiveProjectPath(), getAppPath())
+
+  ipcMain.handle('initial-editor-data', async (): Promise<InitialEditorData> => {
+    try {
+      const loadedDatalogs = Array.from(datalogs().values())
+      const rootPath = getAppPath()
+      const projectPath = getActiveProjectPath()
+      const activeProject = getActiveProject()
+
+      if (!activeProject) throw Error('No active project')
+
+      const initialData: InitialEditorData = {
+        rootPath,
+        projectPath,
+        activeProject,
+        loadedDatalogs
+      }
+      return initialData
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'unknown error'
+      logger.error(`Failed to fetch initial editor data: ${message}`)
+      throw new Error('Failed to fetch initial editor data')
+    }
+  })
+
+  ipcMain.on('show-editor-window', () => {
+    const editor = getEditorWindow()
+    editor?.show()
   })
 
   // Handle reading a file

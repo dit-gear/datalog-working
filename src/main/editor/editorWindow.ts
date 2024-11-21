@@ -1,17 +1,13 @@
 import { BrowserWindow } from 'electron'
 import { join } from 'path'
-import { watchDirectories } from '../utils/editor-file-handler'
-import {
-  getActiveProjectPath,
-  getActiveProject,
-  getAppPath,
-  datalogs
-} from '../core/app-state/state'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../../resources/icon.png?asset'
-import { setupIpcHandlers } from './ipcHandlers'
 
 let editorWindow: BrowserWindow | null = null
+
+export const getEditorWindow = () => {
+  return editorWindow
+}
 
 export function createEditorWindow(): void {
   if (editorWindow) {
@@ -46,15 +42,9 @@ export function createEditorWindow(): void {
     editorWindow = null
   })
 
-  editorWindow.webContents.once('did-finish-load', () => {
-    const loadedDatalogs = Array.from(datalogs().values())
-    //watchDirectories(editorWindow!, getActiveProjectPath(), getAppPath())
-    editorWindow?.webContents.send('init-editorwindow', 'data')
-  })
+  //editorWindow.webContents.once('did-finish-load', () => {})
 
-  editorWindow.on('ready-to-show', () => {
+  /*editorWindow.on('ready-to-show', () => {
     editorWindow?.show()
-  })
-
-  setupIpcHandlers()
+  })*/
 }

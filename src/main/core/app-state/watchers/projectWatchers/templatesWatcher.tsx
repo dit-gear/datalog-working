@@ -3,30 +3,72 @@ import { getActiveProjectPath, getAppPath, getActiveProject, setActiveProject } 
 import logger from '../../../logger'
 import { TemplateDirectoryFile } from '@shared/projectTypes'
 import { ensureDirectoryExists } from '../../../../utils/crud'
+import { getTemplateDirectories } from '../../../project/loader'
+import { getEditorWindow } from '../../../../editor/editorWindow'
 import path from 'path'
+import fs from 'fs'
 
 let templatesWatcher: FSWatcher | null = null
 
-export const initTemplateWatcher = async () => {
-  const projectPath = getActiveProjectPath()
-  const appPath = getAppPath()
-  if (!projectPath) throw Error
+const resolveTemplate = (
+  filePath: string,
+  directories: TemplateDirectoryFile[]
+): TemplateDirectoryFile | null => {
+  const match = directories.find((dir) => filePath.startsWith(dir.path))
+  return match ? { path: filePath, type: match.type, scope: match.scope } : null
+}
 
-  const directories = [
-    `${projectPath}/templates/email`,
-    `${projectPath}/templates/pdf`,
-    `${appPath}/templates/email`,
-    `${appPath}/templates/pdf`
-  ]
+const isValidTemplateFile = (filePath: string, action: 'add' | 'remove'): boolean => {
+  const { dirs } = getTemplateDirectories(getActiveProjectPath(), getAppPath())
+  const isInDirectory = dirs.some((dir) => filePath.startsWith(dir))
+  if (!isInDirectory) {
+    return false
+  }
+
+  // Check if the file ends with .tsx or .jsx
+  const hasValidExtension = filePath.endsWith('.tsx') || filePath.endsWith('.jsx')
+  if (!hasValidExtension) {
+    return false
+  }
+
+  if (action === 'add') {
+    // Only check existence for add actions
+    try {
+      const stat = fs.statSync(filePath)
+      return stat.isFile()
+    } catch (error) {
+      // If the file doesn't exist or another error occurs, return false
+      return false
+    }
+  }
+
+  // For 'remove' actions, no need to check existence
+  return true
+}
+
+export const initTemplateWatcher = async () => {
+  const { dirs, subdirs } = getTemplateDirectories(getActiveProjectPath(), getAppPath())
 
   // Ensure directories exist
-  await Promise.all(directories.map(ensureDirectoryExists))
+  await Promise.all(subdirs.map(ensureDirectoryExists))
 
-  const watchPattern = `${projectPath}/templates/{email,pdf}/*.{jsx,tsx},${appPath}/templates/{email,pdf}/*.{jsx,tsx}`
+  templatesWatcher = chokidar.watch(dirs, { ignoreInitial: true })
 
-  templatesWatcher = chokidar.watch(watchPattern, { ignoreInitial: true })
+  templatesWatcher.on('ready', () => {
+    logger.debug('templatesWatcher started')
+    if (templatesWatcher) {
+      const watched = templatesWatcher.getWatched()
 
-  templatesWatcher.on('ready', () => logger.debug('templateWatcher started'))
+      // Transform the watched object into an array suitable for console.table
+      const tableData = Object.entries(watched).map(([directory, files]) => ({
+        Directory: directory,
+        Files: files.join(', ')
+      }))
+
+      // Display the table in the console
+      console.table(tableData)
+    }
+  })
   templatesWatcher.on('error', (error) => logger.error('TemplateWatcher error:', error))
   templatesWatcher.on('add', (filePath) => updateTemplatesDir(filePath, 'add'))
   templatesWatcher.on('unlink', (filePath) => updateTemplatesDir(filePath, 'remove'))
@@ -46,24 +88,25 @@ export const initTemplateWatcher = async () => {
 }
 
 const updateTemplatesDir = (filePath: string, action: 'add' | 'remove') => {
+  if (!isValidTemplateFile(filePath, action)) return
   const activeProject = getActiveProject()
   if (!activeProject) return
 
   const { templatesDir } = activeProject
 
   if (action === 'add') {
-    // Determine file type and scope based on file path
-    const type = filePath.includes('/email') ? 'email' : 'pdf'
-
-    // Add the new file entry to templatesDir
-    const newTemplate: TemplateDirectoryFile = { path: filePath, type, scope: 'project' }
+    const { detailed: directories } = getTemplateDirectories(getActiveProjectPath(), getAppPath())
+    const newTemplate = resolveTemplate(filePath, directories)
+    if (!newTemplate) return
     activeProject.templatesDir = [...templatesDir, newTemplate]
   } else if (action === 'remove') {
-    // Remove the file entry from templatesDir
     activeProject.templatesDir = templatesDir.filter((template) => template.path !== filePath)
   }
-  // Update active project with modified templatesDir
   setActiveProject(activeProject)
+  const editorWindow = getEditorWindow()
+  if (editorWindow) {
+    editorWindow.webContents.send('directory-changed', activeProject.templatesDir)
+  }
 }
 
 export const closeTemplatesWatcher = async () => {

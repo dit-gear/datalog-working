@@ -42,13 +42,24 @@ const parseSettingsFile = async <T>(filePath: string, schema: ZodType<T>): Promi
   return null
 }
 
-const getTemplateDirectories = (projectPath: string, appPath: string): TemplateDirectoryFile[] => {
-  return [
+export const getTemplateDirectories = (
+  projectPath: string,
+  appPath: string
+): { dirs: string[]; subdirs: string[]; detailed: TemplateDirectoryFile[] } => {
+  const dirs = [`${projectPath}/templates/`, `${appPath}/templates/`]
+  const subdirs = [
+    `${projectPath}/templates/email`,
+    `${projectPath}/templates/pdf`,
+    `${appPath}/templates/email`,
+    `${appPath}/templates/pdf`
+  ]
+  const detailed: TemplateDirectoryFile[] = [
     { path: join(projectPath, 'templates/email'), type: 'email', scope: 'project' },
     { path: join(projectPath, 'templates/pdf'), type: 'pdf', scope: 'project' },
     { path: join(appPath, 'templates/email'), type: 'email', scope: 'global' },
     { path: join(appPath, 'templates/pdf'), type: 'pdf', scope: 'global' }
   ]
+  return { dirs, subdirs, detailed }
 }
 
 const loadTemplateDirectory = async (
@@ -79,7 +90,7 @@ const loadTemplates = async (
   projectPath: string,
   appPath: string
 ): Promise<TemplateDirectoryFile[]> => {
-  const directories = getTemplateDirectories(projectPath, appPath)
+  const { detailed: directories } = getTemplateDirectories(projectPath, appPath)
 
   const templates = await Promise.all(directories.map(loadTemplateDirectory))
   return templates.flat()

@@ -7,36 +7,31 @@ const useInitialDir = () => {
   const [path, setPath] = useState<Path>({ project: '', global: '' } as Path)
   const [loading, setLoading] = useState(true)
 
+  const handleDirectoryChanged = (_, files: TemplateDirectoryFile[]): void => {
+    console.log('Received directory-changed:', JSON.stringify(files))
+    setDir(files)
+  }
+
   useEffect(() => {
     const fetchInitialData = async (): Promise<void> => {
       try {
-        const data = await window.editorApi.getInitialDir()
-        const { dir, path } = data
-        setDir(dir)
-        setPath(path)
+        const data = await window.editorApi.fetchInitialData()
+        const { rootPath, projectPath, activeProject, loadedDatalogs } = data
+        const templates = activeProject.templatesDir
+        setDir(templates)
+        setPath({ project: projectPath, global: rootPath })
       } catch (error) {
         console.error('Failed to fetch initial data:', error)
       } finally {
         setLoading(false)
+        window.editorApi.showWindow()
       }
     }
-
     fetchInitialData()
+  }, [])
 
-    const handleDirectoryChanged = (
-      _event: Electron.IpcRendererEvent,
-      files: TemplateDirectoryFile[]
-    ): void => {
-      //console.log('Received directory-changed:', files)
-      setDir(files)
-    }
-
+  useEffect(() => {
     window.editorApi.onDirChanged(handleDirectoryChanged)
-
-    // Cleanup listeners on unmount
-    return (): void => {
-      window.editorApi.removeAllListeners('directory-changed')
-    }
   }, [])
 
   return { dir, path, loading }

@@ -1,4 +1,5 @@
-import { TemplateDirectoryFile } from './projectTypes'
+import { TemplateDirectoryFile, ProjectRootType } from './projectTypes'
+import { DatalogDynamicType } from './datalogTypes'
 
 export type durationType = {
   hours: number
@@ -44,3 +45,10 @@ export type ResponseWithString =
   | { success: false; error: string; cancelled?: boolean }
 
 export type OpenModalTypes = 'new-project' | 'new-shooting-day' | 'project-settings'
+
+export type InitialEditorData = {
+  rootPath: string
+  projectPath: string
+  activeProject: ProjectRootType
+  loadedDatalogs: DatalogDynamicType[]
+}

@@ -3,7 +3,6 @@ import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../../resources/icon.png?asset'
 import { getActiveProject } from '../core/app-state/state'
-import { setupIpcHandlers } from './ipcHandlers'
 
 let sendWindow: BrowserWindow | null = null
 
@@ -31,7 +30,6 @@ export function createSendWindow(): void {
       contextIsolation: true
     }
   })
-  setupIpcHandlers()
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     sendWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/send.html`)
