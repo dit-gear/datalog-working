@@ -22,6 +22,7 @@ import GeneralTab from './GeneralTab'
 import PathsTab from './Paths/PathsTab'
 import ParsingTab from './Parsing/ParsingTab'
 import EmailTab from './Email/EmailTab'
+import PdfTab from './PDF/PdfTab'
 
 interface SettingsDialogProps {
   defaults: ProjectSettingsType
@@ -54,6 +55,7 @@ const Settings: React.FC<SettingsDialogProps> = ({
     project_additional_parsing: defaults.project?.additional_parsing ?? undefined,
     project_emails: defaults.project?.emails ?? [],
     project_email_api: defaults.project?.email_api ?? undefined,
+    project_pdfs: defaults.project?.pdfs ?? [],
     global_folder_template: defaults.global?.folder_template ?? '',
     global_unit: defaults.global?.unit ?? '',
     global_default_ocf_paths: defaults.global?.default_ocf_paths ?? [],
@@ -62,6 +64,7 @@ const Settings: React.FC<SettingsDialogProps> = ({
     global_additional_parsing: defaults.global?.additional_parsing ?? undefined,
     global_emails: defaults.global?.emails ?? [],
     global_email_api: defaults.global?.email_api ?? undefined,
+    global_pdfs: defaults.global?.pdfs ?? [],
     project_enable_parsing: !!defaults.project?.additional_parsing,
     global_enable_parsing: !!defaults.global?.additional_parsing
   })
@@ -139,6 +142,9 @@ const Settings: React.FC<SettingsDialogProps> = ({
                   <TabsTrigger className="w-full justify-start" value="email">
                     Email
                   </TabsTrigger>
+                  <TabsTrigger className="w-full justify-start" value="pdf">
+                    PDF
+                  </TabsTrigger>
                 </TabsList>
               </nav>
               <ScrollArea className="h-[90vh]">
@@ -153,6 +159,9 @@ const Settings: React.FC<SettingsDialogProps> = ({
                 </TabsContent>
                 <TabsContent value="email">
                   <EmailTab scope={scope} templates={templates} />
+                </TabsContent>
+                <TabsContent value="pdf">
+                  <PdfTab scope={scope} templates={templates} />
                 </TabsContent>
               </ScrollArea>
 

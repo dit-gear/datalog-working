@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { CardContent } from '@components/ui/card'
-import { useFormContext, useFieldArray } from 'react-hook-form'
+import { useFormContext, useFieldArray, useWatch } from 'react-hook-form'
 import { formSchemaType } from '../types'
 import { emailEditType } from './types'
 import { TemplateDirectoryFile } from '@shared/projectTypes'
@@ -21,6 +21,7 @@ import { Button } from '@components/ui/button'
 import EmailTemplate from './EmailTemplate'
 import ApiKeyDialog from './ApiKeyDialog'
 import { getFileName } from '@renderer/utils/formatString'
+import { getPdfAttachments } from '@shared/utils/project-methods'
 
 interface EmailProps {
   scope: 'project' | 'global'
@@ -28,6 +29,8 @@ interface EmailProps {
 }
 
 const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
+  const project_pdfs = useWatch({ name: 'project_pdfs' })
+  const global_pdfs = useWatch({ name: 'global_pdfs' })
   const { control } = useFormContext<formSchemaType>()
   const { fields, append, remove, update } = useFieldArray({
     control,
@@ -73,6 +76,20 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
                   <p>{email.subject}</p>
                   <p>Email Message:</p>
                   <p>{email.message}</p>
+                  <p>Attachments:</p>
+                  <p>
+                    {email.attachments && email.attachments?.length > 0
+                      ? (() => {
+                          const pdfAttachments = getPdfAttachments(
+                            [...(project_pdfs || []), ...(global_pdfs || [])],
+                            email.attachments,
+                            true
+                          )
+                          console.log('PDF Attachments:', pdfAttachments) // Log the output here
+                          return pdfAttachments.join(', ')
+                        })()
+                      : ''}
+                  </p>
                   <p>React template:</p>
                   <p>{getFileName(email.template)}</p>
                 </AccordionContent>

@@ -176,6 +176,14 @@ const additionalParsing = z.object({
     .optional()
 })
 
+export const pdfZodObj = z.object({
+  id: z.string().length(5),
+  name: z.string().min(1, 'Template name are required'),
+  output_name_pattern: z.string().min(1),
+  template: z.string(),
+  show_in_menu: z.boolean()
+})
+
 const emailSettings = z.object({
   service_provider: z.string(),
   api_key_encrypted: z.string()
@@ -195,7 +203,7 @@ export const emailZodObj = z.object({
     .array(z.string().email({ message: 'Must be a vaild email' }))
     .min(1, { message: 'Must contain at least one recipient' }),
   subject: z.string().min(1, 'Subject are required'),
-  attatchments: z.array(z.string()).optional(),
+  attachments: z.array(z.string().length(5)).optional(),
   message: z.string().optional(),
   template: z.string() // url to file.
 })
@@ -208,7 +216,8 @@ export const GlobalSchemaZod = z.object({
   parse_camera_metadata: z.boolean().default(true).optional(),
   additional_parsing: additionalParsing.optional(),
   emails: z.array(emailZodObj).optional(),
-  email_api: emailSettings.optional()
+  email_api: emailSettings.optional(),
+  pdfs: z.array(pdfZodObj).optional()
 })
 
 export const ProjectSchemaZod = z.object({
@@ -280,6 +289,7 @@ export type Field = z.infer<typeof field>
 export type additionalParsing = z.infer<typeof additionalParsing>
 export type emailApiType = z.infer<typeof emailApiZodObj>
 export type emailType = z.infer<typeof emailZodObj>
+export type pdfType = z.infer<typeof pdfZodObj>
 export type TemplateDirectoryFile = z.infer<typeof TemplateDirectoryFileZod>
 export type ProjectSchemaType = z.infer<typeof ProjectSchemaZod>
 export type ProjectRootType = z.infer<typeof ProjectRootZod>

@@ -10,10 +10,9 @@ import {
   SelectTrigger,
   SelectValue
 } from '@components/ui/select'
-import { Textarea } from '@components/ui/textarea'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { emailType, emailEditType } from './types'
-import { emailZodObj } from '@shared/projectTypes'
+import { pdfType, pdfEditType, pdfWitoutIDType } from './types'
+import { pdfZodObj } from '@shared/projectTypes'
 import {
   Dialog,
   DialogTrigger,
@@ -23,20 +22,21 @@ import {
   DialogDescription,
   DialogFooter
 } from '@components/ui/dialog'
-import MultiSelectTextInput from '@components/MultiSelectTextInput'
 import { Button } from '@components/ui/button'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { getFileName } from '@renderer/utils/formatString'
+import { Switch } from '@components/ui/switch'
+import { nanoid } from 'nanoid/non-secure'
 
-interface EmailTemplateProps {
-  append: (email: emailType) => void
-  update: (index: number, email: emailType) => void
-  emailEdit: emailEditType | null
-  setEmailEdit: (edit: emailEditType | null) => void
+interface PdfTemplateProps {
+  append: (email: pdfType) => void
+  update: (index: number, email: pdfType) => void
+  emailEdit: pdfEditType | null
+  setEmailEdit: (edit: pdfEditType | null) => void
   templates: TemplateDirectoryFile[]
 }
 
-const EmailTemplate: React.FC<EmailTemplateProps> = ({
+const PdfTemplate: React.FC<PdfTemplateProps> = ({
   append,
   update,
   emailEdit,
@@ -44,41 +44,37 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
   templates
 }) => {
   const [open, setOpen] = useState<boolean>(false)
+
   const defaultValues = {
     name: '',
-    show: { item: false, root: false },
-    sender: '',
-    recipients: [],
-    subject: '',
-    message: '',
-    template: 'Plain-Text'
+    output_name_pattern: '',
+    template: 'Plain-Text',
+    show_in_menu: true
   }
-  const form = useForm<emailType>({
+  const form = useForm<pdfWitoutIDType>({
     defaultValues: defaultValues,
     mode: 'onSubmit',
-    resolver: zodResolver(emailZodObj)
+    resolver: zodResolver(pdfZodObj.omit({ id: true }))
   })
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors }
-  } = form
+  const { control, handleSubmit, reset } = form
 
   let currentIndex = 0 // Initialize the index counter
 
   const assignIndex = (): number => currentIndex++
 
-  const onSubmit: SubmitHandler<emailType> = (data): void => {
+  const onSubmit: SubmitHandler<pdfWitoutIDType> = (data): void => {
+    console.log(data)
     if (emailEdit !== null) {
-      update(emailEdit.index, data)
-    } else append(data)
+      update(emailEdit.index, { id: emailEdit.pdf.id, ...data })
+    } else {
+      append({ id: nanoid(5), ...data })
+    }
     onOpenChange(false)
   }
   useEffect(() => {
     if (emailEdit) {
-      reset(emailEdit.email)
+      reset(emailEdit.pdf)
       setOpen(true)
     }
   }, [emailEdit])
@@ -95,16 +91,14 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button type="button" variant="secondary">
-          Add Email
+          Add Pdf
         </Button>
       </DialogTrigger>
       <DialogContent className="border p-4">
         <DialogHeader>
-          <DialogTitle>
-            {emailEdit ? `Edit ${emailEdit.email.name}` : 'New Email Template'}
-          </DialogTitle>
+          <DialogTitle>{emailEdit ? `Edit ${emailEdit.pdf.name}` : 'New PDF Template'}</DialogTitle>
           <DialogDescription>
-            {`${emailEdit ? 'Edit the' : 'Create a new'} Email template that can be used from the UI`}
+            {`${emailEdit ? 'Edit the' : 'Create a new'} Pdf template that can be used from the UI`}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -123,10 +117,10 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
           />
           <FormField
             control={control}
-            name={`sender`}
+            name={`output_name_pattern`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>From:</FormLabel>
+                <FormLabel>Output Name Pattern:</FormLabel>
                 <FormControl>
                   <Input {...field} data-index={assignIndex()} />
                 </FormControl>
@@ -134,62 +128,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
               </FormItem>
             )}
           />
-          <FormField
-            control={control}
-            name={`recipients`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>To:</FormLabel>
-                <FormControl>
-                  <MultiSelectTextInput {...field} dataIndex={assignIndex()} />
-                </FormControl>
-                {Array.isArray(errors.recipients) &&
-                  errors.recipients.length > 0 &&
-                  errors.recipients.map((error, index) => (
-                    <FormMessage key={index}>{error.message}</FormMessage>
-                  ))}
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`subject`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Subject</FormLabel>
-                <FormControl>
-                  <Input {...field} data-index={assignIndex()} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`attachments`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Attachments</FormLabel>
-                <FormControl>
-                  <MultiSelectTextInput {...field} dataIndex={assignIndex()} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`message`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Message</FormLabel>
-                <FormControl>
-                  <Textarea {...field} data-index={assignIndex()} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
           <FormField
             control={control}
             name={`template`}
@@ -205,7 +144,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
                       <SelectGroup>
                         <SelectItem value="Plain-Text">Plain Text</SelectItem>
                         {templates
-                          .filter((template) => template.type === 'email')
+                          .filter((template) => template.type === 'pdf')
                           .map((template) => (
                             <SelectItem key={template.path} value={template.path}>
                               {getFileName(template.path)}
@@ -214,6 +153,23 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
                       </SelectGroup>
                     </SelectContent>
                   </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`show_in_menu`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Show in menu:</FormLabel>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    data-index={assignIndex()}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -230,4 +186,4 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
   )
 }
 
-export default EmailTemplate
+export default PdfTemplate

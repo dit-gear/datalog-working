@@ -15,6 +15,7 @@ export const formSchema = z
     project_additional_parsing: ProjectSchemaZod.shape.additional_parsing,
     project_emails: ProjectSchemaZod.shape.emails,
     project_email_api: ProjectSchemaZod.shape.email_api,
+    project_pdfs: ProjectSchemaZod.shape.pdfs,
     global_folder_template: GlobalSchemaZod.shape.folder_template,
     global_unit: GlobalSchemaZod.shape.unit,
     global_default_ocf_paths: GlobalSchemaZod.shape.default_ocf_paths,
@@ -23,6 +24,7 @@ export const formSchema = z
     global_additional_parsing: GlobalSchemaZod.shape.additional_parsing,
     global_emails: GlobalSchemaZod.shape.emails,
     global_email_api: GlobalSchemaZod.shape.email_api,
+    global_pdfs: GlobalSchemaZod.shape.pdfs,
     project_enable_parsing: z.boolean(),
     global_enable_parsing: z.boolean(),
     new_email_api: emailApiZodObj.optional()
