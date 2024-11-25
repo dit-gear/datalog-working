@@ -1,24 +1,39 @@
-import { useEffect, useState } from 'react'
-import { emailType, TemplateDirectoryFile } from '@shared/projectTypes'
+import { useState, useEffect } from 'react'
+import { emailType, pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
+import { DatalogDynamicType } from '@shared/datalogTypes'
 import SendSelector from './sendSelector'
 
 const SendInitializer = () => {
-  const [loading, setLoading] = useState<boolean>(true)
   const [projectEmails, setProjectEmails] = useState<emailType[]>([])
+  const [projectPdfs, setProjectPdfs] = useState<pdfType[]>([])
   const [projectTemplates, setProjectTemplates] = useState<TemplateDirectoryFile[]>([])
+  const [datalogs, setDatalogs] = useState<DatalogDynamicType[]>([])
 
   useEffect(() => {
-    window.sendApi.initSendWindow((project) => {
-      const emails = project?.emails
-      const templates = project?.templatesDir
-      if (emails) setProjectEmails(emails)
-      if (templates) setProjectTemplates(templates)
-    })
-    setLoading(false)
-  })
-  if (loading) return <div>Loading...</div>
+    const loadInitialData = async () => {
+      try {
+        const data = await window.sendApi.fetchInitialData()
+        if (data.project.emails) setProjectEmails(data.project.emails)
+        if (data.project.pdfs) setProjectPdfs(data.project.pdfs)
+        if (data.project.templatesDir) setProjectTemplates(data.project.templatesDir)
+        if (data.datalogs) setDatalogs(data.datalogs)
+      } catch (error) {
+        console.log(error)
+      } finally {
+        window.sendApi.showWindow()
+      }
+    }
 
-  return <SendSelector projectEmails={projectEmails} projectTemplates={projectTemplates} />
+    loadInitialData()
+  }, [])
+
+  return (
+    <SendSelector
+      projectEmails={projectEmails}
+      projectPdfs={projectPdfs}
+      projectTemplates={projectTemplates}
+    />
+  )
 }
 
 export default SendInitializer

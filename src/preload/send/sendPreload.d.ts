@@ -1,10 +1,10 @@
-import { ProjectRootType } from '@shared/projectTypes'
+import { InitialSendData } from '@shared/shared-types'
 
 declare global {
   interface Window {
     sendApi: {
-      initSendWindow: (callback: (project: ProjectRootType | null) => void) => void
-      openSendWindow: () => void
+      fetchInitialData: () => Promise<InitialSendData>
+      showWindow: () => void
       closeSendWindow: () => void
       getFileContent: (filePath: string) => Promise<string>
     }

@@ -2,33 +2,52 @@ import { FormField, FormItem, FormControl, FormLabel, FormMessage, Form } from '
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
 import MultiSelectTextInput from '@components/MultiSelectTextInput'
-import { useForm } from 'react-hook-form'
+import MultiSelect from '@components/MultiSelect'
+import { useForm, ControllerRenderProps } from 'react-hook-form'
 import { Button } from '@components/ui/button'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@components/ui/resizable'
 import { Tabs, TabsTrigger, TabsContent } from '@components/ui/tabs'
 import { TabsList } from '@radix-ui/react-tabs'
 import { Select, SelectContent, SelectItem } from '@components/ui/select'
 import { SelectTrigger } from '@components/SelectIconTrigger'
-import { emailType, TemplateDirectoryFile } from '@shared/projectTypes'
+import { emailType, emailZodObj, pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
 import { getFileName } from '@renderer/utils/formatString'
+import { getPdfAttachments } from '@shared/utils/project-methods'
 import { EmailPreview } from './emailPreview'
+import { AttachmentsTabs } from './attachmentsTabs'
+import { emailWithAttatchmentsZod, emailWithAttatchmentsType } from './types'
 
 interface SendProps {
   defaults: emailType | null
+  projectPdfs: pdfType[]
   projectTemplates: TemplateDirectoryFile[]
 }
 
-const Send = ({ defaults, projectTemplates }: SendProps) => {
-  const form = useForm({
+interface Option {
+  label: string
+  value: string
+}
+
+const Send = ({ defaults, projectPdfs, projectTemplates }: SendProps) => {
+  //const pdfs = defaults?.attachments ? getPdfAttachments(projectPdfs, defaults.attachments) : []
+  const form = useForm<emailType>({
     defaultValues: {
       recipients: defaults?.recipients ?? [],
       subject: defaults?.subject ?? '',
-      attatchments: defaults?.attatchments ?? [],
+      attachments: defaults?.attachments ?? [],
       message: defaults?.message ?? '',
-      reacttemplate: defaults?.template ?? ''
+      react: defaults?.react ?? ''
     },
     mode: 'onSubmit'
   })
+
+  function mapPdfTypesToOptions(pdfs: pdfType[]): Option[] {
+    return pdfs.map((pdf) => ({
+      label: `${pdf.name} (${pdf.output_name_pattern})`, // Use the `name` from pdfType as the label
+      value: pdf.id // Use the `id` from pdfType as the value
+    }))
+  }
+
   const { control } = form
   return (
     <div className="min-h-[calc(100vh-36px)] border-t flex flex-col">
@@ -81,12 +100,35 @@ const Send = ({ defaults, projectTemplates }: SendProps) => {
               />
               <FormField
                 control={control}
-                name={`attatchments`}
+                name={`attachments`}
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Attatchments</FormLabel>
+                  <FormItem className="overflow-visible">
+                    <FormLabel>Attachments</FormLabel>
                     <FormControl>
-                      <MultiSelectTextInput dataIndex={1} {...field} />
+                      <MultiSelect
+                        dataIndex={1}
+                        {...field}
+                        value={mapPdfTypesToOptions(
+                          getPdfAttachments(projectPdfs, field.value ?? [])
+                        )}
+                        onChange={(newValues) => {
+                          // Map selected Option objects to pdfType objects
+                          const updatedAttachments = newValues
+                            .map((id) => {
+                              const foundPdf = projectPdfs.find((pdf) => pdf.id === id)
+                              console.log('Selected ID -> pdf:', id, foundPdf) // Debug mapping
+                              return foundPdf?.id
+                            })
+                            .filter(Boolean) // Remove any undefined entries
+
+                          field.onChange(updatedAttachments) // Update the form state with pdfType objects
+                        }}
+                        options={projectPdfs.map((pdf) => {
+                          const option = { label: pdf.name, value: pdf.id }
+                          console.log('Mapping pdf for options:', option) // Debug options mapping
+                          return option
+                        })}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -109,7 +151,7 @@ const Send = ({ defaults, projectTemplates }: SendProps) => {
                     Email Preview
                     <FormField
                       control={control}
-                      name="reacttemplate"
+                      name="react"
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -135,17 +177,12 @@ const Send = ({ defaults, projectTemplates }: SendProps) => {
                     />
                   </span>
                 </TabsTrigger>
-                <TabsTrigger
-                  value="datalog.pdf"
-                  className="border-t border-l border-r rounded-t-lg px-4 pb-2"
-                >
-                  datalog.pdf
-                </TabsTrigger>
+                <AttachmentsTabs />
               </TabsList>
               <TabsContent value="email" className="h-full w-full">
                 <EmailPreview />
               </TabsContent>
-              <TabsContent value="datalog.pdf">pdf</TabsContent>
+              <TabsContent value="pdf">pdf</TabsContent>
             </Tabs>
           </ResizablePanel>
         </ResizablePanelGroup>

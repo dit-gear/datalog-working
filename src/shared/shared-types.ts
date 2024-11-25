@@ -52,3 +52,8 @@ export type InitialEditorData = {
   activeProject: ProjectRootType
   loadedDatalogs: DatalogDynamicType[]
 }
+
+export type InitialSendData = {
+  project: ProjectRootType
+  datalogs: DatalogDynamicType[]
+}

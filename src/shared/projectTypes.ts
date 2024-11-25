@@ -87,6 +87,7 @@ const listOfMappedObjectsField = z.object({
 })
 const durationField = z.object({
   type: fieldType.extract(['duration']),
+  // value_key: 'duration'
   column,
   unit: timeUnits,
   fps: z.string().max(80).optional()
@@ -180,8 +181,8 @@ export const pdfZodObj = z.object({
   id: z.string().length(5),
   name: z.string().min(1, 'Template name are required'),
   output_name_pattern: z.string().min(1),
-  template: z.string(),
-  show_in_menu: z.boolean()
+  react: z.string(),
+  enabled: z.boolean()
 })
 
 const emailSettings = z.object({
@@ -197,7 +198,6 @@ export const emailApiZodObj = z.object({
 
 export const emailZodObj = z.object({
   name: z.string().min(1, 'Template name are required'),
-  show: z.object({ item: z.boolean(), root: z.boolean() }),
   sender: z.string().email(),
   recipients: z
     .array(z.string().email({ message: 'Must be a vaild email' }))
@@ -205,7 +205,8 @@ export const emailZodObj = z.object({
   subject: z.string().min(1, 'Subject are required'),
   attachments: z.array(z.string().length(5)).optional(),
   message: z.string().optional(),
-  template: z.string() // url to file.
+  react: z.string(), // url to file.
+  enabled: z.boolean()
 })
 
 export const GlobalSchemaZod = z.object({
@@ -213,6 +214,7 @@ export const GlobalSchemaZod = z.object({
   unit: z.string().optional(),
   default_ocf_paths: z.array(z.string()).optional(),
   default_proxies_path: z.string().optional(),
+  default_audio_paths: z.string().optional(),
   parse_camera_metadata: z.boolean().default(true).optional(),
   additional_parsing: additionalParsing.optional(),
   emails: z.array(emailZodObj).optional(),

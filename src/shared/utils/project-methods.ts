@@ -3,6 +3,18 @@ import { pdfType } from '@shared/projectTypes'
 export function getPdfAttachments(
   pdfs: pdfType[],
   attachments: string[],
+  getNamesOnly: true
+): string[]
+
+export function getPdfAttachments(
+  pdfs: pdfType[],
+  attachments: string[],
+  getNamesOnly?: false
+): pdfType[]
+
+export function getPdfAttachments(
+  pdfs: pdfType[],
+  attachments: string[],
   getNamesOnly = false
 ): (pdfType | string)[] {
   // Match the attachment IDs to PDF objects

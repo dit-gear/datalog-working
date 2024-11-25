@@ -32,6 +32,7 @@ declare global {
       onDirectoryLoaded: (
         callback: (event: Electron.IpcRendererEvent, files: TemplateDirectoryFile[]) => void
       ) => void
+      openSendWindow: () => void
     }
   }
 }

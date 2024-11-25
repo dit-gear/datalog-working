@@ -63,9 +63,9 @@ const Pdfs: React.FC<PdfProps> = ({ scope, templates }) => {
                   <p>Output Name:</p>
                   <p>{pdf.output_name_pattern}</p>
                   <p>React template:</p>
-                  <p>{getFileName(pdf.template)}</p>
+                  <p>{getFileName(pdf.react)}</p>
                   <p>Show in menu:</p>
-                  <p className="text-white">{pdf.show_in_menu && '✔'}</p>
+                  <p className="text-white">{pdf.enabled && '✔'}</p>
                 </AccordionContent>
               </AccordionItem>
             ))}

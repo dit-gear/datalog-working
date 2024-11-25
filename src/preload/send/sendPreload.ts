@@ -1,12 +1,13 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { ProjectRootType } from '@shared/projectTypes'
+import { InitialSendData } from '@shared/shared-types'
+import { safeInvoke } from '@shared/utils/ipcUtils'
 
 const sendApi = {
-  initSendWindow: (callback: (project: ProjectRootType | null) => void) =>
-    ipcRenderer.on('init-sendwindow', (_, project: ProjectRootType | null) => {
-      callback(project)
-    }),
-  openSendWindow: () => ipcRenderer.send('open-send-window'),
+  fetchInitialData: (): Promise<InitialSendData> =>
+    safeInvoke<InitialSendData>('initial-send-data'),
+  showWindow: (): void => {
+    ipcRenderer.send('show-send-window')
+  },
   closeSendWindow: () => ipcRenderer.send('close-send-window'),
   getFileContent: (filePath: string): Promise<string> =>
     ipcRenderer.invoke('get-file-content', filePath)

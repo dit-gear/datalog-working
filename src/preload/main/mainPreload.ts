@@ -35,7 +35,8 @@ const mainApi = {
   },
   getProxies: () => ipcRenderer.invoke('getProxies'),
   removeProxies: () => ipcRenderer.invoke('removeProxies'),
-  getCsvMetadata: () => ipcRenderer.invoke('getCsvMetadata')
+  getCsvMetadata: () => ipcRenderer.invoke('getCsvMetadata'),
+  openSendWindow: () => ipcRenderer.send('open-send-window')
 }
 
 if (process.contextIsolated) {

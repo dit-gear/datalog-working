@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useWatch } from 'react-hook-form'
 
 export const EmailPreview = () => {
-  const email = useWatch({ name: 'reacttemplate' })
+  const email = useWatch({ name: 'react' })
   const [error, setError] = useState(null)
   const [previewContent, setPreviewContent] = useState<string | null>(null)
   const previewWorkerRef = useRef<Worker | null>(null)

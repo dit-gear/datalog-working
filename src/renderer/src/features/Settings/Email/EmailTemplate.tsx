@@ -27,6 +27,7 @@ import MultiSelectTextInput from '@components/MultiSelectTextInput'
 import { Button } from '@components/ui/button'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { getFileName } from '@renderer/utils/formatString'
+import { Switch } from '@components/ui/switch'
 
 interface EmailTemplateProps {
   append: (email: emailType) => void
@@ -46,12 +47,12 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
   const [open, setOpen] = useState<boolean>(false)
   const defaultValues = {
     name: '',
-    show: { item: false, root: false },
     sender: '',
     recipients: [],
     subject: '',
     message: '',
-    template: 'Plain-Text'
+    react: 'none',
+    enabled: true
   }
   const form = useForm<emailType>({
     defaultValues: defaultValues,
@@ -192,7 +193,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
           />
           <FormField
             control={control}
-            name={`template`}
+            name={`react`}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>React Email Template</FormLabel>
@@ -203,7 +204,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="Plain-Text">Plain Text</SelectItem>
+                        <SelectItem value="none">none</SelectItem>
                         {templates
                           .filter((template) => template.type === 'email')
                           .map((template) => (
@@ -214,6 +215,19 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
                       </SelectGroup>
                     </SelectContent>
                   </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`enabled`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Enabled</FormLabel>
+                <FormControl>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
