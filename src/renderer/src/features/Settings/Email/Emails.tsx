@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { CardContent } from '@components/ui/card'
 import { useFormContext, useFieldArray, useWatch } from 'react-hook-form'
 import { formSchemaType } from '../types'
 import { emailEditType } from './types'
-import { TemplateDirectoryFile } from '@shared/projectTypes'
+import { pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
 import {
   Accordion,
   AccordionContent,
@@ -21,7 +21,7 @@ import { Button } from '@components/ui/button'
 import EmailTemplate from './EmailTemplate'
 import ApiKeyDialog from './ApiKeyDialog'
 import { getFileName } from '@renderer/utils/formatString'
-import { getPdfAttachments } from '@shared/utils/project-methods'
+import { getPdfAttachments } from '../../../utils/getAttachments'
 
 interface EmailProps {
   scope: 'project' | 'global'
@@ -29,8 +29,14 @@ interface EmailProps {
 }
 
 const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
+  const [pdfs, setPdfs] = useState<pdfType[]>([])
   const project_pdfs = useWatch({ name: 'project_pdfs' })
   const global_pdfs = useWatch({ name: 'global_pdfs' })
+
+  useEffect(() => {
+    setPdfs([...global_pdfs, ...project_pdfs])
+  }, [project_pdfs, global_pdfs])
+
   const { control } = useFormContext<formSchemaType>()
   const { fields, append, remove, update } = useFieldArray({
     control,
@@ -80,12 +86,7 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
                   <p>
                     {email.attachments && email.attachments?.length > 0
                       ? (() => {
-                          const pdfAttachments = getPdfAttachments(
-                            [...(project_pdfs || []), ...(global_pdfs || [])],
-                            email.attachments,
-                            true
-                          )
-                          console.log('PDF Attachments:', pdfAttachments) // Log the output here
+                          const pdfAttachments = getPdfAttachments(pdfs, email.attachments, true)
                           return pdfAttachments.join(', ')
                         })()
                       : ''}
@@ -104,6 +105,7 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
             emailEdit={emailEdit}
             setEmailEdit={setEmailEdit}
             templates={templates}
+            pdfs={pdfs}
           />
         </dd>
       </div>

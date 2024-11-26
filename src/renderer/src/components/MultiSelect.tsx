@@ -10,13 +10,23 @@ interface MultiSelectProps {
   options: Option[]
   placeholder?: string
   dataIndex: number
+  menuPosition?: 'fixed'
 }
 
 function MultiSelectInner(
   props: MultiSelectProps,
   ref: Ref<SelectInstance<Option, true, GroupBase<Option>>>
 ) {
-  const { value = [], options, onChange, onBlur, name, placeholder = '', dataIndex } = props
+  const {
+    value = [],
+    options,
+    onChange,
+    onBlur,
+    name,
+    placeholder = '',
+    dataIndex,
+    menuPosition
+  } = props
 
   const handleChange = (selectedOptions: MultiValue<Option>) => {
     // Extract IDs from selected options
@@ -43,7 +53,7 @@ function MultiSelectInner(
       options={options}
       onBlur={onBlur}
       onKeyDown={handleKeyDown}
-      menuPosition="fixed"
+      menuPosition={menuPosition}
       name={name}
       ref={ref}
       data-index={dataIndex}

@@ -3,7 +3,7 @@ import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
 import MultiSelectTextInput from '@components/MultiSelectTextInput'
 import MultiSelect from '@components/MultiSelect'
-import { useForm, ControllerRenderProps } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { Button } from '@components/ui/button'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@components/ui/resizable'
 import { Tabs, TabsTrigger, TabsContent } from '@components/ui/tabs'
@@ -12,20 +12,14 @@ import { Select, SelectContent, SelectItem } from '@components/ui/select'
 import { SelectTrigger } from '@components/SelectIconTrigger'
 import { emailType, emailZodObj, pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
 import { getFileName } from '@renderer/utils/formatString'
-import { getPdfAttachments } from '@shared/utils/project-methods'
+import { getPdfAttachments, mapPdfTypesToOptions } from '../../utils/getAttachments'
 import { EmailPreview } from './emailPreview'
 import { AttachmentsTabs } from './attachmentsTabs'
-import { emailWithAttatchmentsZod, emailWithAttatchmentsType } from './types'
 
 interface SendProps {
   defaults: emailType | null
   projectPdfs: pdfType[]
   projectTemplates: TemplateDirectoryFile[]
-}
-
-interface Option {
-  label: string
-  value: string
 }
 
 const Send = ({ defaults, projectPdfs, projectTemplates }: SendProps) => {
@@ -40,13 +34,6 @@ const Send = ({ defaults, projectPdfs, projectTemplates }: SendProps) => {
     },
     mode: 'onSubmit'
   })
-
-  function mapPdfTypesToOptions(pdfs: pdfType[]): Option[] {
-    return pdfs.map((pdf) => ({
-      label: `${pdf.name} (${pdf.output_name_pattern})`, // Use the `name` from pdfType as the label
-      value: pdf.id // Use the `id` from pdfType as the value
-    }))
-  }
 
   const { control } = form
   return (
@@ -107,6 +94,7 @@ const Send = ({ defaults, projectPdfs, projectTemplates }: SendProps) => {
                     <FormControl>
                       <MultiSelect
                         dataIndex={1}
+                        menuPosition="fixed"
                         {...field}
                         value={mapPdfTypesToOptions(
                           getPdfAttachments(projectPdfs, field.value ?? [])
