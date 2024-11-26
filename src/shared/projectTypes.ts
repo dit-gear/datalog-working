@@ -181,7 +181,7 @@ export const pdfZodObj = z.object({
   id: z.string().length(5),
   name: z.string().min(1, 'Template name are required'),
   output_name_pattern: z.string().min(1),
-  react: z.string(),
+  react: z.string().optional(),
   enabled: z.boolean()
 })
 
@@ -205,7 +205,7 @@ export const emailZodObj = z.object({
   subject: z.string().min(1, 'Subject are required'),
   attachments: z.array(z.string().length(5)).optional(),
   message: z.string().optional(),
-  react: z.string(), // url to file.
+  react: z.string().optional(),
   enabled: z.boolean()
 })
 
@@ -243,6 +243,7 @@ const ProjectSettingsZod = z.object({
 
 const TemplateDirectoryFileZod = z.object({
   path: z.string(),
+  name: z.string(),
   type: z.enum(['email', 'pdf']),
   scope: z.enum(['project', 'global'])
 })

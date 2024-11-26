@@ -54,10 +54,10 @@ export const getTemplateDirectories = (
     `${appPath}/templates/pdf`
   ]
   const detailed: TemplateDirectoryFile[] = [
-    { path: join(projectPath, 'templates/email'), type: 'email', scope: 'project' },
-    { path: join(projectPath, 'templates/pdf'), type: 'pdf', scope: 'project' },
-    { path: join(appPath, 'templates/email'), type: 'email', scope: 'global' },
-    { path: join(appPath, 'templates/pdf'), type: 'pdf', scope: 'global' }
+    { path: join(projectPath, 'templates/email'), name: '', type: 'email', scope: 'project' },
+    { path: join(projectPath, 'templates/pdf'), name: '', type: 'pdf', scope: 'project' },
+    { path: join(appPath, 'templates/email'), name: '', type: 'email', scope: 'global' },
+    { path: join(appPath, 'templates/pdf'), name: '', type: 'pdf', scope: 'global' }
   ]
   return { dirs, subdirs, detailed }
 }
@@ -75,6 +75,7 @@ const loadTemplateDirectory = async (
       .filter((file) => file.endsWith('.jsx') || file.endsWith('.tsx'))
       .map((file) => ({
         path: join(dirPath, file),
+        name: file,
         type,
         scope
       }))

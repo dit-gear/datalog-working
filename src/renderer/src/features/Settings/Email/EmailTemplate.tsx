@@ -233,8 +233,8 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
                         {templates
                           .filter((template) => template.type === 'email')
                           .map((template) => (
-                            <SelectItem key={template.path} value={template.path}>
-                              {getFileName(template.path)}
+                            <SelectItem key={template.path} value={template.name}>
+                              {template.name}
                             </SelectItem>
                           ))}
                       </SelectGroup>

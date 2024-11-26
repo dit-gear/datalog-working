@@ -76,7 +76,7 @@ const Settings: React.FC<SettingsDialogProps> = ({
   })
   const {
     handleSubmit,
-    formState: { isSubmitting, isSubmitSuccessful },
+    formState: { isSubmitting, isSubmitSuccessful, errors },
     reset
   } = form
 

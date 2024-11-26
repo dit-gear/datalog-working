@@ -146,8 +146,8 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
                         {templates
                           .filter((template) => template.type === 'pdf')
                           .map((template) => (
-                            <SelectItem key={template.path} value={template.path}>
-                              {getFileName(template.path)}
+                            <SelectItem key={template.path} value={template.name}>
+                              {template.name}
                             </SelectItem>
                           ))}
                       </SelectGroup>

@@ -15,7 +15,9 @@ const resolveTemplate = (
   directories: TemplateDirectoryFile[]
 ): TemplateDirectoryFile | null => {
   const match = directories.find((dir) => filePath.startsWith(dir.path))
-  return match ? { path: filePath, type: match.type, scope: match.scope } : null
+  return match
+    ? { path: filePath, name: path.basename(filePath), type: match.type, scope: match.scope }
+    : null
 }
 
 const isValidTemplateFile = (filePath: string, action: 'add' | 'remove'): boolean => {

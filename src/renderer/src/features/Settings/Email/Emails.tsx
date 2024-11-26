@@ -92,7 +92,7 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
                       : ''}
                   </p>
                   <p>React template:</p>
-                  <p>{getFileName(email.react)}</p>
+                  <p>{email.react}</p>
                   <p>Enabled:</p>
                   <p>{email.enabled && '✔'}</p>
                 </AccordionContent>

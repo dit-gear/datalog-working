@@ -1,20 +1,30 @@
 import { TabsTrigger } from '@components/ui/tabs'
 import { useWatch } from 'react-hook-form'
-import { getPdfAttachments } from '@shared/utils/project-methods'
+import { getPdfAttachments } from '../../utils/getAttachments'
+import { pdfType } from '@shared/projectTypes'
 
-export const AttachmentsTabs = () => {
+interface AttachmentTabsProps {
+  pdfs: pdfType[]
+}
+
+export const AttachmentsTabs = ({ pdfs }: AttachmentTabsProps) => {
   const attachments = useWatch({ name: 'attachments' })
 
-  // Return the JSX structure
+  if (!attachments || !pdfs) {
+    return null
+  }
+
+  const pdfAttachments = getPdfAttachments(pdfs, attachments)
+
   return (
     <>
-      {attachments.map((item: string, index: number) => (
+      {pdfAttachments.map((item) => (
         <TabsTrigger
           className="border-t border-l border-r rounded-t-lg px-4 pb-2"
-          key={index}
-          value="pdf"
+          key={item.id}
+          value={item.id}
         >
-          {item}
+          {`${item.output_name_pattern} (pdf)`}
         </TabsTrigger>
       ))}
     </>

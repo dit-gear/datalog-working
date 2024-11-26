@@ -11,7 +11,6 @@ import { TabsList } from '@radix-ui/react-tabs'
 import { Select, SelectContent, SelectItem } from '@components/ui/select'
 import { SelectTrigger } from '@components/SelectIconTrigger'
 import { emailType, emailZodObj, pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
-import { getFileName } from '@renderer/utils/formatString'
 import { getPdfAttachments, mapPdfTypesToOptions } from '../../utils/getAttachments'
 import { EmailPreview } from './emailPreview'
 import { AttachmentsTabs } from './attachmentsTabs'
@@ -100,20 +99,17 @@ const Send = ({ defaults, projectPdfs, projectTemplates }: SendProps) => {
                           getPdfAttachments(projectPdfs, field.value ?? [])
                         )}
                         onChange={(newValues) => {
-                          // Map selected Option objects to pdfType objects
                           const updatedAttachments = newValues
                             .map((id) => {
                               const foundPdf = projectPdfs.find((pdf) => pdf.id === id)
-                              console.log('Selected ID -> pdf:', id, foundPdf) // Debug mapping
                               return foundPdf?.id
                             })
-                            .filter(Boolean) // Remove any undefined entries
+                            .filter(Boolean)
 
-                          field.onChange(updatedAttachments) // Update the form state with pdfType objects
+                          field.onChange(updatedAttachments)
                         }}
                         options={projectPdfs.map((pdf) => {
                           const option = { label: pdf.name, value: pdf.id }
-                          console.log('Mapping pdf for options:', option) // Debug options mapping
                           return option
                         })}
                       />
@@ -153,8 +149,8 @@ const Send = ({ defaults, projectPdfs, projectTemplates }: SendProps) => {
                                 {projectTemplates
                                   .filter((template) => template.type === 'email')
                                   .map((template) => (
-                                    <SelectItem key={template.path} value={template.path}>
-                                      {getFileName(template.path)}
+                                    <SelectItem key={template.path} value={template.name}>
+                                      {template.name}
                                     </SelectItem>
                                   ))}
                               </SelectContent>
@@ -165,10 +161,10 @@ const Send = ({ defaults, projectPdfs, projectTemplates }: SendProps) => {
                     />
                   </span>
                 </TabsTrigger>
-                <AttachmentsTabs />
+                <AttachmentsTabs pdfs={projectPdfs} />
               </TabsList>
               <TabsContent value="email" className="h-full w-full">
-                <EmailPreview />
+                <EmailPreview templates={projectTemplates} />
               </TabsContent>
               <TabsContent value="pdf">pdf</TabsContent>
             </Tabs>

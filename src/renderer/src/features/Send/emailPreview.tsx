@@ -1,15 +1,21 @@
 import { useEffect, useState, useRef } from 'react'
 import { useWatch } from 'react-hook-form'
+import { getReactTemplate } from '@renderer/utils/getReactTemplate'
+import { TemplateDirectoryFile } from '@shared/projectTypes'
 
-export const EmailPreview = () => {
+interface EmailPreviewProps {
+  templates: TemplateDirectoryFile[]
+}
+
+export const EmailPreview = ({ templates }: EmailPreviewProps) => {
   const email = useWatch({ name: 'react' })
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const [previewContent, setPreviewContent] = useState<string | null>(null)
   const previewWorkerRef = useRef<Worker | null>(null)
 
-  const fetchFileContent = async (email: string) => {
+  const fetchFileContent = async (email: TemplateDirectoryFile) => {
     try {
-      const content = await window.sendApi.getFileContent(email)
+      const content = await window.sendApi.getFileContent(email.path)
       if (previewWorkerRef.current) {
         previewWorkerRef.current.postMessage({ code: content, type: 'email' })
       }
@@ -19,8 +25,12 @@ export const EmailPreview = () => {
   }
 
   useEffect(() => {
-    if (email && email !== 'plain-text') {
-      fetchFileContent(email)
+    if (error) {
+      setError(null)
+    }
+    if (email && templates) {
+      const res = getReactTemplate(email, templates, 'email')
+      res ? fetchFileContent(res) : setError(`${email} could not be found.`)
     }
   }, [email])
 
@@ -52,7 +62,12 @@ export const EmailPreview = () => {
       {previewContent && !error && (
         <iframe id="iframe" className="w-full h-full" srcDoc={previewContent} />
       )}
-      {error && <div className="bg-red-100 p-8">{error}</div>}
+      {error && (
+        <div className="bg-red-100 p-8 text-black">
+          <p>Error:</p>
+          {error}
+        </div>
+      )}
     </div>
   )
 }
