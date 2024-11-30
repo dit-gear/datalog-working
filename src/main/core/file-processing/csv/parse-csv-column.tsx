@@ -197,7 +197,10 @@ function parseListOfMappedObjects(
 ): string[][] | Record<string, string>[] {
   const { value_key, column, subfields, primary_delimiter = ',', secondary_delimiter = '|' } = field
   const value = row[column] ?? ''
-
+  if (!value.trim()) {
+    return (dataRow[value_key] = [])
+  }
+  console.log('value: ', value)
   const fieldMapping = subfields.map((sub) => sub.value_key)
 
   const records = value.split(primary_delimiter)
@@ -206,6 +209,7 @@ function parseListOfMappedObjects(
 
   records.map((record) => {
     const fields = record.split(secondary_delimiter).map((field) => field.trim())
+    console.log('fields: ', fields)
     const mappedObject: Record<string, string> = {}
     fields.forEach((field, index) => {
       const key = fieldMapping[index]
@@ -283,7 +287,9 @@ export function parseField(
     case 'list_of_field_arrays':
       return parseListOfFieldArrays(field, row, dataRow)
     case 'list_of_mapped_objects':
-      return parseListOfMappedObjects(field, row, dataRow)
+      const test = parseListOfMappedObjects(field, row, dataRow)
+      console.log('listofmappedobjects parsed: ', test)
+      return test
     case 'duration':
       return parseDuration(field, row, dataRow)
   }

@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Path } from '@shared/shared-types'
-import { TemplateDirectoryFile } from '@shared/projectTypes'
+import { ProjectRootType, TemplateDirectoryFile } from '@shared/projectTypes'
+import { DatalogType } from '@shared/datalogTypes'
 
 const useInitialDir = () => {
   const [dir, setDir] = useState<TemplateDirectoryFile[]>([])
   const [path, setPath] = useState<Path>({ project: '', global: '' } as Path)
+  const [data, setData] = useState<{ project: ProjectRootType; datalogs: DatalogType[] } | null>(
+    null
+  )
   const [loading, setLoading] = useState(true)
 
   const handleDirectoryChanged = (_, files: TemplateDirectoryFile[]): void => {
@@ -15,11 +19,12 @@ const useInitialDir = () => {
   useEffect(() => {
     const fetchInitialData = async (): Promise<void> => {
       try {
-        const data = await window.editorApi.fetchInitialData()
-        const { rootPath, projectPath, activeProject, loadedDatalogs } = data
+        const result = await window.editorApi.fetchInitialData()
+        const { rootPath, projectPath, activeProject, loadedDatalogs } = result
         const templates = activeProject.templatesDir
         setDir(templates)
         setPath({ project: projectPath, global: rootPath })
+        if (!data) setData({ project: activeProject, datalogs: loadedDatalogs })
       } catch (error) {
         console.error('Failed to fetch initial data:', error)
       } finally {
@@ -34,7 +39,7 @@ const useInitialDir = () => {
     window.editorApi.onDirChanged(handleDirectoryChanged)
   }, [])
 
-  return { dir, path, loading }
+  return { dir, path, loading, data }
 }
 
 export default useInitialDir

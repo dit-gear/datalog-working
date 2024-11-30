@@ -111,7 +111,7 @@ const Builderdialog = ({
     const currentClips = form.getValues().Clips
 
     const mergedClips = mergeDirtyValues(dirtyFields, currentClips, newClips)
-
+    console.log('mergedClips:', mergedClips)
     form.reset({ ...form.getValues(), Clips: mergedClips }, { keepDirty: true })
     if (setcopies) {
       setCopies(getCopiesFromClips(newClips))
@@ -177,6 +177,7 @@ const Builderdialog = ({
     try {
       const res = await window.mainApi.getCsvMetadata()
       if (res.success) {
+        console.log('getcsv-res:', res.clips)
         updateClips(res.clips)
       } else {
         if (res.cancelled) return

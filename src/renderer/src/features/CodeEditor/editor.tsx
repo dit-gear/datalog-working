@@ -19,6 +19,9 @@ import {
   DropdownMenuTrigger
 } from '@components/ui/dropdown-menu'
 import { LoadedFile } from '@shared/shared-types'
+import { ProjectRootType } from '@shared/projectTypes'
+import { DatalogType } from '@shared/datalogTypes'
+import { getLatestDatalog } from '@renderer/utils/getLatestDatalog'
 
 type Monaco = typeof monaco
 
@@ -29,10 +32,13 @@ const highlighter = await createHighlighter({
 
 interface EditorProps {
   loadedFile: LoadedFile
+  data: { project: ProjectRootType; datalogs: DatalogType[] } | null
 }
 
-const Editor = ({ loadedFile }: EditorProps) => {
-  // const [loadedFile, setLoadedFile] = useState<LoadedFile | null>(null)
+const Editor = ({ loadedFile, data }: EditorProps) => {
+  const [selection, setSelection] = useState<DatalogType | DatalogType[]>(
+    data ? getLatestDatalog(data.datalogs, data.project) : []
+  ) // use for data form
   const [editorContent, setEditorContent] = useState<string>(loadedFile.content)
   const [previewContent, setPreviewContent] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
@@ -110,7 +116,12 @@ const Editor = ({ loadedFile }: EditorProps) => {
     if (editorContent) {
       const request = {
         code: editorContent,
-        type: loadedFile.type
+        type: loadedFile.type,
+        dataObject: {
+          project: data?.project,
+          selection: data ? getLatestDatalog(data.datalogs, data.project) : [],
+          all: data?.datalogs
+        }
       }
       previewWorker.postMessage(request)
       linterWorker.postMessage(editorContent)
@@ -127,7 +138,12 @@ const Editor = ({ loadedFile }: EditorProps) => {
     if (editorContent && previewWorkerRef.current && linterWorkerRef.current) {
       const request = {
         code: editorContent,
-        type: loadedFile.type
+        type: loadedFile.type,
+        dataObject: {
+          project: data?.project,
+          selection: data ? getLatestDatalog(data.datalogs, data.project) : [],
+          all: data?.datalogs
+        }
       }
       previewWorkerRef.current.postMessage(request)
       linterWorkerRef.current.postMessage(editorContent)
@@ -142,7 +158,12 @@ const Editor = ({ loadedFile }: EditorProps) => {
     }
     const request = {
       code: editorContent,
-      type: loadedFile.type
+      type: loadedFile.type,
+      dataObject: {
+        project: data?.project,
+        selection: data ? getLatestDatalog(data.datalogs, data.project) : [],
+        all: data?.datalogs
+      }
     }
     previewWorkerRef.current.postMessage(request)
     linterWorkerRef.current.postMessage(editorContent)

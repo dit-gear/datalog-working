@@ -134,7 +134,7 @@ const parseCsv = async (path?: string): Promise<ResponseWithClips> => {
       if (hasForbiddenKey) {
         throw new Error(`Attempt to overwrite forbidden fields`)
       }
-      console.log(dataRow)
+      //console.log(dataRow)
       // Update the matched Clip with the additional `dataRow` fields
       clips[matchingClipIndex] = {
         ...clips[matchingClipIndex],

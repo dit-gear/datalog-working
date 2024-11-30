@@ -2,22 +2,27 @@ import React from 'react'
 import ReactDOMServer from 'react-dom/server'
 import { transform } from 'sucrase'
 import { pdf } from '@react-pdf/renderer'
-import { DatalogType } from '@shared/datalogTypes'
-import { Datalog } from '@shared/utils/datalog-methods'
+import { DatalogDynamicType } from '@shared/datalogTypes'
+import { ProjectRootType } from '@shared/projectTypes'
 
-// `${transpiledCode}\nreturn Emailtest;`
+type dataobjectType = {
+  project: ProjectRootType
+  selection: DatalogDynamicType
+  all: DatalogDynamicType[]
+}
 
 interface PreviewWorkerRequest {
   code: string
   type: 'email' | 'pdf'
-  datalogData: DatalogType
+  dataObject: dataobjectType
 }
 
 self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void> => {
-  const { code, type, datalogData } = event.data
+  const { code, type, dataObject } = event.data
   let components: Record<string, unknown> = {}
 
   try {
+    const { DataObject } = await import('@shared/utils/datalog-methods')
     if (type === 'email') {
       const {
         Html,
@@ -77,20 +82,7 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
         PDFViewer
       }
     }
-
-    const data = {
-      selected: {
-        name: '240801_DAY01',
-        day: 1,
-        date: '2024-08-01'
-      },
-      target: {
-        days: 3,
-        size: 1233
-      }
-    }
-
-    const datalog = new Datalog(datalogData)
+    const data = new DataObject(dataObject.project, dataObject.selection, dataObject.all)
 
     const transpiledCode = transform(code, {
       transforms: ['typescript', 'jsx', 'imports'],
@@ -107,7 +99,7 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
     const Component = new Function('React', ...Object.keys(components), 'data', wrappedCode)(
       React,
       ...Object.values(components),
-      datalog
+      data
     )
 
     let renderedContent
