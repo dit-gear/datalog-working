@@ -84,6 +84,23 @@ export type ResponseWithDatalog =
 
 // Dynamic fields on Clip
 
+const preprocessNestedObjectToArray = (data: unknown): unknown => {
+  if (Array.isArray(data)) {
+    return data.map(preprocessNestedObjectToArray) // Recursively process nested arrays
+  }
+  if (typeof data === 'object' && data !== null) {
+    const keys = Object.keys(data)
+    if (keys.every((key) => /^\d+$/.test(key))) {
+      // If all keys are numeric, convert to array
+      return keys
+        .map(Number)
+        .sort((a, b) => a - b)
+        .map((key) => (data as Record<string, unknown>)[key])
+    }
+  }
+  return data // Return unchanged if no transformation is needed
+}
+
 const mapTypeToZod = (field: Field): z.ZodTypeAny | undefined => {
   switch (field.type) {
     case 'string':
@@ -91,7 +108,7 @@ const mapTypeToZod = (field: Field): z.ZodTypeAny | undefined => {
     case 'list_of_strings':
       return z.array(z.string()).optional()
     case 'list_of_field_arrays':
-      return z.array(z.array(z.string())).optional()
+      return z.array(z.preprocess(preprocessNestedObjectToArray, z.array(z.string()))).optional()
     case 'key-value_object':
       return z.record(z.string(), z.string().optional()).optional()
     case 'list_of_mapped_objects':
