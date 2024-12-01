@@ -7,7 +7,7 @@ import { ProjectRootType } from '@shared/projectTypes'
 
 type dataobjectType = {
   project: ProjectRootType
-  selection: DatalogDynamicType
+  selection: DatalogDynamicType | DatalogDynamicType[]
   all: DatalogDynamicType[]
 }
 

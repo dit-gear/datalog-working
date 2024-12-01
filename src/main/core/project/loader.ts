@@ -16,7 +16,8 @@ import {
   ProjectSchemaZod,
   GlobalSchemaZodNullable,
   ProjectRootType,
-  TemplateDirectoryFile
+  TemplateDirectoryFile,
+  ProjectInRootMenuItem
 } from '../../../shared/projectTypes'
 import logger from '../logger'
 import { ZodType } from 'zod'
@@ -168,7 +169,7 @@ export const loadProjectsInRootPath = async (): Promise<void> => {
     includeFileName: 'config.yaml',
     maxDepth: 1
   })
-  const projects = yamlFiles.map((filePath) => {
+  const projects = yamlFiles.map((filePath): ProjectInRootMenuItem => {
     const folderPath = path.dirname(filePath)
     return {
       project: path.basename(folderPath), // Folder name

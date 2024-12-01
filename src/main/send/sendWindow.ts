@@ -1,21 +1,41 @@
-import { BrowserWindow, ipcMain } from 'electron'
+import { BrowserWindow } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../../resources/icon.png?asset'
+import { sendWindowDataMap } from '../core/app-state/state'
+import { emailType } from '@shared/projectTypes'
+import { DatalogType } from '@shared/datalogTypes'
 
-let sendWindow: BrowserWindow | null = null
+//let sendWindow: BrowserWindow | null = null
 
-export const getSendWindow = () => {
-  return sendWindow
+/*export const getSendWindow = (): BrowserWindow | undefined => {
+  if (sendWindow && !sendWindow.isDestroyed()) {
+    return sendWindow
+  }
+  return
+}*/
+
+export const getSendWindow = (windowId: number): BrowserWindow | undefined => {
+  const data = sendWindowDataMap.get(windowId)
+  if (data?.window && !data.window.isDestroyed()) {
+    return data.window
+  }
+  return undefined
 }
 
-export function createSendWindow(): void {
-  if (sendWindow) {
-    sendWindow.focus()
-    return
-  }
+export function createSendWindow(
+  selectedEmail?: emailType,
+  selection?: DatalogType | DatalogType[]
+): void {
+  /*if (sendWindow) {
+    if (!sendWindow.isDestroyed()) {
+      sendWindow.focus()
+      return
+    }
+    sendWindow = null
+  }*/
 
-  sendWindow = new BrowserWindow({
+  const sendWindow = new BrowserWindow({
     width: 1200,
     height: 760,
     show: false,
@@ -34,6 +54,14 @@ export function createSendWindow(): void {
     }
   })
 
+  sendWindowDataMap.set(sendWindow.webContents.id, {
+    window: sendWindow,
+    selectedEmail,
+    selection
+  })
+
+  const windowId = sendWindow.webContents.id
+
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     sendWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/send.html`)
   } else {
@@ -41,10 +69,7 @@ export function createSendWindow(): void {
   }
 
   sendWindow.on('closed', () => {
-    sendWindow = null
-  })
-
-  ipcMain.on('close-send-window', () => {
-    sendWindow?.close()
+    //ipcMain.removeHandler(`close-send-window`)
+    sendWindowDataMap.delete(windowId)
   })
 }

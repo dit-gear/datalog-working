@@ -1,17 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Send from './send'
 import { Select, SelectContent, SelectItem, SelectValue } from '@components/ui/select'
 import { SelectTrigger } from '@components/SelectIconTrigger'
-import { emailType, pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
+import { emailType } from '@shared/projectTypes'
+import { useDataContext } from './dataContext'
 
-interface SendSelectorProps {
-  projectEmails: emailType[]
-  projectPdfs: pdfType[]
-  projectTemplates: TemplateDirectoryFile[]
-}
-
-const SendSelector = ({ projectEmails, projectPdfs, projectTemplates }: SendSelectorProps) => {
+const SendSelector = () => {
+  const { projectEmails, defaultSelectedEmail } = useDataContext()
   const [selectedEmail, setSelectedEmail] = useState<emailType | null>(null)
+
+  useEffect(() => {
+    if (defaultSelectedEmail) setSelectedEmail(defaultSelectedEmail)
+  }, [defaultSelectedEmail])
 
   const handleSelectChange = (value: string) => {
     if (value === 'none') {
@@ -50,12 +50,7 @@ const SendSelector = ({ projectEmails, projectPdfs, projectTemplates }: SendSele
           </SelectContent>
         </Select>
       </div>
-      <Send
-        key={selectedEmail ? selectedEmail.name : 'none'}
-        defaults={selectedEmail}
-        projectPdfs={projectPdfs}
-        projectTemplates={projectTemplates}
-      />
+      <Send key={selectedEmail ? selectedEmail.name : 'none'} defaults={selectedEmail} />
     </div>
   )
 }

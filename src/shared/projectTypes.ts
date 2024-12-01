@@ -304,6 +304,12 @@ export type ProjectType = {
   data?: ProjectRootType
 }
 
+export type ProjectInRootMenuItem = {
+  project: string
+  path: string
+  active: boolean
+}
+
 export type ProjectToUpdate = {
   update_settings: ProjectSettingsType
   update_email_api: emailApiType

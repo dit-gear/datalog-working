@@ -1,18 +1,13 @@
 import { Menu, app, Tray, nativeImage } from 'electron'
 import { getMainWindow } from '../index'
 import { OpenModalTypes } from '@shared/shared-types'
-import { getTray, setTray, getProjectsInRootPath } from './app-state/state'
+import { ProjectRootType, ProjectInRootMenuItem } from '@shared/projectTypes'
+import { getTray, setTray, getProjectsInRootPath, getActiveProject } from './app-state/state'
 import { handleChangeProject } from './project/manager'
 import { handleRootDirChange } from './app-state/updater'
 import { createEditorWindow } from '../editor/editorWindow'
 import { createSendWindow } from '../send/sendWindow'
 import appIcon from '../../../build/tray_icon_template.png?asset'
-
-type ProjectItem = {
-  project: string
-  path: string
-  active: boolean
-}
 
 const handleOpenModalInDatalog = async (modal: OpenModalTypes): Promise<void> => {
   const mainWindow = await getMainWindow({ ensureOpen: true })
@@ -24,13 +19,16 @@ const handleOpenModalInDatalog = async (modal: OpenModalTypes): Promise<void> =>
     mainWindow?.webContents.send('open-modal-datalogWindow', modal)
   }
 }
-
-const buildContextMenu = (projects: ProjectItem[] | null): Menu => {
-  const activeProject = projects?.find((proj) => proj.active)
+// pass active project!
+const buildContextMenu = (
+  projects: ProjectInRootMenuItem[] | null,
+  activeProject: ProjectRootType | null
+): Menu => {
+  //const activeProject = projects?.find((proj) => proj.active)
   return Menu.buildFromTemplate([
     {
       id: 'active',
-      label: `Project: ${activeProject ? activeProject.project : 'None'}`,
+      label: `Project: ${activeProject ? activeProject.project_name : 'None'}`,
       enabled: false
     },
 
@@ -42,12 +40,20 @@ const buildContextMenu = (projects: ProjectItem[] | null): Menu => {
     { type: 'separator' },
     {
       label: 'Send',
-      submenu: [{ label: 'Datalog', click: (): void => createSendWindow() }],
+      submenu: activeProject?.emails?.map((email, index) => ({
+        id: index.toString(),
+        label: email.name,
+        click: (): void => createSendWindow(email)
+      })) || [{ label: 'No Emails Available', enabled: false }],
       enabled: Boolean(activeProject)
     }, // Will open Send window
     {
       label: 'Export',
-      submenu: [{ label: 'Datalog', click: (): void => console.log('Export clicked') }],
+      submenu: activeProject?.pdfs?.map((pdf) => ({
+        id: pdf.id,
+        label: pdf.name,
+        click: (): void => console.log('Export clicked')
+      })) || [{ label: 'No PDFs Available', enabled: false }],
       enabled: Boolean(activeProject)
     },
     { type: 'separator' },
@@ -102,12 +108,15 @@ const buildContextMenu = (projects: ProjectItem[] | null): Menu => {
   ])
 }
 
-export const createTray = (projects: ProjectItem[] | null): void => {
+const createTray = (
+  projects: ProjectInRootMenuItem[] | null,
+  activeProject: ProjectRootType | null
+): void => {
   let trayicon = nativeImage.createFromPath(appIcon)
   trayicon = trayicon.resize({ width: 32, height: 32 })
   let tray = new Tray(trayicon)
 
-  const contextMenu = buildContextMenu(projects)
+  const contextMenu = buildContextMenu(projects, activeProject)
 
   Menu.setApplicationMenu(contextMenu)
   tray.setContextMenu(contextMenu)
@@ -117,11 +126,12 @@ export const createTray = (projects: ProjectItem[] | null): void => {
 export const updateTray = (): void => {
   const tray = getTray()
   const projects = getProjectsInRootPath()
+  const activeProject = getActiveProject()
   if (!tray) {
-    createTray(projects)
+    createTray(projects, activeProject)
     return
   }
-  const contextMenu = buildContextMenu(projects)
+  const contextMenu = buildContextMenu(projects, activeProject)
   Menu.setApplicationMenu(contextMenu)
   tray.setContextMenu(contextMenu)
 }

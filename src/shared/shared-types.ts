@@ -1,4 +1,4 @@
-import { TemplateDirectoryFile, ProjectRootType } from './projectTypes'
+import { TemplateDirectoryFile, ProjectRootType, emailType } from './projectTypes'
 import { DatalogDynamicType } from './datalogTypes'
 
 export type durationType = {
@@ -54,6 +54,8 @@ export type InitialEditorData = {
 }
 
 export type InitialSendData = {
+  selectedEmail?: emailType
   project: ProjectRootType
+  selection?: DatalogDynamicType | DatalogDynamicType[]
   datalogs: DatalogDynamicType[]
 }

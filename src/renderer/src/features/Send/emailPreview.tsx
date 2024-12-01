@@ -2,12 +2,10 @@ import { useEffect, useState, useRef } from 'react'
 import { useWatch } from 'react-hook-form'
 import { getReactTemplate } from '@renderer/utils/getReactTemplate'
 import { TemplateDirectoryFile } from '@shared/projectTypes'
+import { useDataContext } from './dataContext'
 
-interface EmailPreviewProps {
-  templates: TemplateDirectoryFile[]
-}
-
-export const EmailPreview = ({ templates }: EmailPreviewProps) => {
+export const EmailPreview = () => {
+  const { projectTemplates, data } = useDataContext()
   const email = useWatch({ name: 'react' })
   const [error, setError] = useState<string | null>(null)
   const [previewContent, setPreviewContent] = useState<string | null>(null)
@@ -17,7 +15,11 @@ export const EmailPreview = ({ templates }: EmailPreviewProps) => {
     try {
       const content = await window.sendApi.getFileContent(email.path)
       if (previewWorkerRef.current) {
-        previewWorkerRef.current.postMessage({ code: content, type: 'email' })
+        previewWorkerRef.current.postMessage({
+          code: content,
+          type: 'email',
+          dataObject: data
+        })
       }
     } catch (err: any) {
       console.log(err)
@@ -28,8 +30,8 @@ export const EmailPreview = ({ templates }: EmailPreviewProps) => {
     if (error) {
       setError(null)
     }
-    if (email && templates) {
-      const res = getReactTemplate(email, templates, 'email')
+    if (email && projectTemplates) {
+      const res = getReactTemplate(email, projectTemplates, 'email')
       res ? fetchFileContent(res) : setError(`${email} could not be found.`)
     }
   }, [email])

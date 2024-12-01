@@ -10,19 +10,19 @@ import { Tabs, TabsTrigger, TabsContent } from '@components/ui/tabs'
 import { TabsList } from '@radix-ui/react-tabs'
 import { Select, SelectContent, SelectItem } from '@components/ui/select'
 import { SelectTrigger } from '@components/SelectIconTrigger'
-import { emailType, emailZodObj, pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
+import { emailType } from '@shared/projectTypes'
 import { getPdfAttachments, mapPdfTypesToOptions } from '../../utils/getAttachments'
 import { EmailPreview } from './emailPreview'
 import { AttachmentsTabs } from './attachmentsTabs'
+import { useDataContext } from './dataContext'
 
 interface SendProps {
   defaults: emailType | null
-  projectPdfs: pdfType[]
-  projectTemplates: TemplateDirectoryFile[]
 }
 
-const Send = ({ defaults, projectPdfs, projectTemplates }: SendProps) => {
+const Send = ({ defaults }: SendProps) => {
   //const pdfs = defaults?.attachments ? getPdfAttachments(projectPdfs, defaults.attachments) : []
+  const { projectPdfs, projectTemplates } = useDataContext()
   const form = useForm<emailType>({
     defaultValues: {
       recipients: defaults?.recipients ?? [],
@@ -164,7 +164,7 @@ const Send = ({ defaults, projectPdfs, projectTemplates }: SendProps) => {
                 <AttachmentsTabs pdfs={projectPdfs} />
               </TabsList>
               <TabsContent value="email" className="h-full w-full">
-                <EmailPreview templates={projectTemplates} />
+                <EmailPreview />
               </TabsContent>
               <TabsContent value="pdf">pdf</TabsContent>
             </Tabs>

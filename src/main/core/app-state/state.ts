@@ -1,28 +1,26 @@
-import { app, Tray } from 'electron'
-import { ProjectRootType } from '@shared/projectTypes'
-import { DatalogDynamicType } from '@shared/datalogTypes'
-
-type ProjectItem = {
-  project: string
-  path: string
-  active: boolean
-}
+import { app, Tray, BrowserWindow } from 'electron'
+import { ProjectRootType, emailType, ProjectInRootMenuItem } from '@shared/projectTypes'
+import { DatalogDynamicType, DatalogType } from '@shared/datalogTypes'
 
 let rootPath: string = ''
-let projectsInRootPath: ProjectItem[] | null = null
+let projectsInRootPath: ProjectInRootMenuItem[] | null = null
 let activeProjectPath: string = ''
 let activeProject: ProjectRootType | null = null
 let tray: Electron.Tray | null = null
 const appPath = app.getPath('userData')
 const datalogStore = new Map<string, DatalogDynamicType>()
+export const sendWindowDataMap = new Map<
+  number,
+  { window: BrowserWindow; selectedEmail?: emailType; selection?: DatalogType | DatalogType[] }
+>()
 
 export const getRootPath = (): string => rootPath
 export const setRootPath = (newPath: string): void => {
   rootPath = newPath
 }
 
-export const getProjectsInRootPath = (): ProjectItem[] | null => projectsInRootPath
-export const setProjectsInRootPath = (fetchedProjectsInRoot: ProjectItem[]): void => {
+export const getProjectsInRootPath = (): ProjectInRootMenuItem[] | null => projectsInRootPath
+export const setProjectsInRootPath = (fetchedProjectsInRoot: ProjectInRootMenuItem[]): void => {
   projectsInRootPath = fetchedProjectsInRoot
 }
 
