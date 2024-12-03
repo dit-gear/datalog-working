@@ -8,9 +8,15 @@ export const getOCFFiles = (data: DatalogType): number => {
   const files = data.OCF?.Files ?? data.Clips?.length ?? 0
   return files
 }
-export const getOCFSize = (data: DatalogType, format: boolean = true): string | number => {
+
+export function getOCFSize(data: DatalogType, options?: { format: true }): string
+export function getOCFSize(data: DatalogType, options?: { format: false }): number
+export function getOCFSize(
+  data: DatalogType,
+  options: { format: true } | { format: false } = { format: true }
+): string | number {
   const size = data.OCF?.Size ?? data.Clips?.reduce((acc, clip) => acc + (clip.Size ?? 0), 0) ?? 0
-  return format ? formatBytes(size) : size
+  return options.format ? formatBytes(size) : size
 }
 export const getProxyFiles = (data: DatalogType): number => {
   const files =
@@ -197,7 +203,7 @@ export class DataObject {
 
   getTotalOCFSize(): string {
     const totalSize = this.all.reduce(
-      (acc, datalog) => acc + (getOCFSize(datalog.data, false) as number), // Using getOCFSize from utils
+      (acc, datalog) => acc + (getOCFSize(datalog.data, { format: false }) as number), // Using getOCFSize from utils
       0
     )
     return totalSize > 0 ? formatBytes(totalSize) : '0 bytes' // Format size for readability

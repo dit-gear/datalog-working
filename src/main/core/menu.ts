@@ -33,18 +33,22 @@ const buildContextMenu = (
     },
 
     {
-      label: 'Show Datalog',
+      label: 'Open Datalog Window',
       click: () => getMainWindow({ ensureOpen: true }),
       enabled: Boolean(activeProject)
     }, // Opens main window
     { type: 'separator' },
     {
       label: 'Send',
-      submenu: activeProject?.emails?.map((email, index) => ({
-        id: index.toString(),
-        label: email.name,
-        click: (): void => createSendWindow(email)
-      })) || [{ label: 'No Emails Available', enabled: false }],
+      submenu: [
+        ...(activeProject?.emails?.map((email, index) => ({
+          id: index.toString(),
+          label: email.name,
+          click: (): void => createSendWindow(email)
+        })) || [{ label: 'No Emails Available', enabled: false }]),
+        { type: 'separator' },
+        { id: 'sendWindow', label: 'Open Send Window', click: (): void => createSendWindow() }
+      ],
       enabled: Boolean(activeProject)
     }, // Will open Send window
     {
@@ -95,10 +99,10 @@ const buildContextMenu = (
       enabled: Boolean(activeProject)
     }, // Opens main window and open settings modal.
     { type: 'separator' },
-    { label: 'Help', submenu: [{ label: 'Docs' }, { label: 'Discord' }] },
+    { label: 'Help', submenu: [{ label: 'Docs' } /*{ label: 'Discord' }*/] },
     { label: 'About' },
     { type: 'separator' },
-    { label: 'Log in', enabled: false },
+    /*{ label: 'Log in', enabled: false },*/
     {
       label: 'Quit',
       click: (): void => {

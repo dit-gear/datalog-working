@@ -4,14 +4,17 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
+  DropdownMenuSub,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuGroup
 } from '@components/ui/dropdown-menu'
 import { Checkbox } from '@components/ui/checkbox'
 import { MoreHorizontal, Trash2, Pencil, FileDown } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import { DatalogType } from '@shared/datalogTypes'
+import { DropdownMenuPortal, DropdownMenuSubTrigger } from '@radix-ui/react-dropdown-menu'
 
 export const Columns = (handlers: {
   handleDelete: (datalog: DatalogType) => void
@@ -83,21 +86,29 @@ export const Columns = (handlers: {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handlers.handleEdit(datalog)}>
               <Pencil className="mr-2 h-4 w-4" />
               <span>Edit</span>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <FileDown className="mr-2 h-4 w-4" />
-              <span>Export</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <FileDown className="mr-2 h-4 w-4" />
-              <span>Send</span>
-            </DropdownMenuItem>
+            {/*<DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem>
+                <FileDown className="mr-2 h-4 w-4" />
+                <span>Export</span>
+              </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <span>Send</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem>
+                      <span>Test</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+            </DropdownMenuGroup>*/}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-red-800 hover:text-red-900"
