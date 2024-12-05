@@ -15,10 +15,11 @@ interface PreviewWorkerRequest {
   code: string
   type: 'email' | 'pdf'
   dataObject: dataobjectType
+  id: number
 }
 
 self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void> => {
-  const { code, type, dataObject } = event.data
+  const { code, type, dataObject, id } = event.data
   let components: Record<string, unknown> = {}
 
   try {
@@ -106,7 +107,7 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
 
     if (type === 'email') {
       renderedContent = ReactDOMServer.renderToString(React.createElement(Component))
-      self.postMessage({ html: renderedContent })
+      self.postMessage({ id, html: renderedContent })
     } else if (type === 'pdf') {
       // Create a PDF document using the component wrapped in PDFViewer
       const pdfDocument = pdf(React.createElement(Component))
@@ -114,11 +115,11 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
 
       // Create a URL for the Blob to be used in an iframe
       const pdfUrl = URL.createObjectURL(pdfBlob)
-      self.postMessage({ html: pdfUrl })
+      self.postMessage({ id, html: pdfUrl })
     }
   } catch (error) {
     console.error('Error in preview-worker', error)
-    self.postMessage({ error: (error as Error).message })
+    self.postMessage({ id, error: (error as Error).message })
   }
 }
 

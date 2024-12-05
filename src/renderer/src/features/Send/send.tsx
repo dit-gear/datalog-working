@@ -6,15 +6,10 @@ import MultiSelect from '@components/MultiSelect'
 import { useForm } from 'react-hook-form'
 import { Button } from '@components/ui/button'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@components/ui/resizable'
-import { Tabs, TabsTrigger, TabsContent } from '@components/ui/tabs'
-import { TabsList } from '@radix-ui/react-tabs'
-import { Select, SelectContent, SelectItem } from '@components/ui/select'
-import { SelectTrigger } from '@components/SelectIconTrigger'
 import { emailType } from '@shared/projectTypes'
 import { getPdfAttachments, mapPdfTypesToOptions } from '../../utils/getAttachments'
-import { EmailPreview } from './emailPreview'
-import { AttachmentsTabs } from './attachmentsTabs'
 import { useDataContext } from './dataContext'
+import { Previews } from './preview/previews'
 
 interface SendProps {
   defaults: emailType | null
@@ -22,7 +17,7 @@ interface SendProps {
 
 const Send = ({ defaults }: SendProps) => {
   //const pdfs = defaults?.attachments ? getPdfAttachments(projectPdfs, defaults.attachments) : []
-  const { projectPdfs, projectTemplates } = useDataContext()
+  const { projectPdfs } = useDataContext()
   const form = useForm<emailType>({
     defaultValues: {
       recipients: defaults?.recipients ?? [],
@@ -122,7 +117,7 @@ const Send = ({ defaults }: SendProps) => {
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel className="mx-8 overflow-visible" defaultSize={60} maxSize={75}>
-            <Tabs defaultValue="email" className="overflow-visible h-full">
+            {/*<Tabs defaultValue="email" className="overflow-visible h-full">
               <TabsList
                 className="absolute -mt-10 overflow-visible z-20 flex gap-1"
                 style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
@@ -161,13 +156,16 @@ const Send = ({ defaults }: SendProps) => {
                     />
                   </span>
                 </TabsTrigger>
-                <AttachmentsTabs pdfs={projectPdfs} />
+                <AttachmentsTabs />
               </TabsList>
               <TabsContent value="email" className="h-full w-full">
                 <EmailPreview />
               </TabsContent>
-              <TabsContent value="pdf">pdf</TabsContent>
-            </Tabs>
+              {projectPdfs.map((pdf) => (
+                <TabsContent key={pdf.id} value={pdf.id}></TabsContent>
+              ))}
+            </Tabs>*/}
+            <Previews />
           </ResizablePanel>
         </ResizablePanelGroup>
         <div className="fixed bottom-0 left-0 w-full flex justify-end gap-4 p-4 border-t">

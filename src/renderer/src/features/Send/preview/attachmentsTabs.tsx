@@ -1,20 +1,17 @@
 import { TabsTrigger } from '@components/ui/tabs'
 import { useWatch } from 'react-hook-form'
-import { getPdfAttachments } from '../../utils/getAttachments'
-import { pdfType } from '@shared/projectTypes'
+import { getPdfAttachments } from '../../../utils/getAttachments'
+import { useDataContext } from '../dataContext'
 
-interface AttachmentTabsProps {
-  pdfs: pdfType[]
-}
-
-export const AttachmentsTabs = ({ pdfs }: AttachmentTabsProps) => {
+const AttachmentsTabs = () => {
+  const { projectPdfs } = useDataContext()
   const attachments = useWatch({ name: 'attachments' })
 
-  if (!attachments || !pdfs) {
+  if (!attachments || !projectPdfs) {
     return null
   }
 
-  const pdfAttachments = getPdfAttachments(pdfs, attachments)
+  const pdfAttachments = getPdfAttachments(projectPdfs, attachments)
 
   return (
     <>
@@ -24,9 +21,11 @@ export const AttachmentsTabs = ({ pdfs }: AttachmentTabsProps) => {
           key={item.id}
           value={item.id}
         >
-          {`${item.output_name_pattern} (pdf)`}
+          <span className="h-4">{`${item.output_name_pattern} (pdf)`}</span>
         </TabsTrigger>
       ))}
     </>
   )
 }
+
+export default AttachmentsTabs
