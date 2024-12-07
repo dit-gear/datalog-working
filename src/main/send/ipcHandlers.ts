@@ -2,6 +2,7 @@
 import { ipcMain } from 'electron'
 import fs from 'fs/promises'
 import { InitialSendData } from '@shared/shared-types'
+import { emailType } from '@shared/projectTypes'
 import {
   getActiveProject,
   datalogs as datalogStore,
@@ -44,4 +45,33 @@ export function setupSendIpcHandlers(): void {
       throw new Error(`Failed to read file: ${message}`)
     }
   })
+  ipcMain.handle('get-multiple-file-contents', async (_event, filePaths: string[]) => {
+    try {
+      const fileReadPromises = filePaths.map(async (filePath) => {
+        await fs.access(filePath)
+        const content = await fs.readFile(filePath, 'utf8')
+        return { filePath, content }
+      })
+
+      const results = await Promise.all(fileReadPromises)
+      const fileContents = results.reduce(
+        (acc, { filePath, content }) => {
+          acc[filePath] = content
+          return acc
+        },
+        {} as Record<string, string>
+      )
+
+      return fileContents
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'unknown error'
+      throw new Error(`Failed to read files: ${message}`)
+    }
+  })
 }
+ipcMain.handle('incoming-send-email-request', async (event, email: emailType) => {
+  const project = getActiveProject()
+  const datalogs = Array.from(datalogStore().values())
+  const windowId = event.sender.id
+  const { selection } = sendWindowDataMap.get(windowId) || {}
+})

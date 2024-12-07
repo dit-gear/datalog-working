@@ -1,3 +1,4 @@
+import { emailType } from '@shared/projectTypes'
 import { InitialSendData } from '@shared/shared-types'
 
 declare global {
@@ -7,6 +8,8 @@ declare global {
       showWindow: () => void
       closeSendWindow: () => void
       getFileContent: (filePath: string) => Promise<string>
+      getMultipleFileContent: (filePaths: string[]) => Promise<Record<string, string>>
+      sendEmail: (email: emailType) => Promise<boolean>
     }
   }
 }

@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
-import icon from '../../../resources/icon.png?asset'
+import icon from '../../../resources/appIcondark.png?asset'
 import { sendWindowDataMap } from '../core/app-state/state'
 import { emailType } from '@shared/projectTypes'
 import { DatalogType } from '@shared/datalogTypes'

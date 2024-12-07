@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { useDataContext } from '../dataContext'
-import { WorkerContext } from './PreviewContainer'
+import { PreviewContainer, WorkerContext } from './PreviewContainer'
 import { getReactTemplate } from '@renderer/utils/getReactTemplate'
+import { fetchFileContent } from '../utils/fetchFileContent'
 
 interface PreviewProps {
   react: string
@@ -19,15 +20,6 @@ export const Preview: React.FC<PreviewProps> = ({ react, type }) => {
   }
 
   const { sendToWorker } = workerContext
-
-  const fetchFileContent = async (path: string): Promise<string> => {
-    try {
-      const content = await window.sendApi.getFileContent(path)
-      return content
-    } catch (err: any) {
-      throw new Error(`Failed to fetch file content: ${err.message}`)
-    }
-  }
 
   useEffect(() => {
     let isMounted = true
@@ -47,7 +39,6 @@ export const Preview: React.FC<PreviewProps> = ({ react, type }) => {
         })
 
         if (isMounted) {
-          console.log(result.toString())
           setPreviewContent(result)
         }
       } catch (err: any) {

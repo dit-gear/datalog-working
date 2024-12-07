@@ -7,7 +7,7 @@ import { handleChangeProject } from './project/manager'
 import { handleRootDirChange } from './app-state/updater'
 import { createEditorWindow } from '../editor/editorWindow'
 import { createSendWindow } from '../send/sendWindow'
-import appIcon from '../../../build/tray_icon_template.png?asset'
+import trayIcon from '../../../resources/trayIcon.png?asset'
 
 const handleOpenModalInDatalog = async (modal: OpenModalTypes): Promise<void> => {
   const mainWindow = await getMainWindow({ ensureOpen: true })
@@ -116,9 +116,9 @@ const createTray = (
   projects: ProjectInRootMenuItem[] | null,
   activeProject: ProjectRootType | null
 ): void => {
-  let trayicon = nativeImage.createFromPath(appIcon)
-  trayicon = trayicon.resize({ width: 32, height: 32 })
-  let tray = new Tray(trayicon)
+  //let trayicon = nativeImage.createFromPath(appIcon)
+  //trayicon = trayicon.resize({ width: 32, height: 32 })
+  let tray = new Tray(trayIcon)
 
   const contextMenu = buildContextMenu(projects, activeProject)
 

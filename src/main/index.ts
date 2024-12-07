@@ -1,7 +1,7 @@
 import { app, shell, BrowserWindow, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import icon from '../../resources/appIconlight.png?asset'
 import { ProjectType } from '../shared/projectTypes'
 import { loadState } from './core/app-state/loader'
 import { setupIpcHandlers } from './setupIpcHandlers'
@@ -93,6 +93,7 @@ async function createWindow(): Promise<void> {
 app.whenReady().then(() => {
   session.defaultSession.clearCache()
   electronApp.setAppUserModelId('com.electron')
+  app.dock.setIcon(icon)
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

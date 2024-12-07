@@ -3,21 +3,22 @@ import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
 import MultiSelectTextInput from '@components/MultiSelectTextInput'
 import MultiSelect from '@components/MultiSelect'
-import { useForm } from 'react-hook-form'
+import { SubmitHandler, useForm } from 'react-hook-form'
 import { Button } from '@components/ui/button'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@components/ui/resizable'
-import { emailType } from '@shared/projectTypes'
+import { emailType, emailZodObj } from '@shared/projectTypes'
 import { getPdfAttachments, mapPdfTypesToOptions } from '../../utils/getAttachments'
 import { useDataContext } from './dataContext'
 import { Previews } from './preview/previews'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Loader2 } from 'lucide-react'
 
 interface SendProps {
   defaults: emailType | null
 }
 
 const Send = ({ defaults }: SendProps) => {
-  //const pdfs = defaults?.attachments ? getPdfAttachments(projectPdfs, defaults.attachments) : []
-  const { projectPdfs } = useDataContext()
+  const { projectPdfs, projectTemplates, data: dataObject } = useDataContext()
   const form = useForm<emailType>({
     defaultValues: {
       recipients: defaults?.recipients ?? [],
@@ -27,9 +28,23 @@ const Send = ({ defaults }: SendProps) => {
       react: defaults?.react ?? ''
     },
     mode: 'onSubmit'
+    //resolver: zodResolver(emailZodObj) // maybe omit name, sender from validation.
   })
 
-  const { control } = form
+  const {
+    control,
+    formState: { isSubmitting, isSubmitSuccessful },
+    handleSubmit
+  } = form
+
+  const onSubmit: SubmitHandler<emailType> = async (data) => {
+    try {
+      await window.sendApi.sendEmail(data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <div className="min-h-[calc(100vh-36px)] border-t flex flex-col">
       <Form {...form}>
@@ -117,54 +132,6 @@ const Send = ({ defaults }: SendProps) => {
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel className="mx-8 overflow-visible" defaultSize={60} maxSize={75}>
-            {/*<Tabs defaultValue="email" className="overflow-visible h-full">
-              <TabsList
-                className="absolute -mt-10 overflow-visible z-20 flex gap-1"
-                style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-              >
-                <TabsTrigger
-                  value="email"
-                  className="border-t border-l border-r rounded-t-lg px-4 pb-2"
-                >
-                  <span className="flex gap-4 h-4 items-center">
-                    Email Preview
-                    <FormField
-                      control={control}
-                      name="react"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Select
-                              defaultValue={field.value}
-                              onValueChange={(value) => field.onChange(value)} // Update the form state
-                            >
-                              <SelectTrigger />
-                              <SelectContent>
-                                <SelectItem value="plain-text">Plain-text</SelectItem>
-                                {projectTemplates
-                                  .filter((template) => template.type === 'email')
-                                  .map((template) => (
-                                    <SelectItem key={template.path} value={template.name}>
-                                      {template.name}
-                                    </SelectItem>
-                                  ))}
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </span>
-                </TabsTrigger>
-                <AttachmentsTabs />
-              </TabsList>
-              <TabsContent value="email" className="h-full w-full">
-                <EmailPreview />
-              </TabsContent>
-              {projectPdfs.map((pdf) => (
-                <TabsContent key={pdf.id} value={pdf.id}></TabsContent>
-              ))}
-            </Tabs>*/}
             <Previews />
           </ResizablePanel>
         </ResizablePanelGroup>
@@ -172,7 +139,10 @@ const Send = ({ defaults }: SendProps) => {
           <Button variant="ghost" onClick={() => window.sendApi.closeSendWindow()}>
             Cancel
           </Button>
-          <Button>Send</Button>
+          <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting || isSubmitSuccessful}>
+            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <></>}
+            {isSubmitting ? 'Please wait' : isSubmitSuccessful ? 'Sent sucessfully' : 'Send'}
+          </Button>
         </div>
       </Form>
     </div>

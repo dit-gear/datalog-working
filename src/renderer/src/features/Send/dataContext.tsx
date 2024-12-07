@@ -1,13 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { emailType, pdfType, TemplateDirectoryFile, ProjectRootType } from '@shared/projectTypes'
-import { DatalogDynamicType } from '@shared/datalogTypes'
+import { DataObjectType } from './types'
 import { getLatestDatalog } from '@renderer/utils/getLatestDatalog'
-
-type DataObjectType = {
-  project: ProjectRootType
-  selection: DatalogDynamicType | DatalogDynamicType[]
-  all: DatalogDynamicType[]
-}
 
 type DataContextType = {
   data?: DataObjectType

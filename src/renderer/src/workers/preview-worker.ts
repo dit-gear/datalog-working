@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOMServer from 'react-dom/server'
 import { transform } from 'sucrase'
 import { pdf } from '@react-pdf/renderer'
+import { render } from '@react-email/render'
 import { DatalogDynamicType } from '@shared/datalogTypes'
 import { ProjectRootType } from '@shared/projectTypes'
 
@@ -103,10 +104,9 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
       data
     )
 
-    let renderedContent
-
     if (type === 'email') {
-      renderedContent = ReactDOMServer.renderToString(React.createElement(Component))
+      //const renderedContent = ReactDOMServer.renderToString(React.createElement(Component))
+      const renderedContent = await render(React.createElement(Component), { plainText: false })
       self.postMessage({ id, html: renderedContent })
     } else if (type === 'pdf') {
       // Create a PDF document using the component wrapped in PDFViewer

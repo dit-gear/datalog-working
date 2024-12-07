@@ -1,4 +1,5 @@
-import { emailZodObj, pdfZodObj } from '@shared/projectTypes'
+import { emailZodObj, pdfZodObj, ProjectRootType } from '@shared/projectTypes'
+import { DatalogDynamicType } from '@shared/datalogTypes'
 import z from 'zod'
 
 export const emailWithAttatchmentsZod = emailZodObj
@@ -6,3 +7,9 @@ export const emailWithAttatchmentsZod = emailZodObj
   .extend({ attachments: z.array(pdfZodObj).optional() })
 
 export type emailWithAttatchmentsType = z.infer<typeof emailWithAttatchmentsZod>
+
+export type DataObjectType = {
+  project: ProjectRootType
+  selection: DatalogDynamicType | DatalogDynamicType[]
+  all: DatalogDynamicType[]
+}
