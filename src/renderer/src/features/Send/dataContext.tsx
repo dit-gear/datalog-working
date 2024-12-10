@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { emailType, pdfType, TemplateDirectoryFile, ProjectRootType } from '@shared/projectTypes'
 import { DataObjectType } from './types'
-import { getLatestDatalog } from '@renderer/utils/getLatestDatalog'
+import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 
 type DataContextType = {
   data?: DataObjectType

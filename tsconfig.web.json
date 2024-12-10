@@ -7,7 +7,7 @@
     "src/preload/**/*.d.ts",
     "src/shared/**/*.ts",
     "src/main/core/app-state/state.tsx"
-],
+, "src/shared/utils/getAttachments.ts", "src/shared/utils/getLatestDatalog.ts"],
   "compilerOptions": {
     "composite": true,
     "jsx": "react-jsx",

@@ -1,6 +1,6 @@
 import { TabsTrigger } from '@components/ui/tabs'
 import { useWatch } from 'react-hook-form'
-import { getPdfAttachments } from '../../../utils/getAttachments'
+import { getPdfAttachments } from '@shared/utils/getAttachments'
 import { useDataContext } from '../dataContext'
 
 const AttachmentsTabs = () => {

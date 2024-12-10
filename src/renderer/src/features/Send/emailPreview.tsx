@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useWatch } from 'react-hook-form'
-import { getReactTemplate } from '@renderer/utils/getReactTemplate'
+import { getReactTemplate } from '@shared/utils/getReactTemplate'
 import { TemplateDirectoryFile } from '@shared/projectTypes'
 import { useDataContext } from './dataContext'
 

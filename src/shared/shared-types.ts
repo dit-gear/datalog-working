@@ -59,3 +59,9 @@ export type InitialSendData = {
   selection?: DatalogDynamicType | DatalogDynamicType[]
   datalogs: DatalogDynamicType[]
 }
+
+export type DataObjectType = {
+  project: ProjectRootType
+  selection: DatalogDynamicType | DatalogDynamicType[]
+  all: DatalogDynamicType[]
+}

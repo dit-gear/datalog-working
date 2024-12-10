@@ -20,8 +20,7 @@ import { MoreHorizontal } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import EmailTemplate from './EmailTemplate'
 import ApiKeyDialog from './ApiKeyDialog'
-import { getFileName } from '@renderer/utils/formatString'
-import { getPdfAttachments } from '../../../utils/getAttachments'
+import { getPdfAttachments } from '@shared/utils/getAttachments'
 
 interface EmailProps {
   scope: 'project' | 'global'

@@ -9,7 +9,7 @@ declare global {
       closeSendWindow: () => void
       getFileContent: (filePath: string) => Promise<string>
       getMultipleFileContent: (filePaths: string[]) => Promise<Record<string, string>>
-      sendEmail: (email: emailType) => Promise<boolean>
+      sendEmail: (email: emailType) => Promise<void>
     }
   }
 }

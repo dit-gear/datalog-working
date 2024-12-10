@@ -14,8 +14,8 @@ const sendApi = {
     ipcRenderer.invoke('get-file-content', filePath),
   getMultipleFileContent: (filePaths: string[]): Promise<Record<string, string>> =>
     ipcRenderer.invoke('get-multiple-file-contents', filePaths),
-  sendEmail: (email: emailType): Promise<boolean> =>
-    safeInvoke<boolean>('incoming-send-email-request', email)
+  sendEmail: (email: emailType): Promise<void> =>
+    safeInvoke<void>('incoming-send-email-request', email)
 }
 
 if (process.contextIsolated) {

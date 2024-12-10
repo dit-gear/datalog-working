@@ -21,7 +21,7 @@ import {
 import { LoadedFile } from '@shared/shared-types'
 import { ProjectRootType } from '@shared/projectTypes'
 import { DatalogType } from '@shared/datalogTypes'
-import { getLatestDatalog } from '@renderer/utils/getLatestDatalog'
+import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 
 type Monaco = typeof monaco
 
@@ -363,9 +363,9 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
           {loadedFile && previewContent && !error && (
             <iframe
               id="iframe"
-              className="w-full h-full"
+              className="w-full h-full border-0"
               {...(loadedFile.type === 'pdf'
-                ? { src: previewContent }
+                ? { src: `${previewContent}#toolbar=0` }
                 : { srcDoc: previewContent })}
             />
           )}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { useDataContext } from '../dataContext'
 import { PreviewContainer, WorkerContext } from './PreviewContainer'
-import { getReactTemplate } from '@renderer/utils/getReactTemplate'
+import { getReactTemplate } from '@shared/utils/getReactTemplate'
 import { fetchFileContent } from '../utils/fetchFileContent'
 
 interface PreviewProps {
@@ -61,7 +61,9 @@ export const Preview: React.FC<PreviewProps> = ({ react, type }) => {
       {previewContent && !error ? (
         <iframe
           className="w-full h-full"
-          {...(type === 'pdf' ? { src: previewContent } : { srcDoc: previewContent })}
+          {...(type === 'pdf'
+            ? { src: `${previewContent}#toolbar=0` }
+            : { srcDoc: previewContent })}
         />
       ) : error ? (
         <div className="bg-red-100 p-8 text-black">

@@ -21,6 +21,8 @@ export function createSendWindow(
   const sendWindow = new BrowserWindow({
     width: 1200,
     height: 760,
+    minWidth: 580,
+    minHeight: 650,
     show: false,
     backgroundColor: '#090909',
     autoHideMenuBar: true,

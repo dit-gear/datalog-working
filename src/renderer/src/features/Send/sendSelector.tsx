@@ -35,7 +35,7 @@ const SendSelector = () => {
           onValueChange={handleSelectChange}
         >
           <SelectTrigger>
-            <span>Email Template: </span>
+            <span>Preset: </span>
             <span className={selectedEmail === null ? 'text-muted-foreground' : ''}>
               <SelectValue />
             </span>

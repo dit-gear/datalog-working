@@ -7,7 +7,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { Button } from '@components/ui/button'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@components/ui/resizable'
 import { emailType, emailZodObj } from '@shared/projectTypes'
-import { getPdfAttachments, mapPdfTypesToOptions } from '../../utils/getAttachments'
+import { getPdfAttachments, mapPdfTypesToOptions } from '@shared/utils/getAttachments'
 import { useDataContext } from './dataContext'
 import { Previews } from './preview/previews'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,7 +18,7 @@ interface SendProps {
 }
 
 const Send = ({ defaults }: SendProps) => {
-  const { projectPdfs, projectTemplates, data: dataObject } = useDataContext()
+  const { projectPdfs } = useDataContext()
   const form = useForm<emailType>({
     defaultValues: {
       recipients: defaults?.recipients ?? [],
@@ -135,14 +135,34 @@ const Send = ({ defaults }: SendProps) => {
             <Previews />
           </ResizablePanel>
         </ResizablePanelGroup>
-        <div className="fixed bottom-0 left-0 w-full flex justify-end gap-4 p-4 border-t">
-          <Button variant="ghost" onClick={() => window.sendApi.closeSendWindow()}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting || isSubmitSuccessful}>
-            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <></>}
-            {isSubmitting ? 'Please wait' : isSubmitSuccessful ? 'Sent sucessfully' : 'Send'}
-          </Button>
+        <div className="fixed bottom-0 left-0 w-full flex justify-between gap-4 p-4 border-t">
+          <div className="">
+            <p className="text-xs text-blue-400">Message from today's sponsor:</p>
+            <span className="text-sm">
+              {
+                [
+                  'Tech.store: Raid X20 just dropped. Amazing speeds of 2500MB/s!',
+                  'GadgetHub: 30% off all label printers today!',
+                  'SpeedyMart: Free shipping on orders over $500!'
+                ][Math.floor(Math.random() * 3)]
+              }
+              <Button
+                variant="link"
+                className="h-auto  py-0 pl-1 text-xs font-normal text-blue-400 underline"
+              >
+                {['Read more', 'Visit store', 'Press release', ''][Math.floor(Math.random() * 3)]}
+              </Button>
+            </span>
+          </div>
+          <div className="flex gap-4">
+            <Button variant="ghost" onClick={() => window.sendApi.closeSendWindow()}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting || isSubmitSuccessful}>
+              {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <></>}
+              {isSubmitting ? 'Please wait' : isSubmitSuccessful ? 'Sent sucessfully' : 'Send'}
+            </Button>
+          </div>
         </div>
       </Form>
     </div>

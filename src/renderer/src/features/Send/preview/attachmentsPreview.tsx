@@ -1,5 +1,5 @@
 import { useWatch } from 'react-hook-form'
-import { getPdfAttachments } from '../../../utils/getAttachments'
+import { getPdfAttachments } from '@shared/utils/getAttachments'
 import { Preview } from './Preview'
 import { TabsContent } from '@components/ui/tabs'
 import { useDataContext } from '../dataContext'
