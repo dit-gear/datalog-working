@@ -1,5 +1,5 @@
 import { emailType } from '@shared/projectTypes'
-import { InitialSendData } from '@shared/shared-types'
+import { InitialSendData, Response } from '@shared/shared-types'
 
 declare global {
   interface Window {
@@ -9,7 +9,7 @@ declare global {
       closeSendWindow: () => void
       getFileContent: (filePath: string) => Promise<string>
       getMultipleFileContent: (filePaths: string[]) => Promise<Record<string, string>>
-      sendEmail: (email: emailType) => Promise<void>
+      sendEmail: (email: emailType) => Promise<Response>
     }
   }
 }

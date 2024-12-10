@@ -14,7 +14,6 @@ import {
 import { openWindow } from './utils/open-window'
 import { closeAllWatchers } from './core/app-state/watchers/closing'
 import logger from './core/logger'
-import { shutdownRenderServer } from './core/render/renderServerManager'
 
 // Initialize the application
 app.setName('Datalog')
@@ -141,7 +140,6 @@ app.on('will-quit', async (event) => {
 
   try {
     logger.debug('App is quitting. Performing cleanup...')
-    await shutdownRenderServer()
     await closeAllWatchers()
     await flushWinstonLogs()
     console.log('Cleanup complete. Quitting app.') // logger has ended, using console.

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { FormField, FormItem, FormControl, FormLabel, FormMessage, Form } from '@components/ui/form'
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
@@ -11,7 +12,10 @@ import { getPdfAttachments, mapPdfTypesToOptions } from '@shared/utils/getAttach
 import { useDataContext } from './dataContext'
 import { Previews } from './preview/previews'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Send as Sendicon, Check } from 'lucide-react'
+import { Toaster } from '@components/ui/toaster'
+import { ToastAction } from '@components/ui/toast'
+import { useToast } from '@components/lib/hooks/use-toast'
 
 interface SendProps {
   defaults: emailType | null
@@ -19,6 +23,8 @@ interface SendProps {
 
 const Send = ({ defaults }: SendProps) => {
   const { projectPdfs } = useDataContext()
+  const [sentSuccess, setSendSuccess] = useState<boolean>(false)
+  const { toast } = useToast()
   const form = useForm<emailType>({
     defaultValues: {
       recipients: defaults?.recipients ?? [],
@@ -39,9 +45,15 @@ const Send = ({ defaults }: SendProps) => {
 
   const onSubmit: SubmitHandler<emailType> = async (data) => {
     try {
-      await window.sendApi.sendEmail(data)
+      const res = await window.sendApi.sendEmail(data)
+      if (res.success) {
+        setSendSuccess(true)
+      } else throw new Error(res.error)
     } catch (error) {
-      console.log(error)
+      const errormessage =
+        error instanceof Error ? error.message : 'Unknown error, please check error log.'
+      console.log(errormessage)
+      toast({ variant: 'destructive', title: 'Error:', description: errormessage })
     }
   }
 
@@ -156,15 +168,34 @@ const Send = ({ defaults }: SendProps) => {
           </div>
           <div className="flex gap-4">
             <Button variant="ghost" onClick={() => window.sendApi.closeSendWindow()}>
-              Cancel
+              {isSubmitSuccessful && sentSuccess ? 'Close window' : 'Cancel'}
             </Button>
-            <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting || isSubmitSuccessful}>
-              {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <></>}
-              {isSubmitting ? 'Please wait' : isSubmitSuccessful ? 'Sent sucessfully' : 'Send'}
+            <Button
+              onClick={handleSubmit(onSubmit)}
+              disabled={isSubmitting || (isSubmitSuccessful && sentSuccess)}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Please wait
+                </>
+              ) : isSubmitSuccessful && sentSuccess ? (
+                <>
+                  <Check className="mr-2 h-4 w-4 animate-fadeInMove" />
+                  Sent Successfully
+                </>
+              ) : (
+                <>
+                  <Sendicon className="mr-2 h-4 w-4" />
+                  Send
+                </>
+              )}
+              {/*isSubmitting ? 'Please wait' : isSubmitSuccessful ? 'Sent successfully' : 'Send'*/}
             </Button>
           </div>
         </div>
       </Form>
+      <Toaster />
     </div>
   )
 }
