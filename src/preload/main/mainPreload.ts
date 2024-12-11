@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { OpenModalTypes } from '../../shared/shared-types'
 import { DatalogType } from '@shared/datalogTypes'
+import { pdfType } from '@shared/projectTypes'
 
 // Custom APIs for renderer
 const mainApi = {
@@ -36,7 +37,9 @@ const mainApi = {
   getProxies: () => ipcRenderer.invoke('getProxies'),
   removeProxies: () => ipcRenderer.invoke('removeProxies'),
   getCsvMetadata: () => ipcRenderer.invoke('getCsvMetadata'),
-  openSendWindow: (selection?: DatalogType[]) => ipcRenderer.send('open-send-window', selection)
+  openSendWindow: (selection?: DatalogType[]) => ipcRenderer.send('open-send-window', selection),
+  exportPdf: (pdf: pdfType, selection?: DatalogType[]) =>
+    ipcRenderer.send('pdf-to-export', pdf, selection)
 }
 
 if (process.contextIsolated) {

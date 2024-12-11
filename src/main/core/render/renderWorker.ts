@@ -134,11 +134,11 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
     if (type === 'email') {
       // For email, we render to an HTML string
       const renderedContent = await render(React.createElement(Component), { plainText: false })
-      parentPort?.postMessage({ id, html: renderedContent })
+      parentPort?.postMessage({ id, code: renderedContent })
     } else if (type === 'pdf') {
       // For PDF, we create a string representation of PDF document
-      const pdfDocument = pdf(React.createElement(Component)).toBuffer()
-      parentPort?.postMessage({ id, html: pdfDocument.toString('base64') })
+      const pdfDocument = await pdf(React.createElement(Component)).toBuffer()
+      parentPort?.postMessage({ id, code: pdfDocument.toString('base64') })
     }
   } catch (error) {
     console.error('Error in render-worker', error)

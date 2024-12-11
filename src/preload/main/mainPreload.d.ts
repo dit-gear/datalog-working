@@ -8,7 +8,7 @@ import {
   OpenModalTypes
 } from '@shared/shared-types'
 import { DatalogType, ResponseWithClips } from '@shared/datalogTypes'
-import { TemplateDirectoryFile } from '@shared/projectTypes'
+import { TemplateDirectoryFile, pdfType } from '@shared/projectTypes'
 
 declare global {
   interface Window {
@@ -33,6 +33,7 @@ declare global {
         callback: (event: Electron.IpcRendererEvent, files: TemplateDirectoryFile[]) => void
       ) => void
       openSendWindow: (selection?: DatalogType[]) => void
+      exportPdf: (pdf: pdfType, selection?: DatalogType[]) => void
     }
   }
 }

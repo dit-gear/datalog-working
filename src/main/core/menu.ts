@@ -7,6 +7,7 @@ import { handleChangeProject } from './project/manager'
 import { handleRootDirChange } from './app-state/updater'
 import { createEditorWindow } from '../editor/editorWindow'
 import { createSendWindow } from '../send/sendWindow'
+import { exportPdf } from './export/exportPdf'
 import trayIcon from '../../../resources/trayIcon.png?asset'
 
 const handleOpenModalInDatalog = async (modal: OpenModalTypes): Promise<void> => {
@@ -56,7 +57,7 @@ const buildContextMenu = (
       submenu: activeProject?.pdfs?.map((pdf) => ({
         id: pdf.id,
         label: pdf.name,
-        click: (): void => console.log('Export clicked')
+        click: () => exportPdf({ pdf })
       })) || [{ label: 'No PDFs Available', enabled: false }],
       enabled: Boolean(activeProject)
     },

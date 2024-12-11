@@ -12,6 +12,7 @@ import { Toaster } from '@components/ui/toaster'
 import { Button } from '@components/ui/button'
 import { SelectedProvider } from './features/Datalog/SelectedContext'
 import SendButton from './features/Datalog/SendButton'
+import ExportButton from './features/Datalog/ExportButton'
 
 function App(): JSX.Element {
   const [project, setProject] = useState<ProjectType>()
@@ -67,7 +68,7 @@ function App(): JSX.Element {
           {project?.data && (
             <div className="flex justify-end gap-4">
               <SendButton />
-              <Button disabled>Export</Button>
+              <ExportButton pdfs={project.data.pdfs} />
               <Dialog open={builderOpen} onOpenChange={handleBuilderClose}>
                 <DialogTrigger asChild>
                   <Button>

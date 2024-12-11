@@ -7,6 +7,7 @@ import { createRenderWorker } from './renderWorkerHelper'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
 import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 import { WorkerRequest } from './types'
+import logger from '../logger'
 
 interface renderEmailProps {
   email: emailType
@@ -17,7 +18,7 @@ export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
   const project = getActiveProject()
   if (!project) throw new Error('No project')
   const datalogs = Array.from(datalogStore().values())
-  if (!datalogs) throw new Error('no selection')
+  if (!datalogs) throw new Error('no datalogs')
   const selection =
     sendWindowDataMap.get(windowId)?.selection ?? getLatestDatalog(datalogs, project)
 
@@ -41,7 +42,7 @@ export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
             dataObject
           }
           const renderedEmail = await emailWorker.render(req)
-          const emailcode = renderedEmail.html
+          const emailcode = renderedEmail.code
           return emailcode
         }
       }
@@ -67,7 +68,7 @@ export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
           }
           const renderedPdf = await pdfWorker.render(reqpdf)
           attachmentsToSend.push({
-            content: renderedPdf.html,
+            content: renderedPdf.code,
             filename: att.output_name_pattern
           })
         }
@@ -78,7 +79,7 @@ export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
     return { emailcode, attachmentsToSend }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown error'
-    console.error(`Failed to process incoming-send-email-request: ${message}`)
+    logger.error(`Error in renderEmail: ${message}`)
     return
   } finally {
     emailWorker.terminate()
