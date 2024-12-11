@@ -1,6 +1,11 @@
 # datalog.email
 
-This app let's the user send fully custom emails and generate pdfs.
+Streamline reporting in YOUR post-production workflow. Generate and send custom reports directly from the desktop’s status bar.
+
+-Stores reports from camera metadata /media-hash-lists in .datalog format.
+-It’s easy share datalogs and projects among teams. Just copy the files you want to share or access them from a shared file folder.
+-Create fully customized reports as email or pdf with react.
+-Adapt to YOUR workflow by creating presets that can b e easily accessed directly in the desktop status bar.
 
 ### To do before first publish
 
@@ -27,3 +32,10 @@ This app let's the user send fully custom emails and generate pdfs.
 - Although a database would have been nice, this app relies on local config files and .datalog files that user's can edit and share outside the app.
 - Watchfolders. The app state will update if users add/change/remove .datalog-files and configs outside the app.
 - Dynamic statusbar-shortcuts for user presets.
+
+Streamline reporting in YOUR post-production workflow. Generate and send custom reports directly from the desktop’s status bar.
+
+Stores reports from camera metadata /media-hash-lists in .datalog format.
+It’s easy share datalogs and projects among teams. Just copy the files you want to share or access them from a shared file folder.
+Create fully customized reports as email or pdf with react.
+Adapt to YOUR workflow by creating presets that can be easily accessed directly in the desktop status bar.
