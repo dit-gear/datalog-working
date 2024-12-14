@@ -9,6 +9,7 @@
     "src/main/core/app-state/state.tsx"
 , "src/shared/utils/getAttachments.ts", "src/shared/utils/getLatestDatalog.ts"],
   "compilerOptions": {
+    "moduleResolution": "bundler",
     "composite": true,
     "jsx": "react-jsx",
     "baseUrl": ".",

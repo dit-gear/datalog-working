@@ -1,14 +1,16 @@
 import * as eslint from 'eslint-linter-browserify'
 import parserTypescript from 'prettier/plugins/typescript'
-import parserEstreePlugin from 'prettier/plugins/estree'
-import eslintConfigPrettier from 'eslint-config-prettier'
+//import parserEstreePlugin from 'prettier/plugins/estree'
+//import eslintConfigPrettier from 'eslint-config-prettier'
+import tsParser from '@typescript-eslint/parser'
+import tsPlugin from '@typescript-eslint/eslint-plugin'
 
 self.onmessage = async (event: MessageEvent) => {
   console.log('liner-worker called')
   const code = event.data as string
   const linter = new eslint.Linter()
   const specialRule = 0
-  const confiq: eslint.Linter.FlatConfig = {
+  const confiq: eslint.Linter.Config = {
     languageOptions: {
       parserOptions: {
         ecmaVersion: 2022,
@@ -19,11 +21,12 @@ self.onmessage = async (event: MessageEvent) => {
       }
     },
     rules: {
+      '@typescript-eslint/no-unused-vars': 'warn'
       // The following rules can be used in some cases. See the README for more
       // information. These are marked with `0` instead of `"off"` so that a
       // script can distinguish them. Note that there are a few more of these
       // in the deprecated section below.
-      curly: specialRule,
+      /* curly: specialRule,
       'no-unexpected-multiline': specialRule,
       '@typescript-eslint/lines-around-comment': specialRule,
       '@typescript-eslint/quotes': specialRule,
@@ -122,7 +125,7 @@ self.onmessage = async (event: MessageEvent) => {
       'vue/space-in-parens': 'off',
       'vue/space-infix-ops': 'off',
       'vue/space-unary-ops': 'off',
-      'vue/template-curly-spacing': 'off'
+      'vue/template-curly-spacing': 'off'*/
     }
   }
   try {

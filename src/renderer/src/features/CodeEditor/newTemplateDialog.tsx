@@ -95,7 +95,7 @@ const NewTemplateDialog = forwardRef<NewTemplateDialogHandle>((_, ref) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="icon" disabled={loading}>
+        <Button variant="secondary" size="sm" disabled={loading}>
           +
         </Button>
       </DialogTrigger>

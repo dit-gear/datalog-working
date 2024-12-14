@@ -1,5 +1,4 @@
 import React from 'react'
-import ReactDOMServer from 'react-dom/server'
 import { transform } from 'sucrase'
 import { pdf } from '@react-pdf/renderer'
 import { render } from '@react-email/render'
@@ -107,7 +106,7 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
     if (type === 'email') {
       //const renderedContent = ReactDOMServer.renderToString(React.createElement(Component))
       const renderedContent = await render(React.createElement(Component), { plainText: false })
-      self.postMessage({ id, html: renderedContent })
+      self.postMessage({ id, type, code: renderedContent })
     } else if (type === 'pdf') {
       // Create a PDF document using the component wrapped in PDFViewer
       const pdfDocument = pdf(React.createElement(Component))
@@ -115,7 +114,7 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
 
       // Create a URL for the Blob to be used in an iframe
       const pdfUrl = URL.createObjectURL(pdfBlob)
-      self.postMessage({ id, html: pdfUrl })
+      self.postMessage({ id, type, code: pdfUrl })
     }
   } catch (error) {
     console.error('Error in preview-worker', error)

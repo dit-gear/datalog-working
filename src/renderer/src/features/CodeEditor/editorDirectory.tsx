@@ -40,7 +40,7 @@ const EditorDirectory: React.FC<DirectoryDisplayProps> = ({
             <ContextMenu key={file.path}>
               <ContextMenuTrigger asChild>
                 <li
-                  className={`flex justify-between items-center select-none cursor-pointer space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground aria-selected:bg-blue-950 aria-selected:ring-1  data-[state=open]:ring-1`}
+                  className={`flex justify-between items-center select-none cursor-pointer space-y-1 rounded px-3 py-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground aria-selected:bg-blue-950 aria-selected:ring-1  data-[state=open]:ring-1`}
                   aria-selected={loadedFile?.path === file.path}
                   onClick={() => window.editorApi.requestReadFile(file)}
                 >

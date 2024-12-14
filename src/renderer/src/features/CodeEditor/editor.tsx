@@ -22,17 +22,24 @@ import { LoadedFile } from '@shared/shared-types'
 import { ProjectRootType } from '@shared/projectTypes'
 import { DatalogType } from '@shared/datalogTypes'
 import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
+import { Loader2 } from 'lucide-react'
 
 type Monaco = typeof monaco
 
 const highlighter = await createHighlighter({
-  themes: ['dark-plus', 'vitesse-dark', 'vitesse-light'],
-  langs: ['jsx', 'tsx']
+  themes: ['dark-plus', 'aurora-x'],
+  langs: ['jsx', 'tsx', 'typescript']
 })
 
 interface EditorProps {
   loadedFile: LoadedFile
-  data: { project: ProjectRootType; datalogs: DatalogType[] } | null
+  data: { project: ProjectRootType; datalogs: DatalogType[] }
+}
+
+interface Preview {
+  id: string
+  type: 'email' | 'pdf'
+  code: string
 }
 
 const Editor = ({ loadedFile, data }: EditorProps) => {
@@ -40,7 +47,9 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
     data ? getLatestDatalog(data.datalogs, data.project) : []
   ) // use for data form
   const [editorContent, setEditorContent] = useState<string>(loadedFile.content)
-  const [previewContent, setPreviewContent] = useState<string>('')
+  const [previewContent, setPreviewContent] = useState<Preview>()
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [previousPreviewContent, setPreviousPreviewContent] = useState<Preview>()
   const [error, setError] = useState<string | null>(null)
   const previewWorkerRef = useRef<Worker | null>(null)
   const linterWorkerRef = useRef<Worker | null>(null)
@@ -48,8 +57,12 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
   const [isFormatOnSave, setIsFormatOnSave] = useState<boolean>(true)
   const [autoCloseTags, setAutoCloseTags] = useState<boolean>(true)
 
+  const loadTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const errorTimerRef = useRef<NodeJS.Timeout | null>(null)
+
   useEffect(() => {
     setEditorContent(loadedFile.content)
+    setIsLoading(true)
   }, [loadedFile])
 
   useEffect(() => {
@@ -68,6 +81,28 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
     }
   }, [])
 
+  const loadNewContent = (p: Preview) => {
+    !isLoading && p.type === 'pdf' && setIsLoading(true)
+
+    if (loadTimerRef.current) {
+      clearTimeout(loadTimerRef.current) // Reset the timer
+    }
+
+    loadTimerRef.current = setTimeout(() => {
+      loadError()
+      setPreviewContent(p)
+    }, 300) // Delay duration
+  }
+
+  const loadError = (error?: string) => {
+    if (errorTimerRef.current) {
+      clearTimeout(errorTimerRef.current) // Reset the timer
+    }
+    errorTimerRef.current = setTimeout(() => {
+      error ? setError(error) : setError(null)
+    }, 1000)
+  }
+
   useEffect(() => {
     const previewWorker = new Worker(new URL('@workers/preview-worker.ts', import.meta.url), {
       type: 'module'
@@ -80,13 +115,11 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
     linterWorkerRef.current = linterWorker
 
     previewWorker.onmessage = (e): void => {
-      const { html, error } = e.data
-      if (error) {
-        console.error(error)
-        setError(error)
-      } else {
-        setError(null)
-        setPreviewContent(html)
+      const { id, type, code, error } = e.data
+      if (code) {
+        loadNewContent({ id, type, code })
+      } else if (error) {
+        loadError(error)
       }
     }
 
@@ -115,12 +148,13 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
 
     if (editorContent) {
       const request = {
+        id: loadedFile.name,
         code: editorContent,
         type: loadedFile.type,
         dataObject: {
-          project: data?.project,
-          selection: data ? getLatestDatalog(data.datalogs, data.project) : [],
-          all: data?.datalogs
+          project: data.project,
+          selection: getLatestDatalog(data.datalogs, data.project),
+          all: data.datalogs
         }
       }
       previewWorker.postMessage(request)
@@ -186,8 +220,15 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
       return new editorWorker()
     }
   }
+  monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+    moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+    jsx: monaco.languages.typescript.JsxEmit.React,
+    allowJs: true,
+    checkJs: false
+  })
   monaco.languages.register({ id: 'jsx' })
   monaco.languages.register({ id: 'tsx' })
+  monaco.languages.register({ id: 'typescript' })
 
   function insertClosingTag(): void {
     if (!editorRef.current) return
@@ -234,8 +275,25 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
     monacoInstance: Monaco
   ): void => {
     editorRef.current = editor
-    sendMessageToWorker()
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC, // Shortcut: Ctrl/Cmd + C
+      () => editor.trigger('keyboard', 'editor.action.clipboardCopyAction', null)
+    )
+
+    // Add Cut Command
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyX, // Shortcut: Ctrl/Cmd + X
+      () => editor.trigger('keyboard', 'editor.action.clipboardCutAction', null)
+    )
+
+    // Add Paste Command
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, // Shortcut: Ctrl/Cmd + V
+      () => editor.trigger('keyboard', 'editor.action.clipboardPasteAction', null)
+    )
+
     shikiToMonaco(highlighter, monacoInstance)
+    sendMessageToWorker()
   }
   loader.config({ monaco })
 
@@ -271,6 +329,18 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
     }
   }
 
+  const handlePreviewLoaded = async () => {
+    if (loadTimerRef.current) {
+      clearTimeout(loadTimerRef.current) // Clear any existing timer
+    }
+
+    // Add a delay to ensure `iframe1` is completely rendered
+    loadTimerRef.current = setTimeout(() => {
+      isLoading && setIsLoading(false)
+      setPreviousPreviewContent(previewContent)
+    }, 300)
+  }
+
   const handleSave = async (): Promise<void> => {
     let codeToSave = editorContent
     if (isFormatOnSave) {
@@ -296,18 +366,18 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
           <span className="font-semibold">Editor</span>
           <div className="flex gap-2">
             <Button
-              size="icon"
+              size="sm"
               variant="secondary"
-              className="p-3"
+              className="rounded"
               onClick={() => editorRef.current?.getAction('actions.find')?.run()}
             >
-              <SearchCodeIcon />
+              <SearchCodeIcon className="h-4 w-4" />
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="icon" className="p-3" variant="secondary">
-                  <SettingsIcon />
+                <Button size="sm" variant="secondary" className="rounded">
+                  <SettingsIcon className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -325,7 +395,7 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
                 </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="secondary" onClick={handleSave}>
+            <Button variant="secondary" size="sm" className="rounded">
               <span>Save</span>
               <span className="ml-2 text-xs text-muted-foreground">(CMD + S)</span>
             </Button>
@@ -333,8 +403,8 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
         </div>
         <MonacoEditor
           height="100%"
-          theme="dark-plus"
-          language={loadedFile?.filetype}
+          theme="aurora-x"
+          language={'tsx'}
           value={editorContent}
           onMount={handleEditorDidMount}
           onChange={(v) => handleEditorChange(v)}
@@ -351,25 +421,63 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
         <div className="flex items-center justify-between">
           <span className="font-semibold">Preview</span>
           <div className="flex gap-2">
-            <Button size="sm" variant="secondary">
+            <Button size="sm" variant="secondary" className="rounded">
               Sample Data
             </Button>
-            <Button size="sm" variant="secondary">
+            <Button size="sm" variant="secondary" className="rounded">
               Docs
             </Button>
           </div>
         </div>
         <div className="h-full rounded-md bg-white text-black">
-          {loadedFile && previewContent && !error && (
-            <iframe
-              id="iframe"
-              className="w-full h-full border-0"
-              {...(loadedFile.type === 'pdf'
-                ? { src: `${previewContent}#toolbar=0` }
-                : { srcDoc: previewContent })}
-            />
-          )}
-          {error ? <div className="bg-red-100 p-8">{error}</div> : null}
+          {/* Iframe 1 */}
+          <div className="relative w-full h-full bg-white">
+            {isLoading && (
+              <div className="absolute top-0 left-0 z-20 w-full h-full bg-white/80 flex items-center justify-center z-30">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              </div>
+            )}
+            {previewContent ? (
+              <iframe
+                id="iframe1"
+                key="iframe1"
+                className={`absolute top-0 left-0 z-20 w-full h-full border-0 ${
+                  isLoading ? 'hidden' : 'block'
+                }`}
+                {...(previewContent.type === 'pdf'
+                  ? { src: `${previewContent.code}#toolbar=0` }
+                  : { srcDoc: previewContent.code })}
+                onLoad={handlePreviewLoaded}
+              />
+            ) : (
+              !isLoading && (
+                <div className="absolute top-0 left-0 z-20 w-full h-full bg-white/80 flex items-center justify-center z-30">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                </div>
+              )
+            )}
+            {previousPreviewContent ? (
+              <iframe
+                id="iframe2"
+                key="iframe2"
+                className={`absolute top-0 left-0 z-10 w-full h-full border-0 ${
+                  isLoading ? 'block' : 'hidden'
+                }`}
+                {...(previousPreviewContent.type === 'pdf'
+                  ? { src: `${previousPreviewContent.code}#toolbar=0` }
+                  : { srcDoc: previousPreviewContent.code })}
+              />
+            ) : (
+              <div className="absolute top-0 left-0 z-20 w-full h-full bg-white/80 flex items-center justify-center z-30">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              </div>
+            )}
+            {error && (
+              <div className="absolute bottom-10 left-10 z-30 bg-red-100 p-8 rounded-md">
+                {error}
+              </div>
+            )}
+          </div>
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>
@@ -377,4 +485,34 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
 }
 
 export default Editor
-/*<iframe id="iframe" srcDoc={previewContent} className="w-full h-full" />*/
+{
+  /*<iframe
+              id="iframe"
+              className="w-full h-full border-0"
+              {...(loadedFile.type === 'pdf'
+                ? { src: `${previewContent}#toolbar=0` }
+                : { srcDoc: previewContent })}
+            />*/
+  /*<iframe
+             id='frame2'
+             {...(loadedFile.type === 'pdf'
+               ? { src: iframe2Src ? `${iframe2Src}#toolbar=0` : undefined }
+               : { srcDoc: iframe2Src || undefined })}
+             className={`w-full h-full border-0 ${
+               visibleIframe === 2
+                 ? 'opacity-100 z-20 pointer-events-auto '
+                 : 'opacity-0 z-10 pointer-events-none '
+             }`}
+             onLoad={handleIframe2Load}
+             onError={handleIframe2Error}
+             title="PDF Viewer 2"
+           />*/
+}
+/*<iframe
+              id="iframe2"
+              key="iframe2"
+              className="absolute top-0 left-0 z-10 w-full h-full border-0"
+              {...(loadedFile.type === 'pdf'
+                ? { src: `${PreviousPreviewContent}#toolbar=0` }
+                : { srcDoc: PreviousPreviewContent })}
+            />*/
