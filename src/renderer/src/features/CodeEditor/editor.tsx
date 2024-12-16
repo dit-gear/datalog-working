@@ -23,12 +23,17 @@ import { ProjectRootType } from '@shared/projectTypes'
 import { DatalogType } from '@shared/datalogTypes'
 import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 import { Loader2 } from 'lucide-react'
+//import reactDTSIndex from '../../../../../node_modules/@types/react/index.d.ts?raw'
+//import reactDTSGlobal from '../../../../../node_modules/@types/react/global.d.ts?raw'
+//import reactDTSjsxdev from '../../../../../node_modules/@types/react/jsx-dev-runtime.d.ts?raw'
+//import reactDTSjsx from '../../../../../node_modules/@types/react/jsx-runtime.d.ts?raw'
+import { loadTypeDefinitions } from './utils/typeDefinitions'
 
 type Monaco = typeof monaco
 
 const highlighter = await createHighlighter({
   themes: ['dark-plus', 'aurora-x'],
-  langs: ['jsx', 'tsx', 'typescript']
+  langs: ['typescript']
 })
 
 interface EditorProps {
@@ -158,7 +163,7 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
         }
       }
       previewWorker.postMessage(request)
-      linterWorker.postMessage(editorContent)
+      //linterWorker.postMessage(editorContent)
     }
 
     // Clean up the worker when the component unmounts
@@ -180,7 +185,7 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
         }
       }
       previewWorkerRef.current.postMessage(request)
-      linterWorkerRef.current.postMessage(editorContent)
+      //linterWorkerRef.current.postMessage(editorContent)
     }
   }, [editorContent])
 
@@ -200,7 +205,7 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
       }
     }
     previewWorkerRef.current.postMessage(request)
-    linterWorkerRef.current.postMessage(editorContent)
+    //linterWorkerRef.current.postMessage(editorContent)
   }
 
   self.MonacoEnvironment = {
@@ -220,15 +225,6 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
       return new editorWorker()
     }
   }
-  monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-    moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-    jsx: monaco.languages.typescript.JsxEmit.React,
-    allowJs: true,
-    checkJs: false
-  })
-  monaco.languages.register({ id: 'jsx' })
-  monaco.languages.register({ id: 'tsx' })
-  monaco.languages.register({ id: 'typescript' })
 
   function insertClosingTag(): void {
     if (!editorRef.current) return
@@ -270,11 +266,59 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
     }
   }
 
-  const handleEditorDidMount = (
+  const handleEditorDidMount = async (
     editor: monaco.editor.IStandaloneCodeEditor,
     monacoInstance: Monaco
-  ): void => {
+  ): Promise<void> => {
     editorRef.current = editor
+
+    monaco.editor.defineTheme('myTheme', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [],
+      colors: {
+        'editor.background': '#000000'
+      }
+    })
+    monaco.editor.setTheme('myTheme')
+
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.ES2020,
+      allowNonTsExtensions: true,
+      allowJs: true,
+      jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
+      jsxImportSource: 'react',
+      module: monaco.languages.typescript.ModuleKind.ESNext,
+      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+      isolatedModules: true,
+      strict: true,
+      esModuleInterop: true,
+      noEmit: true,
+      typeRoots: ['node_modules@types'],
+      baseUrl: './',
+      paths: {
+        '@react-email/*': ['file:///node_modules/@react-email/*']
+      }
+    })
+
+    // Add our custom global type definitions
+    await loadTypeDefinitions(monaco)
+
+    // Associate a fake file ending with `.tsx` so that TSX features are recognized
+    const uri = monaco.Uri.parse('file:///main.tsx')
+    let model = monaco.editor.getModel(uri)
+    if (!model) {
+      model = monaco.editor.createModel(editorContent, 'typescript', uri)
+    }
+    // Set the model in the editor
+    editor.setModel(model)
+
+    // Optionally adjust editor model formatting options
+    model.updateOptions({ tabSize: 2 })
+
+    // Ensure changes sync to the TS worker promptly
+    monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true)
+
     editor.addCommand(
       monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC, // Shortcut: Ctrl/Cmd + C
       () => editor.trigger('keyboard', 'editor.action.clipboardCopyAction', null)
@@ -292,7 +336,7 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
       () => editor.trigger('keyboard', 'editor.action.clipboardPasteAction', null)
     )
 
-    shikiToMonaco(highlighter, monacoInstance)
+    //shikiToMonaco(highlighter, monacoInstance)
     sendMessageToWorker()
   }
   loader.config({ monaco })
@@ -310,14 +354,14 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
 
         // Check if the user typed a ">"
         if (text === '>') {
-          insertClosingTag()
+          //insertClosingTag()
         }
       })
     }
     // Post message to worker with the new content
     if (previewWorkerRef.current && linterWorkerRef.current) {
       previewWorkerRef.current.postMessage(newValue)
-      linterWorkerRef.current.postMessage(newValue)
+      //linterWorkerRef.current.postMessage(newValue)
     }
   }
   async function formatCode(): Promise<void> {
@@ -395,7 +439,7 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
                 </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="secondary" size="sm" className="rounded">
+            <Button variant="secondary" size="sm" className="rounded" onClick={handleSave}>
               <span>Save</span>
               <span className="ml-2 text-xs text-muted-foreground">(CMD + S)</span>
             </Button>
@@ -403,12 +447,11 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
         </div>
         <MonacoEditor
           height="100%"
-          theme="aurora-x"
-          language={'tsx'}
           value={editorContent}
           onMount={handleEditorDidMount}
           onChange={(v) => handleEditorChange(v)}
           options={{
+            automaticLayout: true,
             autoClosingBrackets: 'always',
             scrollBeyondLastLine: false,
             formatOnType: true,

@@ -4,6 +4,7 @@ import { pdf } from '@react-pdf/renderer'
 import { render } from '@react-email/render'
 import { DatalogDynamicType } from '@shared/datalogTypes'
 import { ProjectRootType } from '@shared/projectTypes'
+import { removeImports } from './utils/removeImports'
 
 type dataobjectType = {
   project: ProjectRootType
@@ -85,7 +86,9 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
     }
     const data = new DataObject(dataObject.project, dataObject.selection, dataObject.all)
 
-    const transpiledCode = transform(code, {
+    const codeWithoutImports = await removeImports(code)
+
+    const transpiledCode = transform(codeWithoutImports, {
       transforms: ['typescript', 'jsx', 'imports'],
       preserveDynamicImport: true
     }).code
