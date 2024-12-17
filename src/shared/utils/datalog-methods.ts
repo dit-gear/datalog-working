@@ -107,35 +107,38 @@ function mergeDatalogs(datalogs: DatalogType[]): DatalogType {
 }
 
 export class Datalog {
-  public readonly data: DatalogType // set to private to not expose
+  public readonly raw: DatalogType
 
   constructor(data: DatalogType) {
-    this.data = data
+    this.raw = data
+  }
+  public get logName(): string {
+    return this.raw.Folder
   }
   public get day(): number {
-    return this.data.Day
+    return this.raw.Day
   }
   public get date(): string {
-    return this.data.Date
+    return this.raw.Date
   }
   public get clips() {
-    return this.data.Clips
+    return this.raw.Clips
   }
   public ocf = {
-    getFilesCount: () => getOCFFiles(this.data),
-    getSize: () => getOCFSize(this.data),
+    getFilesCount: () => getOCFFiles(this.raw),
+    getSize: () => getOCFSize(this.raw),
     getCopies: () => 'TODO: list copies here'
   }
   public proxys = {
-    getFilesCount: () => getProxyFiles(this.data),
-    getSize: () => getProxySize(this.data)
+    getFilesCount: () => getProxyFiles(this.raw),
+    getSize: () => getProxySize(this.raw)
   }
 
   getDuration() {
-    return getDuration(this.data)
+    return getDuration(this.raw)
   }
   getReels(options?: getReelsOptions) {
-    return getReels(this.data, options)
+    return getReels(this.raw, options)
   }
 }
 
@@ -203,7 +206,7 @@ export class DataObject {
 
   getTotalOCFSize(): string {
     const totalSize = this.all.reduce(
-      (acc, datalog) => acc + (getOCFSize(datalog.data, { format: false }) as number), // Using getOCFSize from utils
+      (acc, datalog) => acc + (getOCFSize(datalog.raw, { format: false }) as number), // Using getOCFSize from utils
       0
     )
     return totalSize > 0 ? formatBytes(totalSize) : '0 bytes' // Format size for readability
@@ -212,7 +215,7 @@ export class DataObject {
   // Method to get the total OCF file count of "all" datalogs
   getTotalOCFFileCount(): number {
     return this.all.reduce(
-      (acc, datalog) => acc + getOCFFiles(datalog.data), // Using getOCFFiles from utils
+      (acc, datalog) => acc + getOCFFiles(datalog.raw), // Using getOCFFiles from utils
       0
     )
   }

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { Field, ProjectRootType } from './projectTypes'
+import { getDuration } from './utils/datalog-methods'
 
 const Camera_MetadataZod = z.object({
   Camera_Model: z.string().optional(),
@@ -222,15 +223,34 @@ export const DatalogDynamicZod = <T extends Record<string, any>>(
   return datalogBase as z.ZodObject<z.ZodRawShape & T>
 }
 
+export type DatalogDynamicType = DatalogType & Record<string, any>
+
 const reelsOptions = z.object({ grouped: z.boolean().optional() }).optional()
 
-export type DatalogDynamicType = DatalogType & Record<string, any>
-const datalogWithMethods = datalogZod.extend({
-  getOCFFiles: z.function().returns(z.number()),
-  getOCFSize: z.function().returns(z.number()),
-  getProxyFiles: z.function().returns(z.number()),
-  getProxySize: z.function().returns(z.number()),
-  getDuration: z.function().returns(z.number()),
-  getReels: z.function().args(reelsOptions).returns(z.array(z.string()))
+const DatalogClassZod = z.object({
+  logName: z.string(),
+  day: z.number(),
+  date: z.string(),
+  clips: z.array(ClipZod),
+  ocf: z.object({
+    filesCount: z.function().returns(z.number()),
+    getSize: z.function().returns(z.string()),
+    getCopies: z.function().returns(z.string())
+  }),
+  proxys: z.object({
+    getFilesCount: z.function().args().returns(z.number()),
+    getSize: z.function().returns(z.string())
+  }),
+  getDuration: z.function().returns(z.string()),
+  getReels: z.function().args(reelsOptions).returns(z.array(z.string())),
+  raw: datalogZod
 })
-export type DatalogWithMethods = z.infer<typeof datalogWithMethods>
+
+export const DataClassZod = z.object({
+  projectName: z.string(),
+  datalog: DatalogClassZod,
+  datalogs: z.array(DatalogClassZod),
+  allDatalogs: z.array(DatalogClassZod),
+  getTotalOCFSize: z.function().returns(z.string()),
+  getTotalOCFFileCount: z.function().returns(z.number())
+})

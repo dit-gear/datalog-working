@@ -18,6 +18,8 @@ import MarkdownDts from '../../../../../../node_modules/@react-email/markdown/di
 import RowDts from '../../../../../../node_modules/@react-email/row/dist/index.d.ts?raw'
 import ComponentsDts from '..//../../../../../node_modules/@react-email/components/dist/index.d.ts?raw'
 import MockDts from './reactEmaildec.d.ts?raw'
+import { createDataDefinition } from './dataDefinition'
+import { ProjectRootType } from '@shared/projectTypes'
 
 export async function loadTypeDefinitions(monaco: typeof import('monaco-editor')) {
   // Static glob patterns as string literals
@@ -32,6 +34,8 @@ export async function loadTypeDefinitions(monaco: typeof import('monaco-editor')
     { query: '?raw', import: 'default', eager: true }
   )
 
+  const dataDts = createDataDefinition()
+
   // Combine all type definitions
   const dtsModules = { ...reactTypeDefs }
 
@@ -41,6 +45,10 @@ export async function loadTypeDefinitions(monaco: typeof import('monaco-editor')
     const uri = path.replace('../../../../../../node_modules/', 'file:///node_modules/')
     monaco.languages.typescript.typescriptDefaults.addExtraLib(dtsContent, uri)
   }
+  monaco.languages.typescript.typescriptDefaults.addExtraLib(
+    dataDts,
+    'file:///node_modules/@types/global.d.ts'
+  )
   monaco.languages.typescript.typescriptDefaults.addExtraLib(
     HtmlDts,
     'file:///node_modules/@react-email/html/index.d.ts'
