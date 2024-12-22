@@ -146,7 +146,7 @@ export class DataObject {
   private project: ProjectRootType
   //private selection: DatalogType | DatalogType[]
   private datalogOne: Datalog
-  private datalogArray: Datalog[]
+  private datalogMulti: Datalog[]
   private all: Datalog[] // fix later
 
   constructor(
@@ -177,10 +177,10 @@ export class DataObject {
       // Merge the selected datalogs
       const mergedData = mergeDatalogs(selection)
       this.datalogOne = new Datalog(mergedData)
-      this.datalogArray = selection.map((data) => new Datalog(data))
+      this.datalogMulti = selection.map((data) => new Datalog(data))
     } else {
       this.datalogOne = new Datalog(selection)
-      this.datalogArray = [new Datalog(selection)]
+      this.datalogMulti = [new Datalog(selection)]
     }
   }
 
@@ -195,28 +195,46 @@ export class DataObject {
   }
 
   // Getter for the selected datalogs array
-  get datalogs(): Datalog[] {
-    return this.datalogArray
+  get datalogArray(): Datalog[] {
+    return this.datalogMulti
   }
 
   // Getter for all datalogs
-  get allDatalogs(): Datalog[] {
+  get datalogs(): Datalog[] {
     return this.all
   }
 
-  getTotalOCFSize(): string {
-    const totalSize = this.all.reduce(
-      (acc, datalog) => acc + (getOCFSize(datalog.raw, { format: false }) as number), // Using getOCFSize from utils
-      0
-    )
-    return totalSize > 0 ? formatBytes(totalSize) : '0 bytes' // Format size for readability
+  get totals() {
+    return {
+      getTotalOCFSize: (): string => {
+        const totalSize = this.all.reduce(
+          (acc, datalog) => acc + (getOCFSize(datalog.raw, { format: false }) as number),
+          0
+        )
+        return totalSize > 0 ? formatBytes(totalSize) : '0 bytes'
+      },
+      getTotalOCFFileCount: (): number => {
+        return this.all.reduce((acc, datalog) => acc + getOCFFiles(datalog.raw), 0)
+      }
+    }
   }
+  /*
+  public totals = {
+    getTotalOCFSize(): string {
+      const totalSize = this.all.reduce(
+        (acc, datalog) => acc + (getOCFSize(datalog.raw, { format: false }) as number), // Using getOCFSize from utils
+        0
+      )
+      return totalSize > 0 ? formatBytes(totalSize) : '0 bytes' // Format size for readability
+    },
+  
+    // Method to get the total OCF file count of "all" datalogs
+    getTotalOCFFileCount(): number {
+      return this.all.reduce(
+        (acc, datalog) => acc + getOCFFiles(datalog.raw), // Using getOCFFiles from utils
+        0
+      )
+    }
 
-  // Method to get the total OCF file count of "all" datalogs
-  getTotalOCFFileCount(): number {
-    return this.all.reduce(
-      (acc, datalog) => acc + getOCFFiles(datalog.raw), // Using getOCFFiles from utils
-      0
-    )
-  }
+  }*/
 }

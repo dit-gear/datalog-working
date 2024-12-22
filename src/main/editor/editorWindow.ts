@@ -18,6 +18,8 @@ export function createEditorWindow(): void {
   editorWindow = new BrowserWindow({
     width: 1600,
     height: 1000,
+    minWidth: 580,
+    minHeight: 650,
     backgroundColor: '#090909',
     autoHideMenuBar: true,
     frame: false,

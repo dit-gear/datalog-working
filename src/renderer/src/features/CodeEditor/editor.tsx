@@ -1,44 +1,30 @@
-import { useState, useEffect, useRef } from 'react'
-import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from '@components/ui/resizable'
-import { Button } from '@components/ui/button'
-import { SearchCodeIcon, SettingsIcon } from 'lucide-react'
+import { forwardRef, useImperativeHandle, useState, useEffect, useRef } from 'react'
 import * as monaco from 'monaco-editor'
-import { Editor as MonacoEditor, loader } from '@monaco-editor/react'
+import { Monaco, Editor as MonacoEditor, OnMount, loader } from '@monaco-editor/react'
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
 import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
-import { createHighlighter } from 'shiki'
-import { shikiToMonaco } from '@shikijs/monaco'
+//import { createHighlighter } from 'shiki'
+//import { shikiToMonaco } from '@shikijs/monaco'
 import { formatter } from '@renderer/utils/prettierFormatter'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger
-} from '@components/ui/dropdown-menu'
 import { LoadedFile } from '@shared/shared-types'
-import { ProjectRootType } from '@shared/projectTypes'
-import { DatalogType } from '@shared/datalogTypes'
-import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
-import { Loader2 } from 'lucide-react'
-//import reactDTSIndex from '../../../../../node_modules/@types/react/index.d.ts?raw'
-//import reactDTSGlobal from '../../../../../node_modules/@types/react/global.d.ts?raw'
-//import reactDTSjsxdev from '../../../../../node_modules/@types/react/jsx-dev-runtime.d.ts?raw'
-//import reactDTSjsx from '../../../../../node_modules/@types/react/jsx-runtime.d.ts?raw'
 import { loadTypeDefinitions } from './utils/typeDefinitions'
+import { useInitialData } from './dataContext'
 
-type Monaco = typeof monaco
+//type Monaco = typeof monaco
 
-const highlighter = await createHighlighter({
+/*const highlighter = await createHighlighter({
   themes: ['dark-plus', 'aurora-x'],
-  langs: ['typescript']
-})
+  langs: ['typescript-ext']
+})*/
 
-interface EditorProps {
-  loadedFile: LoadedFile
-  data: { project: ProjectRootType; datalogs: DatalogType[] }
+export type EditorHandle = {
+  openFile: (file: LoadedFile) => void
+  removeFile: (file: LoadedFile) => void
+  openFind: () => void
+  getActiveModelCode: () => string
 }
 
 interface Preview {
@@ -47,42 +33,37 @@ interface Preview {
   code: string
 }
 
-const Editor = ({ loadedFile, data }: EditorProps) => {
-  const [selection, setSelection] = useState<DatalogType | DatalogType[]>(
-    data ? getLatestDatalog(data.datalogs, data.project) : []
-  ) // use for data form
-  const [editorContent, setEditorContent] = useState<string>(loadedFile.content)
+const Editor = forwardRef<EditorHandle, {}>((_props, ref) => {
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
+  const monacoRef = useRef<typeof monaco | null>(null)
+
+  const { initialData } = useInitialData()
+  const data = { project: initialData.activeProject, datalogs: initialData.loadedDatalogs }
+  //const [editorContent, setEditorContent] = useState<string>(loadedFile.content)
   const [previewContent, setPreviewContent] = useState<Preview>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [previousPreviewContent, setPreviousPreviewContent] = useState<Preview>()
   const [error, setError] = useState<string | null>(null)
   const previewWorkerRef = useRef<Worker | null>(null)
   const linterWorkerRef = useRef<Worker | null>(null)
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
   const [isFormatOnSave, setIsFormatOnSave] = useState<boolean>(true)
   const [autoCloseTags, setAutoCloseTags] = useState<boolean>(true)
 
   const loadTimerRef = useRef<NodeJS.Timeout | null>(null)
   const errorTimerRef = useRef<NodeJS.Timeout | null>(null)
-
+  /*
   useEffect(() => {
-    setEditorContent(loadedFile.content)
-    setIsLoading(true)
-  }, [loadedFile])
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === 's') {
-        event.preventDefault() // Prevent the default save action
+    const handleGlobalSave = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault() // Prevent browser's default save dialog
         handleSave() // Call your save function
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keydown', handleGlobalSave)
 
-    // Cleanup the event listener when the component unmounts
     return () => {
-      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keydown', handleGlobalSave)
     }
   }, [])
 
@@ -207,7 +188,7 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
     previewWorkerRef.current.postMessage(request)
     //linterWorkerRef.current.postMessage(editorContent)
   }
-
+*/
   self.MonacoEnvironment = {
     getWorker(_, label) {
       if (label === 'json') {
@@ -226,8 +207,67 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
     }
   }
 
+  const viewStatesRef = useRef<Record<string, monaco.editor.ICodeEditorViewState | null>>({})
+
+  useImperativeHandle(ref, () => ({
+    openFile(file: LoadedFile) {
+      if (!monacoRef.current || !editorRef.current) return
+
+      // 1) Save current file’s view state
+      const oldModel = editorRef.current.getModel()
+      if (oldModel) {
+        const oldUri = oldModel.uri.toString()
+        viewStatesRef.current[oldUri] = editorRef.current.saveViewState()
+      }
+
+      const uri = monacoRef.current.Uri.file(file.path)
+      let model = monacoRef.current.editor.getModel(uri)
+      if (!model) {
+        model = monacoRef.current.editor.createModel(file.content, 'typescript', uri)
+      }
+      editorRef.current.setModel(model)
+
+      // 4) Restore the new file’s view state (cursor, scroll, etc.)
+      const newViewState = viewStatesRef.current[uri.toString()]
+      if (newViewState) {
+        editorRef.current.restoreViewState(newViewState)
+      }
+
+      // Focus the editor so the cursor gets applied
+      editorRef.current.focus()
+    },
+    removeFile(file: LoadedFile) {
+      if (!monacoRef.current) return
+
+      const uri = monacoRef.current.Uri.file(file.path)
+      const model = monacoRef.current.editor.getModel(uri)
+      if (model) {
+        // 1) Dispose the model so Monaco forgets it (undo stack, text, etc.)
+        model.dispose()
+
+        // 2) Remove any saved view state for that URI
+        delete viewStatesRef.current[uri.toString()]
+
+        // OPTIONAL: If this file is currently open, you may also want to:
+        //    - editorRef.current.setModel(null)
+        //    - or switch to another file’s model automatically
+        // But that depends on your desired UX.
+      }
+    },
+    openFind() {
+      editorRef.current?.getAction('actions.find')?.run()
+    },
+    getActiveModelCode() {
+      // 1) Grab the active model
+      const model = editorRef.current?.getModel()
+      // 2) Return the text, or empty string if none
+      return model?.getValue() ?? ''
+    }
+  }))
+
   function insertClosingTag(): void {
     if (!editorRef.current) return
+
     const model = editorRef.current.getModel()
     const position = editorRef.current.getPosition()
     if (!model || !position) return
@@ -239,38 +279,62 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
       endColumn: position.column
     })
 
-    // Regex to match the opening tag
+    const textAfterPosition = model.getValueInRange({
+      startLineNumber: position.lineNumber,
+      startColumn: position.column,
+      endLineNumber: position.lineNumber,
+      endColumn: model.getLineMaxColumn(position.lineNumber)
+    })
+
+    // Match the most recent opening tag before the cursor
     const match = textUntilPosition.match(/<(\w+)([^>]*)>?$/)
     if (match && !/\/\s*$/.test(match[2])) {
       const tag = match[1]
       const closingTag = `</${tag}>`
 
-      editorRef.current.executeEdits('', [
-        {
-          range: new monaco.Range(
-            position.lineNumber,
-            position.column + 1,
-            position.lineNumber,
-            position.column + 1
-          ),
-          text: closingTag,
-          forceMoveMarkers: true
-        }
-      ])
+      // Prevent infinite loop by checking if the closing tag already exists
+      if (!textAfterPosition.startsWith(closingTag)) {
+        editorRef.current.executeEdits('', [
+          {
+            range: new monaco.Range(
+              position.lineNumber,
+              position.column,
+              position.lineNumber,
+              position.column
+            ),
+            text: closingTag,
+            forceMoveMarkers: true
+          }
+        ])
 
-      // Move cursor inside the newly added closing tag
-      editorRef.current.setPosition({
-        lineNumber: position.lineNumber,
-        column: position.column
-      })
+        // Adjust the cursor position to the original spot, inside the new tag
+        editorRef.current.setPosition({
+          lineNumber: position.lineNumber,
+          column: position.column
+        })
+      }
     }
   }
 
-  const handleEditorDidMount = async (
+  const handleEditorDidMount: OnMount = async (
     editor: monaco.editor.IStandaloneCodeEditor,
-    monacoInstance: Monaco
+    monaco: Monaco
   ): Promise<void> => {
     editorRef.current = editor
+    monacoRef.current = monaco
+
+    /*monaco.languages.setMonarchTokensProvider('typescript', {
+      tokenizer: {
+        root: [
+          [/(?<!\{)>[^<{}]+<(?!=\})/, 'unwrapped-text'],
+          [/<\/?/, 'tag-bracket'], // Matches `<` and `</`
+          [/>/, 'tag-bracket'], // Matches `>`
+
+          // Match tag names (e.g., `div`, `span`)
+          [/[a-zA-Z0-9\-]+(?=\s|\/?>)/, 'tag-name']
+        ]
+      }
+    })*/
 
     monaco.editor.defineTheme('myTheme', {
       base: 'vs-dark',
@@ -302,10 +366,10 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
     })
 
     // Add our custom global type definitions
-    await loadTypeDefinitions(monaco)
+    await loadTypeDefinitions(monaco, data.project)
 
     // Associate a fake file ending with `.tsx` so that TSX features are recognized
-    const uri = monaco.Uri.parse('file:///main.tsx')
+    /*const uri = monaco.Uri.parse('file:///main.tsx')
     let model = monaco.editor.getModel(uri)
     if (!model) {
       model = monaco.editor.createModel(editorContent, 'typescript', uri)
@@ -314,7 +378,7 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
     editor.setModel(model)
 
     // Optionally adjust editor model formatting options
-    model.updateOptions({ tabSize: 2 })
+    model.updateOptions({ tabSize: 2 })*/
 
     // Ensure changes sync to the TS worker promptly
     monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true)
@@ -336,12 +400,27 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
       () => editor.trigger('keyboard', 'editor.action.clipboardPasteAction', null)
     )
 
-    //shikiToMonaco(highlighter, monacoInstance)
-    sendMessageToWorker()
+    // Add Save Command
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, async () => {
+      //handleSave()
+    })
+
+    if (autoCloseTags) {
+      editor.onDidChangeModelContent((event) => {
+        if (event.changes.length === 0) return
+        const text = event.changes[0].text
+        if (text === '>') {
+          insertClosingTag()
+        }
+      })
+    }
+
+    //shikiToMonaco(highlighter, editor)
+    //sendMessageToWorker()
   }
   loader.config({ monaco })
 
-  function handleEditorChange(value: string | undefined): void {
+  /*function handleEditorChange(value: string | undefined): void {
     const newValue = value || ''
     setEditorContent(newValue)
     if (editorRef.current && autoCloseTags) {
@@ -354,7 +433,7 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
 
         // Check if the user typed a ">"
         if (text === '>') {
-          //insertClosingTag()
+          insertClosingTag()
         }
       })
     }
@@ -363,28 +442,17 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
       previewWorkerRef.current.postMessage(newValue)
       //linterWorkerRef.current.postMessage(newValue)
     }
-  }
-  async function formatCode(): Promise<void> {
+  }*/
+  /*async function formatCode(): Promise<void> {
     const formattedCode = await formatter(editorContent)
     setEditorContent(formattedCode)
     if (previewWorkerRef.current && linterWorkerRef.current) {
       previewWorkerRef.current.postMessage(formattedCode)
       linterWorkerRef.current.postMessage(formattedCode)
     }
-  }
+  }*/
 
-  const handlePreviewLoaded = async () => {
-    if (loadTimerRef.current) {
-      clearTimeout(loadTimerRef.current) // Clear any existing timer
-    }
-
-    // Add a delay to ensure `iframe1` is completely rendered
-    loadTimerRef.current = setTimeout(() => {
-      isLoading && setIsLoading(false)
-      setPreviousPreviewContent(previewContent)
-    }, 300)
-  }
-
+  /*
   const handleSave = async (): Promise<void> => {
     let codeToSave = editorContent
     if (isFormatOnSave) {
@@ -401,161 +469,24 @@ const Editor = ({ loadedFile, data }: EditorProps) => {
       previewWorkerRef.current.postMessage(codeToSave)
       linterWorkerRef.current.postMessage(codeToSave)
     }
-  }
+  }*/
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="min-h-[200px] w-full border-x">
-      <ResizablePanel className="flex flex-col m-2 gap-2">
-        <div className="flex items-center justify-between">
-          <span className="font-semibold">Editor</span>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="secondary"
-              className="rounded"
-              onClick={() => editorRef.current?.getAction('actions.find')?.run()}
-            >
-              <SearchCodeIcon className="h-4 w-4" />
-            </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="secondary" className="rounded">
-                  <SettingsIcon className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuCheckboxItem
-                  checked={isFormatOnSave}
-                  onCheckedChange={setIsFormatOnSave}
-                >
-                  Format on Save
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={autoCloseTags}
-                  onCheckedChange={setAutoCloseTags}
-                >
-                  Autoclosing tags
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button variant="secondary" size="sm" className="rounded" onClick={handleSave}>
-              <span>Save</span>
-              <span className="ml-2 text-xs text-muted-foreground">(CMD + S)</span>
-            </Button>
-          </div>
-        </div>
-        <MonacoEditor
-          height="100%"
-          value={editorContent}
-          onMount={handleEditorDidMount}
-          onChange={(v) => handleEditorChange(v)}
-          options={{
-            automaticLayout: true,
-            autoClosingBrackets: 'always',
-            scrollBeyondLastLine: false,
-            formatOnType: true,
-            formatOnPaste: true
-          }}
-        />
-      </ResizablePanel>
-      <ResizableHandle withHandle />
-      <ResizablePanel className="flex flex-col m-2 gap-2">
-        <div className="flex items-center justify-between">
-          <span className="font-semibold">Preview</span>
-          <div className="flex gap-2">
-            <Button size="sm" variant="secondary" className="rounded">
-              Sample Data
-            </Button>
-            <Button size="sm" variant="secondary" className="rounded">
-              Docs
-            </Button>
-          </div>
-        </div>
-        <div className="h-full rounded-md bg-white text-black">
-          {/* Iframe 1 */}
-          <div className="relative w-full h-full bg-white">
-            {isLoading && (
-              <div className="absolute top-0 left-0 z-20 w-full h-full bg-white/80 flex items-center justify-center z-30">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              </div>
-            )}
-            {previewContent ? (
-              <iframe
-                id="iframe1"
-                key="iframe1"
-                className={`absolute top-0 left-0 z-20 w-full h-full border-0 ${
-                  isLoading ? 'hidden' : 'block'
-                }`}
-                {...(previewContent.type === 'pdf'
-                  ? { src: `${previewContent.code}#toolbar=0` }
-                  : { srcDoc: previewContent.code })}
-                onLoad={handlePreviewLoaded}
-              />
-            ) : (
-              !isLoading && (
-                <div className="absolute top-0 left-0 z-20 w-full h-full bg-white/80 flex items-center justify-center z-30">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                </div>
-              )
-            )}
-            {previousPreviewContent ? (
-              <iframe
-                id="iframe2"
-                key="iframe2"
-                className={`absolute top-0 left-0 z-10 w-full h-full border-0 ${
-                  isLoading ? 'block' : 'hidden'
-                }`}
-                {...(previousPreviewContent.type === 'pdf'
-                  ? { src: `${previousPreviewContent.code}#toolbar=0` }
-                  : { srcDoc: previousPreviewContent.code })}
-              />
-            ) : (
-              <div className="absolute top-0 left-0 z-20 w-full h-full bg-white/80 flex items-center justify-center z-30">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              </div>
-            )}
-            {error && (
-              <div className="absolute bottom-10 left-10 z-30 bg-red-100 p-8 rounded-md">
-                {error}
-              </div>
-            )}
-          </div>
-        </div>
-      </ResizablePanel>
-    </ResizablePanelGroup>
+    <MonacoEditor
+      height="100%"
+      defaultLanguage="typescript"
+      onMount={handleEditorDidMount}
+      options={{
+        automaticLayout: true,
+        autoClosingBrackets: 'always',
+        scrollBeyondLastLine: false,
+        wordSeparators: '~!@#$%^&*()-=+[{]}|;:\'",.<>/?',
+        formatOnType: true,
+        formatOnPaste: true
+      }}
+    />
   )
-}
+})
 
+Editor.displayName = 'Editor'
 export default Editor
-{
-  /*<iframe
-              id="iframe"
-              className="w-full h-full border-0"
-              {...(loadedFile.type === 'pdf'
-                ? { src: `${previewContent}#toolbar=0` }
-                : { srcDoc: previewContent })}
-            />*/
-  /*<iframe
-             id='frame2'
-             {...(loadedFile.type === 'pdf'
-               ? { src: iframe2Src ? `${iframe2Src}#toolbar=0` : undefined }
-               : { srcDoc: iframe2Src || undefined })}
-             className={`w-full h-full border-0 ${
-               visibleIframe === 2
-                 ? 'opacity-100 z-20 pointer-events-auto '
-                 : 'opacity-0 z-10 pointer-events-none '
-             }`}
-             onLoad={handleIframe2Load}
-             onError={handleIframe2Error}
-             title="PDF Viewer 2"
-           />*/
-}
-/*<iframe
-              id="iframe2"
-              key="iframe2"
-              className="absolute top-0 left-0 z-10 w-full h-full border-0"
-              {...(loadedFile.type === 'pdf'
-                ? { src: `${PreviousPreviewContent}#toolbar=0` }
-                : { srcDoc: PreviousPreviewContent })}
-            />*/

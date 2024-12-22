@@ -1,4 +1,5 @@
 import { ClipType } from '../datalogTypes'
+import { boolean, z } from 'zod'
 
 type ReelInfo = {
   reel: string
@@ -88,9 +89,12 @@ function groupReels(reelsArray: string[]): string[] {
   return Reels
 }
 
-export type getReelsOptions = {
+export const getReelsOptionsZod = z.object({ grouped: z.boolean().optional() }).optional()
+
+export type getReelsOptions = z.infer<typeof getReelsOptionsZod>
+/*export type getReelsOptions = {
   grouped?: boolean
-}
+}*/
 
 export function getReels(clips: ClipType[] | string[], options: getReelsOptions = {}): string[] {
   const reelsSet: Set<string> = new Set()

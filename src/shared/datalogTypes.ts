@@ -233,7 +233,7 @@ const DatalogClassZod = z.object({
   date: z.string(),
   clips: z.array(ClipZod),
   ocf: z.object({
-    filesCount: z.function().returns(z.number()),
+    getfilesCount: z.function().returns(z.number()),
     getSize: z.function().returns(z.string()),
     getCopies: z.function().returns(z.string())
   }),
@@ -249,8 +249,8 @@ const DatalogClassZod = z.object({
 export const DataClassZod = z.object({
   projectName: z.string(),
   datalog: DatalogClassZod,
+  datalogArray: z.array(DatalogClassZod),
   datalogs: z.array(DatalogClassZod),
-  allDatalogs: z.array(DatalogClassZod),
   getTotalOCFSize: z.function().returns(z.string()),
   getTotalOCFFileCount: z.function().returns(z.number())
 })

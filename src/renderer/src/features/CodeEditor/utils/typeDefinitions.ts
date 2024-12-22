@@ -21,25 +21,30 @@ import MockDts from './reactEmaildec.d.ts?raw'
 import { createDataDefinition } from './dataDefinition'
 import { ProjectRootType } from '@shared/projectTypes'
 
-export async function loadTypeDefinitions(monaco: typeof import('monaco-editor')) {
-  // Static glob patterns as string literals
+// React-email module had to be declared seperately in MockDts. For react-pdf we can import everything.
+
+export async function loadTypeDefinitions(
+  monaco: typeof import('monaco-editor'),
+  project: ProjectRootType
+) {
   const reactTypeDefs = import.meta.glob('../../../../../../node_modules/@types/react/**/*.d.ts', {
     query: '?raw',
     import: 'default',
     eager: true
   })
 
-  const reactEmailTypeDefs = import.meta.glob(
-    '../../../../../../node_modules/@react-email/**/*.d.ts',
-    { query: '?raw', import: 'default', eager: true }
-  )
+  const reactPdfTypeDefs = import.meta.glob('../../../../../../node_modules/@react-pdf/**/*.d.ts', {
+    query: '?raw',
+    import: 'default',
+    eager: true
+  })
 
-  const dataDts = createDataDefinition()
+  const dataDts = createDataDefinition(project)
 
-  // Combine all type definitions
-  const dtsModules = { ...reactTypeDefs }
+  const dtsModules = { ...reactTypeDefs, ...reactPdfTypeDefs }
 
-  // Add each .d.ts content to Monaco
+  // React-email module had to be declared seperately in MockDts. For react-pdf we can import everything.
+
   for (const path in dtsModules) {
     const dtsContent = dtsModules[path] as string
     const uri = path.replace('../../../../../../node_modules/', 'file:///node_modules/')

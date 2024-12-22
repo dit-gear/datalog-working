@@ -67,14 +67,12 @@ export function setupEditorIpcHandlers(): void {
   })
 
   // Handle saving a file
-  ipcMain.handle('save-file', async (event, file: LoadedFile) => {
+  ipcMain.handle('save-file', async (_, file: LoadedFile) => {
     try {
       if (file.isNewFile && fs.existsSync(file.path)) {
         throw new Error('File already exists')
       }
       fs.writeFileSync(file.path, file.content, 'utf8')
-      delete file.isNewFile
-      event.sender.send('response-read-file', file)
       return { success: true }
     } catch (error) {
       return { success: false, error: (error as Error).message }

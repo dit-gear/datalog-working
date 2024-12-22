@@ -1,12 +1,24 @@
 import '../../assets/main.css'
-
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import Editorlayout from './editorlayout'
+import { DataProvider } from './dataContext'
+import Aside from './sidebar/aside'
+import EditorWrapper from './editorWrapper'
+import { LoadedFileProvider } from './loadedFileContext'
+import { SidebarProvider } from '@components/ui/sidebar'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <div style={{ height: '36px', WebkitAppRegion: 'drag' } as React.CSSProperties}></div>
-    <Editorlayout />
+    <div className="h-full flex flex-row gap-2">
+      <DataProvider>
+        <LoadedFileProvider>
+          <SidebarProvider>
+            <Aside />
+            <EditorWrapper />
+          </SidebarProvider>
+        </LoadedFileProvider>
+      </DataProvider>
+    </div>
   </React.StrictMode>
 )

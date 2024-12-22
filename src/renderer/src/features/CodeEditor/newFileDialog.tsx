@@ -1,4 +1,4 @@
-import { useEffect, useState, forwardRef, useImperativeHandle } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogTrigger,
@@ -16,51 +16,59 @@ import { z } from 'zod'
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group'
-import useInitialDir from './useInitialDir'
+import { useInitialData } from './dataContext'
 import { EmailStarter } from '../../templates/EmailStarter'
 import { LoadedFile } from '@shared/shared-types'
-import { getFileExtension } from '@renderer/utils/formatString'
+import { Plus } from 'lucide-react'
+import { SidebarMenuAction } from '@components/ui/sidebar'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from '@components/ui/select'
 
-export interface NewTemplateDialogHandle {
-  setMode: React.Dispatch<React.SetStateAction<'email' | 'pdf'>>
+interface NewFileDialogProps {
+  mode: 'email' | 'pdf'
 }
 
 const FormSchema = z.object({
   filename: z
     .string()
     // eslint-disable-next-line no-useless-escape
-    .regex(/^[a-zA-Z0-9_\-]+\.(jsx|tsx)$/i, {
-      message:
-        'Filename must only contain alphanumeric characters, underscores, or hyphens, and must end with .jsx or .tsx'
+    .regex(/^[a-zA-Z0-9_-]+$/, {
+      message: 'Filename must only contain alphanumeric characters, underscores, or hyphens.'
     })
     .refine((val) => val.slice(0, -4).length >= 1, {
       message: 'Filename must be at least 1 character long'
     }),
+  ext: z.enum(['tsx', 'jsx']),
   scope: z.enum(['project', 'global'])
 })
 
-const NewTemplateDialog = forwardRef<NewTemplateDialogHandle>((_, ref) => {
-  const { loading, path } = useInitialDir()
-  const [mode, setMode] = useState<'email' | 'pdf'>('email')
+const NewFileDialog = ({ mode }: NewFileDialogProps) => {
+  const { initialData } = useInitialData()
+  const path = { project: initialData.projectPath, global: initialData.rootPath }
   const [open, setOpen] = useState<boolean>(false)
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       filename: '',
+      ext: 'tsx',
       scope: 'project'
     },
-    mode: 'onBlur'
+    mode: 'onSubmit'
   })
 
   function onSubmit(values: z.infer<typeof FormSchema>): void {
-    const fileType = (getFileExtension(values.filename) as 'jsx' | 'tsx') || 'jsx'
-
     const File: LoadedFile = {
-      path: `${path[values.scope]}/templates/${mode}/${values.filename}`,
+      name: values.filename,
+      path: `${path[values.scope]}/templates/${mode}/${values.filename}.${values.ext}`,
       type: mode,
       scope: values.scope,
       content: EmailStarter,
-      filetype: fileType,
+      filetype: values.ext,
       isNewFile: true
     }
     window.editorApi
@@ -81,6 +89,11 @@ const NewTemplateDialog = forwardRef<NewTemplateDialogHandle>((_, ref) => {
         })
       })
   }
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => form.setFocus('filename'), 0)
+    }
+  }, [open])
 
   useEffect(() => {
     if (open === false) {
@@ -88,20 +101,16 @@ const NewTemplateDialog = forwardRef<NewTemplateDialogHandle>((_, ref) => {
     }
   }, [form, open])
 
-  useImperativeHandle(ref, () => ({
-    setMode
-  }))
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm" disabled={loading}>
-          +
-        </Button>
+        <SidebarMenuAction>
+          <Plus /> <span className="sr-only">{`New ${mode} template`}</span>
+        </SidebarMenuAction>
       </DialogTrigger>
       <DialogContent className="backdrop-blur-sm">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <DialogHeader>
               <DialogTitle>
                 New <span className={mode === 'pdf' ? 'uppercase' : 'capitalize'}>{mode}</span>{' '}
@@ -112,19 +121,43 @@ const NewTemplateDialog = forwardRef<NewTemplateDialogHandle>((_, ref) => {
               </DialogDescription>
               <DialogClose />
             </DialogHeader>
-            <FormField
-              control={form.control}
-              name="filename"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Filename</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex gap-4">
+              <FormField
+                control={form.control}
+                name="filename"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>Filename:</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="ext"
+                render={({ field }) => (
+                  <FormItem className="min-w-24">
+                    <Select defaultValue={field.value} onValueChange={field.onChange}>
+                      <FormLabel className="text-transparent">Extension</FormLabel>
+                      <SelectTrigger>
+                        <SelectValue defaultValue={field.value} placeholder=".tsx" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem key={'tsx'} value={'tsx'}>
+                          {'.tsx'}
+                        </SelectItem>
+                        <SelectItem key={'jsx'} value={'jsx'}>
+                          {'.jsx'}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="scope"
@@ -135,7 +168,8 @@ const NewTemplateDialog = forwardRef<NewTemplateDialogHandle>((_, ref) => {
                     <RadioGroup
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="flex flex-col space-y-1"
+                      className="flex gap-10 space-y-1"
+                      orientation="horizontal"
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
@@ -159,11 +193,7 @@ const NewTemplateDialog = forwardRef<NewTemplateDialogHandle>((_, ref) => {
               <DialogClose asChild>
                 <Button variant="ghost">Cancel</Button>
               </DialogClose>
-              <Button
-                type="submit"
-                onClick={form.handleSubmit(onSubmit)}
-                disabled={!form.formState.isValid}
-              >
+              <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
                 Save
               </Button>
             </DialogFooter>
@@ -172,8 +202,6 @@ const NewTemplateDialog = forwardRef<NewTemplateDialogHandle>((_, ref) => {
       </DialogContent>
     </Dialog>
   )
-})
+}
 
-NewTemplateDialog.displayName = 'NewTemplateDialog'
-
-export default NewTemplateDialog
+export default NewFileDialog
