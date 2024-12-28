@@ -9,9 +9,10 @@ import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 //import { createHighlighter } from 'shiki'
 //import { shikiToMonaco } from '@shikijs/monaco'
 import { formatter } from '@renderer/utils/prettierFormatter'
-import { LoadedFile } from '@shared/shared-types'
+import { LoadedFile, ChangedFile } from '@shared/shared-types'
 import { loadTypeDefinitions } from './utils/typeDefinitions'
 import { useInitialData } from './dataContext'
+import { handleApiResponse } from '@renderer/utils/handleApiResponse'
 
 //type Monaco = typeof monaco
 
@@ -25,6 +26,13 @@ export type EditorHandle = {
   removeFile: (file: LoadedFile) => void
   openFind: () => void
   getActiveModelCode: () => string
+  saveFiles: () => void
+}
+
+interface EditorProps {
+  //onDirty: (path: string, dirty: boolean) => void
+  //resetDirty: () => void
+  onEditorReady: () => void
 }
 
 interface Preview {
@@ -33,9 +41,19 @@ interface Preview {
   code: string
 }
 
-const Editor = forwardRef<EditorHandle, {}>((_props, ref) => {
+interface FileTrackingInfo {
+  path: string
+  modelUri: monaco.Uri
+  lastSavedVersionId: number
+}
+
+const fileTrackers: Map<string, FileTrackingInfo> = new Map()
+
+const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
   const monacoRef = useRef<typeof monaco | null>(null)
+
+  const { onEditorReady } = props
 
   const { initialData } = useInitialData()
   const data = { project: initialData.activeProject, datalogs: initialData.loadedDatalogs }
@@ -51,7 +69,7 @@ const Editor = forwardRef<EditorHandle, {}>((_props, ref) => {
 
   const loadTimerRef = useRef<NodeJS.Timeout | null>(null)
   const errorTimerRef = useRef<NodeJS.Timeout | null>(null)
-  /*
+
   useEffect(() => {
     const handleGlobalSave = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
@@ -66,7 +84,7 @@ const Editor = forwardRef<EditorHandle, {}>((_props, ref) => {
       window.removeEventListener('keydown', handleGlobalSave)
     }
   }, [])
-
+  /*
   const loadNewContent = (p: Preview) => {
     !isLoading && p.type === 'pdf' && setIsLoading(true)
 
@@ -209,6 +227,8 @@ const Editor = forwardRef<EditorHandle, {}>((_props, ref) => {
 
   const viewStatesRef = useRef<Record<string, monaco.editor.ICodeEditorViewState | null>>({})
 
+  console.log('editor rendered')
+
   useImperativeHandle(ref, () => ({
     openFile(file: LoadedFile) {
       if (!monacoRef.current || !editorRef.current) return
@@ -226,6 +246,13 @@ const Editor = forwardRef<EditorHandle, {}>((_props, ref) => {
         model = monacoRef.current.editor.createModel(file.content, 'typescript', uri)
       }
       editorRef.current.setModel(model)
+
+      fileTrackers.set(file.path, {
+        path: file.path,
+        modelUri: uri,
+        lastSavedVersionId: model.getAlternativeVersionId()
+      })
+      console.log('fileTrackers after set:', Array.from(fileTrackers.keys()))
 
       // 4) Restore the new file’s view state (cursor, scroll, etc.)
       const newViewState = viewStatesRef.current[uri.toString()]
@@ -248,6 +275,8 @@ const Editor = forwardRef<EditorHandle, {}>((_props, ref) => {
         // 2) Remove any saved view state for that URI
         delete viewStatesRef.current[uri.toString()]
 
+        fileTrackers.delete(file.path)
+
         // OPTIONAL: If this file is currently open, you may also want to:
         //    - editorRef.current.setModel(null)
         //    - or switch to another file’s model automatically
@@ -262,8 +291,79 @@ const Editor = forwardRef<EditorHandle, {}>((_props, ref) => {
       const model = editorRef.current?.getModel()
       // 2) Return the text, or empty string if none
       return model?.getValue() ?? ''
-    }
+    },
+    saveFiles: async () => handleSave()
   }))
+
+  const handleSave = async () => {
+    const changesToSave: ChangedFile[] = []
+    console.log('handleSave launched')
+    console.log(fileTrackers)
+    for (const [filePath, tracker] of fileTrackers.entries()) {
+      console.log(tracker)
+      const model = monaco.editor.getModel(tracker.modelUri)
+      if (!model) {
+        console.log('no model')
+        continue
+      }
+
+      const currentVersion = model.getAlternativeVersionId()
+      console.log(currentVersion, tracker.lastSavedVersionId)
+      if (currentVersion !== tracker.lastSavedVersionId) {
+        // Mark this file as changed
+        changesToSave.push({
+          path: filePath,
+          content: model.getValue()
+        })
+      }
+      if (changesToSave.length === 0) {
+        console.log('No changes to save')
+        return
+      }
+      try {
+        const response = await window.editorApi.saveFiles(changesToSave)
+        handleApiResponse(response, () => {
+          // 3) On success, update each file’s lastSavedVersionId
+          for (const { path } of changesToSave) {
+            const tracker = fileTrackers.get(path)
+            if (!tracker) continue
+            const model = monaco.editor.getModel(tracker.modelUri)
+            if (!model) continue
+
+            tracker.lastSavedVersionId = model.getAlternativeVersionId()
+          }
+          resetDirty()
+          console.log('All dirty files saved successfully!')
+        })
+      } catch (error) {
+        console.error(error)
+      }
+    }
+  }
+
+  function getOriginalFilePath(uri: monaco.Uri): string | undefined {
+    const incomingFsPath = uri.fsPath
+    for (const [path, tracker] of fileTrackers.entries()) {
+      if (tracker.modelUri.fsPath === incomingFsPath) {
+        return path
+      }
+    }
+    return undefined
+  }
+
+  function isDirty(): boolean {
+    const editor = editorRef.current
+    if (!editor) return false
+
+    const model = editor.getModel()
+    if (!model) return false
+
+    // If you’re still storing lastSavedVersionId in fileTrackers, you can do:
+    const tracker = fileTrackers.get(model.uri.fsPath)
+    if (!tracker) return false
+
+    return model.getAlternativeVersionId() !== tracker.lastSavedVersionId
+  }
 
   function insertClosingTag(): void {
     if (!editorRef.current) return
@@ -323,25 +423,12 @@ const Editor = forwardRef<EditorHandle, {}>((_props, ref) => {
     editorRef.current = editor
     monacoRef.current = monaco
 
-    /*monaco.languages.setMonarchTokensProvider('typescript', {
-      tokenizer: {
-        root: [
-          [/(?<!\{)>[^<{}]+<(?!=\})/, 'unwrapped-text'],
-          [/<\/?/, 'tag-bracket'], // Matches `<` and `</`
-          [/>/, 'tag-bracket'], // Matches `>`
-
-          // Match tag names (e.g., `div`, `span`)
-          [/[a-zA-Z0-9\-]+(?=\s|\/?>)/, 'tag-name']
-        ]
-      }
-    })*/
-
     monaco.editor.defineTheme('myTheme', {
       base: 'vs-dark',
       inherit: true,
       rules: [],
       colors: {
-        'editor.background': '#000000'
+        'editor.background': '#09090b'
       }
     })
     monaco.editor.setTheme('myTheme')
@@ -402,7 +489,7 @@ const Editor = forwardRef<EditorHandle, {}>((_props, ref) => {
 
     // Add Save Command
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, async () => {
-      //handleSave()
+      handleSave()
     })
 
     if (autoCloseTags) {
@@ -415,8 +502,24 @@ const Editor = forwardRef<EditorHandle, {}>((_props, ref) => {
       })
     }
 
+    /*editor.onDidChangeModelContent(() => {
+      const model = editor.getModel()
+      if (!model) return
+
+      const path = getOriginalFilePath(model.uri)
+      if (!path) return
+
+      const tracker = fileTrackers.get(path)
+      if (!tracker) return
+
+      const currentVersion = model.getAlternativeVersionId()
+      const isDirty = currentVersion !== tracker.lastSavedVersionId
+      onDirty(path, isDirty)
+    })*/
+
     //shikiToMonaco(highlighter, editor)
     //sendMessageToWorker()
+    onEditorReady?.()
   }
   loader.config({ monaco })
 

@@ -1,26 +1,24 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+/*import React, { createContext, useContext, useState, useEffect } from 'react'
 import { LoadedFile } from '@shared/shared-types'
 import { handleApiResponse } from '@renderer/utils/handleApiResponse'
 
+interface ExtendedLoadedFile extends LoadedFile {
+  isActive: boolean
+  initialCode: string
+  currentCode: string
+}
 interface LoadedFileContextType {
   loadedFiles: LoadedFile[]
   addLoadedFile: (file: LoadedFile) => void
+  removeLoadedFile: (filePath: string) => void
+  setActiveFile: (filePath: string) => void
 }
 
 const LoadedFileContext = createContext<LoadedFileContextType | undefined>(undefined)
 
 export const LoadedFileProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [loadedFiles, setLoadedFiles] = useState<LoadedFile[]>([])
-  //const { dir, loading } = useInitialDir()
-
-  /*useEffect(() => {
-    if (!loading && dir.length > 0 && !loadedFile) {
-      const firstFile = dir.find((file) => file.type === 'email' || file.type === 'pdf')
-      if (firstFile) {
-        window.editorApi.requestReadFile(firstFile)
-      }
-    }
-  }, [dir, loading, loadedFile])*/
+ 
 
   useEffect(() => {
     window.editorApi.onResponseReadFile((response) => {
@@ -40,19 +38,13 @@ export const LoadedFileProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     })
   }, [])
 
-  const addLoadedFile = (file: LoadedFile) => {
-    setLoadedFiles((prev) => {
-      const existing = prev.find((f) => f.path === file.path)
-      if (existing) {
-        // optional: either replace the file or do nothing
-        return prev
-      }
-      return [...prev, file]
-    })
+  const removeLoadedFile = (file: LoadedFile) => {
+    const prev = loadedFiles.find((v) => v.path !== file.path)
+    setLoadedFiles(prev)
   }
 
   return (
-    <LoadedFileContext.Provider value={{ loadedFiles, addLoadedFile }}>
+    <LoadedFileContext.Provider value={{ loadedFiles, removeLoadedFile }}>
       {children}
     </LoadedFileContext.Provider>
   )
@@ -65,3 +57,4 @@ export const useLoadedFile = (): LoadedFileContextType => {
   }
   return context
 }
+*/

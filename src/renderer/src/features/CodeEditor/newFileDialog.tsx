@@ -68,11 +68,10 @@ const NewFileDialog = ({ mode }: NewFileDialogProps) => {
       type: mode,
       scope: values.scope,
       content: EmailStarter,
-      filetype: values.ext,
-      isNewFile: true
+      filetype: values.ext
     }
     window.editorApi
-      .saveFile(File)
+      .saveNewFile(File)
       .then((response) => {
         if (response.success) {
           console.log('File saved successfully')

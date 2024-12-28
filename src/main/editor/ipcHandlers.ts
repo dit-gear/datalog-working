@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 import fs from 'fs'
 import path from 'path'
-import { LoadedFile, InitialEditorData } from '../../shared/shared-types'
+import { LoadedFile, InitialEditorData, ChangedFile } from '../../shared/shared-types'
 import { TemplateDirectoryFile } from '@shared/projectTypes'
 import { moveFileToTrash } from '../utils/crud'
 import { getEditorWindow } from './editorWindow'
@@ -67,9 +67,9 @@ export function setupEditorIpcHandlers(): void {
   })
 
   // Handle saving a file
-  ipcMain.handle('save-file', async (_, file: LoadedFile) => {
+  ipcMain.handle('save-new-file', async (_, file: ChangedFile) => {
     try {
-      if (file.isNewFile && fs.existsSync(file.path)) {
+      if (fs.existsSync(file.path)) {
         throw new Error('File already exists')
       }
       fs.writeFileSync(file.path, file.content, 'utf8')
@@ -78,6 +78,8 @@ export function setupEditorIpcHandlers(): void {
       return { success: false, error: (error as Error).message }
     }
   })
+
+  ipcMain.handle('save-files', async (__dirname, file: ChangedFile) => {})
 
   // Handle deleting a file
   ipcMain.handle('delete-file', async (_event, file: TemplateDirectoryFile) => {

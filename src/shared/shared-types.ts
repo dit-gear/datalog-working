@@ -30,7 +30,11 @@ export type Path = {
 export type LoadedFile = TemplateDirectoryFile & {
   content: string
   filetype: 'jsx' | 'tsx'
-  isNewFile?: boolean
+}
+
+export type ChangedFile = {
+  path: string
+  content: string
 }
 
 export type InitialDir = {
