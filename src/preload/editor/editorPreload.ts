@@ -14,7 +14,7 @@ const editorApi = {
   onResponseReadFile: (callback: (file: LoadedFile | { error: string }) => void) =>
     ipcRenderer.on('response-read-file', (_, file) => callback(file)),
   saveNewFile: (file: ChangedFile) => ipcRenderer.invoke('save-new-file', file),
-  saveFiles: (files: ChangedFile[]) => ipcRenderer.invoke('save-files', files),
+  saveFiles: (files: ChangedFile[]) => safeInvoke('save-files', files),
   deleteFile: (file: TemplateDirectoryFile) => ipcRenderer.invoke('delete-file', file)
 }
 

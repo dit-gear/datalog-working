@@ -79,7 +79,20 @@ export function setupEditorIpcHandlers(): void {
     }
   })
 
-  ipcMain.handle('save-files', async (__dirname, file: ChangedFile) => {})
+  ipcMain.handle('save-files', async (__dirname, files: ChangedFile[]) => {
+    try {
+      await Promise.all(
+        files.map(async (file) => {
+          fs.writeFileSync(file.path, file.content, 'utf-8')
+        })
+      )
+      return
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error(`Failed to save files: ${errorMessage}`)
+      throw new Error(errorMessage)
+    }
+  })
 
   // Handle deleting a file
   ipcMain.handle('delete-file', async (_event, file: TemplateDirectoryFile) => {

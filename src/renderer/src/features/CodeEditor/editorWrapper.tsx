@@ -172,8 +172,8 @@ const EditorWrapper = () => {
         </div>
         <Editor
           ref={editorRef}
-          //onDirty={handleDirty}
-          //resetDirty={resetDirty}
+          onDirty={handleDirty}
+          resetDirty={resetDirty}
           onEditorReady={() => setLoading(false)}
         />
       </ResizablePanel>

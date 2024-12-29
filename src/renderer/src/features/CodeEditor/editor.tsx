@@ -8,11 +8,10 @@ import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 //import { createHighlighter } from 'shiki'
 //import { shikiToMonaco } from '@shikijs/monaco'
-import { formatter } from '@renderer/utils/prettierFormatter'
+//import { formatter } from '@renderer/utils/prettierFormatter'
 import { LoadedFile, ChangedFile } from '@shared/shared-types'
 import { loadTypeDefinitions } from './utils/typeDefinitions'
 import { useInitialData } from './dataContext'
-import { handleApiResponse } from '@renderer/utils/handleApiResponse'
 
 //type Monaco = typeof monaco
 
@@ -30,8 +29,8 @@ export type EditorHandle = {
 }
 
 interface EditorProps {
-  //onDirty: (path: string, dirty: boolean) => void
-  //resetDirty: () => void
+  onDirty: (path: string, dirty: boolean) => void
+  resetDirty: () => void
   onEditorReady: () => void
 }
 
@@ -53,7 +52,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
   const monacoRef = useRef<typeof monaco | null>(null)
 
-  const { onEditorReady } = props
+  const { onEditorReady, onDirty, resetDirty } = props
 
   const { initialData } = useInitialData()
   const data = { project: initialData.activeProject, datalogs: initialData.loadedDatalogs }
@@ -105,7 +104,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     errorTimerRef.current = setTimeout(() => {
       error ? setError(error) : setError(null)
     }, 1000)
-  }
+  } */
 
   useEffect(() => {
     const previewWorker = new Worker(new URL('@workers/preview-worker.ts', import.meta.url), {
@@ -113,10 +112,10 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     })
     previewWorkerRef.current = previewWorker
 
-    const linterWorker = new Worker(new URL('@workers/linter-worker.ts', import.meta.url), {
+    /*const linterWorker = new Worker(new URL('@workers/linter-worker.ts', import.meta.url), {
       type: 'module'
     })
-    linterWorkerRef.current = linterWorker
+    linterWorkerRef.current = linterWorker*/
 
     previewWorker.onmessage = (e): void => {
       const { id, type, code, error } = e.data
@@ -127,7 +126,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
       }
     }
 
-    linterWorker.onmessage = (e): void => {
+    /*linterWorker.onmessage = (e): void => {
       const { lintMessages, error } = e.data
       if (error) {
         console.error('Linting Error:', error)
@@ -148,7 +147,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
           }
         }
       }
-    }
+    }*/
 
     if (editorContent) {
       const request = {
@@ -168,7 +167,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     // Clean up the worker when the component unmounts
     return () => {
       previewWorker.terminate()
-      linterWorker.terminate()
+      //linterWorker.terminate()
     }
   }, [])
 
@@ -188,14 +187,14 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     }
   }, [editorContent])
 
-  const sendMessageToWorker = (): void => {
+  const sendMessageToWorker = (content: string): void => {
     // console.log('editorcontent:', editorContent)
     if (!previewWorkerRef.current || !linterWorkerRef.current) {
       console.error('Workers not initialized')
       return
     }
     const request = {
-      code: editorContent,
+      code: content,
       type: loadedFile.type,
       dataObject: {
         project: data?.project,
@@ -206,7 +205,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     previewWorkerRef.current.postMessage(request)
     //linterWorkerRef.current.postMessage(editorContent)
   }
-*/
+
   self.MonacoEnvironment = {
     getWorker(_, label) {
       if (label === 'json') {
@@ -299,45 +298,56 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     const changesToSave: ChangedFile[] = []
     console.log('handleSave launched')
     console.log(fileTrackers)
+
+    // Iterate through all tracked files to identify changes
     for (const [filePath, tracker] of fileTrackers.entries()) {
       console.log(tracker)
       const model = monaco.editor.getModel(tracker.modelUri)
       if (!model) {
-        console.log('no model')
+        console.log(`No model found for path: ${filePath}`)
         continue
       }
 
       const currentVersion = model.getAlternativeVersionId()
-      console.log(currentVersion, tracker.lastSavedVersionId)
+      console.log(
+        `Current Version: ${currentVersion}, Last Saved Version: ${tracker.lastSavedVersionId}`
+      )
+
+      // Check if the file has unsaved changes
       if (currentVersion !== tracker.lastSavedVersionId) {
-        // Mark this file as changed
         changesToSave.push({
           path: filePath,
           content: model.getValue()
         })
       }
-      if (changesToSave.length === 0) {
-        console.log('No changes to save')
-        return
-      }
-      try {
-        const response = await window.editorApi.saveFiles(changesToSave)
-        handleApiResponse(response, () => {
-          // 3) On success, update each file’s lastSavedVersionId
-          for (const { path } of changesToSave) {
-            const tracker = fileTrackers.get(path)
-            if (!tracker) continue
-            const model = monaco.editor.getModel(tracker.modelUri)
-            if (!model) continue
+    }
 
-            tracker.lastSavedVersionId = model.getAlternativeVersionId()
-          }
-          resetDirty()
-          console.log('All dirty files saved successfully!')
-        })
-      } catch (error) {
-        console.error(error)
-      }
+    // If there are no changes to save, exit the function
+    if (changesToSave.length === 0) {
+      console.log('No changes to save')
+      return
+    }
+
+    try {
+      // Invoke the IPC handler using the safeInvoke utility
+      await window.editorApi.saveFiles(changesToSave)
+
+      // On successful save, update the lastSavedVersionId for each file
+      changesToSave.forEach(({ path }) => {
+        const tracker = fileTrackers.get(path)
+        if (!tracker) return
+
+        const model = monaco.editor.getModel(tracker.modelUri)
+        if (!model) return
+
+        tracker.lastSavedVersionId = model.getAlternativeVersionId()
+        console.log(`File saved and tracker updated for path: ${path}`)
+      })
+      resetDirty()
+      console.log('All dirty files saved successfully!')
+    } catch (error) {
+      console.error('Error saving files:', error)
+      // Optional: Implement user-facing error notifications here
     }
   }
 
@@ -502,7 +512,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
       })
     }
 
-    /*editor.onDidChangeModelContent(() => {
+    editor.onDidChangeModelContent(() => {
       const model = editor.getModel()
       if (!model) return
 
@@ -513,12 +523,19 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
       if (!tracker) return
 
       const currentVersion = model.getAlternativeVersionId()
+      console.log('version:', currentVersion)
       const isDirty = currentVersion !== tracker.lastSavedVersionId
+      console.log(path, isDirty)
       onDirty(path, isDirty)
-    })*/
+    })
+
+    editor.onDidChangeModelContent((event) => {
+      const model = editor.getModel()
+      if (!model) return
+      sendMessageToWorker(model.getValue())
+    })
 
     //shikiToMonaco(highlighter, editor)
-    //sendMessageToWorker()
     onEditorReady?.()
   }
   loader.config({ monaco })
