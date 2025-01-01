@@ -7,12 +7,12 @@ import Stat from '@components/stat'
 
 const Proxy = () => {
   const { setValue } = useFormContext()
-  const clips = useWatch({ name: 'Clips' }) || []
-  const fixedProxy = useWatch({ name: 'Proxy' }) as FilesType | undefined
+  const clips = useWatch({ name: 'clips' }) || []
+  const fixedProxy = useWatch({ name: 'proxy' }) as FilesType | undefined
 
-  const [value, setValueState] = useState<FilesType>({ Files: 0, Size: 0 })
+  const [value, setValueState] = useState<FilesType>({ files: 0, size: 0 })
   const [displayValue, setDisplayValue] = useState<React.ReactNode>(null)
-  const [defaults, setDefaults] = useState<FilesType>({ Files: 0, Size: 0 })
+  const [defaults, setDefaults] = useState<FilesType>({ files: 0, size: 0 })
 
   useEffect(() => {
     const computedDefaults = getProxyValueFromClips(clips)
@@ -27,11 +27,11 @@ const Proxy = () => {
   }, [clips, fixedProxy])
 
   const update = (newValue: FilesType) => {
-    setValue('Proxy', newValue)
+    setValue('proxy', newValue)
   }
 
   const clear = () => {
-    setValue('Proxy', undefined)
+    setValue('proxy', undefined)
   }
 
   return (
@@ -42,23 +42,23 @@ const Proxy = () => {
 }
 
 const getProxyValueFromClips = (clips): FilesType => {
-  const Files = clips.filter((clip) => clip.Proxy !== undefined).length || 0
-  const Size = clips.reduce((acc, clip) => acc + (clip.Proxy?.Size || 0), 0) || 0
-  return { Files, Size }
+  const files = clips.filter((clip) => clip.proxy !== undefined).length || 0
+  const size = clips.reduce((acc, clip) => acc + (clip.proxy?.size || 0), 0) || 0
+  return { files, size }
 }
 
 const formatProxyDisplayValue = (value: FilesType) => {
-  if (!value || value.Files === 0 || !value.Size) {
+  if (!value || value.files === 0 || !value.size) {
     return { displayValue: null }
   }
-  const [sizeValue, sizeUnit] = formatBytes(value.Size, { asTuple: true })
+  const [sizeValue, sizeUnit] = formatBytes(value.size, { asTuple: true })
   return {
     displayValue: (
       <>
         <span className="text-4xl font-semibold leading-none tracking-tight text-white line-clamp-3">
           {sizeValue}
         </span>
-        <span className="text-sm text-gray-400">{`${sizeUnit} (${value.Files} clips)`}</span>
+        <span className="text-sm text-gray-400">{`${sizeUnit} (${value.files} clips)`}</span>
       </>
     )
   }

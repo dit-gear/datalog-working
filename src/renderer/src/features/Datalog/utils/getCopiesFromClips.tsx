@@ -1,5 +1,5 @@
 import { ClipType } from '@shared/datalogTypes'
-import { CopyType, PathType } from '../types'
+import { CopyType, PathType } from '../builder/types'
 import getVolumeName from './get-volume'
 
 const formatPath = (path: string): PathType => {
@@ -15,25 +15,21 @@ const formatPath = (path: string): PathType => {
 export const getCopiesFromClips = (clips: ClipType[]): CopyType[] => {
   const total = clips.length
 
-  /*const paths = Array.from(new Set(clips.flatMap((clip) => 
-    clip.Copies.map((copy) => copy.Path)
-  )))*/
-
   const pathMap = new Map<string, Set<string>>()
 
   clips.forEach((clip) => {
-    clip.Copies.forEach((copy) => {
+    clip.copies.forEach((copy) => {
       // If the path already exists, append the Clip to the array
-      if (pathMap.has(copy.Path)) {
-        pathMap.get(copy.Path)!.add(clip.Clip)
+      if (pathMap.has(copy.path)) {
+        pathMap.get(copy.path)!.add(clip.clip)
       } else {
         // Otherwise, create a new entry with the current Clip
-        pathMap.set(copy.Path, new Set([clip.Clip]))
+        pathMap.set(copy.path, new Set([clip.clip]))
       }
     })
   })
 
-  const groups: { Paths: string[]; Clips: Set<string> }[] = []
+  const groups: { paths: string[]; clips: Set<string> }[] = []
 
   // Function to check if two sets overlap
   const hasOverlap = (setA: Set<string>, setB: Set<string>): boolean => {
@@ -49,9 +45,9 @@ export const getCopiesFromClips = (clips: ClipType[]): CopyType[] => {
 
     // Try to add to an existing group
     for (const group of groups) {
-      if (!hasOverlap(group.Clips, clipsSet)) {
-        group.Paths.push(path) // Add the path to this group
-        clipsSet.forEach((clip) => group.Clips.add(clip)) // Merge clips
+      if (!hasOverlap(group.clips, clipsSet)) {
+        group.paths.push(path) // Add the path to this group
+        clipsSet.forEach((clip) => group.clips.add(clip)) // Merge clips
         addedToGroup = true
         break
       }
@@ -59,25 +55,13 @@ export const getCopiesFromClips = (clips: ClipType[]): CopyType[] => {
 
     // If no group found, create a new group
     if (!addedToGroup) {
-      groups.push({ Paths: [path], Clips: new Set(clipsSet) })
+      groups.push({ paths: [path], clips: new Set(clipsSet) })
     }
   })
 
   return groups.map((group) => ({
-    paths: group.Paths.map(formatPath),
-    clips: [...group.Clips],
-    count: [group.Clips.size, total]
+    paths: group.paths.map(formatPath),
+    clips: [...group.clips],
+    count: [group.clips.size, total]
   }))
 }
-
-/*
-  return groups.map((group) => {
-    const formattedPath = group.Paths.map((p) => formatPath(p)) // Map over each path if it's an array
-   // Format a single path
-
-    return {
-      paths: formattedPath,
-      clips: Array.from(group.Clips),
-      count: [group.Clips.size, total] // Convert Set back to an array for output
-    }
-  })*/

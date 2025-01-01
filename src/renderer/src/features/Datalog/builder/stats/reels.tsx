@@ -7,8 +7,8 @@ import { ClipType } from '@shared/datalogTypes'
 
 const Reels = () => {
   const { setValue } = useFormContext()
-  const clips: ClipType[] = useWatch({ name: 'Clips' }) || []
-  const fixedReels = useWatch({ name: 'Reels' }) as string[] | undefined
+  const clips: ClipType[] = useWatch({ name: 'clips' }) || []
+  const fixedReels = useWatch({ name: 'reels' }) as string[] | undefined
 
   const [value, setValueState] = useState<string[]>([])
   const [displayValue, setDisplayValue] = useState<React.ReactNode>(null)
@@ -27,11 +27,11 @@ const Reels = () => {
   }, [clips, fixedReels])
 
   const update = (newValue: string[]) => {
-    setValue('Reels', newValue)
+    setValue('reels', newValue)
   }
 
   const clear = () => {
-    setValue('Reels', undefined)
+    setValue('reels', undefined)
   }
 
   // Convert `value` to a string for the `ReelsPopupForm`

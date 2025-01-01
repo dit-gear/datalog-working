@@ -69,6 +69,10 @@ export function setupEditorIpcHandlers(): void {
   // Handle saving a file
   ipcMain.handle('save-new-file', async (_, file: ChangedFile) => {
     try {
+      const dir = path.dirname(file.path)
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true })
+      }
       if (fs.existsSync(file.path)) {
         throw new Error('File already exists')
       }

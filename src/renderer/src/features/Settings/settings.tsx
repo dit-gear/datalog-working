@@ -52,7 +52,7 @@ const Settings: React.FC<SettingsDialogProps> = ({
     project_default_ocf_paths: defaults.project?.default_ocf_paths ?? [],
     project_default_proxies_path: defaults.project?.default_proxies_path ?? '',
     project_parse_camera_metadata: defaults.project?.parse_camera_metadata ?? true,
-    project_additional_parsing: defaults.project?.additional_parsing ?? undefined,
+    project_custom_fields: defaults.project?.custom_fields ?? undefined,
     project_emails: defaults.project?.emails ?? [],
     project_email_api: defaults.project?.email_api ?? undefined,
     project_pdfs: defaults.project?.pdfs ?? [],
@@ -61,12 +61,12 @@ const Settings: React.FC<SettingsDialogProps> = ({
     global_default_ocf_paths: defaults.global?.default_ocf_paths ?? [],
     global_default_proxies_path: defaults.global?.default_proxies_path ?? '',
     global_parse_camera_metadata: defaults.global?.parse_camera_metadata ?? true,
-    global_additional_parsing: defaults.global?.additional_parsing ?? undefined,
+    global_custom_fields: defaults.global?.custom_fields ?? undefined,
     global_emails: defaults.global?.emails ?? [],
     global_email_api: defaults.global?.email_api ?? undefined,
     global_pdfs: defaults.global?.pdfs ?? [],
-    project_enable_parsing: !!defaults.project?.additional_parsing,
-    global_enable_parsing: !!defaults.global?.additional_parsing
+    project_enable_parsing: !!defaults.project?.custom_fields,
+    global_enable_parsing: !!defaults.global?.custom_fields
   })
 
   const form = useForm<formSchemaType>({
@@ -137,7 +137,7 @@ const Settings: React.FC<SettingsDialogProps> = ({
                     Default Paths
                   </TabsTrigger>
                   <TabsTrigger className="w-full justify-start" value="parsing">
-                    Parsing
+                    Metadata Fields
                   </TabsTrigger>
                   <TabsTrigger className="w-full justify-start" value="email">
                     Email

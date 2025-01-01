@@ -7,7 +7,6 @@ import DurationCell from './Duration'
 import { flattenData } from './flattenData'
 
 const formatHeader = (key: string): JSX.Element => {
-  // Capitalize the first letter and replace underscores with spaces
   const formattedKey = key.replace(/_/g, ' ')
 
   // Split by hyphen and return JSX with <br /> for line breaks
@@ -16,7 +15,7 @@ const formatHeader = (key: string): JSX.Element => {
   return (
     <>
       {parts.map((part, index) => (
-        <span key={index} className="whitespace-nowrap capitalize">
+        <span key={index} className="whitespace-nowrap">
           {part}
           {index < parts.length - 1 && <br />}
         </span>
@@ -27,7 +26,7 @@ const formatHeader = (key: string): JSX.Element => {
 
 const getMaxCopies = (data: RowData[]): number => {
   return data.reduce((max, item) => {
-    const copies = (item.Copies as { Path: string; Hash: string | null }[]) || []
+    const copies = (item.copies as { path: string; hash: string | null }[]) || []
     return Math.max(max, copies.length)
   }, 0)
 }
@@ -40,15 +39,15 @@ export const generateColumns = (data: RowData[]): ColumnDef<RowData>[] => {
 
   // Generate columns from the flattened data
   const columns: ColumnDef<RowData>[] = Object.keys(flattenedData[0]).flatMap((key) => {
-    if (key === 'Copies') {
+    if (key === 'copies') {
       // For the Copies field, generate dynamic columns for each copy's Path
       const pathColumns: ColumnDef<RowData>[] = Array.from({ length: maxCopies }, (_, i) => ({
         accessorKey: `Copy ${i + 1}`, // Column key like "Copy 1", "Copy 2"
         header: `Copy ${i + 1}`, // Header name
         cell: ({ row }) => {
-          const copies = row.original.Copies as { Path: string; Hash: string | null }[]
+          const copies = row.original.copies as { path: string; hash: string | null }[]
           if (copies && copies[i]) {
-            return getVolumeName(copies[i].Path) || 'No Path'
+            return getVolumeName(copies[i].path) || 'No Path'
           }
           return 'No Copy' // In case there are fewer copies than the max number
         }
@@ -56,11 +55,11 @@ export const generateColumns = (data: RowData[]): ColumnDef<RowData>[] => {
 
       // Generate a single Hashes column
       const hashColumn: ColumnDef<RowData> = {
-        accessorKey: `Hash`,
-        header: `Hash`,
+        accessorKey: `hash`,
+        header: `hash`,
         cell: ({ row }) => {
-          const copies = row.original.Copies as { Path: string; Hash: string | null }[]
-          const hashes = copies.map((copy) => copy.Hash || 'No Hash')
+          const copies = row.original.copies as { path: string; hash: string | null }[]
+          const hashes = copies.map((copy) => copy.hash || 'No Hash')
           const allSame = hashes.every((hash) => hash === hashes[0])
           return allSame ? hashes[0] : <span className="text-yellow-300">{hashes.join(', ')}</span>
         }
@@ -82,14 +81,14 @@ export const generateColumns = (data: RowData[]): ColumnDef<RowData>[] => {
           : row.getValue(key)
 
         // Special formatting for Size column
-        if ((key === 'Size' || key === 'Proxy.Size') && typeof value === 'number') {
+        if ((key === 'size' || key === 'proxy.size') && typeof value === 'number') {
           return <span className="whitespace-nowrap">{formatBytes(value)}</span>
         }
-        if (key === 'Duration') {
+        if (key === 'duration') {
           const v = typeof value === 'number' ? value : 0
           return <DurationCell row={row} column={column} value={v} />
         }
-        if (key === 'Clip') return <span className="whitespace-nowrap">{value}</span>
+        if (key === 'clip') return <span className="whitespace-nowrap">{value}</span>
         if (Array.isArray(value)) {
           return (
             <ul className="list-none pl-4">
@@ -109,7 +108,7 @@ export const generateColumns = (data: RowData[]): ColumnDef<RowData>[] => {
         }
 
         // Handle other types
-        return <FormCell prefix="Clips" row={row} column={column} totalRows={data.length} />
+        return <FormCell prefix="clips" row={row} column={column} totalRows={data.length} />
       }
     }
   })

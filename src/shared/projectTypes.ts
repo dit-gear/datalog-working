@@ -216,7 +216,7 @@ export const GlobalSchemaZod = z.object({
   default_proxies_path: z.string().optional(),
   default_audio_paths: z.string().optional(),
   parse_camera_metadata: z.boolean().default(true).optional(),
-  additional_parsing: additionalParsing.optional(),
+  custom_fields: additionalParsing.optional(),
   emails: z.array(emailZodObj).optional(),
   email_api: emailSettings.optional(),
   pdfs: z.array(pdfZodObj).optional()

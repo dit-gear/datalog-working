@@ -26,16 +26,16 @@ const getProxys = async (directory: string, clips: ClipType[]): Promise<FileInfo
 
         if (extensions.has(ext)) {
           const filenameWithoutExt = path.basename(file, ext)
-          const matchedClip = clips.find((clip) => clip.Clip === filenameWithoutExt)
+          const matchedClip = clips.find((clip) => clip.clip === filenameWithoutExt)
 
           if (matchedClip) {
-            const { Codec, Resolution } = await getProxyMetadata(filePath)
+            const { codec, resolution } = await getProxyMetadata(filePath)
             return {
               filename: filenameWithoutExt,
-              Size: fileStats.size,
-              Format: ext.slice(1).toUpperCase(),
-              ...(Codec && { Codec }),
-              ...(Resolution && { Resolution })
+              size: fileStats.size,
+              format: ext.slice(1).toUpperCase(),
+              ...(codec && { codec }),
+              ...(resolution && { resolution })
             }
           }
         }
@@ -51,13 +51,13 @@ const getProxys = async (directory: string, clips: ClipType[]): Promise<FileInfo
 
 const matchClips = (clips: ClipType[], proxies: FileInfo[], directory: string): ClipType[] => {
   return clips.map((clip) => {
-    const matchedFile = proxies.find((proxy) => proxy.filename === clip.Clip)
+    const matchedFile = proxies.find((proxy) => proxy.filename === clip.clip)
 
     if (matchedFile) {
       return {
         ...clip,
-        Proxy: {
-          Path: directory,
+        proxy: {
+          path: directory,
           ...(({ filename, ...rest }) => rest)(matchedFile)
         }
       }

@@ -5,7 +5,7 @@ import { DatalogType } from '@shared/datalogTypes'
 import { ProjectRootType } from '@shared/projectTypes'
 
 export const getOCFFiles = (data: DatalogType): number => {
-  const files = data.OCF?.Files ?? data.Clips?.length ?? 0
+  const files = data.ocf?.files ?? data.clips?.length ?? 0
   return files
 }
 
@@ -15,47 +15,46 @@ export function getOCFSize(
   data: DatalogType,
   options: { format: true } | { format: false } = { format: true }
 ): string | number {
-  const size = data.OCF?.Size ?? data.Clips?.reduce((acc, clip) => acc + (clip.Size ?? 0), 0) ?? 0
+  const size = data.ocf?.size ?? data.clips?.reduce((acc, clip) => acc + (clip.size ?? 0), 0) ?? 0
   return options.format ? formatBytes(size) : size
 }
 export const getProxyFiles = (data: DatalogType): number => {
   const files =
-    data.Proxy?.Files ?? data.Clips?.filter((clip) => clip.Proxy !== undefined).length ?? 0
+    data.proxy?.files ?? data.clips?.filter((clip) => clip.proxy !== undefined).length ?? 0
   return files
 }
 
 export const getProxySize = (data: DatalogType): string => {
   const size =
-    data.Proxy?.Size ?? data.Clips?.reduce((acc, clip) => acc + (clip.Proxy?.Size ?? 0), 0) ?? 0
+    data.proxy?.size ?? data.clips?.reduce((acc, clip) => acc + (clip.proxy?.size ?? 0), 0) ?? 0
   return size > 0 ? formatBytes(size) : ''
 }
 
 export const getDuration = (data: DatalogType, options?: FormatDurationOptions): string => {
   const duration =
-    data.Duration ?? data.Clips?.reduce((acc, clip) => acc + (clip.Duration ?? 0), 0) ?? 0
+    data.duration ?? data.clips?.reduce((acc, clip) => acc + (clip.duration ?? 0), 0) ?? 0
   return duration > 0 ? formatDuration(duration, { ...options, asString: true }) : ''
 }
 
 export const getReels = (data: DatalogType, options?: getReelsOptions): string[] => {
-  if (data.Reels !== undefined) {
-    return getReelsFunction(data.Reels, options)
-  } else if (data.Clips && data.Clips.length > 0) {
-    return getReelsFunction(data.Clips, options)
+  if (data.reels !== undefined) {
+    return getReelsFunction(data.reels, options)
+  } else if (data.clips && data.clips.length > 0) {
+    return getReelsFunction(data.clips, options)
   } else return []
 }
 
 function mergeDatalogs(datalogs: DatalogType[]): DatalogType {
   // Initialize an empty DatalogType object
   const mergedDatalog: DatalogType = {
-    Folder: '',
-    Date: '',
-    Day: 0,
-    OCF: { Size: 0, Files: 0 },
-    Proxy: { Size: 0, Files: 0 },
-    Duration: 0,
-    Clips: [],
-    Reels: []
-    // Add other necessary fields based on your DatalogType definition
+    id: '',
+    date: '',
+    day: 0,
+    ocf: { size: 0, files: 0 },
+    proxy: { size: 0, files: 0 },
+    duration: 0,
+    clips: [],
+    reels: []
   }
 
   if (datalogs.length === 0) {
@@ -63,43 +62,43 @@ function mergeDatalogs(datalogs: DatalogType[]): DatalogType {
   }
 
   // Merge Dates
-  const dates = datalogs.map((d) => d.Date)
+  const dates = datalogs.map((d) => d.date)
   const minDate = dates.reduce((a, b) => (a < b ? a : b))
   const maxDate = dates.reduce((a, b) => (a > b ? a : b))
-  mergedDatalog.Date = minDate === maxDate ? minDate : `${minDate} - ${maxDate}`
+  mergedDatalog.date = minDate === maxDate ? minDate : `${minDate} - ${maxDate}`
 
   // Merge Days
-  const days = datalogs.map((d) => d.Day)
+  const days = datalogs.map((d) => d.day)
   const minDay = Math.min(...days)
   const maxDay = Math.max(...days)
   //mergedDatalog.Day = minDay === maxDay ? minDay : `${minDay} - ${maxDay}`
-  mergedDatalog.Day = minDay
+  mergedDatalog.day = minDay
 
   // Merge OCF
-  mergedDatalog.OCF = {
-    Size: datalogs.reduce((acc, d) => acc + (d.OCF?.Size ?? 0), 0),
-    Files: datalogs.reduce((acc, d) => acc + (d.OCF?.Files ?? 0), 0)
+  mergedDatalog.ocf = {
+    size: datalogs.reduce((acc, d) => acc + (d.ocf?.size ?? 0), 0),
+    files: datalogs.reduce((acc, d) => acc + (d.ocf?.files ?? 0), 0)
   }
 
   // Merge Proxy
-  mergedDatalog.Proxy = {
-    Size: datalogs.reduce((acc, d) => acc + (d.Proxy?.Size ?? 0), 0),
-    Files: datalogs.reduce((acc, d) => acc + (d.Proxy?.Files ?? 0), 0)
+  mergedDatalog.proxy = {
+    size: datalogs.reduce((acc, d) => acc + (d.proxy?.size ?? 0), 0),
+    files: datalogs.reduce((acc, d) => acc + (d.proxy?.files ?? 0), 0)
   }
 
   // Merge Duration
-  mergedDatalog.Duration = datalogs.reduce((acc, d) => acc + (d.Duration ?? 0), 0)
+  mergedDatalog.duration = datalogs.reduce((acc, d) => acc + (d.duration ?? 0), 0)
 
   // Merge Clips
-  mergedDatalog.Clips = datalogs.flatMap((d) => d.Clips ?? [])
+  mergedDatalog.clips = datalogs.flatMap((d) => d.clips ?? [])
 
   // Merge Reels
   const reelsSet = new Set<string>()
   datalogs.forEach((d) => {
-    const reels = d.Reels ?? []
+    const reels = d.reels ?? []
     reels.forEach((reel) => reelsSet.add(reel))
   })
-  mergedDatalog.Reels = Array.from(reelsSet)
+  mergedDatalog.reels = Array.from(reelsSet)
 
   // Merge other fields as necessary
 
@@ -113,16 +112,16 @@ export class Datalog {
     this.raw = data
   }
   public get logName(): string {
-    return this.raw.Folder
+    return this.raw.id
   }
   public get day(): number {
-    return this.raw.Day
+    return this.raw.day
   }
   public get date(): string {
-    return this.raw.Date
+    return this.raw.date
   }
   public get clips() {
-    return this.raw.Clips
+    return this.raw.clips
   }
   public ocf = {
     getFilesCount: () => getOCFFiles(this.raw),
@@ -144,7 +143,6 @@ export class Datalog {
 
 export class DataObject {
   private project: ProjectRootType
-  //private selection: DatalogType | DatalogType[]
   private datalogOne: Datalog
   private datalogMulti: Datalog[]
   private all: Datalog[] // fix later

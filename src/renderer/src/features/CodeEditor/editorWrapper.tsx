@@ -7,12 +7,14 @@ import { DatabaseIcon, SearchCodeIcon, SettingsIcon, Loader2, XIcon } from 'luci
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem
 } from '@components/ui/dropdown-menu'
 import Preview from './preview'
 import { CustomTab } from '@components/CustomTab'
 import { LoadedFile } from '@shared/shared-types'
 import { handleApiResponse } from '@renderer/utils/handleApiResponse'
+import { NewMockdataDialog } from './newMockdataDialog'
 
 const EditorWrapper = () => {
   const [isLoading, setLoading] = useState<boolean>(true)
@@ -21,6 +23,9 @@ const EditorWrapper = () => {
 
   const [activePath, setActivePath] = useState<string | null>(null)
   const [dirtyPaths, setDirtyPaths] = useState<string[]>([])
+
+  const [formatOnSave, setFormatOnSave] = useState<boolean>(true)
+  const [autoCloseTags, setAutoCloseTags] = useState<boolean>(true)
 
   // A ref to call imperatively: editorRef.current.openFile(file)
   const editorRef = useRef<EditorHandle | null>(null)
@@ -54,6 +59,9 @@ const EditorWrapper = () => {
   const handleCloseTab = (file: LoadedFile) => {
     const remainingFiles = loadedFiles.filter((f) => f.path !== file.path)
     setLoadedFiles(remainingFiles)
+    if (dirtyPaths.includes(file.path)) {
+      setDirtyPaths(dirtyPaths.filter((path) => path !== file.path))
+    }
     const nextFile = remainingFiles[0]
     if (nextFile) {
       setActivePath(nextFile.path)
@@ -131,9 +139,11 @@ const EditorWrapper = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button size="sm" variant="secondary" className="rounded">
-              <DatabaseIcon className="h-4 w-4" />
-            </Button>
+            <NewMockdataDialog>
+              <Button size="sm" variant="secondary" className="rounded">
+                <DatabaseIcon className="h-4 w-4" />
+              </Button>
+            </NewMockdataDialog>
             <Button
               size="sm"
               variant="secondary"
@@ -150,10 +160,7 @@ const EditorWrapper = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {/*<DropdownMenuCheckboxItem
-                  checked={isFormatOnSave}
-                  onCheckedChange={setIsFormatOnSave}
-                >
+                <DropdownMenuCheckboxItem checked={formatOnSave} onCheckedChange={setFormatOnSave}>
                   Format on Save
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
@@ -161,13 +168,9 @@ const EditorWrapper = () => {
                   onCheckedChange={setAutoCloseTags}
                 >
                   Autoclosing tags
-                </DropdownMenuCheckboxItem>*/}
+                </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            {/*<Button variant="secondary" size="sm" className="rounded" onClick={handleSave}>
-              <span>Save</span>
-              <span className="ml-2 text-[10px] text-muted-foreground">(CMD + S)</span>
-            </Button>*/}
           </div>
         </div>
         <Editor
@@ -175,6 +178,7 @@ const EditorWrapper = () => {
           onDirty={handleDirty}
           resetDirty={resetDirty}
           onEditorReady={() => setLoading(false)}
+          options={[formatOnSave, autoCloseTags]}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />
@@ -187,7 +191,7 @@ const EditorWrapper = () => {
             </Button>
           </div>
         </div>
-        {/*<Preview />*/}
+        <Preview />
       </ResizablePanel>
     </ResizablePanelGroup>
   )

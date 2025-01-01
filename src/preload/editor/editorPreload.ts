@@ -9,7 +9,10 @@ const editorApi = {
   showWindow: (): void => {
     ipcRenderer.send('show-editor-window')
   },
-  onDirChanged: (callback) => ipcRenderer.on('directory-changed', callback),
+  onDirChanged: (callback: (files: TemplateDirectoryFile[]) => void) =>
+    ipcRenderer.on('directory-changed', (_, files) => callback(files)),
+  onMockdataChanged: (callback: (data: string) => void) =>
+    ipcRenderer.on('mockdata-changed', (_, data) => callback(data)),
   requestReadFile: (file: TemplateDirectoryFile) => ipcRenderer.send('request-read-file', file),
   onResponseReadFile: (callback: (file: LoadedFile | { error: string }) => void) =>
     ipcRenderer.on('response-read-file', (_, file) => callback(file)),

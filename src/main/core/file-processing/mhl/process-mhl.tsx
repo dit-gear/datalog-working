@@ -127,14 +127,14 @@ async function processFile(
         const xxhash64be = isClassic ? row.xxhash64be : row.xxh64be?.text
 
         acc[baseClipName] = acc[baseClipName] || {
-          Clip: baseClipName,
-          Size: 0,
-          Copies: [{ Path: path, Hash: md5 || sha1 || xxhash64 || xxhash64be || null }]
+          clip: baseClipName,
+          size: 0,
+          copies: [{ path: path, hash: md5 || sha1 || xxhash64 || xxhash64be || null }]
         }
 
         // Sum the sizes
         const size = isClassic ? row.size : row.path.size
-        acc[baseClipName].Size += !isNaN(Number(size)) ? Number(size) : 0
+        acc[baseClipName].size += !isNaN(Number(size)) ? Number(size) : 0
 
         return acc
       },

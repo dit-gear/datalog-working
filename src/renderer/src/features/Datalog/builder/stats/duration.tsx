@@ -6,8 +6,8 @@ import { formatDuration } from '@shared/utils/format-duration'
 
 const Duration = () => {
   const { setValue } = useFormContext()
-  const clips = useWatch({ name: 'Clips' }) || []
-  const fixedDuration = useWatch({ name: 'Duration' }) as number | undefined
+  const clips = useWatch({ name: 'clips' }) || []
+  const fixedDuration = useWatch({ name: 'duration' }) as number | undefined
 
   const [value, setValueState] = useState<number>(0)
   const [displayValue, setDisplayValue] = useState<React.ReactNode>(null)
@@ -26,11 +26,11 @@ const Duration = () => {
   }, [clips, fixedDuration])
 
   const update = (newValue: number) => {
-    setValue('Duration', newValue)
+    setValue('duration', newValue)
   }
 
   const clear = () => {
-    setValue('Duration', undefined)
+    setValue('duration', undefined)
   }
 
   return (

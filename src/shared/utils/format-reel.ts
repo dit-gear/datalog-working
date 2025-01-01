@@ -1,5 +1,5 @@
 import { ClipType } from '../datalogTypes'
-import { boolean, z } from 'zod'
+import { z } from 'zod'
 
 type ReelInfo = {
   reel: string
@@ -105,8 +105,8 @@ export function getReels(clips: ClipType[] | string[], options: getReelsOptions 
     }
   } else {
     for (const clip of clips as ClipType[]) {
-      if (clip.Reel) {
-        reelsSet.add(clip.Reel)
+      if (clip.reel) {
+        reelsSet.add(clip.reel)
       } else {
         clipsWithoutReel++
       }

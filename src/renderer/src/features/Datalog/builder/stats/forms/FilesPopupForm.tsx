@@ -3,9 +3,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import { FormControl, FormField, FormItem, FormLabel, Form } from '@components/ui/form'
 import { Input } from '@components/ui/input'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { FilesType } from '@shared/datalogTypes'
+import { FilesType, Files } from '@shared/datalogTypes'
 import { Button } from '@components/ui/button'
 import { deepEqual } from '@renderer/utils/compare'
+import { FileTypeReqType } from '../types'
 
 interface FilesPopupFormProps {
   value: FilesType
@@ -27,8 +28,8 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
   const BYTES_IN_GB = 1e9
   const form = useForm({
     defaultValues: {
-      Files: value.Files,
-      Size: Math.round(value.Size / BYTES_IN_GB)
+      files: value.files || 0,
+      size: value.size ? Math.round(value.size / BYTES_IN_GB) : 0
     }
   })
   const {
@@ -38,17 +39,17 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
   } = form
 
   useEffect(() => {
-    reset({ Files: value.Files, Size: Math.round(value.Size / BYTES_IN_GB) })
+    reset({ files: value.files, size: value.size ? Math.round(value.size / BYTES_IN_GB) : 0 })
   }, [value])
 
-  const onSubmit: SubmitHandler<FilesType> = (data): void => {
-    const { Size, ...rest } = data
-    const sizeInBytes = Size * BYTES_IN_GB // Convert from GB to Bytes
+  const onSubmit: SubmitHandler<FileTypeReqType> = (data): void => {
+    const { size, ...rest } = data
+    const sizeInBytes = size ? size * BYTES_IN_GB : 0 // Convert from GB to Bytes
     const updated = { ...rest, Size: sizeInBytes }
 
     const defaultsInGB = {
       ...defaults,
-      Size: Math.round(defaults.Size / BYTES_IN_GB)
+      size: defaults.size ? Math.round(defaults.size / BYTES_IN_GB) : 0
     }
     if (deepEqual(data, defaultsInGB)) return
     update(updated) // in Bytes
@@ -73,7 +74,7 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
             </div>
             <div className="grid gap-2">
               <FormField
-                name="Size"
+                name="size"
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-3 items-center gap-4">
                     <FormLabel>Size in GB</FormLabel>
@@ -92,7 +93,7 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
                 )}
               />
               <FormField
-                name="Files"
+                name="files"
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-3 items-center gap-4">
                     <FormLabel>Clips</FormLabel>
@@ -113,7 +114,10 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
             <Button
               size="sm"
               onClick={() => {
-                reset({ Files: defaults.Files, Size: Math.round(defaults.Size / BYTES_IN_GB) })
+                reset({
+                  files: defaults.files,
+                  size: defaults.size && Math.round(defaults.size / BYTES_IN_GB)
+                })
                 clear()
               }}
             >

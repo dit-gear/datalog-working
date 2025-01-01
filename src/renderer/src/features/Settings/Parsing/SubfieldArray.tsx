@@ -26,13 +26,13 @@ const SubfieldArray: React.FC<SubfieldArrayProps> = ({ type, scope, parentIndex 
   } = useFormContext<formSchemaType>()
   const { fields, append, remove } = useFieldArray({
     control, // control prop comes from useForm or FormProvider
-    name: `${scope}_additional_parsing.fields.${parentIndex}.subfields` // unique name for your Field Array
+    name: `${scope}_custom_fields.fields.${parentIndex}.subfields` // unique name for your Field Array
   })
 
   const subfieldErrors: FieldError | undefined =
-    errors.project_additional_parsing?.fields?.[parentIndex] &&
-    'subfields' in errors.project_additional_parsing?.fields?.[parentIndex]
-      ? (errors.project_additional_parsing?.fields?.[parentIndex].subfields as FieldError)
+    errors.project_custom_fields?.fields?.[parentIndex] &&
+    'subfields' in errors.project_custom_fields?.fields?.[parentIndex]
+      ? (errors.project_custom_fields?.fields?.[parentIndex].subfields as FieldError)
       : undefined
 
   useEffect(() => {
@@ -54,7 +54,7 @@ const SubfieldArray: React.FC<SubfieldArrayProps> = ({ type, scope, parentIndex 
             >
               <FormField
                 control={control}
-                name={`${scope}_additional_parsing.fields.${parentIndex}.subfields.${index}.value_key`}
+                name={`${scope}_custom_fields.fields.${parentIndex}.subfields.${index}.value_key`}
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel>Value Key</FormLabel>

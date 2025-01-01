@@ -1,55 +1,53 @@
 import { z } from 'zod'
 import { Field, ProjectRootType } from './projectTypes'
-import { getDuration } from './utils/datalog-methods'
 
 const Camera_MetadataZod = z.object({
-  Camera_Model: z.string().optional(),
-  Camera_Id: z.string().optional(),
-  Reel: z.string().optional(),
-  FPS: z.string().optional(),
-  Sensor_FPS: z.string().optional(),
-  Lens: z.string().optional(),
-  Focal_Lenght: z.string().optional(),
-  Resolution: z.string().optional(),
-  Codec: z.string().optional(),
-  Gamma: z.string().optional(),
-  WB: z.string().optional(),
-  Tint: z.string().optional(),
-  LUT: z.string().optional()
+  camera_model: z.string().optional(),
+  camera_id: z.string().optional(),
+  reel: z.string().optional(),
+  fps: z.string().optional(),
+  sensor_fps: z.string().optional(),
+  lens: z.string().optional(),
+  resolution: z.string().optional(),
+  codec: z.string().optional(),
+  gamma: z.string().optional(),
+  wb: z.string().optional(),
+  tint: z.string().optional(),
+  lut: z.string().optional()
 })
 
 const ProxyZod = z.object({
-  Path: z.string(),
-  Size: z.number().nonnegative().finite(),
-  Format: z.string().optional(),
-  Codec: z.string().optional(),
-  Resolution: z.string().optional()
+  path: z.string(),
+  size: z.number().nonnegative().finite(),
+  format: z.string().optional(),
+  codec: z.string().optional(),
+  resolution: z.string().optional()
 })
 
 export const ClipZod = z
   .object({
-    Clip: z.string(),
-    Size: z.number(),
-    Copies: z.array(
+    clip: z.string(),
+    size: z.number(),
+    copies: z.array(
       z.object({
-        Path: z.string(),
-        Hash: z.string().nullable()
+        path: z.string(),
+        hash: z.string().nullable()
       })
     ),
-    Duration: z.number().optional(),
-    Image: z.string().optional(), // Not in use
-    Proxy: ProxyZod.optional()
+    duration: z.number().optional(),
+    image: z.string().optional(), // Not in use
+    proxy: ProxyZod.optional()
   })
   .extend(Camera_MetadataZod.shape)
 
 export const Files = z.object({
-  Files: z.number().int().nonnegative().finite().optional(),
-  Size: z.number().nonnegative().finite().optional()
+  files: z.number().int().nonnegative().finite().optional(),
+  size: z.number().nonnegative().finite().optional()
 })
 
 export const datalogZod = z.object({
-  Folder: z.string().min(1).max(50),
-  Day: z
+  id: z.string().min(1).max(50),
+  day: z
     .number({
       required_error: 'Day is required',
       invalid_type_error: 'Day is required'
@@ -57,14 +55,14 @@ export const datalogZod = z.object({
     .int()
     .gte(1, { message: 'Day must be greater than or equal to 1' })
     .lte(999, { message: 'Day must be below 999' }),
-  Date: z.string().date(),
-  Unit: z.string().optional(),
-  OCF: Files.optional(),
-  Proxy: Files.optional(),
-  Duration: z.number().optional(),
-  Reels: z.array(z.string()).optional(),
-  Copies: z.array(z.string()).optional(), // Move to within OCF
-  Clips: z.array(ClipZod).optional()
+  date: z.string().date(),
+  unit: z.string().optional(),
+  ocf: Files.optional(),
+  proxy: Files.optional(),
+  duration: z.number().optional(),
+  reels: z.array(z.string()).optional(),
+  copies: z.array(z.string()).optional(), // Move to within OCF
+  clips: z.array(ClipZod).optional()
 })
 
 export type FilesType = z.infer<typeof Files>
@@ -127,8 +125,8 @@ const mapTypeToZod = (field: Field): z.ZodTypeAny | undefined => {
 const buildAdditionalFieldsSchema = (project: ProjectRootType) => {
   const additionalFields: Record<string, z.ZodTypeAny> = {}
 
-  if (project.additional_parsing?.fields) {
-    for (const field of project.additional_parsing.fields) {
+  if (project.custom_fields?.fields) {
+    for (const field of project.custom_fields.fields) {
       if (field.type === 'duration') {
         continue
       }
@@ -168,7 +166,7 @@ interface DatalogDynamicZodOptions {
   transformDurationToMs?: boolean
 }
 
-type DatalogZodShape = typeof datalogZod extends z.ZodObject<infer S> ? S : never
+//type DatalogZodShape = typeof datalogZod extends z.ZodObject<infer S> ? S : never
 
 export const DatalogDynamicZod = <T extends Record<string, any>>(
   project: ProjectRootType | undefined,
@@ -180,14 +178,14 @@ export const DatalogDynamicZod = <T extends Record<string, any>>(
     let transformedClipZod = project ? ClipDynamicZod(project) : (ClipZod as z.ZodObject<any>)
     if (transformDurationToReadable) {
       transformedClipZod = transformedClipZod.omit({ Duration: true }).extend({
-        Duration: z
+        duration: z
           .number()
           .transform((val) => msToReadable(val))
           .optional()
       })
     } else if (transformDurationToMs) {
       transformedClipZod = transformedClipZod.omit({ Duration: true }).extend({
-        Duration: z
+        duration: z
           .string()
           .transform((val) => readableToMs(val))
           .optional()
@@ -199,14 +197,14 @@ export const DatalogDynamicZod = <T extends Record<string, any>>(
   // Apply duration transformations
   if (transformDurationToReadable) {
     datalogBase = datalogBase.omit({ Duration: true }).extend({
-      Duration: z
+      duration: z
         .number()
         .transform((val) => msToReadable(val))
         .optional()
     })
   } else if (transformDurationToMs) {
     datalogBase = datalogBase.omit({ Duration: true }).extend({
-      Duration: z
+      duration: z
         .string()
         .transform((val) => readableToMs(val))
         .optional()
@@ -216,7 +214,7 @@ export const DatalogDynamicZod = <T extends Record<string, any>>(
   if (project) {
     const ClipSchema = getTransformedClipSchema()
     datalogBase = datalogBase.omit({ Clips: true }).extend({
-      Clips: z.array(ClipSchema).optional()
+      clips: z.array(ClipSchema).optional()
     })
   }
 

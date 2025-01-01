@@ -6,7 +6,7 @@ const removeProxies = async (): Promise<ResponseWithClips> => {
   const clips = getBuilderClips()
   try {
     const updatedClips = clips.map((clip) => {
-      const { Proxy, ...updatedClip } = clip
+      const { proxy, ...updatedClip } = clip
       return updatedClip
     })
     setBuilderClips(updatedClips)

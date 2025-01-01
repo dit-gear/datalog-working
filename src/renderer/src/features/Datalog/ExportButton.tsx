@@ -60,7 +60,9 @@ const ExportButton = ({ pdfs }: ExportButtonProps) => {
             </SelectTrigger>
             <SelectContent>
               {pdfs.map((pdf) => (
-                <SelectItem value={pdf.id}>{pdf.name}</SelectItem>
+                <SelectItem key={pdf.id} value={pdf.id}>
+                  {pdf.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

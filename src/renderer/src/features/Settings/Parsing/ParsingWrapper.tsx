@@ -23,7 +23,7 @@ const ParsingWrapper: React.FC<ParsingWrapperProps> = ({ scope }) => {
   const { control } = useFormContext<formSchemaType>()
   const { fields, append, remove } = useFieldArray({
     control,
-    name: `${scope}_additional_parsing.fields`
+    name: `${scope}_custom_fields.fields`
   })
   return (
     <>
@@ -43,7 +43,7 @@ const ParsingWrapper: React.FC<ParsingWrapperProps> = ({ scope }) => {
               </FormItem>
               <FormField
                 control={control}
-                name={`${scope}_additional_parsing.clip.column`}
+                name={`${scope}_custom_fields.clip.column`}
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel>CSV Column Name for Clip Name</FormLabel>
@@ -76,7 +76,7 @@ const ParsingWrapper: React.FC<ParsingWrapperProps> = ({ scope }) => {
             {showRegex ? (
               <FormField
                 control={control}
-                name={`${scope}_additional_parsing.clip.regex`}
+                name={`${scope}_custom_fields.clip.regex`}
                 render={({ field }) => (
                   <FormItem className="w-64 m-4">
                     <FormLabel>Value Extraction Regex (Optional)</FormLabel>

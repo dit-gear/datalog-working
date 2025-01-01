@@ -35,9 +35,9 @@ const flattenObject = (
 // Flatten the data array while skipping the Copies array
 export const flattenData = (data: RowData[]): RowData[] => {
   return data.map((item) => {
-    const { Copies, ...rest } = item
+    const { copies, ...rest } = item
     const flattened = flattenObject(rest) // Flatten all fields except Copies
-    flattened['Copies'] = Copies // Re-add Copies as-is to handle separately
+    flattened['copies'] = copies // Re-add Copies as-is to handle separately
     return flattened
   })
 }

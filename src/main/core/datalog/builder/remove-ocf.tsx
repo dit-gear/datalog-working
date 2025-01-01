@@ -8,13 +8,13 @@ const removeOcf = async (paths: string[]): Promise<ResponseWithClips> => {
     const pathSet = new Set(paths)
     const updatedClips = clips
       .map((clip) => {
-        const filteredCopies = clip.Copies.filter((copy) => !pathSet.has(copy.Path))
+        const filteredCopies = clip.copies.filter((copy) => !pathSet.has(copy.path))
         return {
           ...clip,
-          Copies: filteredCopies
+          copies: filteredCopies
         }
       })
-      .filter((clip) => clip.Copies.length > 0)
+      .filter((clip) => clip.copies.length > 0)
 
     setBuilderClips(updatedClips)
     return { success: true, clips: updatedClips }

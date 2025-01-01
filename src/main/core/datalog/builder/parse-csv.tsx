@@ -14,7 +14,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024
 
 const parseCsv = async (path?: string): Promise<ResponseWithClips> => {
   try {
-    const settings = getActiveProject()?.additional_parsing
+    const settings = getActiveProject()?.custom_fields
 
     if (
       !Array.isArray(settings?.fields) ||
@@ -116,7 +116,7 @@ const parseCsv = async (path?: string): Promise<ResponseWithClips> => {
       }
 
       // Find the corresponding clip in the `clips` array by matching the `Clip` field
-      const matchingClipIndex = clips.findIndex((c) => c.Clip === clipcolumn)
+      const matchingClipIndex = clips.findIndex((c) => c.clip === clipcolumn)
 
       if (matchingClipIndex === -1) continue
 

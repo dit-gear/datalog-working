@@ -23,9 +23,9 @@ export const Name = ({ project }: Nameprops) => {
 
   const [folderEdit, setFolderEdit] = useState<boolean>(false)
 
-  const daywatch = useWatch({ name: 'Day' })
-  const datewatch = useWatch({ name: 'Date' })
-  const unitwatch = useWatch({ name: 'Unit' })
+  const daywatch = useWatch({ name: 'day' })
+  const datewatch = useWatch({ name: 'date' })
+  const unitwatch = useWatch({ name: 'unit' })
 
   useEffect(() => {
     const tags = {
@@ -34,7 +34,7 @@ export const Name = ({ project }: Nameprops) => {
       unit: unitwatch !== '' ? unitwatch : undefined,
       projectName: project.project_name
     }
-    setValue('Folder', replaceTags(project.folder_template, tags))
+    setValue('id', replaceTags(project.folder_template, tags))
   }, [daywatch, datewatch, unitwatch])
 
   return (
@@ -44,7 +44,7 @@ export const Name = ({ project }: Nameprops) => {
         <div className="flex gap-10 mb-10">
           <FormField
             control={control}
-            name="Day"
+            name="day"
             rules={{
               max: { value: 999, message: 'The day must be less than or equal to 999' },
               min: { value: 1, message: 'The day must be greater than or equal to 1' },
@@ -70,7 +70,7 @@ export const Name = ({ project }: Nameprops) => {
           />
           <FormField
             control={control}
-            name="Date"
+            name="date"
             render={({ field }) => (
               <FormItem className="flex flex-col justify-between pt-1">
                 <FormLabel>Date</FormLabel>
@@ -83,7 +83,7 @@ export const Name = ({ project }: Nameprops) => {
           />
           <FormField
             control={control}
-            name="Unit"
+            name="unit"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Unit</FormLabel>
@@ -97,14 +97,14 @@ export const Name = ({ project }: Nameprops) => {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="folder">Log Name</Label>
+          <Label htmlFor="id">Log Name</Label>
           <div className="flex w-full max-w-sm items-center space-x-2">
             <Input
-              id="folder"
+              id="id"
               disabled={!folderEdit}
               type="text"
               className={errors.Folder ? 'border-red-500' : ''}
-              {...register('Folder')}
+              {...register('id')}
             />
             <Button
               variant="secondary"
@@ -114,7 +114,7 @@ export const Name = ({ project }: Nameprops) => {
                   const newValue = !prev
                   if (newValue) {
                     setTimeout(() => {
-                      document.getElementById('folder')?.focus()
+                      document.getElementById('id')?.focus()
                     }, 0)
                   }
                   return newValue

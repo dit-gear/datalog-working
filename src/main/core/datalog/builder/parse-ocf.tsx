@@ -44,7 +44,7 @@ const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
 
     // Create a map of existing clips for fast lookup
     const existingClipMap = new Map<string, ClipType>(
-      existingClips.map((clip) => [clip.Clip, clip])
+      existingClips.map((clip) => [clip.clip, clip])
     )
 
     // We'll accumulate new clips and metadata before updating state
@@ -64,15 +64,15 @@ const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
 
         // Handle Copies merging
         mhlData.forEach((newClip) => {
-          const existingClip = existingClipMap.get(newClip.Clip)
+          const existingClip = existingClipMap.get(newClip.clip)
 
           if (existingClip) {
             // If the clip already exists, merge the Copies
-            existingClip.Copies = [
-              ...existingClip.Copies,
-              ...newClip.Copies.filter(
+            existingClip.copies = [
+              ...existingClip.copies,
+              ...newClip.copies.filter(
                 (copy) =>
-                  !existingClip.Copies.some((existingCopy) => existingCopy.Path === copy.Path)
+                  !existingClip.copies.some((existingCopy) => existingCopy.path === copy.path)
               )
             ]
           } else {
@@ -95,11 +95,11 @@ const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
 
     // merge aleData and data that have the same Clip name
     const mergedWithMetadata = newClips.map((item) => {
-      const cameraMetadataItem = cameraMetadata.find((camera) => camera.Clip === item.Clip)
+      const cameraMetadataItem = cameraMetadata.find((camera) => camera.clip === item.clip)
       return { ...cameraMetadataItem, ...item }
     })
     const updatedClips = [
-      ...existingClips.map((clip) => existingClipMap.get(clip.Clip) || clip), // Update existing clips with merged Copies
+      ...existingClips.map((clip) => existingClipMap.get(clip.clip) || clip), // Update existing clips with merged Copies
       ...mergedWithMetadata // Add newly parsed clips
     ]
     setBuilderClips(updatedClips)

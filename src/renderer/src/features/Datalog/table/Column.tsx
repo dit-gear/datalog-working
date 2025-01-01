@@ -42,15 +42,15 @@ export const Columns = (handlers: {
     enableHiding: false
   },
   {
-    accessorKey: 'Folder',
+    accessorKey: 'id',
     header: 'Index'
   },
   {
-    accessorKey: 'Day',
+    accessorKey: 'day',
     header: 'Day'
   },
   {
-    accessorKey: 'Date',
+    accessorKey: 'date',
     header: 'Date'
   },
   {
@@ -58,19 +58,19 @@ export const Columns = (handlers: {
     header: 'Unit'
   },
   {
-    accessorKey: 'OCFSize',
+    accessorKey: 'ocfSize',
     header: 'OCF Size'
   },
   {
-    accessorKey: 'ProxySize',
+    accessorKey: 'proxySize',
     header: 'Proxy Size'
   },
   {
-    accessorKey: 'Duration',
+    accessorKey: 'duration',
     header: 'Duration'
   },
   {
-    accessorKey: 'Reels',
+    accessorKey: 'reels',
     header: 'Reels'
   },
   {

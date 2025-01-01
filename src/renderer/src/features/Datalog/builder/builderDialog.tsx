@@ -39,17 +39,17 @@ const Builderdialog = ({
   setOpen
 }: BuilderdialogProps): JSX.Element => {
   const [copies, setCopies] = useState<CopyType[]>(
-    selected && selected.Clips ? getCopiesFromClips(selected.Clips) : []
+    selected && selected.clips ? getCopiesFromClips(selected.clips) : []
   )
 
   const { toast } = useToast()
 
   function getNextDay(entries: DatalogType[]): number {
-    let highestDay = entries[0].Day
+    let highestDay = entries[0].day
 
     for (const entry of entries) {
-      if (entry.Day > highestDay) {
-        highestDay = entry.Day
+      if (entry.day > highestDay) {
+        highestDay = entry.day
       }
     }
     return highestDay + 1
@@ -68,16 +68,16 @@ const Builderdialog = ({
 
   const form = useForm({
     defaultValues: {
-      Folder: selected ? selected.Folder : defaultFolder(),
-      Day: selected ? selected.Day : defaultDay,
-      Date: selected ? selected.Date : formatDate(),
-      Unit: selected ? selected.Unit : project.unit ? project.unit : '',
-      OCF: selected ? selected.OCF : undefined,
-      Proxy: selected ? selected.Proxy : undefined, // {}
-      Duration: selected ? selected.Duration : undefined,
-      Reels: selected ? selected.Reels : [],
-      Copies: selected ? selected.Copies : [],
-      Clips: selected ? selected.Clips : []
+      id: selected ? selected.id : defaultFolder(),
+      day: selected ? selected.day : defaultDay,
+      date: selected ? selected.date : formatDate(),
+      unit: selected ? selected.unit : project.unit ? project.unit : '',
+      ocf: selected ? selected.ocf : undefined,
+      proxy: selected ? selected.proxy : undefined, // {}
+      duration: selected ? selected.duration : undefined,
+      reels: selected ? selected.reels : [],
+      copies: selected ? selected.copies : [],
+      clips: selected ? selected.clips : []
     },
     mode: 'onSubmit',
     resolver: zodResolver(DatalogDynamicZod(project, { transformDurationToReadable: true }))
@@ -107,12 +107,12 @@ const Builderdialog = ({
   }
 
   const updateClips = (newClips: ClipType[], setcopies = false) => {
-    const dirtyFields = form.formState.dirtyFields.Clips
-    const currentClips = form.getValues().Clips
+    const dirtyFields = form.formState.dirtyFields.clips
+    const currentClips = form.getValues().clips
 
     const mergedClips = mergeDirtyValues(dirtyFields, currentClips, newClips)
     console.log('mergedClips:', mergedClips)
-    form.reset({ ...form.getValues(), Clips: mergedClips }, { keepDirty: true })
+    form.reset({ ...form.getValues(), clips: mergedClips }, { keepDirty: true })
     if (setcopies) {
       setCopies(getCopiesFromClips(newClips))
     }

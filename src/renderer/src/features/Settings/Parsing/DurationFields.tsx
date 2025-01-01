@@ -20,14 +20,14 @@ const DurationFields: React.FC<DurationFieldsProps> = ({ scope, index }) => {
   const { control } = useFormContext()
   const unit = useWatch({
     control,
-    name: `${scope}_additional_parsing.fields.${index}.unit`
+    name: `${scope}_custom_fields.fields.${index}.unit`
   })
   return (
     <>
       <div className="flex gap-10 py-4 pl-4 pr-5 text-sm leading-6">
         <FormField
           control={control}
-          name={`${scope}_additional_parsing.fields.${index}.unit`}
+          name={`${scope}_custom_fields.fields.${index}.unit`}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Duration Unit</FormLabel>
@@ -53,7 +53,7 @@ const DurationFields: React.FC<DurationFieldsProps> = ({ scope, index }) => {
         {unit === 'tc' || unit === 'frames' ? (
           <FormField
             control={control}
-            name={`${scope}_additional_parsing.fields.${index}.fps`}
+            name={`${scope}_custom_fields.fields.${index}.fps`}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>CSV Column Name for FPS</FormLabel>

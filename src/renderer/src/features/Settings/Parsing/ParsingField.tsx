@@ -49,11 +49,11 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
   const { control, setValue, getValues } = useFormContext<formSchemaType>()
   const activeType = useWatch({
     control,
-    name: `${scope}_additional_parsing.fields.${index}.type`
+    name: `${scope}_custom_fields.fields.${index}.type`
   })
   const [showRegex, setShowRegex] = useState('regex' in field)
 
-  const fields = useWatch({ control, name: `${scope}_additional_parsing.fields` })
+  const fields = useWatch({ control, name: `${scope}_custom_fields.fields` })
 
   const primitiveDropdownItems = primitiveTypesZod.options.map((type) => ({
     value: type,
@@ -80,12 +80,12 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
   }))
 
   const handleTypeChange = (type: fieldType): void => {
-    const currentField = getValues(`${scope}_additional_parsing.fields.${index}`)
+    const currentField = getValues(`${scope}_custom_fields.fields.${index}`)
 
     switch (type) {
       case 'string':
         setValue(
-          `${scope}_additional_parsing.fields.${index}`,
+          `${scope}_custom_fields.fields.${index}`,
           {
             type: 'string',
             value_key: 'value_key' in currentField ? currentField.value_key : '',
@@ -99,7 +99,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
       case 'list_of_strings':
         setShowRegex(false)
         setValue(
-          `${scope}_additional_parsing.fields.${index}`,
+          `${scope}_custom_fields.fields.${index}`,
           {
             type: 'list_of_strings',
             value_key: 'value_key' in currentField ? currentField.value_key : '',
@@ -113,7 +113,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
       case 'key-value_object':
         setShowRegex(false)
         setValue(
-          `${scope}_additional_parsing.fields.${index}`,
+          `${scope}_custom_fields.fields.${index}`,
           {
             type: 'key-value_object',
             value_key: 'value_key' in currentField ? currentField.value_key : '',
@@ -130,7 +130,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
       case 'list_of_field_arrays':
         setShowRegex(false)
         setValue(
-          `${scope}_additional_parsing.fields.${index}`,
+          `${scope}_custom_fields.fields.${index}`,
           {
             type: 'list_of_field_arrays',
             value_key: 'value_key' in currentField ? currentField.value_key : '',
@@ -146,7 +146,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
 
       case 'list_of_mapped_objects':
         setShowRegex(false)
-        setValue(`${scope}_additional_parsing.fields.${index}`, {
+        setValue(`${scope}_custom_fields.fields.${index}`, {
           type: 'list_of_mapped_objects',
           value_key: 'value_key' in currentField ? currentField.value_key : '',
           column: 'column' in currentField ? currentField.column : '',
@@ -161,7 +161,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
       case 'duration':
         setShowRegex(false)
         setValue(
-          `${scope}_additional_parsing.fields.${index}`,
+          `${scope}_custom_fields.fields.${index}`,
           {
             type: 'duration',
             column: 'column' in currentField ? currentField.column : '',
@@ -197,7 +197,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
         ) : (
           <FormField
             control={control}
-            name={`${scope}_additional_parsing.fields.${index}.value_key`}
+            name={`${scope}_custom_fields.fields.${index}.value_key`}
             //disabled={specialDropdownItems.some((item) => item.value === activeType)}
             render={({ field }) => (
               <FormItem className="w-full">
@@ -212,7 +212,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
         )}
         <FormField
           control={control}
-          name={`${scope}_additional_parsing.fields.${index}.column`}
+          name={`${scope}_custom_fields.fields.${index}.column`}
           render={({ field }) => (
             <FormItem className="w-full">
               <FormLabel className="">CSV Column Name</FormLabel>
@@ -239,7 +239,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
                   <DropdownMenuSubContent>
                     <FormField
                       control={control}
-                      name={`${scope}_additional_parsing.fields.${index}.type`}
+                      name={`${scope}_custom_fields.fields.${index}.type`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -285,7 +285,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
                     <DropdownMenuSubContent>
                       <FormField
                         control={control}
-                        name={`${scope}_additional_parsing.fields.${index}.delimiter`}
+                        name={`${scope}_custom_fields.fields.${index}.delimiter`}
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
@@ -321,7 +321,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
                         <DropdownMenuLabel>Primary Delimiter</DropdownMenuLabel>
                         <FormField
                           control={control}
-                          name={`${scope}_additional_parsing.fields.${index}.primary_delimiter`}
+                          name={`${scope}_custom_fields.fields.${index}.primary_delimiter`}
                           render={({ field }) => (
                             <FormItem>
                               <FormControl>
@@ -350,7 +350,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
                         <DropdownMenuLabel>Secondary Delimiter</DropdownMenuLabel>
                         <FormField
                           control={control}
-                          name={`${scope}_additional_parsing.fields.${index}.secondary_delimiter`}
+                          name={`${scope}_custom_fields.fields.${index}.secondary_delimiter`}
                           render={({ field }) => (
                             <FormItem>
                               <FormControl>
@@ -383,7 +383,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
                 checked={showRegex}
                 disabled={activeType !== 'string'}
                 onCheckedChange={(v) => {
-                  setShowRegex(v), setValue(`${scope}_additional_parsing.fields.${index}.regex`, '')
+                  setShowRegex(v), setValue(`${scope}_custom_fields.fields.${index}.regex`, '')
                 }}
               >
                 Regex
@@ -401,7 +401,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
       {showRegex ? (
         <FormField
           control={control}
-          name={`${scope}_additional_parsing.fields.${index}.regex`}
+          name={`${scope}_custom_fields.fields.${index}.regex`}
           render={({ field }) => (
             <FormItem className="w-64 m-4">
               <FormLabel className="">Value Extraction Regex (Optional)</FormLabel>

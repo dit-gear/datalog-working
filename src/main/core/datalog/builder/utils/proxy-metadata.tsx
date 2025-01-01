@@ -1,8 +1,8 @@
 import ffmpeg from 'fluent-ffmpeg'
 
 type proxyMetadataType = {
-  Codec?: string
-  Resolution?: string
+  codec?: string
+  resolution?: string
 }
 
 export const getProxyMetadata = async (filepath: string): Promise<proxyMetadataType> => {
@@ -18,8 +18,8 @@ export const getProxyMetadata = async (filepath: string): Promise<proxyMetadataT
     const videoStream = metadata.streams.find((stream) => stream.codec_type === 'video')
     if (videoStream) {
       return {
-        Codec: videoStream.codec_name,
-        Resolution: `${videoStream.width}x${videoStream.height}`
+        codec: videoStream.codec_name,
+        resolution: `${videoStream.width}x${videoStream.height}`
       }
     } else return {}
   } catch (error) {

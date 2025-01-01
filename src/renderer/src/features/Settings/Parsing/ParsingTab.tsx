@@ -17,7 +17,7 @@ const ParsingTab = ({ scope }: ParsingTabProps): ReactElement => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Parsing</CardTitle>
+        <CardTitle>Metadata Fields</CardTitle>
         <CardDescription>
           You can optionally import more metadata to merge with your clips.
         </CardDescription>
@@ -54,7 +54,7 @@ const ParsingTab = ({ scope }: ParsingTabProps): ReactElement => {
               />
             )}
           </dd>
-          <dt className="text-sm font-medium leading-6 text-white">Enable CSV Parsing</dt>
+          <dt className="text-sm font-medium leading-6 text-white">Enable Custom Fields</dt>
           <dd className="mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 flex flex-col gap-3">
             {scope === 'project' ? (
               <FormField

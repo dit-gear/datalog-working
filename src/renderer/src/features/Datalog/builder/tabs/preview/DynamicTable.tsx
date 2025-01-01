@@ -5,7 +5,7 @@ import { flattenData } from './flattenData'
 import { generateColumns } from './Column'
 
 export const DynamicTable = () => {
-  const { fields } = useFieldArray({ name: 'Clips' })
+  const { fields } = useFieldArray({ name: 'clips' })
   const data = useMemo(() => flattenData(fields.map(({ id, ...rest }) => rest)), [fields])
   const columns = useMemo(() => generateColumns(data), [data])
 

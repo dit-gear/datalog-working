@@ -41,8 +41,9 @@ const CustomTab = React.forwardRef<HTMLDivElement, CustomTabProps>(
       <div
         ref={ref}
         className={cn(
+          'group',
           customTabVariants({ variant, size }),
-          isActive && 'bg-background text-accent-foreground hover:bg-background',
+          isActive && ' bg-background text-accent-foreground hover:bg-background',
           'relative',
           className
         )}
@@ -53,27 +54,25 @@ const CustomTab = React.forwardRef<HTMLDivElement, CustomTabProps>(
             'flex items-center gap-2 flex-grow text-left',
             'transition-colors rounded-md px-2 py-1'
           )}
-          //onClick={props.onClick}
           disabled={isActive}
         >
           <span className="truncate">{children}</span>
         </button>
-        {isDirty ? (
-          <Dot />
-        ) : (
-          action && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn('ml-2 h-6 w-6 rounded-md')}
-              onClick={(e) => {
-                e.stopPropagation()
-                action.onClick()
-              }}
-            >
-              <XIcon className="h-4 w-4" />
-            </Button>
-          )
+        {isDirty && <Dot className={`h-8 w-8 ${isActive && 'group-hover:hidden'}`} />}
+        {action && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              `ml-2 h-6 w-6 rounded-md ${isActive && 'hidden group-hover:inline-flex'}`
+            )}
+            onClick={(e) => {
+              e.stopPropagation()
+              action?.onClick()
+            }}
+          >
+            <XIcon className="h-4 w-4" />
+          </Button>
         )}
 
         {isActive && (

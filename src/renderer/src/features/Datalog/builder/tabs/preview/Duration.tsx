@@ -4,7 +4,7 @@ import { formatDuration } from '@shared/utils/format-duration'
 
 const DurationCell = ({ row, column, value }) => {
   const { setValue } = useFormContext()
-  const field = `Clips.${row.id}.${column.id}`
+  const field = `clips.${row.id}.${column.id}`
   const valueInSync = useWatch({ name: field })
   const update = (newValue: number) => {
     setValue(field, newValue, {

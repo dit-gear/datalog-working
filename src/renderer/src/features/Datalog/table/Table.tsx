@@ -23,14 +23,14 @@ const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
 
   const DatalogRows = (logs: DatalogType[]): LogSum[] => {
     return logs.map((data) => ({
-      Folder: data.Folder,
-      Day: data.Day,
-      Date: data.Date,
-      Unit: data.Unit,
-      OCFSize: getOCFSize(data),
-      ProxySize: getProxySize(data),
-      Duration: getDuration(data, { separator: ' ', asString: true }),
-      Reels: getReels(data, { grouped: true }),
+      id: data.id,
+      day: data.day,
+      date: data.date,
+      unit: data.unit,
+      ocfSize: getOCFSize(data),
+      proxySize: getProxySize(data),
+      duration: getDuration(data, { separator: ' ', asString: true }),
+      reels: getReels(data, { grouped: true }),
       raw: data
     }))
   }

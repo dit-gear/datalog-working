@@ -89,7 +89,6 @@ declare global {
   }
 }
 
-
 declare const data: ProjectData;
 `
 

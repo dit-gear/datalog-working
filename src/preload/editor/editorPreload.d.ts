@@ -7,9 +7,8 @@ declare global {
     editorApi: {
       fetchInitialData: () => Promise<InitialEditorData>
       showWindow: () => void
-      onDirChanged: (
-        callback: (event: Electron.IpcRendererEvent, files: TemplateDirectoryFile[]) => void
-      ) => void
+      onDirChanged: (callback: (files: TemplateDirectoryFile[]) => void) => void
+      onMockdataChanged: (callback: (data: string) => void) => void
       requestReadFile: (file: TemplateDirectoryFile) => void
       onResponseReadFile: (callback: (file: LoadedFile | { error: string }) => void) => void
       saveNewFile: (file: ChangedFile) => Promise<Response>
