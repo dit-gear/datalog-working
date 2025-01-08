@@ -9,7 +9,7 @@ import { Response } from '@shared/shared-types'
 const updateDatalog = async (data: DatalogType): Promise<Response> => {
   try {
     const yaml = YAML.stringify(data)
-    const filepath = path.join(getActiveProjectPath(), 'logs', `${data.Folder}.datalog`)
+    const filepath = path.join(getActiveProjectPath(), 'logs', `${data.id}.datalog`)
     fs.writeFileSync(filepath, yaml, 'utf8')
     return { success: true }
   } catch (error) {

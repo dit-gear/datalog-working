@@ -1,42 +1,91 @@
 import { getReels as getReelsFunction, getReelsOptions } from './format-reel'
 import { formatBytes } from './format-bytes'
-import { formatDuration, FormatDurationOptions } from './format-duration'
-import { DatalogType } from '@shared/datalogTypes'
+import { formatDuration } from './format-duration'
+import {
+  DatalogType,
+  OcfClipType,
+  OcfType,
+  ProxyType,
+  ProxyClipType,
+  SoundClipType,
+  SoundType,
+  CopyType
+} from '@shared/datalogTypes'
+import {
+  timecodeToFrames,
+  framesToTimecode,
+  timecodeToSeconds,
+  secondsToLargeTimecode
+} from './format-timecode'
 import { ProjectRootType } from '@shared/projectTypes'
+import { durationType } from '@shared/shared-types'
+import { formatCopiesFromString, formatCopiesFromClips } from './format-copies'
+import { Datalog } from '@shared/datalogClass'
 
-export const getOCFFiles = (data: DatalogType): number => {
-  const files = data.ocf?.files ?? data.clips?.length ?? 0
-  return files
+type Clip = OcfClipType | ProxyClipType | SoundClipType
+type Dataroot = OcfType | ProxyType | SoundType
+
+/**
+ * Utility to count how many “files” from an array of clips
+ * (Sometimes you might interpret “files” simply as the count of those clips.)
+ */
+function countClipFiles(clips: Clip[] | undefined): number {
+  return clips?.length ?? 0
 }
 
-export function getOCFSize(data: DatalogType, options?: { format: true }): string
-export function getOCFSize(data: DatalogType, options?: { format: false }): number
-export function getOCFSize(
-  data: DatalogType,
-  options: { format: true } | { format: false } = { format: true }
-): string | number {
-  const size = data.ocf?.size ?? data.clips?.reduce((acc, clip) => acc + (clip.size ?? 0), 0) ?? 0
-  return options.format ? formatBytes(size) : size
-}
-export const getProxyFiles = (data: DatalogType): number => {
-  const files =
-    data.proxy?.files ?? data.clips?.filter((clip) => clip.proxy !== undefined).length ?? 0
-  return files
+/**
+ * Utility to sum the numeric `size` of an array of clips
+ */
+function sumClipSizes(clips: Clip[] | undefined): number {
+  if (!clips) return 0
+  return clips.reduce((acc, clip) => acc + (clip.size ?? 0), 0)
 }
 
-export const getProxySize = (data: DatalogType): string => {
-  const size =
-    data.proxy?.size ?? data.clips?.reduce((acc, clip) => acc + (clip.proxy?.size ?? 0), 0) ?? 0
-  return size > 0 ? formatBytes(size) : ''
+/**
+ * Utility to sum timecode durations from an array of OCF clips.
+ * converts each clip’s `duration` to frames, sums up, then converts back.
+ */
+function sumClipDurations(clips: OcfClipType[] | undefined, fallbackFps = 24): string {
+  if (!clips || clips.length === 0) {
+    return '00:00:00:00'
+  }
+  const totalFrames = clips.reduce((acc, clip) => {
+    // If clip.fps is missing, fall back to some default
+    const fps = clip.fps ?? fallbackFps
+    return acc + timecodeToFrames(clip.duration, fps)
+  }, 0)
+
+  // For simplicity, assume we just use the first clip’s fps
+  const fps = clips[0]?.fps ?? fallbackFps
+  return framesToTimecode(totalFrames, fps)
 }
 
-export const getDuration = (data: DatalogType, options?: FormatDurationOptions): string => {
-  const duration =
-    data.duration ?? data.clips?.reduce((acc, clip) => acc + (clip.duration ?? 0), 0) ?? 0
-  return duration > 0 ? formatDuration(duration, { ...options, asString: true }) : ''
+export const getFiles = (data: Dataroot): number => {
+  return data?.files != null ? data.files : countClipFiles(data.clips)
 }
 
-export const getReels = (data: DatalogType, options?: getReelsOptions): string[] => {
+export function getSize(data: Dataroot, options: { format: true }): string
+export function getSize(data: Dataroot, options: { format: false }): number
+export function getSize(data: Dataroot, options: { format?: boolean }): string | number {
+  const size = data?.size != null ? data.size : sumClipSizes(data.clips)
+  return options.format === false ? size : formatBytes(size)
+}
+export function getDuration(data: OcfType, format: 'tc'): string
+export function getDuration(data: OcfType, format: 'seconds'): number
+export function getDuration(data: OcfType, format: 'hms'): durationType
+export function getDuration(data: OcfType, format: 'hms-string'): string
+export function getDuration(
+  data: OcfType,
+  format: 'tc' | 'seconds' | 'hms' | 'hms-string'
+): string | number | durationType {
+  const duration = data?.duration ?? sumClipDurations(data.clips)
+  if ((format = 'seconds')) return timecodeToSeconds(duration)
+  if ((format = 'hms')) return formatDuration(duration)
+  if ((format = 'hms-string')) return formatDuration(duration, { asString: true })
+  return duration
+}
+
+export const getReels = (data: OcfType, options?: getReelsOptions): string[] => {
   if (data.reels !== undefined) {
     return getReelsFunction(data.reels, options)
   } else if (data.clips && data.clips.length > 0) {
@@ -44,195 +93,64 @@ export const getReels = (data: DatalogType, options?: getReelsOptions): string[]
   } else return []
 }
 
-function mergeDatalogs(datalogs: DatalogType[]): DatalogType {
-  // Initialize an empty DatalogType object
-  const mergedDatalog: DatalogType = {
-    id: '',
-    date: '',
-    day: 0,
-    ocf: { size: 0, files: 0 },
-    proxy: { size: 0, files: 0 },
-    duration: 0,
-    clips: [],
-    reels: []
-  }
-
-  if (datalogs.length === 0) {
-    return mergedDatalog
-  }
-
-  // Merge Dates
-  const dates = datalogs.map((d) => d.date)
-  const minDate = dates.reduce((a, b) => (a < b ? a : b))
-  const maxDate = dates.reduce((a, b) => (a > b ? a : b))
-  mergedDatalog.date = minDate === maxDate ? minDate : `${minDate} - ${maxDate}`
-
-  // Merge Days
-  const days = datalogs.map((d) => d.day)
-  const minDay = Math.min(...days)
-  const maxDay = Math.max(...days)
-  //mergedDatalog.Day = minDay === maxDay ? minDay : `${minDay} - ${maxDay}`
-  mergedDatalog.day = minDay
-
-  // Merge OCF
-  mergedDatalog.ocf = {
-    size: datalogs.reduce((acc, d) => acc + (d.ocf?.size ?? 0), 0),
-    files: datalogs.reduce((acc, d) => acc + (d.ocf?.files ?? 0), 0)
-  }
-
-  // Merge Proxy
-  mergedDatalog.proxy = {
-    size: datalogs.reduce((acc, d) => acc + (d.proxy?.size ?? 0), 0),
-    files: datalogs.reduce((acc, d) => acc + (d.proxy?.files ?? 0), 0)
-  }
-
-  // Merge Duration
-  mergedDatalog.duration = datalogs.reduce((acc, d) => acc + (d.duration ?? 0), 0)
-
-  // Merge Clips
-  mergedDatalog.clips = datalogs.flatMap((d) => d.clips ?? [])
-
-  // Merge Reels
-  const reelsSet = new Set<string>()
-  datalogs.forEach((d) => {
-    const reels = d.reels ?? []
-    reels.forEach((reel) => reelsSet.add(reel))
-  })
-  mergedDatalog.reels = Array.from(reelsSet)
-
-  // Merge other fields as necessary
-
-  return mergedDatalog
+export function getCopies(data: OcfType | SoundType): CopyType[] {
+  return data.copies ? formatCopiesFromString(data.copies) : formatCopiesFromClips(data.clips)
 }
 
-export class Datalog {
-  public readonly raw: DatalogType
+type Context = 'ocf' | 'proxy' | 'sound'
 
-  constructor(data: DatalogType) {
-    this.raw = data
-  }
-  public get logName(): string {
-    return this.raw.id
-  }
-  public get day(): number {
-    return this.raw.day
-  }
-  public get date(): string {
-    return this.raw.date
-  }
-  public get clips() {
-    return this.raw.clips
-  }
-  public ocf = {
-    getFilesCount: () => getOCFFiles(this.raw),
-    getSize: () => getOCFSize(this.raw),
-    getCopies: () => 'TODO: list copies here'
-  }
-  public proxys = {
-    getFilesCount: () => getProxyFiles(this.raw),
-    getSize: () => getProxySize(this.raw)
+export function getTotalFiles(data: Datalog[], context: Context): number {
+  const contextMap: Record<Context, keyof Datalog> = {
+    ocf: 'ocf',
+    proxy: 'proxy',
+    sound: 'sound'
   }
 
-  getDuration() {
-    return getDuration(this.raw)
-  }
-  getReels(options?: getReelsOptions) {
-    return getReels(this.raw, options)
-  }
+  const files = data.reduce((sum, log) => {
+    const ctx = log[contextMap[context]]
+    if (typeof ctx === 'object' && ctx !== null && 'files' in ctx) {
+      return sum + ctx.files()
+    }
+    return sum
+  }, 0)
+
+  return files
 }
 
-export class DataObject {
-  private project: ProjectRootType
-  private datalogOne: Datalog
-  private datalogMulti: Datalog[]
-  private all: Datalog[] // fix later
-
-  constructor(
-    project: ProjectRootType,
-    datalog_selection: DatalogType | DatalogType[],
-    datalog_all: DatalogType[]
-  ) {
-    const selection = datalog_selection
-    const all = datalog_all
-
-    if (!project) {
-      throw new Error('Project is required to initialize DataObject.')
-    }
-
-    if (!all || all.length === 0) {
-      throw new Error("The 'all' array must contain at least one DatalogType.")
-    }
-
-    if (!selection || (Array.isArray(selection) && selection.length === 0)) {
-      throw new Error('The selection is empty')
-    }
-
-    this.project = project
-    //this.selection = selection
-    this.all = all.map((data) => new Datalog(data))
-
-    if (Array.isArray(selection)) {
-      // Merge the selected datalogs
-      const mergedData = mergeDatalogs(selection)
-      this.datalogOne = new Datalog(mergedData)
-      this.datalogMulti = selection.map((data) => new Datalog(data))
-    } else {
-      this.datalogOne = new Datalog(selection)
-      this.datalogMulti = [new Datalog(selection)]
-    }
+export function getTotalSize(data: Datalog[], context: Context, options: { format: true }): string
+export function getTotalSize(data: Datalog[], context: Context, options: { format: false }): number
+export function getTotalSize(
+  data: Datalog[],
+  context: Context,
+  options: { format: boolean }
+): string | number {
+  const contextMap: Record<Context, keyof Datalog> = {
+    ocf: 'ocf',
+    proxy: 'proxy',
+    sound: 'sound'
   }
 
-  // Getter for the project name
-  get projectName(): string {
-    return this.project.project_name
-  }
-
-  // Getter for the selected datalog (merged if multiple)
-  get datalog(): Datalog {
-    return this.datalogOne
-  }
-
-  // Getter for the selected datalogs array
-  get datalogArray(): Datalog[] {
-    return this.datalogMulti
-  }
-
-  // Getter for all datalogs
-  get datalogs(): Datalog[] {
-    return this.all
-  }
-
-  get totals() {
-    return {
-      getTotalOCFSize: (): string => {
-        const totalSize = this.all.reduce(
-          (acc, datalog) => acc + (getOCFSize(datalog.raw, { format: false }) as number),
-          0
-        )
-        return totalSize > 0 ? formatBytes(totalSize) : '0 bytes'
-      },
-      getTotalOCFFileCount: (): number => {
-        return this.all.reduce((acc, datalog) => acc + getOCFFiles(datalog.raw), 0)
-      }
+  const size = data.reduce((sum, log) => {
+    const ctx = log[contextMap[context]]
+    if (typeof ctx === 'object' && ctx !== null && 'sizeAsNumber' in ctx) {
+      return sum + ctx.sizeAsNumber()
     }
-  }
-  /*
-  public totals = {
-    getTotalOCFSize(): string {
-      const totalSize = this.all.reduce(
-        (acc, datalog) => acc + (getOCFSize(datalog.raw, { format: false }) as number), // Using getOCFSize from utils
-        0
-      )
-      return totalSize > 0 ? formatBytes(totalSize) : '0 bytes' // Format size for readability
-    },
-  
-    // Method to get the total OCF file count of "all" datalogs
-    getTotalOCFFileCount(): number {
-      return this.all.reduce(
-        (acc, datalog) => acc + getOCFFiles(datalog.raw), // Using getOCFFiles from utils
-        0
-      )
-    }
+    return sum
+  }, 0)
 
-  }*/
+  return options.format === false ? size : formatBytes(size)
+}
+
+export function getTotalDuration(data: Datalog[], format: 'tc'): string
+export function getTotalDuration(data: Datalog[], format: 'hms-string'): string
+export function getTotalDuration(data: Datalog[], format: 'hms'): durationType
+export function getTotalDuration(
+  data: Datalog[],
+  format: 'tc' | 'hms' | 'hms-string'
+): string | durationType {
+  const duration = data.reduce((sum, log) => sum + log.ocf.durationAsSeconds(), 0)
+  const durationTC = secondsToLargeTimecode(duration)
+  if ((format = 'hms')) return formatDuration(durationTC)
+  if ((format = 'hms-string')) return formatDuration(durationTC, { asString: true })
+  return durationTC
 }

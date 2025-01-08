@@ -1,4 +1,4 @@
-import { ClipType } from '../datalogTypes'
+import { OcfClipType } from '../datalogTypes'
 import { z } from 'zod'
 
 type ReelInfo = {
@@ -96,7 +96,7 @@ export type getReelsOptions = z.infer<typeof getReelsOptionsZod>
   grouped?: boolean
 }*/
 
-export function getReels(clips: ClipType[] | string[], options: getReelsOptions = {}): string[] {
+export function getReels(clips: OcfClipType[] | string[], options: getReelsOptions = {}): string[] {
   const reelsSet: Set<string> = new Set()
   let clipsWithoutReel = 0
   if (clips.length > 0 && typeof clips[0] === 'string') {
@@ -104,7 +104,7 @@ export function getReels(clips: ClipType[] | string[], options: getReelsOptions 
       reelsSet.add(clip)
     }
   } else {
-    for (const clip of clips as ClipType[]) {
+    for (const clip of clips as OcfClipType[]) {
       if (clip.reel) {
         reelsSet.add(clip.reel)
       } else {

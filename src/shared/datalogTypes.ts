@@ -1,11 +1,20 @@
 import { z } from 'zod'
 import { Field, ProjectRootType } from './projectTypes'
+import { isValidTimecodeFormat, addTimecodeValidation } from './utils/format-timecode'
 
-const Camera_MetadataZod = z.object({
+const timecode = z
+  .string()
+  .refine((val) => isValidTimecodeFormat(val), { message: 'Invalid timecode format' })
+
+const CameraMetadataZod = z.object({
+  clip: z.string(),
+  tc_start: timecode,
+  tc_end: timecode,
+  duration: timecode,
   camera_model: z.string().optional(),
   camera_id: z.string().optional(),
   reel: z.string().optional(),
-  fps: z.string().optional(),
+  fps: z.coerce.number().optional(),
   sensor_fps: z.string().optional(),
   lens: z.string().optional(),
   resolution: z.string().optional(),
@@ -16,34 +25,117 @@ const Camera_MetadataZod = z.object({
   lut: z.string().optional()
 })
 
-const ProxyZod = z.object({
+export type CameraMetadataType = z.infer<typeof CameraMetadataZod>
+
+const copy = z.object({
+  volume: z.string(),
   path: z.string(),
+  hash: z.string().nullable()
+})
+const copies = z.array(copy)
+export type CopyBaseType = z.infer<typeof copy>
+
+/*export type PathType = {
+  volume: string | null
+  fullPath: string
+  relativePath: string
+}*/
+
+export type CopyType = {
+  copies: CopyBaseType[]
+  clips: string[]
+  count: [number, number]
+}
+
+/*export const ClipZod = z
+  .object({
+    clip: z.string(),
+    size: z.number(),
+    copies: Copies,
+    duration: z.number().optional(),
+    image: z.string().optional(), // Not in use
+    proxy: ProxyZod.optional()
+  })
+  .extend(CameraMetadataZod.merge)
+
+export const Files = z.object({
+  files: z.number().int().nonnegative().finite().optional(),
+  size: z.number().nonnegative().finite().optional()
+})*/
+
+const OcfClipBaseZod = z.object({
+  clip: z.string(),
+  size: z.number(),
+  copies: copies
+})
+
+export const OcfClipZod = addTimecodeValidation(OcfClipBaseZod.merge(CameraMetadataZod), [
+  'tc_start',
+  'tc_end',
+  'duration'
+])
+
+export type OcfClipType = z.infer<typeof OcfClipZod>
+export type OcfClipBaseType = z.infer<typeof OcfClipBaseZod>
+
+const SoundClipZod = addTimecodeValidation(
+  z.object({
+    clip: z.string(),
+    size: z.number(),
+    copies: copies,
+    tc_start: z.string().optional(),
+    tc_end: z.string().optional(),
+    fps: z.coerce.number().optional()
+  }),
+  ['tc_start', 'tc_end']
+)
+
+export type SoundClipType = z.infer<typeof SoundClipZod>
+
+const ProxyClipZod = z.object({
+  clip: z.string(),
   size: z.number().nonnegative().finite(),
   format: z.string().optional(),
   codec: z.string().optional(),
   resolution: z.string().optional()
 })
+export type ProxyClipType = z.infer<typeof ProxyClipZod>
 
-export const ClipZod = z
-  .object({
-    clip: z.string(),
-    size: z.number(),
-    copies: z.array(
-      z.object({
-        path: z.string(),
-        hash: z.string().nullable()
-      })
-    ),
-    duration: z.number().optional(),
-    image: z.string().optional(), // Not in use
-    proxy: ProxyZod.optional()
-  })
-  .extend(Camera_MetadataZod.shape)
+const file = z.number().int().nonnegative().finite().optional()
+const size = z.number().nonnegative().finite().optional()
 
-export const Files = z.object({
-  files: z.number().int().nonnegative().finite().optional(),
-  size: z.number().nonnegative().finite().optional()
+export const Sound = z.object({
+  files: file,
+  size: size,
+  copies: z.array(z.string()).optional(),
+  clips: z.array(SoundClipZod).optional()
 })
+export type SoundType = z.infer<typeof Sound>
+
+export const OCF = z.object({
+  files: file,
+  size: size,
+  duration: timecode,
+  reels: z.array(z.string()).optional(),
+  copies: z.array(z.string()).optional(),
+  clips: z.array(OcfClipZod).optional()
+})
+export type OcfType = z.infer<typeof OCF>
+
+export const Proxy = z.object({
+  files: file,
+  size: size,
+  clips: z.array(ProxyClipZod).optional()
+})
+export type ProxyType = z.infer<typeof Proxy>
+
+const Custom = z
+  .object({
+    clip: z.string()
+  })
+  .catchall(z.any())
+
+export type CustomType = z.infer<typeof Custom>
 
 export const datalogZod = z.object({
   id: z.string().min(1).max(50),
@@ -57,20 +149,19 @@ export const datalogZod = z.object({
     .lte(999, { message: 'Day must be below 999' }),
   date: z.string().date(),
   unit: z.string().optional(),
-  ocf: Files.optional(),
-  proxy: Files.optional(),
-  duration: z.number().optional(),
-  reels: z.array(z.string()).optional(),
-  copies: z.array(z.string()).optional(), // Move to within OCF
-  clips: z.array(ClipZod).optional()
+  ocf: OCF,
+  proxy: Proxy,
+  sound: Sound,
+  custom: z.array(Custom).optional()
 })
 
-export type FilesType = z.infer<typeof Files>
-export type ClipType = z.infer<typeof ClipZod>
 export type DatalogType = z.infer<typeof datalogZod>
 
 export type ResponseWithClips =
-  | { success: true; clips: ClipType[] }
+  | {
+      success: true
+      clips: { ocf?: OcfClipType[]; sound?: SoundClipType[]; proxy?: ProxyClipType[]; custom? }
+    }
   | { success: false; error: string; cancelled?: boolean }
 
 export type ResponseWithDatalogs =
@@ -122,8 +213,8 @@ const mapTypeToZod = (field: Field): z.ZodTypeAny | undefined => {
   }
 }
 
-const buildAdditionalFieldsSchema = (project: ProjectRootType) => {
-  const additionalFields: Record<string, z.ZodTypeAny> = {}
+const buildCustomFieldsSchema = (project: ProjectRootType) => {
+  const customFields: Record<string, z.ZodTypeAny> = {}
 
   if (project.custom_fields?.fields) {
     for (const field of project.custom_fields.fields) {
@@ -133,42 +224,29 @@ const buildAdditionalFieldsSchema = (project: ProjectRootType) => {
       const zodSchema = mapTypeToZod(field)
 
       if (zodSchema) {
-        additionalFields[field.value_key] = zodSchema // Add only if schema is defined
+        customFields[field.value_key] = zodSchema // Add only if schema is defined
       }
     }
   }
 
-  return additionalFields
+  return customFields
 }
 
-export const ClipDynamicZod = (project: ProjectRootType): z.ZodObject<any> => {
+/*export const ClipDynamicZod = (project: ProjectRootType): z.ZodObject<any> => {
   const zodSchema = ClipZod.extend(buildAdditionalFieldsSchema(project))
+  return zodSchema
+}*/
+
+export const CustomFieldsZod = (project: ProjectRootType): z.ZodObject<any> => {
+  const zodSchema = Custom.extend(buildCustomFieldsSchema(project))
   return zodSchema
 }
 
-function msToReadable(ms: number): string {
-  const hours = Math.floor(ms / (1000 * 60 * 60))
-  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60))
-  const seconds = Math.floor((ms % (1000 * 60)) / 1000)
-  const milliseconds = ms % 1000
-
-  return `${String(hours)}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`
+export const DatalogDynamicZod = (project: ProjectRootType) => {
+  return datalogZod.omit({ custom: true }).extend({ custom: CustomFieldsZod(project) })
 }
 
-function readableToMs(readable: string): number {
-  const [time, ms = '0'] = readable.split('.')
-  const [hours, minutes, seconds] = time.split(':').map(Number)
-  return hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000 + Number(ms.padEnd(3, '0'))
-}
-
-interface DatalogDynamicZodOptions {
-  transformDurationToReadable?: boolean
-  transformDurationToMs?: boolean
-}
-
-//type DatalogZodShape = typeof datalogZod extends z.ZodObject<infer S> ? S : never
-
-export const DatalogDynamicZod = <T extends Record<string, any>>(
+/*export const DatalogDynamicZod = <T extends Record<string, any>>(
   project: ProjectRootType | undefined,
   { transformDurationToReadable, transformDurationToMs }: DatalogDynamicZodOptions = {}
 ): z.ZodObject<z.ZodRawShape & T> => {
@@ -219,36 +297,6 @@ export const DatalogDynamicZod = <T extends Record<string, any>>(
   }
 
   return datalogBase as z.ZodObject<z.ZodRawShape & T>
-}
+}*/
 
-export type DatalogDynamicType = DatalogType & Record<string, any>
-
-const reelsOptions = z.object({ grouped: z.boolean().optional() }).optional()
-
-const DatalogClassZod = z.object({
-  logName: z.string(),
-  day: z.number(),
-  date: z.string(),
-  clips: z.array(ClipZod),
-  ocf: z.object({
-    getfilesCount: z.function().returns(z.number()),
-    getSize: z.function().returns(z.string()),
-    getCopies: z.function().returns(z.string())
-  }),
-  proxys: z.object({
-    getFilesCount: z.function().args().returns(z.number()),
-    getSize: z.function().returns(z.string())
-  }),
-  getDuration: z.function().returns(z.string()),
-  getReels: z.function().args(reelsOptions).returns(z.array(z.string())),
-  raw: datalogZod
-})
-
-export const DataClassZod = z.object({
-  projectName: z.string(),
-  datalog: DatalogClassZod,
-  datalogArray: z.array(DatalogClassZod),
-  datalogs: z.array(DatalogClassZod),
-  getTotalOCFSize: z.function().returns(z.string()),
-  getTotalOCFFileCount: z.function().returns(z.number())
-})
+export type DatalogDynamicType = DatalogType

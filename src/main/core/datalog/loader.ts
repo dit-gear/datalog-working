@@ -11,9 +11,7 @@ export const loadDatalog = async (filePath: string): Promise<DatalogDynamicType>
   try {
     const datalog = fs.readFileSync(filePath, 'utf8')
     const yamlDatalog = YAML.parse(datalog)
-    const parsedDatalog = DatalogDynamicZod(project, {
-      transformDurationToMs: true
-    }).parse(yamlDatalog) as DatalogDynamicType
+    const parsedDatalog = DatalogDynamicZod(project).parse(yamlDatalog) as DatalogDynamicType
     return parsedDatalog
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred.'

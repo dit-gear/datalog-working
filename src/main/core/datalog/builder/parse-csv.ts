@@ -1,14 +1,15 @@
-import { ResponseWithClips } from '@shared/datalogTypes'
+import { ResponseWithClips, CustomType } from '@shared/datalogTypes'
 import { dialog } from 'electron'
 import fs from 'fs'
 import Papa from 'papaparse'
-import { getBuilderClips, setBuilderClips } from './builder-state'
+import { ocfClipsStore } from './builder-state'
 import { getActiveProject } from '../../app-state/state'
 import logger from '../../logger'
 import chardet from 'chardet'
 import iconv from 'iconv-lite'
 import { parseField } from '../../file-processing/csv/parse-csv-column'
 import { parseString } from '../../file-processing/csv/parse-string'
+import { createClipRegex, createFieldRegexMap } from './utils/createRegexMap'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
@@ -67,58 +68,23 @@ const parseCsv = async (path?: string): Promise<ResponseWithClips> => {
       })
     })
 
-    /*for (const row of parsed.data) {
-      const dataRow: any = {}
-      for (const field of settings.fields) {
-        const { value_key, column, type, subfields, options } = field
-        const value = row[column]
-        dataRow[value_key] = parseValue(value, type, subfields, options)
-      }
-    }*/
-
-    const clips = getBuilderClips()
-
     // Pre-compile the regex for `settings.clip.regex`, if available
-    let clipRegex: RegExp | null = null
-    if (settings.clip.regex) {
-      try {
-        clipRegex = new RegExp(settings.clip.regex) // Compile clip regex once
-      } catch (error) {
-        throw new Error(`Invalid regex pattern for Clip column: ${settings.clip.regex}`)
-      }
-    }
+    const clipRegex = await createClipRegex(settings.clip.regex)
 
     // Pre-compile regex patterns for each field if available, and store them in a map
-    const fieldRegexMap: { [key: string]: RegExp | null } = {}
-    for (const field of settings.fields) {
-      if (field.type === 'string') {
-        const { value_key, regex } = field
+    const fieldRegexMap = await createFieldRegexMap(settings.fields)
 
-        if (regex) {
-          try {
-            fieldRegexMap[value_key] = new RegExp(regex) // Compile regex once per field
-          } catch (error) {
-            throw new Error(`Invalid regex pattern in field ${value_key}: ${regex}`)
-          }
-        } else {
-          fieldRegexMap[value_key] = null // No regex for this field
-        }
-      }
-    }
+    let customClips: CustomType[] = []
 
     for (const row of parsed.data) {
       let clipcolumn: string | undefined = row[settings.clip.column]
       if (!clipcolumn) continue
 
       // Use the pre-compiled clip regex, if available
-      if (clipRegex) {
-        clipcolumn = parseString(clipcolumn, clipRegex)
-      }
+      clipRegex && (clipcolumn = parseString(clipcolumn, clipRegex))
 
-      // Find the corresponding clip in the `clips` array by matching the `Clip` field
-      const matchingClipIndex = clips.findIndex((c) => c.clip === clipcolumn)
-
-      if (matchingClipIndex === -1) continue
+      const matchingOcfClip = ocfClipsStore().get(clipcolumn)
+      if (!matchingOcfClip) continue
 
       const dataRow: Record<string, unknown> = {} // Create a dataRow object to hold new fields
 
@@ -134,15 +100,14 @@ const parseCsv = async (path?: string): Promise<ResponseWithClips> => {
       if (hasForbiddenKey) {
         throw new Error(`Attempt to overwrite forbidden fields`)
       }
-      //console.log(dataRow)
-      // Update the matched Clip with the additional `dataRow` fields
-      clips[matchingClipIndex] = {
-        ...clips[matchingClipIndex],
-        ...dataRow // Spread the `dataRow` into the matched clip to add the new fields
-      }
+
+      customClips.push({
+        clip: matchingOcfClip.clip,
+        ...dataRow
+      })
     }
-    setBuilderClips(clips)
-    return { success: true, clips }
+
+    return { success: true, clips: { custom: customClips } }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown error'
     logger.error(message)

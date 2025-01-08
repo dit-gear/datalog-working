@@ -1,5 +1,4 @@
-import { BrowserWindow } from 'electron'
-import { ClipType } from '@shared/datalogTypes'
+import { OcfClipBaseType } from '@shared/datalogTypes'
 import fs from 'fs'
 import { mhlClassicZod, mhlClassicType, classicRow } from './schemas/classic-mhl-schema'
 import { mhlAscZod, mhlAscType, ascRow } from './schemas/asc-mhl-schema'
@@ -35,6 +34,28 @@ type ValidationResult =
       type: null
       error: { classicErrors: any; ascErrors: any; mhlInfo?: string }
     }
+
+function getVolumeName(filePath: string): string {
+  if (filePath.startsWith('/Volumes/')) {
+    const parts = filePath.split('/')
+    return parts.length > 2 ? parts[2] : filePath
+  } else {
+    const parts = filePath.split('/')
+    if (parts.length > 1) {
+      switch (parts[1]) {
+        case 'Users':
+        case 'Applications':
+        case 'System':
+        case 'Library':
+          return 'Macintosh HD'
+        default:
+          return filePath
+      }
+    }
+  }
+
+  return filePath // default return if none of the conditions are met
+}
 
 async function getValidMhlData(parsedXML: any): Promise<ValidationResult> {
   const mhlClassicValidator = mhlClassicZod.safeParse(parsedXML)
@@ -72,10 +93,11 @@ function isClassicRow(row: classicRow | ascRow): row is classicRow {
 
 async function processFile(
   filePath: string,
+  volume: string,
   path: string,
   extensions: string[],
   sequentialFileTypes: Set<string>
-): Promise<ClipType[]> {
+): Promise<OcfClipBaseType[]> {
   try {
     const fileData = fs.readFileSync(filePath, 'utf8')
     const parsedXML = await parseXML(fileData)
@@ -129,7 +151,9 @@ async function processFile(
         acc[baseClipName] = acc[baseClipName] || {
           clip: baseClipName,
           size: 0,
-          copies: [{ path: path, hash: md5 || sha1 || xxhash64 || xxhash64be || null }]
+          copies: [
+            { volume: volume, path: path, hash: md5 || sha1 || xxhash64 || xxhash64be || null }
+          ]
         }
 
         // Sum the sizes
@@ -138,10 +162,10 @@ async function processFile(
 
         return acc
       },
-      {} as Record<string, ClipType>
+      {} as Record<string, OcfClipBaseType>
     )
 
-    return Object.values(grouped) as ClipType[]
+    return Object.values(grouped) as OcfClipBaseType[]
   } catch (err) {
     if (err instanceof Error) {
       logger.error(`Error processing file ${filePath}: ${err.message}`)
@@ -154,7 +178,7 @@ async function readAndParseMHLFiles(
   filePaths: string[],
   path: string,
   progressCallback: (progress: number) => void
-): Promise<ClipType[]> {
+): Promise<OcfClipBaseType[]> {
   let processedFiles = 0
   const updateProgress = (): void => {
     processedFiles++
@@ -162,9 +186,11 @@ async function readAndParseMHLFiles(
     progressCallback(progress) // Report progress
   }
 
-  const results: ClipType[][] = await Promise.all(
+  const volume = getVolumeName(path)
+
+  const results: OcfClipBaseType[][] = await Promise.all(
     filePaths.map(async (filePath) => {
-      const result = await processFile(filePath, path, extensions, sequentialFileTypes)
+      const result = await processFile(filePath, volume, path, extensions, sequentialFileTypes)
       updateProgress()
       return result
     })
@@ -173,7 +199,7 @@ async function readAndParseMHLFiles(
   return results.flat() // Flatten the array of results
 }
 
-async function processMHL(mhlFiles: string[], path: string): Promise<ClipType[]> {
+async function processMHL(mhlFiles: string[], path: string): Promise<OcfClipBaseType[]> {
   let progress = 0
   let isCancelled = false
   let showProgressFlag = false

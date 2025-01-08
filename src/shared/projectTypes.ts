@@ -92,6 +92,7 @@ const durationField = z.object({
   unit: timeUnits,
   fps: z.string().max(80).optional()
 })
+
 export type StringFieldType = z.infer<typeof stringField>
 export type ListOfStringsFieldType = z.infer<typeof listOfStringsField>
 export type KeyValueObjFieldType = z.infer<typeof keyValueObjField>

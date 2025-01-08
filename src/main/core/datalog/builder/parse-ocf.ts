@@ -3,19 +3,18 @@ import logger from '../../logger'
 import findFilesByType from '../../../utils/find-files-by-type'
 import processMHL from '../../file-processing/mhl/process-mhl'
 import processALE from '../../file-processing/camera/process-ale'
-import { getActiveProject } from '../../app-state/state'
-import { getBuilderClips, setBuilderClips } from './builder-state'
-import { ClipType, ResponseWithClips } from '@shared/datalogTypes'
+import { ocfClipsStore } from './builder-state'
+import { CameraMetadataType, OcfClipBaseType, ResponseWithClips } from '@shared/datalogTypes'
 
-const ParseCameraMetadata = async (filePath: string): Promise<ClipType[]> => {
+const ParseCameraMetadata = async (filePath: string): Promise<CameraMetadataType[]> => {
   const [aleFiles, xmlFiles] = await Promise.all([
     findFilesByType(filePath, 'ale'),
     findFilesByType(filePath, 'xml')
   ])
 
   // Initialize data arrays
-  let aleData: ClipType[] = []
-  let xmlData: ClipType[] = []
+  let aleData: CameraMetadataType[] = []
+  let xmlData: CameraMetadataType[] = []
 
   if (aleFiles.length > 0) {
     aleData = await processALE(aleFiles)
@@ -40,15 +39,8 @@ const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
       paths = [result.filePaths[0]]
     }
 
-    const existingClips = getBuilderClips()
-
-    // Create a map of existing clips for fast lookup
-    const existingClipMap = new Map<string, ClipType>(
-      existingClips.map((clip) => [clip.clip, clip])
-    )
-
     // We'll accumulate new clips and metadata before updating state
-    let newClips: ClipType[] = []
+    let newClips: OcfClipBaseType[] = []
 
     await Promise.all(
       paths.map(async (path) => {
@@ -64,7 +56,7 @@ const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
 
         // Handle Copies merging
         mhlData.forEach((newClip) => {
-          const existingClip = existingClipMap.get(newClip.clip)
+          let existingClip = ocfClipsStore().get(newClip.clip)
 
           if (existingClip) {
             // If the clip already exists, merge the Copies
@@ -75,6 +67,7 @@ const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
                   !existingClip.copies.some((existingCopy) => existingCopy.path === copy.path)
               )
             ]
+            ocfClipsStore().set(existingClip.clip, existingClip)
           } else {
             // If the clip doesn't exist, add it to the list of new clips
             newClips.push(newClip)
@@ -83,12 +76,8 @@ const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
       })
     )
 
-    const shouldParseCameraMetadata = getActiveProject()?.parse_camera_metadata
-    const parseCameraMetadataEnabled =
-      shouldParseCameraMetadata != null && shouldParseCameraMetadata === false
-
-    let cameraMetadata: ClipType[] = []
-    if (parseCameraMetadataEnabled && newClips.length > 0) {
+    let cameraMetadata: CameraMetadataType[] = []
+    if (newClips.length > 0) {
       const path = paths[0]
       cameraMetadata = await ParseCameraMetadata(path)
     }
@@ -98,12 +87,12 @@ const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
       const cameraMetadataItem = cameraMetadata.find((camera) => camera.clip === item.clip)
       return { ...cameraMetadataItem, ...item }
     })
-    const updatedClips = [
-      ...existingClips.map((clip) => existingClipMap.get(clip.clip) || clip), // Update existing clips with merged Copies
-      ...mergedWithMetadata // Add newly parsed clips
-    ]
-    setBuilderClips(updatedClips)
-    return { success: true, clips: updatedClips }
+
+    mergedWithMetadata.map((item) => {
+      ocfClipsStore().set(item.clip, item)
+    })
+
+    return { success: true, clips: { ocf: Array.from(ocfClipsStore().values()) } }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred.'
     logger.error(`Error parsing OCF: ${message}`)

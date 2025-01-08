@@ -9,21 +9,31 @@ import { Button } from '@components/ui/button'
 import { ScrollArea } from '@components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { useState } from 'react'
-import { ClipType, DatalogType, DatalogDynamicZod } from '@shared/datalogTypes'
+import {
+  DatalogType,
+  DatalogDynamicZod,
+  CopyBaseType,
+  datalogZod,
+  OcfClipZod,
+  OcfClipType,
+  OCF,
+  Sound,
+  Proxy
+} from '@shared/datalogTypes'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ProjectRootType } from '@shared/projectTypes'
 import replaceTags, { formatDate } from '../../../utils/formatDynamicString'
 import { useToast } from '@components/lib/hooks/use-toast'
 import { Form } from '@components/ui/form'
-import { CopyType } from './types'
-import { getCopiesFromClips } from '../utils/getCopiesFromClips'
-import { PathType } from './types'
+import { CopyType } from '@shared/datalogTypes'
+import { formatCopiesFromClips } from '../../../../../shared/utils/format-copies'
 import { DynamicTable } from './tabs/preview/DynamicTable'
 import StatsPanel from './stats/statspanel'
 import { mergeDirtyValues } from '../utils/merge-clips'
 import { removeEmptyFields } from '@renderer/utils/form'
 import Name from './tabs/name'
+import z from 'zod'
 
 interface BuilderdialogProps {
   project: ProjectRootType
@@ -38,18 +48,21 @@ const Builderdialog = ({
   selected,
   setOpen
 }: BuilderdialogProps): JSX.Element => {
-  const [copies, setCopies] = useState<CopyType[]>(
-    selected && selected.clips ? getCopiesFromClips(selected.clips) : []
+  const [ocfCopies, setOcfCopies] = useState<CopyType[]>(
+    selected?.ocf?.clips ? formatCopiesFromClips(selected.ocf.clips) : []
+  )
+  const [soundCopies, setSoundCopies] = useState<CopyType[]>(
+    selected?.sound?.clips ? formatCopiesFromClips(selected.sound.clips) : []
   )
 
   const { toast } = useToast()
 
-  function getNextDay(entries: DatalogType[]): number {
-    let highestDay = entries[0].day
+  function getNextDay(logs: DatalogType[]): number {
+    let highestDay = logs[0].day
 
-    for (const entry of entries) {
-      if (entry.day > highestDay) {
-        highestDay = entry.day
+    for (const log of logs) {
+      if (log.day > highestDay) {
+        highestDay = log.day
       }
     }
     return highestDay + 1
@@ -57,7 +70,7 @@ const Builderdialog = ({
   const defaultDay =
     previousEntries && previousEntries?.length > 0 ? getNextDay(previousEntries) : 1
 
-  const defaultFolder = (): string => {
+  const defaultId = (): string => {
     const tags = {
       day: defaultDay,
       projectName: project.project_name,
@@ -66,7 +79,9 @@ const Builderdialog = ({
     return replaceTags(project.folder_template, tags)
   }
 
-  const form = useForm({
+  /*
+ old form
+ const form = useForm({
     defaultValues: {
       id: selected ? selected.id : defaultFolder(),
       day: selected ? selected.day : defaultDay,
@@ -81,6 +96,50 @@ const Builderdialog = ({
     },
     mode: 'onSubmit',
     resolver: zodResolver(DatalogDynamicZod(project, { transformDurationToReadable: true }))
+  })
+  */
+
+  const omitted = datalogZod.omit({ ocf: true, proxy: true, sound: true, custom: true })
+  const builderSchema = omitted.extend({
+    ocfClips: OCF.shape.clips,
+    ocfOverrideFiles: OCF.shape.files,
+    ocfOverrideSize: OCF.shape.size,
+    ocfOverrideCopies: OCF.shape.copies,
+    ocfOverrideReels: OCF.shape.reels,
+    ocfOverrideDuration: OCF.shape.duration,
+    soundClips: Sound.shape.clips,
+    soundOverrideFiles: Sound.shape.files,
+    soundOverrideSize: Sound.shape.size,
+    soundOverrideCopies: Sound.shape.copies,
+    proxyClips: Proxy.shape.clips,
+    proxyOverrideFiles: Proxy.shape.files,
+    proxyOverrideSize: Proxy.shape.size,
+    csvClips: z.array(z.any())
+  })
+
+  const form = useForm({
+    defaultValues: {
+      id: selected ? selected.id : defaultId(),
+      day: selected ? selected.day : defaultDay,
+      date: selected ? selected.date : formatDate(),
+      unit: selected ? selected.unit : project.unit ? project.unit : '',
+      ocfClips: selected?.ocf.clips ?? [],
+      ocfOverrideFiles: selected?.ocf.files ?? '',
+      ocfOverrideSize: selected?.ocf.size ?? '',
+      ocfOverrideCopies: selected?.ocf.copies ?? [],
+      ocfOverrideReels: selected?.ocf?.reels ?? [],
+      ocfOverrideDuration: selected?.ocf.duration ?? [],
+      soundClips: selected?.sound ?? [],
+      soundOverrideFiles: selected?.sound?.files ?? '',
+      soundOverrideSize: selected?.sound?.size ?? '',
+      soundOverrideCopies: selected?.sound?.copies ?? [],
+      proxyClips: selected?.proxy?.clips ?? [],
+      proxyOverrideFiles: selected?.proxy?.files ?? '',
+      proxyOverrideSize: selected?.proxy?.size ?? '',
+      csvClips: selected?.custom ?? []
+    },
+    mode: 'onSubmit',
+    resolver: zodResolver(builderSchema)
   })
 
   const { formState, handleSubmit, reset } = form
@@ -106,24 +165,24 @@ const Builderdialog = ({
     }
   }
 
-  const updateClips = (newClips: ClipType[], setcopies = false) => {
-    const dirtyFields = form.formState.dirtyFields.clips
-    const currentClips = form.getValues().clips
+  const updateOcfClips = (newClips: OcfClipType[], setcopies = false) => {
+    const dirtyFields = form.formState.dirtyFields.ocfClips
+    const currentClips = form.getValues().ocfClips
 
     const mergedClips = mergeDirtyValues(dirtyFields, currentClips, newClips)
     console.log('mergedClips:', mergedClips)
-    form.reset({ ...form.getValues(), clips: mergedClips }, { keepDirty: true })
+    form.reset({ ...form.getValues(), ocfClips: mergedClips }, { keepDirty: true })
     if (setcopies) {
-      setCopies(getCopiesFromClips(newClips))
+      setOcfCopies(formatCopiesFromClips(newClips))
     }
   }
 
-  const handleRemoveCopy = async (paths: PathType[]): Promise<void> => {
-    const fullPaths = paths.map((item) => item.full)
+  const handleRemoveCopy = async (paths: CopyBaseType[]): Promise<void> => {
+    const fullPaths = paths.map((item) => item.path)
     try {
       const res = await window.mainApi.removeLogPath(fullPaths)
       if (res.success) {
-        updateClips(res.clips, true)
+        res.clips.ocf && updateOcfClips(res.clips.ocf, true)
       } else {
         console.error(res.error)
       }
@@ -136,7 +195,7 @@ const Builderdialog = ({
     try {
       const res = await window.mainApi.findOcf()
       if (res.success) {
-        updateClips(res.clips, true)
+        res.clips.ocf && updateOcfClips(res.clips.ocf, true)
       } else {
         if (res.cancelled) return
         console.error(res.error)
@@ -150,7 +209,7 @@ const Builderdialog = ({
     try {
       const res = await window.mainApi.getProxies()
       if (res.success) {
-        updateClips(res.clips)
+        //updateClips(res.clips)
       } else {
         if (res.cancelled) return
         console.error(res.error)
@@ -164,7 +223,7 @@ const Builderdialog = ({
     try {
       const res = await window.mainApi.removeProxies()
       if (res.success) {
-        updateClips(res.clips)
+        //updateClips(res.clips)
       } else {
         console.error(res.error)
       }
@@ -178,7 +237,7 @@ const Builderdialog = ({
       const res = await window.mainApi.getCsvMetadata()
       if (res.success) {
         console.log('getcsv-res:', res.clips)
-        updateClips(res.clips)
+        //updateClips(res.clips)
       } else {
         if (res.cancelled) return
         console.error(res.error)
@@ -195,9 +254,7 @@ const Builderdialog = ({
           <DialogTitle>New Shooting Day</DialogTitle>
           <DialogDescription>Create a summary of the shooting day</DialogDescription>
           <div>
-            <div className="mx-auto max-w-7xl">
-              <StatsPanel />
-            </div>
+            <div className="mx-auto max-w-7xl">{/*<StatsPanel />*/}</div>
           </div>
           <div className="flex justify-center">
             <TabsList className="grid grid-cols-3 w-[400px] mt-4">
@@ -218,7 +275,7 @@ const Builderdialog = ({
                 role="list"
                 className="divide-y divide-white/10 rounded-md border border-white/20 mb-2"
               >
-                {copies.map((copy, index) => (
+                {ocfCopies.map((copy, index) => (
                   <li
                     key={index}
                     className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6"
@@ -228,12 +285,12 @@ const Builderdialog = ({
                       <div className="ml-4 flex min-w-0 flex-1 gap-2">
                         <span className="flex-shrink-0 text-gray-400">Copy {index + 1}: </span>
 
-                        {copy.paths.map((item, index) => (
+                        {copy.copies.map((item, index) => (
                           <span key={index} className="truncate font-medium">
                             {item.volume}
                             <span className="text-gray-400">
-                              {item.relativePath}
-                              {index < copy.paths.length - 1 && ', '}
+                              {item.path}
+                              {index < copy.copies.length - 1 && ', '}
                             </span>
                           </span>
                         ))}
@@ -246,7 +303,7 @@ const Builderdialog = ({
                     <div className="ml-4 flex-shrink-0">
                       <a
                         href="#"
-                        onClick={() => handleRemoveCopy(copy.paths)}
+                        onClick={() => handleRemoveCopy(copy.copies)}
                         className="font-medium text-indigo-400 hover:text-indigo-300"
                       >
                         Remove

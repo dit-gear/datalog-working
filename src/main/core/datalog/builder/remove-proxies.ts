@@ -1,7 +1,9 @@
-import { getBuilderClips, setBuilderClips } from './builder-state'
 import { ResponseWithClips } from '@shared/datalogTypes'
 import logger from '../../logger'
 
+// Just remove them from the form.
+
+/*
 const removeProxies = async (): Promise<ResponseWithClips> => {
   const clips = getBuilderClips()
   try {
@@ -19,3 +21,4 @@ const removeProxies = async (): Promise<ResponseWithClips> => {
 }
 
 export default removeProxies
+*/
