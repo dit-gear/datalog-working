@@ -13,7 +13,7 @@ export interface MergedClip {
   clip: string
   // OCF fields
   size?: number
-  copies?: Array<{ path: string; hash: string | null }>
+  copies?: Array<{ volume: string; path: string; hash: string | null }>
   tc_start?: string
   tc_end?: string
   duration?: string
@@ -44,7 +44,9 @@ export interface MergedClip {
  * Main function: orchestrates merging of OCF, Proxy, Custom, and Sound clips
  * from a given DatalogType into an array of `MergedClip`.
  */
-export function mergeClips(datalog: DatalogType): MergedClip[] {
+export function mergeClips(
+  datalog: Pick<DatalogType, 'ocf' | 'sound' | 'proxy' | 'custom'>
+): MergedClip[] {
   const clipMap = new Map<string, MergedClip>()
 
   // 1) Merge OCF
@@ -64,7 +66,7 @@ export function mergeClips(datalog: DatalogType): MergedClip[] {
    - OCF clips define a "base" set of fields.
    - We can simply assign all OCF fields to the merged object.
 ----------------------------------------------------------- */
-function mergeOcfClips(clipMap: Map<string, MergedClip>, datalog: DatalogType): void {
+function mergeOcfClips(clipMap: Map<string, MergedClip>, datalog: Pick<DatalogType, 'ocf'>): void {
   const ocfClips = datalog.ocf?.clips || []
 
   mergeIntoMap(clipMap, ocfClips, (merged, ocfClip) => {
@@ -78,7 +80,10 @@ function mergeOcfClips(clipMap: Map<string, MergedClip>, datalog: DatalogType): 
    - For each Proxy clip, embed its relevant fields 
      under mergedClip.proxy = { ... }.
 ----------------------------------------------------------- */
-function mergeProxyClips(clipMap: Map<string, MergedClip>, datalog: DatalogType): void {
+function mergeProxyClips(
+  clipMap: Map<string, MergedClip>,
+  datalog: Pick<DatalogType, 'proxy'>
+): void {
   const proxyClips = datalog.proxy?.clips || []
 
   mergeIntoMap(clipMap, proxyClips, (merged, proxyClip) => {
@@ -96,7 +101,10 @@ function mergeProxyClips(clipMap: Map<string, MergedClip>, datalog: DatalogType)
    - Each "custom" item also has a `clip` field. We attach all 
      other fields on top-level of the merged clip object.
 ----------------------------------------------------------- */
-function mergeCustomEntries(clipMap: Map<string, MergedClip>, datalog: DatalogType): void {
+function mergeCustomEntries(
+  clipMap: Map<string, MergedClip>,
+  datalog: Pick<DatalogType, 'custom'>
+): void {
   const customEntries = datalog.custom || []
 
   mergeIntoMap(clipMap, customEntries, (merged, customObj) => {
@@ -112,7 +120,10 @@ function mergeCustomEntries(clipMap: Map<string, MergedClip>, datalog: DatalogTy
    - Convert OCF start/end to frames, compare with Sound start/end frames,
      if they overlap, add sound clip name to `merged.sound`.
 ----------------------------------------------------------- */
-function mergeSoundClips(clipMap: Map<string, MergedClip>, datalog: DatalogType): void {
+function mergeSoundClips(
+  clipMap: Map<string, MergedClip>,
+  datalog: Pick<DatalogType, 'sound'>
+): void {
   const soundClips = datalog.sound?.clips || []
 
   for (const [, mergedClip] of clipMap) {

@@ -23,7 +23,6 @@ import { formatCopiesFromString, formatCopiesFromClips } from './format-copies'
 import { Datalog } from '@shared/datalogClass'
 
 type Clip = OcfClipType | ProxyClipType | SoundClipType
-type Dataroot = OcfType | ProxyType | SoundType
 
 /**
  * Utility to count how many “files” from an array of clips
@@ -52,7 +51,7 @@ function sumClipDurations(clips: OcfClipType[] | undefined, fallbackFps = 24): s
   const totalFrames = clips.reduce((acc, clip) => {
     // If clip.fps is missing, fall back to some default
     const fps = clip.fps ?? fallbackFps
-    return acc + timecodeToFrames(clip.duration, fps)
+    return acc + (clip.duration ? timecodeToFrames(clip.duration, fps) : 0)
   }, 0)
 
   // For simplicity, assume we just use the first clip’s fps
@@ -60,32 +59,52 @@ function sumClipDurations(clips: OcfClipType[] | undefined, fallbackFps = 24): s
   return framesToTimecode(totalFrames, fps)
 }
 
-export const getFiles = (data: Dataroot): number => {
+export const getFiles = (
+  data: Pick<OcfType | ProxyType | SoundType, 'files' | 'clips'>
+): number => {
   return data?.files != null ? data.files : countClipFiles(data.clips)
 }
 
-export function getSize(data: Dataroot, options: { format: true }): string
-export function getSize(data: Dataroot, options: { format: false }): number
-export function getSize(data: Dataroot, options: { format?: boolean }): string | number {
+export function getSize(
+  data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'>,
+  options: { format: true }
+): string
+export function getSize(
+  data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'>,
+  options: { format: false }
+): number
+export function getSize(
+  data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'>,
+  options: { format?: boolean }
+): string | number {
   const size = data?.size != null ? data.size : sumClipSizes(data.clips)
   return options.format === false ? size : formatBytes(size)
 }
-export function getDuration(data: OcfType, format: 'tc'): string
-export function getDuration(data: OcfType, format: 'seconds'): number
-export function getDuration(data: OcfType, format: 'hms'): durationType
-export function getDuration(data: OcfType, format: 'hms-string'): string
+export function getDuration(data: Pick<OcfType, 'duration' | 'clips'>, format: 'tc'): string
+export function getDuration(data: Pick<OcfType, 'duration' | 'clips'>, format: 'seconds'): number
+export function getDuration(data: Pick<OcfType, 'duration' | 'clips'>, format: 'hms'): durationType
+export function getDuration(data: Pick<OcfType, 'duration' | 'clips'>, format: 'hms-string'): string
 export function getDuration(
-  data: OcfType,
+  data: Pick<OcfType, 'duration' | 'clips'>,
   format: 'tc' | 'seconds' | 'hms' | 'hms-string'
 ): string | number | durationType {
   const duration = data?.duration ?? sumClipDurations(data.clips)
-  if ((format = 'seconds')) return timecodeToSeconds(duration)
-  if ((format = 'hms')) return formatDuration(duration)
-  if ((format = 'hms-string')) return formatDuration(duration, { asString: true })
+  console.log('d-dur', duration)
+  console.log(format)
+  if (format === 'seconds') return timecodeToSeconds(duration)
+  if (format === 'hms') {
+    const d = formatDuration(duration)
+    console.log('formatted', d)
+    return d
+  }
+  if (format === 'hms-string') return formatDuration(duration, { asString: true })
   return duration
 }
 
-export const getReels = (data: OcfType, options?: getReelsOptions): string[] => {
+export const getReels = (
+  data: Pick<OcfType, 'reels' | 'clips'>,
+  options?: getReelsOptions
+): string[] => {
   if (data.reels !== undefined) {
     return getReelsFunction(data.reels, options)
   } else if (data.clips && data.clips.length > 0) {
@@ -93,7 +112,7 @@ export const getReels = (data: OcfType, options?: getReelsOptions): string[] => 
   } else return []
 }
 
-export function getCopies(data: OcfType | SoundType): CopyType[] {
+export function getCopies(data: Pick<OcfType | SoundType, 'copies' | 'clips'>): CopyType[] {
   return data.copies ? formatCopiesFromString(data.copies) : formatCopiesFromClips(data.clips)
 }
 
@@ -150,7 +169,7 @@ export function getTotalDuration(
 ): string | durationType {
   const duration = data.reduce((sum, log) => sum + log.ocf.durationAsSeconds(), 0)
   const durationTC = secondsToLargeTimecode(duration)
-  if ((format = 'hms')) return formatDuration(durationTC)
-  if ((format = 'hms-string')) return formatDuration(durationTC, { asString: true })
+  if (format === 'hms') return formatDuration(durationTC)
+  if (format === 'hms-string') return formatDuration(durationTC, { asString: true })
   return durationTC
 }

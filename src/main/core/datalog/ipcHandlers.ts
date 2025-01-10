@@ -4,7 +4,6 @@ import { Response } from '@shared/shared-types'
 import ParseOCF from './builder/parse-ocf'
 import removeOcf from './builder/remove-ocf'
 import addProxies from './builder/add-proxies'
-import removeProxies from './builder/remove-proxies'
 import parseCsv from './builder/parse-csv'
 import updateDatalog from './updater'
 import deleteDatalog from './delete'
@@ -21,10 +20,6 @@ export function setupDatalogIpcHandlers(): void {
 
   ipcMain.handle('getProxies', async (): Promise<ResponseWithClips> => {
     return await addProxies()
-  })
-
-  ipcMain.handle('removeProxies', async (): Promise<ResponseWithClips> => {
-    return await removeProxies()
   })
 
   ipcMain.handle('getCsvMetadata', async (): Promise<ResponseWithClips> => {

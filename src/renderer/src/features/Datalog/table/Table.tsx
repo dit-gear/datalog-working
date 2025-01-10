@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react'
 import DataTable from './DataTable'
-import { getOCFSize, getProxySize, getDuration, getReels } from '@shared/utils/datalog-methods'
 import { DatalogType } from '@shared/datalogTypes'
 import { LogSum } from './types'
 import { Columns } from './Column'
@@ -21,7 +20,25 @@ const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
 
   const handlers = useMemo(() => ({ handleDelete, handleEdit }), [handleDelete, handleEdit])
 
-  const DatalogRows = (logs: DatalogType[]): LogSum[] => {
+  const DatalogRows = (logs: DatalogType[]): any[] => {
+    return logs.map((data) => ({
+      id: data.id,
+      day: data.day,
+      date: data.date,
+      unit: data.unit,
+      raw: data
+    }))
+  }
+
+  const columns = useMemo(() => Columns(handlers), [handlers])
+
+  return <DataTable columns={columns} data={DatalogRows(logs)} />
+})
+
+export default Table
+
+/*
+const DatalogRows = (logs: DatalogType[]): LogSum[] => {
     return logs.map((data) => ({
       id: data.id,
       day: data.day,
@@ -33,11 +50,4 @@ const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
       reels: getReels(data, { grouped: true }),
       raw: data
     }))
-  }
-
-  const columns = useMemo(() => Columns(handlers), [handlers])
-
-  return <DataTable columns={columns} data={DatalogRows(logs)} />
-})
-
-export default Table
+  } */

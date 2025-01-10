@@ -6,11 +6,11 @@ const timecode = z
   .string()
   .refine((val) => isValidTimecodeFormat(val), { message: 'Invalid timecode format' })
 
-const CameraMetadataZod = z.object({
+export const CameraMetadataZod = z.object({
   clip: z.string(),
-  tc_start: timecode,
-  tc_end: timecode,
-  duration: timecode,
+  tc_start: timecode.optional(),
+  tc_end: timecode.optional(),
+  duration: timecode.optional(),
   camera_model: z.string().optional(),
   camera_id: z.string().optional(),
   reel: z.string().optional(),
@@ -42,7 +42,7 @@ export type CopyBaseType = z.infer<typeof copy>
 }*/
 
 export type CopyType = {
-  copies: CopyBaseType[]
+  volumes: string[]
   clips: string[]
   count: [number, number]
 }
@@ -115,7 +115,7 @@ export type SoundType = z.infer<typeof Sound>
 export const OCF = z.object({
   files: file,
   size: size,
-  duration: timecode,
+  duration: timecode.optional(),
   reels: z.array(z.string()).optional(),
   copies: z.array(z.string()).optional(),
   clips: z.array(OcfClipZod).optional()

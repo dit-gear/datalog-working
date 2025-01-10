@@ -35,7 +35,6 @@ const mainApi = {
     return () => ipcRenderer.removeListener('show-progress', handler)
   },
   getProxies: () => ipcRenderer.invoke('getProxies'),
-  removeProxies: () => ipcRenderer.invoke('removeProxies'),
   getCsvMetadata: () => ipcRenderer.invoke('getCsvMetadata'),
   openSendWindow: (selection?: DatalogType[]) => ipcRenderer.send('open-send-window', selection),
   exportPdf: (pdf: pdfType, selection?: DatalogType[]) =>

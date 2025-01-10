@@ -105,6 +105,20 @@ export function framesToTimecode(totalFrames: number, fps: number): string {
     zeroPad(frames, 2)
   )
 }
+
+/**
+ * Helper: convert seconds to large timecode (HH:MM:SS:FF)
+ */
+export function secondsToTimecode(totalSeconds: number): string {
+  const hours = Math.floor(totalSeconds / 3600)
+  const remainder = totalSeconds % 3600
+
+  const minutes = Math.floor(remainder / 60)
+  const seconds = remainder % 60
+
+  return zeroPad(hours, 2) + ':' + zeroPad(minutes, 2) + ':' + zeroPad(seconds, 2) + ':00'
+}
+
 /**
  * Helper: convert seconds to large timecode (HHHH:MM:SS)
  */

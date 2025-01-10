@@ -2,14 +2,14 @@ import { ocfClipsStore } from './builder-state'
 import { OcfClipType, ResponseWithClips } from '@shared/datalogTypes'
 import logger from '../../logger'
 
-const removeOcf = async (paths: string[]): Promise<ResponseWithClips> => {
+const removeOcf = async (volumes: string[]): Promise<ResponseWithClips> => {
   const ocfClipsMap = ocfClipsStore()
 
   try {
-    const pathSet = new Set(paths)
+    const volSet = new Set(volumes)
 
     for (const [clipKey, clip] of ocfClipsMap.entries()) {
-      const filteredCopies = clip.copies.filter((copy) => !pathSet.has(copy.path))
+      const filteredCopies = clip.copies.filter((copy) => !volSet.has(copy.volume))
 
       if (filteredCopies.length > 0) {
         const updatedClip: OcfClipType = { ...clip, copies: filteredCopies }

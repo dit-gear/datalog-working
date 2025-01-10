@@ -1,58 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { ReelsPopupForm } from './forms/ReelsPopupForm'
-import { getReels } from '@shared/utils/format-reel'
+import { getReels } from '@shared/utils/datalog-methods'
 import Stat from '@components/stat'
-import { ClipType } from '@shared/datalogTypes'
+import { OcfClipType } from '@shared/datalogTypes'
 
-const Reels = () => {
-  const { setValue } = useFormContext()
-  const clips: ClipType[] = useWatch({ name: 'clips' }) || []
-  const fixedReels = useWatch({ name: 'reels' }) as string[] | undefined
-
-  const [value, setValueState] = useState<string[]>([])
-  const [displayValue, setDisplayValue] = useState<React.ReactNode>(null)
-  const [defaults, setDefaults] = useState<string[]>([])
-
-  useEffect(() => {
-    const computedDefaults = getReelsValueFromClips(clips)
-    setDefaults(computedDefaults)
-
-    const hasFixedValue = fixedReels && fixedReels.length > 0
-    const computedValue = hasFixedValue ? fixedReels : computedDefaults
-    setValueState(computedValue)
-
-    const formattedDisplay = formatReelsDisplayValue(hasFixedValue ? fixedReels : clips)
-    setDisplayValue(formattedDisplay.displayValue)
-  }, [clips, fixedReels])
-
-  const update = (newValue: string[]) => {
-    setValue('reels', newValue)
-  }
-
-  const clear = () => {
-    setValue('reels', undefined)
-  }
-
-  // Convert `value` to a string for the `ReelsPopupForm`
-  const valueAsString = value.join(' ')
-
-  return (
-    <ReelsPopupForm value={valueAsString} defaults={defaults} update={update} clear={clear}>
-      <Stat label="Reels">{displayValue}</Stat>
-    </ReelsPopupForm>
-  )
-}
-
-const getReelsValueFromClips = (clips): string[] => {
-  return getReels(clips) || []
-}
-
-const formatReelsDisplayValue = (reels: string[] | ClipType[]) => {
+const formatReelsDisplayValue = (reels: string[]) => {
   if (!reels || reels.length === 0) {
     return { displayValue: null }
   }
-  const displayValueStr = getReels(reels, { grouped: true }).join(', ')
+  const displayValueStr = reels.join(', ')
   const fontClass =
     displayValueStr.length < 20
       ? 'text-4xl'
@@ -70,6 +27,46 @@ const formatReelsDisplayValue = (reels: string[] | ClipType[]) => {
       </span>
     )
   }
+}
+
+const Reels = () => {
+  const { setValue } = useFormContext()
+  const clips = useWatch({ name: 'ocf.clips' })
+  const fixedReels = useWatch({ name: 'ocf.reels' })
+
+  const [valueAsString, setValueAsString] = useState<string>('')
+  const [displayValue, setDisplayValue] = useState<React.ReactNode>(null)
+  const [defaults, setDefaults] = useState<string[]>([])
+
+  useEffect(() => {
+    const reels = getReels(
+      { reels: fixedReels ? fixedReels : undefined, clips: clips },
+      { grouped: false }
+    )
+    const reelsGrouped = getReels(
+      { reels: fixedReels ? fixedReels : undefined, clips: clips },
+      { grouped: true }
+    )
+    const computedDefaults = getReels({ reels: undefined, clips: clips }, { grouped: false })
+    setDefaults(computedDefaults)
+    setValueAsString(reels.join(' '))
+    const formattedDisplay = formatReelsDisplayValue(reelsGrouped)
+    setDisplayValue(formattedDisplay.displayValue)
+  }, [clips, fixedReels])
+
+  const update = (newValue: string[]) => {
+    setValue('ocf.reels', newValue)
+  }
+
+  const clear = () => {
+    setValue('ocf.reels', undefined)
+  }
+
+  return (
+    <ReelsPopupForm value={valueAsString} defaults={defaults} update={update} clear={clear}>
+      <Stat label="Reels">{displayValue}</Stat>
+    </ReelsPopupForm>
+  )
 }
 
 export default Reels

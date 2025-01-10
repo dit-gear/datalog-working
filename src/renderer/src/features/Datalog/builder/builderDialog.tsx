@@ -8,7 +8,7 @@ import {
 import { Button } from '@components/ui/button'
 import { ScrollArea } from '@components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   DatalogType,
   DatalogDynamicZod,
@@ -28,12 +28,14 @@ import { useToast } from '@components/lib/hooks/use-toast'
 import { Form } from '@components/ui/form'
 import { CopyType } from '@shared/datalogTypes'
 import { formatCopiesFromClips } from '../../../../../shared/utils/format-copies'
-import { DynamicTable } from './tabs/preview/DynamicTable'
+import { DynamicTable } from './tabs/preview/table/DynamicTable'
 import StatsPanel from './stats/statspanel'
 import { mergeDirtyValues } from '../utils/merge-clips'
 import { removeEmptyFields } from '@renderer/utils/form'
 import Name from './tabs/name'
-import z from 'zod'
+import Import from './tabs/import/index'
+import Preview from './tabs/preview'
+import z, { ZodTypeAny } from 'zod'
 
 interface BuilderdialogProps {
   project: ProjectRootType
@@ -48,13 +50,6 @@ const Builderdialog = ({
   selected,
   setOpen
 }: BuilderdialogProps): JSX.Element => {
-  const [ocfCopies, setOcfCopies] = useState<CopyType[]>(
-    selected?.ocf?.clips ? formatCopiesFromClips(selected.ocf.clips) : []
-  )
-  const [soundCopies, setSoundCopies] = useState<CopyType[]>(
-    selected?.sound?.clips ? formatCopiesFromClips(selected.sound.clips) : []
-  )
-
   const { toast } = useToast()
 
   function getNextDay(logs: DatalogType[]): number {
@@ -114,8 +109,55 @@ const Builderdialog = ({
     proxyClips: Proxy.shape.clips,
     proxyOverrideFiles: Proxy.shape.files,
     proxyOverrideSize: Proxy.shape.size,
-    csvClips: z.array(z.any())
+    customClips: z.array(z.any())
   })
+
+  const oldDef = {
+    id: selected ? selected.id : defaultId(),
+    day: selected ? selected.day : defaultDay,
+    date: selected ? selected.date : formatDate(),
+    unit: selected ? selected.unit : project.unit ? project.unit : '',
+    ocfClips: selected?.ocf.clips ?? [],
+    ocfOverrideFiles: selected?.ocf.files ?? '',
+    ocfOverrideSize: selected?.ocf.size ?? '',
+    ocfOverrideCopies: selected?.ocf.copies ?? [],
+    ocfOverrideReels: selected?.ocf?.reels ?? [],
+    ocfOverrideDuration: selected?.ocf.duration ?? [],
+    soundClips: selected?.sound ?? [],
+    soundOverrideFiles: selected?.sound?.files ?? '',
+    soundOverrideSize: selected?.sound?.size ?? '',
+    soundOverrideCopies: selected?.sound?.copies ?? [],
+    proxyClips: selected?.proxy?.clips ?? [],
+    proxyOverrideFiles: selected?.proxy?.files ?? '',
+    proxyOverrideSize: selected?.proxy?.size ?? '',
+    customClips: selected?.custom ?? []
+  }
+
+  const getDefaultValues = (schema: ZodTypeAny, data: any = {}) => {
+    if (schema instanceof z.ZodObject) {
+      // Iterate over object keys
+      const shape = schema.shape
+      return Object.keys(shape).reduce(
+        (acc, key) => {
+          acc[key] = getDefaultValues(shape[key], data[key])
+          return acc
+        },
+        {} as Record<string, any>
+      )
+    } else if (schema instanceof z.ZodString) {
+      return data ?? '' // Return empty string if no value
+    } else if (schema instanceof z.ZodNumber) {
+      return data ?? 0 // Return 0 if no value
+    } else if (schema instanceof z.ZodArray) {
+      return data ?? [] // Return empty array if no value
+    } else if (schema instanceof z.ZodBoolean) {
+      return data ?? false // Return false if no value
+    } else if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
+      return getDefaultValues(schema.unwrap(), data)
+    } else {
+      return data ?? null // Default fallback for other types
+    }
+  }
 
   const form = useForm({
     defaultValues: {
@@ -123,23 +165,20 @@ const Builderdialog = ({
       day: selected ? selected.day : defaultDay,
       date: selected ? selected.date : formatDate(),
       unit: selected ? selected.unit : project.unit ? project.unit : '',
-      ocfClips: selected?.ocf.clips ?? [],
-      ocfOverrideFiles: selected?.ocf.files ?? '',
-      ocfOverrideSize: selected?.ocf.size ?? '',
-      ocfOverrideCopies: selected?.ocf.copies ?? [],
-      ocfOverrideReels: selected?.ocf?.reels ?? [],
-      ocfOverrideDuration: selected?.ocf.duration ?? [],
-      soundClips: selected?.sound ?? [],
-      soundOverrideFiles: selected?.sound?.files ?? '',
-      soundOverrideSize: selected?.sound?.size ?? '',
-      soundOverrideCopies: selected?.sound?.copies ?? [],
-      proxyClips: selected?.proxy?.clips ?? [],
-      proxyOverrideFiles: selected?.proxy?.files ?? '',
-      proxyOverrideSize: selected?.proxy?.size ?? '',
-      csvClips: selected?.custom ?? []
+      ocf: {
+        files: selected?.ocf.files ?? '',
+        size: selected?.ocf.size ?? '',
+        duration: selected?.ocf.duration ?? '',
+        reels: selected?.ocf.reels ?? [],
+        copies: selected?.ocf.copies ?? [],
+        clips: selected?.ocf.clips ?? []
+      },
+      sound: getDefaultValues(OCF, selected),
+      proxy: getDefaultValues(Proxy, selected),
+      custom: selected?.custom ?? []
     },
     mode: 'onSubmit',
-    resolver: zodResolver(builderSchema)
+    resolver: zodResolver(datalogZod)
   })
 
   const { formState, handleSubmit, reset } = form
@@ -165,101 +204,21 @@ const Builderdialog = ({
     }
   }
 
-  const updateOcfClips = (newClips: OcfClipType[], setcopies = false) => {
-    const dirtyFields = form.formState.dirtyFields.ocfClips
-    const currentClips = form.getValues().ocfClips
-
-    const mergedClips = mergeDirtyValues(dirtyFields, currentClips, newClips)
-    console.log('mergedClips:', mergedClips)
-    form.reset({ ...form.getValues(), ocfClips: mergedClips }, { keepDirty: true })
-    if (setcopies) {
-      setOcfCopies(formatCopiesFromClips(newClips))
-    }
-  }
-
-  const handleRemoveCopy = async (paths: CopyBaseType[]): Promise<void> => {
-    const fullPaths = paths.map((item) => item.path)
-    try {
-      const res = await window.mainApi.removeLogPath(fullPaths)
-      if (res.success) {
-        res.clips.ocf && updateOcfClips(res.clips.ocf, true)
-      } else {
-        console.error(res.error)
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  const handleAddCopy = async (): Promise<void> => {
-    try {
-      const res = await window.mainApi.findOcf()
-      if (res.success) {
-        res.clips.ocf && updateOcfClips(res.clips.ocf, true)
-      } else {
-        if (res.cancelled) return
-        console.error(res.error)
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  const handleGetProxies = async (): Promise<void> => {
-    try {
-      const res = await window.mainApi.getProxies()
-      if (res.success) {
-        //updateClips(res.clips)
-      } else {
-        if (res.cancelled) return
-        console.error(res.error)
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  const handleRemoveProxies = async (): Promise<void> => {
-    try {
-      const res = await window.mainApi.removeProxies()
-      if (res.success) {
-        //updateClips(res.clips)
-      } else {
-        console.error(res.error)
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  const handleGetCsv = async (): Promise<void> => {
-    try {
-      const res = await window.mainApi.getCsvMetadata()
-      if (res.success) {
-        console.log('getcsv-res:', res.clips)
-        //updateClips(res.clips)
-      } else {
-        if (res.cancelled) return
-        console.error(res.error)
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
   return (
     <Form {...form}>
-      <Tabs defaultValue="name" className="">
+      <Tabs defaultValue="name" className="overflow-hidden">
         <DialogHeader>
           <DialogTitle>New Shooting Day</DialogTitle>
           <DialogDescription>Create a summary of the shooting day</DialogDescription>
           <div>
-            <div className="mx-auto max-w-7xl">{/*<StatsPanel />*/}</div>
+            <div className="mx-auto max-w-7xl">
+              <StatsPanel />
+            </div>
           </div>
           <div className="flex justify-center">
             <TabsList className="grid grid-cols-3 w-[400px] mt-4">
               <TabsTrigger value="name">1. Name</TabsTrigger>
-              <TabsTrigger value="paths">2. Import</TabsTrigger>
+              <TabsTrigger value="import">2. Import</TabsTrigger>
               <TabsTrigger value="clips">3. Preview</TabsTrigger>
             </TabsList>
           </div>
@@ -267,76 +226,11 @@ const Builderdialog = ({
         <TabsContent value="name">
           <Name project={project} />
         </TabsContent>
-        <TabsContent value="paths">
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm font-medium leading-6 text-white">OCF</dt>
-            <dd className="mt-2 text-sm text-white sm:col-span-2 sm:mt-0">
-              <ul
-                role="list"
-                className="divide-y divide-white/10 rounded-md border border-white/20 mb-2"
-              >
-                {ocfCopies.map((copy, index) => (
-                  <li
-                    key={index}
-                    className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6"
-                  >
-                    <div className="flex w-0 flex-1 items-center">
-                      {/*<PaperClipIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />*/}
-                      <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                        <span className="flex-shrink-0 text-gray-400">Copy {index + 1}: </span>
-
-                        {copy.copies.map((item, index) => (
-                          <span key={index} className="truncate font-medium">
-                            {item.volume}
-                            <span className="text-gray-400">
-                              {item.path}
-                              {index < copy.copies.length - 1 && ', '}
-                            </span>
-                          </span>
-                        ))}
-
-                        <span className="flex-shrink-0 text-gray-400">
-                          {copy.count[0]} of {copy.count[1]} Clips
-                        </span>
-                      </div>
-                    </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <a
-                        href="#"
-                        onClick={() => handleRemoveCopy(copy.copies)}
-                        className="font-medium text-indigo-400 hover:text-indigo-300"
-                      >
-                        Remove
-                      </a>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex gap-2">
-                <Button onClick={handleAddCopy}>{`Add OCF Copy Directory (mhl)`}</Button>
-              </div>
-            </dd>
-          </div>
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm font-medium leading-6 text-white">Proxies folder</dt>
-            <dd className="flex mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 gap-4 items-center">
-              <Button onClick={handleGetProxies}>Choose folder</Button>
-              <Button onClick={handleRemoveProxies} variant="outline">
-                Clear
-              </Button>
-            </dd>
-          </div>
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm font-medium leading-6 text-white">Import Metadata</dt>
-            <dd className="flex mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 gap-4 items-center">
-              <Button onClick={handleGetCsv}>Select CSV file</Button>
-            </dd>
-          </div>
+        <TabsContent value="import">
+          <Import project={project} />
         </TabsContent>
         <TabsContent value="clips" className="h-full">
-          <ScrollArea className="h-[50vh] w-[75vw] overflow-hidden" type="auto">
-            <DynamicTable />
-          </ScrollArea>
+          <Preview />
         </TabsContent>
       </Tabs>
       <DialogFooter className="mt-auto">

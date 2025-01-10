@@ -1,6 +1,6 @@
 import { OcfClipType, SoundClipType, CopyType, CopyBaseType } from '@shared/datalogTypes'
-/*
-function getVolumeName(filePath: string): string | null {
+
+export function getVolumeName(filePath: string): string | null {
   if (typeof filePath !== 'string') {
     return null
   }
@@ -32,6 +32,7 @@ function getVolumeName(filePath: string): string | null {
   return null // default return if none of the conditions are met
 }
 
+/*
 const formatPath = (path: string): PathType => {
   const volumesPrefix = `/Volumes/${getVolumeName(path)}`
 
@@ -45,85 +46,136 @@ const formatPath = (path: string): PathType => {
 export function formatCopiesFromString(copies: string[] | undefined): CopyType[] {
   if (!copies || copies.length === 0) return []
 
-  const totalCount = copies.length
-
   return copies.map((copy) => ({
-    copies: [
-      {
-        volume: copy,
-        path: '',
-        hash: null
-      }
-    ],
+    volumes: [copy],
     clips: [],
-    count: [totalCount, 0]
+    count: [0, 0]
+  }))
+}
+
+/**
+ * Takes an array of OcfClipType or SoundClipType and produces
+ * an array of CopyType groups, grouping *by volume name*.
+ */
+
+export const formatCopiesFromClipsNOTGROUPED = (
+  clips: (OcfClipType | SoundClipType)[] | undefined
+): CopyType[] => {
+  if (!clips || clips.length === 0) return []
+
+  const total = clips.length
+  const volumeMap = new Map<string, { copies: CopyBaseType[]; clips: Set<string> }>()
+
+  // Build the volumeMap
+  for (const clip of clips) {
+    for (const copy of clip.copies) {
+      const vol = copy.volume
+      if (!volumeMap.has(vol)) {
+        volumeMap.set(vol, { copies: [], clips: new Set() })
+      }
+      const entry = volumeMap.get(vol)!
+      entry.copies.push(copy)
+      entry.clips.add(clip.clip)
+    }
+  }
+
+  // Return one group per volume
+  return Array.from(volumeMap.values()).map(({ copies, clips }) => ({
+    volumes: Array.from(new Set(copies.map((c) => c.volume))),
+    clips: Array.from(clips),
+    count: [clips.size, total]
   }))
 }
 
 export const formatCopiesFromClips = (
-  clips: (OcfClipType[] | SoundClipType[]) | undefined
+  clips: (OcfClipType | SoundClipType)[] | undefined
 ): CopyType[] => {
   if (!clips || clips.length === 0) return []
+
+  // The total number of clips (used in the `count`)
   const total = clips.length
 
-  // Map to associate each volume with its corresponding copies and clips
-  const volMap = new Map<string, { copies: CopyBaseType[]; clips: Set<string> }>()
+  /**
+   * 1) Build a Map of `volume -> { copies: CopyBaseType[], clips: Set<string> }`
+   *    so that we know which clip IDs reference this volume.
+   *    ----------------------------------------------
+   *    CHANGED from original "pathMap" to "volumeMap"
+   */
+  const volumeMap = new Map<
+    string,
+    {
+      copies: CopyBaseType[]
+      clips: Set<string>
+    }
+  >()
 
-  // Populate the volMap with volumes, their copies, and associated clips
-  clips.forEach((clip) => {
-    clip.copies.forEach((copy) => {
-      if (!volMap.has(copy.volume)) {
-        volMap.set(copy.volume, { copies: [], clips: new Set() })
+  for (const clip of clips) {
+    for (const copy of clip.copies) {
+      // CHANGED: use `copy.volume` instead of `copy.path`
+      const vol = copy.volume
+
+      if (!volumeMap.has(vol)) {
+        volumeMap.set(vol, { copies: [], clips: new Set() })
       }
-      const volEntry = volMap.get(copy.volume)!
-      volEntry.copies.push(copy)
-      if (clip.clip) {
-        volEntry.clips.add(clip.clip)
-      }
-    })
-  })
 
-  const groups: { copies: CopyBaseType[]; clips: Set<string> }[] = []
+      const entry = volumeMap.get(vol)!
+      entry.copies.push(copy)
+      // Keep track of which clip IDs are on this volume
+      entry.clips.add(clip.clip)
+    }
+  }
 
-  // Helper function to determine if two sets have any overlapping elements
-  const hasOverlap = (setA: Set<string>, setB: Set<string>): boolean => {
+  /**
+   * 2) Group the volumes if they have *no overlap* in their clip sets.
+   *    Just like the original logic, but now the sets represent "volumes" instead of "paths."
+   */
+  const groups: Array<{
+    copies: CopyBaseType[]
+    clips: Set<string>
+  }> = []
+
+  // Same overlap check
+  const hasOverlap = (setA: Set<string>, setB: Set<string>) => {
     for (const item of setA) {
       if (setB.has(item)) return true
     }
     return false
   }
 
-  // Group volumes based on overlapping clips
-  volMap.forEach(({ copies, clips }) => {
-    let addedToGroup = false
+  // Iterate over each volume's entry
+  volumeMap.forEach(({ copies: volCopies, clips: volClips }, _) => {
+    let addedToExistingGroup = false
 
     for (const group of groups) {
-      if (!hasOverlap(group.clips, clips)) {
-        group.copies.push(...copies)
-        copies.forEach((copy) => {
-          if (copy.hash) {
-            group.clips.add(copy.hash)
-          }
-        })
-        addedToGroup = true
+      // If there's no overlap in clip IDs, merge them
+      if (!hasOverlap(group.clips, volClips)) {
+        group.copies.push(...volCopies)
+        volClips.forEach((c) => group.clips.add(c))
+        addedToExistingGroup = true
         break
       }
     }
 
-    if (!addedToGroup) {
+    // If not merged, create a new group
+    if (!addedToExistingGroup) {
       groups.push({
-        copies: [...copies],
-        clips: new Set(clips)
+        copies: [...volCopies],
+        clips: new Set(volClips)
       })
     }
   })
 
-  // Format the grouped data into the desired CopyType structure
-  return groups.map((group) => ({
-    copies: group.copies,
-    clips: Array.from(group.clips),
-    count: [group.clips.size, total]
-  }))
+  /**
+   * 3) Finally, map each group to your final CopyType:
+   *    { copies: ..., clips: ..., count: [uniqueClipsInGroup, totalClips] }
+   */
+  return groups.map((group) => {
+    return {
+      volumes: Array.from(new Set(group.copies.map((c) => c.volume))),
+      clips: Array.from(group.clips),
+      count: [group.clips.size, total]
+    }
+  })
 }
 
 /*

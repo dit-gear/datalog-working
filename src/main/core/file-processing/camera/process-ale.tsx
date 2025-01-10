@@ -1,15 +1,14 @@
 import Papaparse from 'papaparse'
 import fs from 'fs'
-import { CameraMetadataType, CameraMetadataBaseType, CameraMetadataZod } from '@shared/datalogTypes'
-import { timecodeToTime } from '../utils/convertTimecode'
+import { CameraMetadataType, CameraMetadataZod } from '@shared/datalogTypes'
 import { alexaAleZod, alexaAleType } from './types'
 
 const NotEmpty = (...sources: (string | undefined)[]): Boolean => {
   return sources.every((source) => !!(source && source.trim() !== ''))
 }
 
-const mapFields = (item: alexaAleType): Partial<CameraMetadataType> => {
-  const result: Partial<CameraMetadataBaseType> = {}
+const mapFields = (item: alexaAleType): CameraMetadataType => {
+  const result: Partial<Omit<CameraMetadataType, 'fps'> & { fps?: string }> = {}
 
   // Assign the fields directly based on the desired mappings
   result.clip = item.name
@@ -33,13 +32,6 @@ const mapFields = (item: alexaAleType): Partial<CameraMetadataType> => {
   if (NotEmpty(item.cc_shift)) result.tint = item.cc_shift
   if (NotEmpty(item.look_name)) result.lut = item.look_name
 
-  // Special handling for duration based on FPS
-  /*if (item.duration && item.fps) {
-    const FPS = parseFloat(item.fps)
-    if (!isNaN(FPS) && isValidTimecodeFormat(item.duration, FPS)) {
-      result.duration = { tc: item.duration, int: timecodeToFrames(item.duration, FPS) } //timecodeToTime(item.duration, FPS)
-    }
-  }*/
   const field = CameraMetadataZod.parse(result)
   return field
 }

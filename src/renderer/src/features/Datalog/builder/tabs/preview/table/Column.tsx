@@ -1,7 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { RowData } from './types'
 import { formatBytes } from '@shared/utils/format-bytes'
-import getVolumeName from '@renderer/features/Datalog/utils/get-volume'
+import { getVolumeName } from '@shared/utils/format-copies'
 import FormCell from './FormCell'
 import DurationCell from './Duration'
 import { flattenData } from './flattenData'
@@ -26,12 +26,12 @@ const formatHeader = (key: string): JSX.Element => {
 
 const getMaxCopies = (data: RowData[]): number => {
   return data.reduce((max, item) => {
-    const copies = (item.copies as { path: string; hash: string | null }[]) || []
+    const copies = (item?.copies as { path: string; hash: string | null }[]) || []
     return Math.max(max, copies.length)
   }, 0)
 }
 
-export const generateColumns = (data: RowData[]): ColumnDef<RowData>[] => {
+export const generateColumns = (data: RowData[], prefix?: string): ColumnDef<RowData>[] => {
   if (!data.length) return []
 
   const flattenedData = flattenData(data) // Flatten the data first
@@ -84,11 +84,12 @@ export const generateColumns = (data: RowData[]): ColumnDef<RowData>[] => {
         if ((key === 'size' || key === 'proxy.size') && typeof value === 'number') {
           return <span className="whitespace-nowrap">{formatBytes(value)}</span>
         }
-        if (key === 'duration') {
+        /*if (key === 'duration') {
           const v = typeof value === 'number' ? value : 0
           return <DurationCell row={row} column={column} value={v} />
-        }
-        if (key === 'clip') return <span className="whitespace-nowrap">{value}</span>
+        }*/
+        if (key === 'clip' || key === 'duration')
+          return <span className="whitespace-nowrap">{value}</span>
         if (Array.isArray(value)) {
           return (
             <ul className="list-none pl-4">
@@ -106,9 +107,11 @@ export const generateColumns = (data: RowData[]): ColumnDef<RowData>[] => {
             </ul>
           )
         }
-
-        // Handle other types
-        return <FormCell prefix="clips" row={row} column={column} totalRows={data.length} />
+        if (prefix) {
+          return <FormCell prefix={prefix} row={row} column={column} totalRows={data.length} />
+        } else {
+          return <span className="whitespace-nowrap">{value}</span>
+        }
       }
     }
   })

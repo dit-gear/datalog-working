@@ -1,6 +1,5 @@
 import { useFormContext, useWatch } from 'react-hook-form'
-import { DurationPopupForm } from '../../stats/forms/DurationPopupForm'
-import { formatDuration } from '@shared/utils/format-duration'
+//import { DurationPopupForm } from '../../stats/forms/DurationPopupForm'
 
 const DurationCell = ({ row, column, value }) => {
   const { setValue } = useFormContext()
@@ -13,12 +12,10 @@ const DurationCell = ({ row, column, value }) => {
       shouldTouch: true
     })
   }
-  return (
-    <DurationPopupForm value={value} update={update} sec>
-      <span className="whitespace-nowrap">
-        {formatDuration(valueInSync, { asString: true, unit: 'ms' })}
-      </span>
-    </DurationPopupForm>
-  )
+  return <span className="whitespace-nowrap">{valueInSync}</span>
 }
 export default DurationCell
+
+/* <DurationPopupForm value={value} update={update} sec>
+      <span className="whitespace-nowrap">{valueInSync}</span>
+    </DurationPopupForm> */

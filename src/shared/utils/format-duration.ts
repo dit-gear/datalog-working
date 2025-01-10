@@ -1,4 +1,5 @@
 import { durationType } from '@shared/shared-types'
+import { secondsToTimecode } from './format-timecode'
 
 // Options when asString is true
 interface FormatDurationAsStringOptions {
@@ -84,4 +85,10 @@ export function formatDuration(
   } else {
     return { hours, minutes, seconds }
   }
+}
+
+export function formatDurationToTC(duration: durationType): string {
+  const { hours, minutes, seconds } = duration
+  const sec = hours * 3600 + minutes * 60 + seconds
+  return secondsToTimecode(sec)
 }

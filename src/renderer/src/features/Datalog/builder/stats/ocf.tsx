@@ -1,33 +1,35 @@
 import { useEffect, useState } from 'react'
-import { FilesType, ClipType } from '@shared/datalogTypes'
 import { FilesPopupForm } from './forms/FilesPopupForm'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { formatBytes } from '@shared/utils/format-bytes'
 import Stat from '@components/stat'
-import { FileTypeReqType } from './types'
 
 const Ocf = () => {
   const { setValue } = useFormContext()
-  const clips = useWatch({ name: 'clips' }) || []
-  const fixedOcf = useWatch({ name: 'ocf' }) as FilesType | undefined
+  //const clips = useWatch({ name: 'ocf.clips' }) || []
+  //const ocfFiles = useWatch({ name: 'ocf.files' }) as undefined
+  //const ocfSize = useWatch({ name: 'ocf.size' })
 
-  const [value, setValueState] = useState<FilesType>({ files: 0, size: 0 })
+  const clips = []
+  const ocfFiles = {}
+
+  const [value, setValueState] = useState({ files: 0, size: 0 })
   const [displayValue, setDisplayValue] = useState<React.ReactNode>(null)
-  const [defaults, setDefaults] = useState<FilesType>({ files: 0, size: 0 })
+  const [defaults, setDefaults] = useState({ files: 0, size: 0 })
 
-  useEffect(() => {
+  /*useEffect(() => {
     const computedDefaults = getOcfValueFromClips(clips)
     setDefaults(computedDefaults)
 
-    const hasFixedValue = fixedOcf && Object.keys(fixedOcf).length > 0
-    const computedValue = hasFixedValue ? fixedOcf : computedDefaults
+    const hasFixedValue = ocfFiles && Object.keys(ocfSize).length > 0
+    const computedValue = hasFixedValue ? ocfFiles : computedDefaults
     setValueState(computedValue)
 
     const formattedDisplay = formatOcfDisplayValue(computedValue)
     setDisplayValue(formattedDisplay.displayValue)
-  }, [clips, fixedOcf])
+  }, [clips, ocfFiles, ocfSize])*/
 
-  const update = (newValue: FilesType) => {
+  const update = (newValue) => {
     setValue('ocf', newValue)
   }
 
@@ -49,13 +51,13 @@ const Ocf = () => {
   )
 }
 
-const getOcfValueFromClips = (clips: ClipType[]): FilesType => {
+const getOcfValueFromClips = (clips) => {
   const files = clips.length || 0
   const size = clips.reduce((acc, clip) => acc + (clip.size || 0), 0)
   return { files, size }
 }
 
-const formatOcfDisplayValue = (value: FilesType) => {
+const formatOcfDisplayValue = (value) => {
   if (!value || value.files === 0 || !value.size) {
     return { displayValue: null }
   }

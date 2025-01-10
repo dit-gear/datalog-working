@@ -44,7 +44,7 @@ export const mergeDatalogs = (datalogs: DatalogType[]): DatalogType => {
     const copiesSet = new Set<string>()
     wrapped.forEach((w) => {
       w.ocf.copies().forEach((c) => {
-        c.copies.forEach((d) => copiesSet.add(d.path))
+        c.volumes.forEach((d) => copiesSet.add(d))
       })
     })
     merged.ocf.copies = Array.from(copiesSet)
@@ -75,7 +75,7 @@ export const mergeDatalogs = (datalogs: DatalogType[]): DatalogType => {
     const copiesSet = new Set<string>()
     wrapped.forEach((w) => {
       w.ocf.copies().forEach((c) => {
-        c.copies.forEach((d) => copiesSet.add(d.path))
+        c.volumes.forEach((d) => copiesSet.add(d))
       })
     })
     merged.sound.copies = Array.from(copiesSet)

@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
-import { FilesType } from '@shared/datalogTypes'
 import { FilesPopupForm } from './forms/FilesPopupForm'
 import { formatBytes } from '@shared/utils/format-bytes'
 import Stat from '@components/stat'
 
 const Proxy = () => {
   const { setValue } = useFormContext()
-  const clips = useWatch({ name: 'clips' }) || []
-  const fixedProxy = useWatch({ name: 'proxy' }) as FilesType | undefined
+  /*const clips = useWatch({ name: 'proxy.clips' }) || []
+  const fixedProxy = useWatch({ name: 'proxy.files' }) as undefined
+  const proxySize = useWatch({ name: 'proxy.size' })*/
 
-  const [value, setValueState] = useState<FilesType>({ files: 0, size: 0 })
+  const [value, setValueState] = useState({ files: 0, size: 0 })
   const [displayValue, setDisplayValue] = useState<React.ReactNode>(null)
-  const [defaults, setDefaults] = useState<FilesType>({ files: 0, size: 0 })
+  const [defaults, setDefaults] = useState({ files: 0, size: 0 })
 
-  useEffect(() => {
+  /*useEffect(() => {
     const computedDefaults = getProxyValueFromClips(clips)
     setDefaults(computedDefaults)
 
@@ -24,9 +24,9 @@ const Proxy = () => {
 
     const formattedDisplay = formatProxyDisplayValue(computedValue)
     setDisplayValue(formattedDisplay.displayValue)
-  }, [clips, fixedProxy])
+  }, [clips, fixedProxy])*/
 
-  const update = (newValue: FilesType) => {
+  const update = (newValue) => {
     setValue('proxy', newValue)
   }
 
@@ -41,13 +41,13 @@ const Proxy = () => {
   )
 }
 
-const getProxyValueFromClips = (clips): FilesType => {
+const getProxyValueFromClips = (clips) => {
   const files = clips.filter((clip) => clip.proxy !== undefined).length || 0
   const size = clips.reduce((acc, clip) => acc + (clip.proxy?.size || 0), 0) || 0
   return { files, size }
 }
 
-const formatProxyDisplayValue = (value: FilesType) => {
+const formatProxyDisplayValue = (value) => {
   if (!value || value.files === 0 || !value.size) {
     return { displayValue: null }
   }
