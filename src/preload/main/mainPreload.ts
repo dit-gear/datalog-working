@@ -34,6 +34,7 @@ const mainApi = {
     ipcRenderer.on('show-progress', handler)
     return () => ipcRenderer.removeListener('show-progress', handler)
   },
+  getSound: () => ipcRenderer.invoke('getSound'),
   getProxies: () => ipcRenderer.invoke('getProxies'),
   getCsvMetadata: () => ipcRenderer.invoke('getCsvMetadata'),
   openSendWindow: (selection?: DatalogType[]) => ipcRenderer.send('open-send-window', selection),

@@ -30,7 +30,7 @@ export const mergeDatalogs = (datalogs: DatalogType[]): DatalogType => {
     merged.ocf.files = getTotalFiles(wrapped, 'ocf')
   }
   if (propertyIsSetOnAny(datalogs, (d) => d.ocf.size)) {
-    merged.ocf.size = getTotalSize(wrapped, 'ocf', { format: false })
+    merged.ocf.size = getTotalSize(wrapped, 'ocf')
   }
   if (propertyIsSetOnAny(datalogs, (d) => d.ocf.duration)) {
     merged.ocf.duration = getTotalDuration(wrapped, 'tc')
@@ -58,7 +58,7 @@ export const mergeDatalogs = (datalogs: DatalogType[]): DatalogType => {
     merged.proxy.files = getTotalFiles(wrapped, 'proxy')
   }
   if (propertyIsSetOnAny(datalogs, (d) => d.proxy.size)) {
-    merged.proxy.size = getTotalSize(wrapped, 'proxy', { format: false })
+    merged.proxy.size = getTotalSize(wrapped, 'proxy')
   }
   if (propertyIsSetOnAny(datalogs, (d) => d.proxy.clips)) {
     merged.proxy.clips = datalogs.flatMap((log) => log.proxy.clips ?? [])
@@ -69,7 +69,7 @@ export const mergeDatalogs = (datalogs: DatalogType[]): DatalogType => {
     merged.sound.files = getTotalFiles(wrapped, 'sound')
   }
   if (propertyIsSetOnAny(datalogs, (d) => d.sound.size)) {
-    merged.sound.size = getTotalSize(wrapped, 'sound', { format: false })
+    merged.sound.size = getTotalSize(wrapped, 'sound')
   }
   if (propertyIsSetOnAny(datalogs, (d) => d.sound.copies)) {
     const copiesSet = new Set<string>()

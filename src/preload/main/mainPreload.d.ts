@@ -26,6 +26,7 @@ declare global {
       removeLogPath: (paths: string[]) => Promise<ResponseWithClips>
       showProgress: (show: boolean, progress: number) => void
       showProgressListener: (callback: (show: boolean, progress: number) => void) => () => void
+      getSound: () => Promise<ResponseWithClips>
       getProxies: () => Promise<ResponseWithClips>
       getCsvMetadata: () => Promise<ResponseWithClips>
       onDirectoryLoaded: (

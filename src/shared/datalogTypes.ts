@@ -84,8 +84,7 @@ const SoundClipZod = addTimecodeValidation(
     size: z.number(),
     copies: copies,
     tc_start: z.string().optional(),
-    tc_end: z.string().optional(),
-    fps: z.coerce.number().optional()
+    tc_end: z.string().optional()
   }),
   ['tc_start', 'tc_end']
 )

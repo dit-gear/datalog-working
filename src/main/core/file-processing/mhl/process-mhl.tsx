@@ -5,7 +5,7 @@ import { mhlAscZod, mhlAscType, ascRow } from './schemas/asc-mhl-schema'
 import logger from '../../logger'
 import { parseXML } from '../utils/xml-parser'
 
-const extensions = [
+const AllowedVideoExt = [
   '.mov',
   '.mxf',
   '.ari',
@@ -23,6 +23,8 @@ const extensions = [
   '.mpeg',
   '.m4v'
 ]
+const AllowedSoundExt = ['.wav']
+
 const sequentialFileTypes = new Set(['.dng', '.arx', '.ari', '.mxf', '.exr', '.r3d', '.braw'])
 
 type ValidationResult =
@@ -177,6 +179,7 @@ async function processFile(
 async function readAndParseMHLFiles(
   filePaths: string[],
   path: string,
+  type: 'ocf' | 'sound',
   progressCallback: (progress: number) => void
 ): Promise<OcfClipBaseType[]> {
   let processedFiles = 0
@@ -185,6 +188,7 @@ async function readAndParseMHLFiles(
     const progress = processedFiles / filePaths.length
     progressCallback(progress) // Report progress
   }
+  const extensions = type === 'ocf' ? AllowedVideoExt : AllowedSoundExt
 
   const volume = getVolumeName(path)
 
@@ -199,7 +203,11 @@ async function readAndParseMHLFiles(
   return results.flat() // Flatten the array of results
 }
 
-async function processMHL(mhlFiles: string[], path: string): Promise<OcfClipBaseType[]> {
+async function processMHL(
+  mhlFiles: string[],
+  path: string,
+  type: 'ocf' | 'sound'
+): Promise<OcfClipBaseType[]> {
   let progress = 0
   let isCancelled = false
   let showProgressFlag = false
@@ -221,7 +229,7 @@ async function processMHL(mhlFiles: string[], path: string): Promise<OcfClipBase
 
   try {
     //progressTimeout
-    const data = await readAndParseMHLFiles(mhlFiles, path, progressCallback)
+    const data = await readAndParseMHLFiles(mhlFiles, path, type, progressCallback)
     //mainWindow.setProgressBar(-1) // Reset the progress bar
     //mainWindow.webContents.send('show-progress', false, -1)
     //clearTimeout(progressTimeout)

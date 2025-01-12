@@ -1,5 +1,5 @@
 import { getReels as getReelsFunction, getReelsOptions } from './format-reel'
-import { formatBytes } from './format-bytes'
+import { formatBytes, FormatBytesOptions, FormatBytesTypes, FormatOutput } from './format-bytes'
 import { formatDuration } from './format-duration'
 import {
   DatalogType,
@@ -65,21 +65,19 @@ export const getFiles = (
   return data?.files != null ? data.files : countClipFiles(data.clips)
 }
 
-export function getSize(
+export function getSize(data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'>): number
+export function getSize<T extends FormatOutput>(
   data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'>,
-  options: { format: true }
-): string
-export function getSize(
+  options: FormatBytesOptions<T>
+): T extends 'tuple' ? [number, string] : T extends 'number' ? number : string
+export function getSize<T extends FormatOutput>(
   data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'>,
-  options: { format: false }
-): number
-export function getSize(
-  data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'>,
-  options: { format?: boolean }
-): string | number {
+  options?: FormatBytesOptions<T>
+): number | string | [number, string] {
   const size = data?.size != null ? data.size : sumClipSizes(data.clips)
-  return options.format === false ? size : formatBytes(size)
+  return options ? formatBytes(size, options) : size
 }
+
 export function getDuration(data: Pick<OcfType, 'duration' | 'clips'>, format: 'tc'): string
 export function getDuration(data: Pick<OcfType, 'duration' | 'clips'>, format: 'seconds'): number
 export function getDuration(data: Pick<OcfType, 'duration' | 'clips'>, format: 'hms'): durationType
@@ -89,14 +87,8 @@ export function getDuration(
   format: 'tc' | 'seconds' | 'hms' | 'hms-string'
 ): string | number | durationType {
   const duration = data?.duration ?? sumClipDurations(data.clips)
-  console.log('d-dur', duration)
-  console.log(format)
   if (format === 'seconds') return timecodeToSeconds(duration)
-  if (format === 'hms') {
-    const d = formatDuration(duration)
-    console.log('formatted', d)
-    return d
-  }
+  if (format === 'hms') return formatDuration(duration)
   if (format === 'hms-string') return formatDuration(duration, { asString: true })
   return duration
 }
@@ -136,13 +128,17 @@ export function getTotalFiles(data: Datalog[], context: Context): number {
   return files
 }
 
-export function getTotalSize(data: Datalog[], context: Context, options: { format: true }): string
-export function getTotalSize(data: Datalog[], context: Context, options: { format: false }): number
-export function getTotalSize(
+export function getTotalSize(data: Datalog[], context: Context): number
+export function getTotalSize<T extends FormatOutput>(
   data: Datalog[],
   context: Context,
-  options: { format: boolean }
-): string | number {
+  options: FormatBytesOptions<T>
+): T extends 'tuple' ? [number, string] : T extends 'number' ? number : string
+export function getTotalSize<T extends FormatOutput>(
+  data: Datalog[],
+  context: Context,
+  options?: FormatBytesOptions<T>
+): number | string | [number, string] {
   const contextMap: Record<Context, keyof Datalog> = {
     ocf: 'ocf',
     proxy: 'proxy',
@@ -157,7 +153,7 @@ export function getTotalSize(
     return sum
   }, 0)
 
-  return options.format === false ? size : formatBytes(size)
+  return options ? formatBytes(size, options) : size
 }
 
 export function getTotalDuration(data: Datalog[], format: 'tc'): string

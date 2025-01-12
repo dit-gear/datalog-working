@@ -82,7 +82,9 @@ export const generateColumns = (data: RowData[], prefix?: string): ColumnDef<Row
 
         // Special formatting for Size column
         if ((key === 'size' || key === 'proxy.size') && typeof value === 'number') {
-          return <span className="whitespace-nowrap">{formatBytes(value)}</span>
+          return (
+            <span className="whitespace-nowrap">{formatBytes(value, { output: 'string' })}</span>
+          )
         }
         /*if (key === 'duration') {
           const v = typeof value === 'number' ? value : 0

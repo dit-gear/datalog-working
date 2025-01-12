@@ -8,6 +8,7 @@ import parseCsv from './builder/parse-csv'
 import updateDatalog from './updater'
 import deleteDatalog from './delete'
 import { createSendWindow } from '../../send/sendWindow'
+import { addSound } from './builder/add-sound'
 
 export function setupDatalogIpcHandlers(): void {
   ipcMain.handle('findOcf', async (): Promise<ResponseWithClips> => {
@@ -16,6 +17,10 @@ export function setupDatalogIpcHandlers(): void {
 
   ipcMain.handle('removeLogPath', async (_, paths: string[]): Promise<ResponseWithClips> => {
     return await removeOcf(paths)
+  })
+
+  ipcMain.handle('getSound', async (): Promise<ResponseWithClips> => {
+    return await addSound()
   })
 
   ipcMain.handle('getProxies', async (): Promise<ResponseWithClips> => {

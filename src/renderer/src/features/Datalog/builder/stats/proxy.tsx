@@ -51,7 +51,7 @@ const formatProxyDisplayValue = (value) => {
   if (!value || value.files === 0 || !value.size) {
     return { displayValue: null }
   }
-  const [sizeValue, sizeUnit] = formatBytes(value.size, { asTuple: true })
+  const [sizeValue, sizeUnit] = formatBytes(value.size, { output: 'tuple' })
   return {
     displayValue: (
       <>

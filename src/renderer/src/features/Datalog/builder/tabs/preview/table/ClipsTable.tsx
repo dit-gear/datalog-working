@@ -6,10 +6,10 @@ import { generateColumns } from './Column'
 import DataTable from '../../../../../../components/DataTable'
 
 export const ClipsTable = () => {
-  const ocf = useWatch({ name: 'ocfClips' })
-  const sound = useWatch({ name: 'soundClips' })
-  const proxy = useWatch({ name: 'proxyClips' })
-  const custom = useWatch({ name: 'customClips' })
+  const ocf = useWatch({ name: 'ocf.clips' })
+  const sound = useWatch({ name: 'sound.clips' })
+  const proxy = useWatch({ name: 'proxy.clips' })
+  const custom = useWatch({ name: 'custom' })
 
   const clips = useMemo(
     () =>
@@ -22,12 +22,15 @@ export const ClipsTable = () => {
     [ocf, sound, proxy, custom]
   )
 
+  console.log(clips)
+
   const data = useMemo(() => flattenData(clips.map(({ id, ...rest }) => rest)), [clips])
   const columns = useMemo(() => generateColumns(data), [data])
 
   return (
     <div className="container mx-auto py-4">
       <DataTable columns={columns} data={data} />
+      test
     </div>
   )
 }

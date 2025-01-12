@@ -1,5 +1,5 @@
 import { DatalogType } from '../datalogTypes'
-import { timecodeToFrames, rangesOverlap } from './format-timecode'
+import { rangesOverlap, timecodeToSeconds } from './format-timecode'
 
 // Example shape for the final merged result
 export interface MergedProxy {
@@ -52,9 +52,9 @@ export function mergeClips(
   // 1) Merge OCF
   mergeOcfClips(clipMap, datalog)
   // 2) Merge Proxy
-  mergeProxyClips(clipMap, datalog)
+  //mergeProxyClips(clipMap, datalog)
   // 3) Merge Custom
-  mergeCustomEntries(clipMap, datalog)
+  //mergeCustomEntries(clipMap, datalog)
   // 4) Merge Sound (by timecode overlap)
   mergeSoundClips(clipMap, datalog)
 
@@ -128,20 +128,20 @@ function mergeSoundClips(
 
   for (const [, mergedClip] of clipMap) {
     // If there's no OCF timecode or fps, skip
-    if (!mergedClip.tc_start || !mergedClip.tc_end || !mergedClip.fps) {
+    if (!mergedClip.tc_start || !mergedClip.tc_end) {
       continue
     }
 
-    const ocfStartFrames = timecodeToFrames(mergedClip.tc_start, mergedClip.fps)
-    const ocfEndFrames = timecodeToFrames(mergedClip.tc_end, mergedClip.fps)
+    const ocfStartFrames = timecodeToSeconds(mergedClip.tc_start)
+    const ocfEndFrames = timecodeToSeconds(mergedClip.tc_end)
 
     // Find any soundClips that overlap
     for (const sClip of soundClips) {
-      if (!sClip.tc_start || !sClip.tc_end || !sClip.fps) {
+      if (!sClip.tc_start || !sClip.tc_end) {
         continue
       }
-      const soundStart = timecodeToFrames(sClip.tc_start, sClip.fps)
-      const soundEnd = timecodeToFrames(sClip.tc_end, sClip.fps)
+      const soundStart = timecodeToSeconds(sClip.tc_start)
+      const soundEnd = timecodeToSeconds(sClip.tc_end)
 
       if (rangesOverlap(ocfStartFrames, ocfEndFrames, soundStart, soundEnd)) {
         if (!mergedClip.sound) {

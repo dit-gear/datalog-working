@@ -1,28 +1,72 @@
-type FormatBytesOptions = {
-  asTuple?: boolean
+export type FormatBytesTypes = 'auto' | 'tb' | 'gb' | 'mb' | 'bytes'
+
+export type FormatOutput = 'tuple' | 'number' | 'string'
+
+export type FormatBytesOptions<T extends FormatOutput = 'string'> = {
+  output: T
+  type?: FormatBytesTypes
 }
-export function formatBytes(bytes: number, options: { asTuple: true }): [number, string]
-export function formatBytes(bytes: number, options?: { asTuple?: false }): string
+/*
+export type FormatBytesOptions = {
+  type?: FormatBytesTypes
+  output: 'string' | 'number' | 'tuple'
+}
+
 export function formatBytes(
   bytes: number,
-  options: FormatBytesOptions = {}
-): string | [number, string] {
-  const { asTuple = false } = options
+  options: { output: 'tuple'; type?: FormatBytesTypes }
+): [number, string]
+export function formatBytes(
+  bytes: number,
+  options: { output: 'number'; type?: FormatBytesTypes }
+): number
+export function formatBytes(
+  bytes: number,
+  options?: { output: 'string'; type?: FormatBytesTypes }
+): string
+export function formatBytes(bytes: number): string*/
 
-  if (bytes === 0) return asTuple ? [0, 'B'] : '0 B'
+export function formatBytes<T extends FormatOutput>(
+  bytes: number,
+  options: FormatBytesOptions<T>
+): T extends 'tuple' ? [number, string] : T extends 'number' ? number : string {
+  const { output = 'string', type = 'auto' } = options
+
+  if (bytes === 0) {
+    if (output === 'tuple') return [0, 'B'] as any
+    if (output === 'number') return 0 as any
+    return '0 B' as any
+  }
 
   const k = 1000
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  let value: number
+  let unit: string
 
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  const value = bytes / Math.pow(k, i)
+  if (type === 'auto') {
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    value = bytes / Math.pow(k, i)
+    unit = sizes[i]
+  } else {
+    const unitMapping: Record<'bytes' | 'mb' | 'gb' | 'tb', { exponent: number; label: string }> = {
+      bytes: { exponent: 0, label: 'B' },
+      mb: { exponent: 2, label: 'MB' },
+      gb: { exponent: 3, label: 'GB' },
+      tb: { exponent: 4, label: 'TB' }
+    }
+    const mapping = unitMapping[type]
+    value = bytes / Math.pow(k, mapping.exponent)
+    unit = mapping.label
+  }
 
   const integerPartLength = Math.floor(value).toString().length
   const decimals = Math.max(0, 3 - integerPartLength) // 1 digit = 2 decimals, 2 digits = 1, 3 or more = 0
 
   const formattedValue = parseFloat(value.toFixed(decimals))
 
-  return asTuple ? [formattedValue, sizes[i]] : `${formattedValue} ${sizes[i]}`
+  if (output === 'tuple') return [formattedValue, unit] as any
+  if (output === 'number') return formattedValue as any
+  return `${formattedValue} ${unit}` as any
 }
 
 // formatBytes(1000);       - Output: 1 KB

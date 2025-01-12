@@ -52,7 +52,7 @@ const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
           return
         }
 
-        const mhlData = await processMHL(mhlFiles, path)
+        const mhlData = await processMHL(mhlFiles, path, 'ocf')
 
         // Handle Copies merging
         mhlData.forEach((newClip) => {

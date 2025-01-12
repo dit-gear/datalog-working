@@ -1,8 +1,9 @@
 import { mergeClips } from './utils/datalog-clips'
-import { DatalogType, CopyType } from './datalogTypes'
+import { DatalogType, CopyType, OcfType, SoundType, ProxyType } from './datalogTypes'
 import { ProjectRootType } from './projectTypes'
 import { durationType } from '@shared/shared-types'
 import { getReelsOptions } from './utils/format-reel'
+import { FormatBytesTypes } from './utils/format-bytes'
 import { mergeDatalogs } from './utils/datalog-merge'
 import {
   getReels,
@@ -32,14 +33,24 @@ export class Datalog {
   public get date(): string {
     return this.raw.date
   }
+  private createCommonMethods(data: OcfType | SoundType | ProxyType) {
+    return {
+      files: (): number => getFiles(data),
+      size: (options?: { type: FormatBytesTypes }): string =>
+        getSize(data, { output: 'string', type: options?.type }),
+      sizeAsNumber: (options?: { type: FormatBytesTypes }): number =>
+        options ? getSize(data, { output: 'number', type: options.type }) : getSize(data),
+      sizeAsTuple: (options?: { type: FormatBytesTypes }): [number, string] =>
+        getSize(data, { output: 'tuple', type: options?.type })
+    }
+  }
+
   public get ocf() {
     const ocfData = this.raw.ocf
 
     return {
       clips: ocfData.clips,
-      files: (): number => getFiles(ocfData),
-      size: (): string => getSize(ocfData, { format: true }),
-      sizeAsNumber: (): number => getSize(ocfData, { format: false }),
+      ...this.createCommonMethods(ocfData),
       copies: (): CopyType[] => getCopies(ocfData),
       reels: (options?: getReelsOptions): string[] => getReels(ocfData, options),
       duration: (): string => getDuration(ocfData, 'tc'),
@@ -52,9 +63,8 @@ export class Datalog {
     const proxyData = this.raw.proxy
 
     return {
-      files: (): number => getFiles(proxyData),
-      size: (): string => getSize(proxyData, { format: true }),
-      sizeAsNumber: (): number => getSize(proxyData, { format: false })
+      clips: proxyData,
+      ...this.createCommonMethods(proxyData)
     }
   }
 
@@ -63,9 +73,7 @@ export class Datalog {
 
     return {
       clips: soundData.clips,
-      files: (): number => getFiles(soundData),
-      size: (): string => getSize(soundData, { format: true }),
-      sizeAsNumber: (): number => getSize(soundData, { format: false }),
+      ...this.createCommonMethods(soundData),
       copies: (): CopyType[] => getCopies(soundData)
     }
   }
@@ -132,25 +140,31 @@ export class DataObject {
     return this.all
   }
 
+  private createCommonMethods(data, context: 'ocf' | 'proxy' | 'sound') {
+    return {
+      size: (options?: { type: FormatBytesTypes }): string =>
+        getTotalSize(data, context, { output: 'string', type: options?.type }),
+      sizeAsNumber: (options?: { type: FormatBytesTypes }): number =>
+        options
+          ? getTotalSize(data, context, { output: 'number', type: options.type })
+          : getTotalSize(data, context),
+      sizeAsTuple: (options?: { type: FormatBytesTypes }): [number, string] =>
+        getTotalSize(data, context, { output: 'tuple', type: options?.type })
+    }
+  }
+
   public get total() {
     const all = this.all
 
     const ocf = {
-      size: (): string => getTotalSize(all, 'ocf', { format: true }),
-      sizeAsNumber: (): number => getTotalSize(all, 'ocf', { format: false }),
+      ...this.createCommonMethods(all, 'ocf'),
       duration: (): string => getTotalDuration(all, 'tc'),
       durationReadable: (): string => getTotalDuration(all, 'hms-string'),
       durationObject: (): durationType => getTotalDuration(all, 'hms')
     }
-    const proxy = {
-      size: (): string => getTotalSize(all, 'proxy', { format: true }),
-      sizeAsNumber: (): number => getTotalSize(all, 'proxy', { format: false })
-    }
+    const proxy = { ...this.createCommonMethods(all, 'proxy') }
 
-    const sound = {
-      size: (): string => getTotalSize(all, 'sound', { format: true }),
-      sizeAsNumber: (): number => getTotalSize(all, 'sound', { format: false })
-    }
+    const sound = { ...this.createCommonMethods(all, 'sound') }
 
     return {
       days: (): number => all.length,

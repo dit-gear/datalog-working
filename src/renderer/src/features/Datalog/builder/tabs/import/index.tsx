@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { formatCopiesFromClips } from '@shared/utils/format-copies'
 import { Button } from '@components/ui/button'
 import { mergeDirtyValues } from '../../../utils/merge-clips'
-import { CopyType, OcfClipType, ProxyType } from '@shared/datalogTypes'
+import { CopyType, OcfClipType, ProxyType, SoundClipType } from '@shared/datalogTypes'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { CopiesList } from './CopiesList'
 import { Plus } from 'lucide-react'
@@ -19,6 +19,14 @@ export const Import = ({ project }) => {
     console.log('mergedClips:', mergedClips)
     resetField('ocf.clips', { defaultValue: mergedClips, keepDirty: true })
     setValue('ocf.clips', mergedClips)
+  }
+
+  const updateSoundClips = (newClips: SoundClipType[]) => {
+    const dirtyFields = formState.dirtyFields.sound?.clips
+    const currentClips = getValues('sound.clips')
+    const mergedClips = mergeDirtyValues(dirtyFields, currentClips, newClips)
+    resetField('sound.clips', { defaultValue: mergedClips, keepDirty: true })
+    setValue('sound.clips', mergedClips)
   }
 
   const updateProxyClips = (newClips: ProxyType[]) => {
@@ -52,6 +60,21 @@ export const Import = ({ project }) => {
     } catch (error) {
       console.error(error)
     }*/
+  }
+
+  const handleAddSoundCopy = async (): Promise<void> => {
+    try {
+      const res = await window.mainApi.getSound()
+      if (res.success) {
+        console.log('success:', res.success)
+        res.clips.sound && updateSoundClips(res.clips.sound)
+      } else {
+        if (res.cancelled) return
+        console.error(res.error)
+      }
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const handleAddCopy = async (): Promise<void> => {
@@ -129,8 +152,7 @@ export const Import = ({ project }) => {
         <dd className="mt-2 text-sm text-white sm:col-span-2 sm:mt-0">
           <CopiesList key="sound" type="sound" handleRemoveCopy={handleRemoveSoundCopy} />
           <div className="flex gap-2">
-            <Button onClick={handleAddCopy} variant="secondary">
-              {' '}
+            <Button onClick={handleAddSoundCopy} variant="secondary">
               <Plus className="mr-2 h-4 w-4" />
               Add Sound Folder
             </Button>
