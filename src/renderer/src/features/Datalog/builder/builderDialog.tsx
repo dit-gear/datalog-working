@@ -94,70 +94,29 @@ const Builderdialog = ({
   })
   */
 
-  const omitted = datalogZod.omit({ ocf: true, proxy: true, sound: true, custom: true })
-  const builderSchema = omitted.extend({
-    ocfClips: OCF.shape.clips,
-    ocfOverrideFiles: OCF.shape.files,
-    ocfOverrideSize: OCF.shape.size,
-    ocfOverrideCopies: OCF.shape.copies,
-    ocfOverrideReels: OCF.shape.reels,
-    ocfOverrideDuration: OCF.shape.duration,
-    soundClips: Sound.shape.clips,
-    soundOverrideFiles: Sound.shape.files,
-    soundOverrideSize: Sound.shape.size,
-    soundOverrideCopies: Sound.shape.copies,
-    proxyClips: Proxy.shape.clips,
-    proxyOverrideFiles: Proxy.shape.files,
-    proxyOverrideSize: Proxy.shape.size,
-    customClips: z.array(z.any())
+  function makeNullableExcept<T extends z.ZodRawShape>(
+    schema: z.ZodObject<T>,
+    keysToExclude: (keyof T)[]
+  ) {
+    const newShape = Object.fromEntries(
+      Object.entries(schema.shape).map(([key, propSchema]) => [
+        key,
+        keysToExclude.includes(key as keyof T) ? propSchema : propSchema.nullable()
+      ])
+    )
+    return z.object(newShape)
+  }
+
+  const datalogFormSchema = z.object({
+    id: datalogZod.shape.id,
+    day: datalogZod.shape.day,
+    date: datalogZod.shape.date,
+    unit: datalogZod.shape.unit.nullable(),
+    ocf: makeNullableExcept(OCF, ['clips']),
+    sound: makeNullableExcept(Sound, ['clips']),
+    proxy: makeNullableExcept(Proxy, ['clips']),
+    custom: datalogZod.shape.custom
   })
-
-  const oldDef = {
-    id: selected ? selected.id : defaultId(),
-    day: selected ? selected.day : defaultDay,
-    date: selected ? selected.date : formatDate(),
-    unit: selected ? selected.unit : project.unit ? project.unit : '',
-    ocfClips: selected?.ocf.clips ?? [],
-    ocfOverrideFiles: selected?.ocf.files ?? '',
-    ocfOverrideSize: selected?.ocf.size ?? '',
-    ocfOverrideCopies: selected?.ocf.copies ?? [],
-    ocfOverrideReels: selected?.ocf?.reels ?? [],
-    ocfOverrideDuration: selected?.ocf.duration ?? [],
-    soundClips: selected?.sound ?? [],
-    soundOverrideFiles: selected?.sound?.files ?? '',
-    soundOverrideSize: selected?.sound?.size ?? '',
-    soundOverrideCopies: selected?.sound?.copies ?? [],
-    proxyClips: selected?.proxy?.clips ?? [],
-    proxyOverrideFiles: selected?.proxy?.files ?? '',
-    proxyOverrideSize: selected?.proxy?.size ?? '',
-    customClips: selected?.custom ?? []
-  }
-
-  const getDefaultValues = (schema: ZodTypeAny, data: any = {}) => {
-    if (schema instanceof z.ZodObject) {
-      // Iterate over object keys
-      const shape = schema.shape
-      return Object.keys(shape).reduce(
-        (acc, key) => {
-          acc[key] = getDefaultValues(shape[key], data[key])
-          return acc
-        },
-        {} as Record<string, any>
-      )
-    } else if (schema instanceof z.ZodString) {
-      return data ?? '' // Return empty string if no value
-    } else if (schema instanceof z.ZodNumber) {
-      return data ?? 0 // Return 0 if no value
-    } else if (schema instanceof z.ZodArray) {
-      return data ?? [] // Return empty array if no value
-    } else if (schema instanceof z.ZodBoolean) {
-      return data ?? false // Return false if no value
-    } else if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
-      return getDefaultValues(schema.unwrap(), data)
-    } else {
-      return data ?? null // Default fallback for other types
-    }
-  }
 
   const form = useForm({
     defaultValues: {
@@ -166,19 +125,28 @@ const Builderdialog = ({
       date: selected ? selected.date : formatDate(),
       unit: selected ? selected.unit : project.unit ? project.unit : '',
       ocf: {
-        files: selected?.ocf.files ?? '',
-        size: selected?.ocf.size ?? '',
-        duration: selected?.ocf.duration ?? '',
-        reels: selected?.ocf.reels ?? [],
-        copies: selected?.ocf.copies ?? [],
+        files: selected?.ocf.files ?? null,
+        size: selected?.ocf.size ?? null,
+        duration: selected?.ocf.duration ?? null,
+        reels: selected?.ocf.reels ?? null,
+        copies: selected?.ocf.copies ?? null,
         clips: selected?.ocf.clips ?? []
       },
-      sound: getDefaultValues(OCF, selected),
-      proxy: getDefaultValues(Proxy, selected),
+      sound: {
+        files: selected?.sound.files ?? null,
+        size: selected?.sound.size ?? null,
+        copies: selected?.sound.copies ?? null,
+        clips: selected?.ocf.clips ?? []
+      },
+      proxy: {
+        files: selected?.sound.files ?? null,
+        size: selected?.sound.size ?? null,
+        clips: selected?.ocf.clips ?? []
+      },
       custom: selected?.custom ?? []
     },
     mode: 'onSubmit',
-    resolver: zodResolver(datalogZod)
+    resolver: zodResolver(datalogFormSchema)
   })
 
   const { formState, handleSubmit, reset } = form

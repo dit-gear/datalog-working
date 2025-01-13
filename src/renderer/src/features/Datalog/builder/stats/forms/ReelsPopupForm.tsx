@@ -1,58 +1,58 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import { FormControl, FormField, FormItem, Form } from '@components/ui/form'
-import { Textarea } from '@components/ui/textarea'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { Button } from '@components/ui/button'
 import { deepEqual } from '@renderer/utils/compare'
+import z from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import MultiSelectTextInput from '@components/MultiSelectTextInput'
 
 interface ReelsPopupFormProps {
-  value: string
-  defaults: string[]
+  value: string[]
   update: (data: string[]) => void
   clear: () => void
   children: React.ReactNode
 }
 
-type ReelsType = {
-  reels: string
-}
+const reelsForm = z.object({
+  reels: z.array(z.string()).nullable()
+})
+
+type ReelsType = z.infer<typeof reelsForm>
 
 export const ReelsPopupForm: React.FC<ReelsPopupFormProps> = ({
   value,
-  defaults,
   update,
   clear,
   children
 }) => {
+  const [open, setOpen] = useState(false)
   const form = useForm({
     defaultValues: {
       reels: value
-    }
+    },
+    resolver: zodResolver(reelsForm)
   })
-  const { handleSubmit, reset } = form
+  const {
+    handleSubmit,
+    reset,
+    formState: { isValid }
+  } = form
 
   useEffect(() => {
     reset({ reels: value })
   }, [value])
 
   const onSubmit: SubmitHandler<ReelsType> = (data): void => {
-    let array = data.reels.split(/[\s,]+/)
-    if (array.length === 1 && array[0] === '') array = []
-    if (deepEqual(array, defaults)) return
-    console.log('will update')
-    update(array)
-    reset(data)
-  }
-
-  const handleOpenChange = (open: boolean) => {
-    if (open === false) {
-      handleSubmit(onSubmit)()
+    if (data.reels && data.reels.slice().sort().join() !== value.slice().sort().join()) {
+      update(data.reels)
     }
+    setOpen(false)
   }
 
   return (
-    <Popover onOpenChange={handleOpenChange}>
+    <Popover open={open} onOpenChange={(v) => setOpen(v)}>
       <PopoverTrigger className="min-w-12 min-h-10 text-left">{children}</PopoverTrigger>
       <PopoverContent className="w-80">
         <Form {...form}>
@@ -67,21 +67,27 @@ export const ReelsPopupForm: React.FC<ReelsPopupFormProps> = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Textarea {...field} />
+                      <MultiSelectTextInput {...field} />
                     </FormControl>
                   </FormItem>
                 )}
               />
             </div>
-            <Button
-              size="sm"
-              onClick={() => {
-                reset({ reels: defaults.join(' ') })
-                clear()
-              }}
-            >
-              Reset
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button size="sm" onClick={handleSubmit(onSubmit)} disabled={!isValid}>
+                Set
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  clear()
+                  setOpen(false)
+                }}
+              >
+                Reset
+              </Button>
+            </div>
           </div>
         </Form>
       </PopoverContent>

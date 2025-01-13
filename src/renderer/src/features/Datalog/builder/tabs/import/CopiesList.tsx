@@ -14,14 +14,14 @@ export const CopiesList = ({ type, handleRemoveCopy }: CopiesListProps) => {
   const clips: (OcfClipType | SoundClipType)[] = useWatch({ name: `${type}.clips` })
 
   useMemo(() => {
-    const newCopies = clips.length > 0 ? formatCopiesFromClips(clips) : []
+    const newCopies = clips?.length > 0 ? formatCopiesFromClips(clips) : []
     setCopies(newCopies)
   }, [clips])
 
   if (copies?.length > 0) {
     return (
       <ul role="list" className="divide-y divide-white/10 rounded-md border border-white/20 mb-2">
-        {copies.map((copy, index) => (
+        {copies?.map((copy, index) => (
           <li
             key={index}
             className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6"
@@ -29,11 +29,11 @@ export const CopiesList = ({ type, handleRemoveCopy }: CopiesListProps) => {
             <div className="flex w-0 flex-1 items-center">
               <div className="ml-4 flex min-w-0 flex-1 gap-2">
                 <span className="flex-shrink-0 text-gray-400">Copy {index + 1}: </span>
-                {copy.volumes.map((vol, volIndex) => (
+                {copy?.volumes?.map((vol, volIndex) => (
                   <span key={volIndex} className="truncate font-medium">
                     {vol}
                     <span className="text-gray-400">
-                      {volIndex < copy.volumes.length - 1 && ', '}
+                      {volIndex < copy.volumes?.length - 1 && ', '}
                     </span>
                   </span>
                 ))}

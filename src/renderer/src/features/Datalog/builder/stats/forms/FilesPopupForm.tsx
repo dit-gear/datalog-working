@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import { FormControl, FormField, FormItem, FormLabel, Form, FormMessage } from '@components/ui/form'
 import { Input } from '@components/ui/input'
@@ -21,8 +21,7 @@ import {
 
 interface FilesPopupFormProps {
   value: any
-  defaults: FilesType
-  update: (data: FilesType) => void
+  update: (data: any) => void
   clear: () => void
   children: React.ReactNode
   header: string
@@ -38,12 +37,12 @@ type fileType = z.infer<typeof fileSchema>
 
 export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
   value,
-  defaults,
   update,
   clear,
   children,
   header
 }) => {
+  const [open, setOpen] = useState(false)
   const BYTES_IN_GB = 1e9
 
   const form = useForm<fileType>({
@@ -51,28 +50,25 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
       files: value.files || 0,
       size: value.size ? Math.round(value.size / BYTES_IN_GB) : 0,
       sizeUnit: 'GB',
-      copies: []
+      copies: value.copies ?? []
     },
     mode: 'onSubmit',
     resolver: zodResolver(fileSchema)
   })
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { isDirty }
-  } = form
+  const { control, handleSubmit, reset } = form
 
   useEffect(() => {
-    reset({ clips: value.files, size: value.size ? Math.round(value.size / BYTES_IN_GB) : 0 })
+    reset({
+      files: value.files ?? 0,
+      size: value.size ? Math.round(value.size / BYTES_IN_GB) : 0,
+      sizeUnit: 'GB',
+      copies: value.copies ?? []
+    })
   }, [value])
 
-  let currentIndex = 0
-  const assignIndex = (): number => currentIndex++
-
   const onSubmit: SubmitHandler<any> = (data): void => {
-    const { size, ...rest } = data
+    /*const { size, ...rest } = data
     const sizeInBytes = size ? size * BYTES_IN_GB : 0 // Convert from GB to Bytes
     const updated = { ...rest, Size: sizeInBytes }
 
@@ -82,17 +78,11 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
     }
     if (deepEqual(data, defaultsInGB)) return
     //update(updated) // in Bytes
-    reset(data) // in GB
-  }
-
-  const handleOpenChange = (open: boolean) => {
-    if (open === false) {
-      handleSubmit(onSubmit)()
-    }
+    reset(data) // in GB*/
   }
 
   return (
-    <Popover onOpenChange={handleOpenChange}>
+    <Popover open={open} onOpenChange={(v) => setOpen(v)}>
       <PopoverTrigger className="min-w-12 min-h-10 text-left">{children}</PopoverTrigger>
       <PopoverContent className="w-80">
         <Form {...form}>
@@ -205,10 +195,6 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
                 size="sm"
                 variant="secondary"
                 onClick={() => {
-                  reset({
-                    files: defaults.files,
-                    size: defaults.size && Math.round(defaults.size / BYTES_IN_GB)
-                  })
                   clear()
                 }}
               >

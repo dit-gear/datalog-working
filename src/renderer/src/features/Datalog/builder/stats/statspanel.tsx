@@ -1,7 +1,7 @@
 import Ocf from './ocf'
 import Proxy from './proxy'
-import Duration from './duration'
-import Reels from './reels'
+import Duration from './duration/duration'
+import Reels from './reels/reels'
 
 const StatsPanel = () => {
   return (

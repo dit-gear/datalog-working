@@ -1,13 +1,5 @@
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  Form,
-  FormMessage,
-  FormDescription
-} from '@components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, Form, FormMessage } from '@components/ui/form'
 import { Input } from '@components/ui/input'
 import { formatDurationToTC } from '@shared/utils/format-duration'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -15,13 +7,12 @@ import { durationType } from '@shared/shared-types'
 import { Button } from '@components/ui/button'
 import z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface DurationPopupFormProps {
-  value?: durationType
-  defaults?: durationType
+  value: durationType | null
   update: (data: string) => void
-  clear?: () => void
+  clear: () => void
   children: React.ReactNode
   sec?: boolean
 }
@@ -34,7 +25,6 @@ const durationSchema = z.object({
 
 export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
   value,
-  defaults,
   update,
   clear,
   children
@@ -46,7 +36,7 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
       minutes: value?.minutes,
       seconds: value?.seconds
     },
-    mode: 'all',
+    mode: 'onSubmit',
     resolver: zodResolver(durationSchema)
   })
   const {
@@ -55,17 +45,24 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
     formState: { isValid }
   } = form
 
+  useEffect(() => {
+    reset({
+      hours: value?.hours ?? 0,
+      minutes: value?.minutes ?? 0,
+      seconds: value?.seconds ?? 0
+    })
+  }, [value])
+
   const onSubmit: SubmitHandler<durationType> = (data): void => {
-    const duration = formatDurationToTC(data)
-    console.log('duration: ', duration)
-    //if (duration === defaults) return
-    update(duration)
-    reset(data)
+    if (data !== value) {
+      const duration = formatDurationToTC(data)
+      update(duration)
+    }
     setIsOpen(false)
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={(v) => setIsOpen(v)} modal={true}>
+    <Popover open={isOpen} onOpenChange={(v) => setIsOpen(v)}>
       <PopoverTrigger className="min-w-12 min-h-10 text-left">{children}</PopoverTrigger>
       <PopoverContent className="w-80">
         <Form {...form}>
@@ -185,12 +182,7 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
                 variant="secondary"
                 onClick={() => {
                   setIsOpen(false)
-                  reset({
-                    hours: defaults?.hours,
-                    minutes: defaults?.minutes,
-                    seconds: defaults?.seconds
-                  })
-                  clear?.()
+                  clear()
                 }}
               >
                 Reset

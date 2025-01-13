@@ -1,25 +1,33 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Stat from '@components/stat'
-import { useWatch } from 'react-hook-form'
-import { getDuration } from '@shared/utils/datalog-methods'
 import { durationType } from '@shared/shared-types'
 
-export const DurationStat = ({ duration }) => {
+interface DurationStatProps {
+  value: durationType | null
+}
+
+export const DurationStat = ({ value }: DurationStatProps) => {
+  const [display, setDisplay] = useState<durationType | null>(null)
+
+  useEffect(() => {
+    setDisplay(value)
+  }, [value])
+
   return (
     <Stat label="Duration">
       <>
-        {duration?.hours ? (
+        {display?.hours ? (
           <>
             <span className="text-4xl font-semibold leading-none tracking-tight text-white">
-              {duration.hours}
+              {display.hours}
             </span>
             <span className="text-sm text-gray-400">h</span>
           </>
         ) : null}
-        {duration?.minutes ? (
+        {display?.minutes ? (
           <>
             <span className="text-4xl font-semibold tracking-tight text-white">
-              {duration.minutes}
+              {display.minutes}
             </span>
             <span className="text-sm text-gray-400">min</span>
           </>

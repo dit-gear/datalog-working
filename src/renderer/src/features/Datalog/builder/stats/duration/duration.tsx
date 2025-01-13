@@ -1,24 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
-import { DurationPopupForm } from './forms/DurationPopupForm'
-import Stat from '@components/stat'
+import { DurationPopupForm } from '../forms/DurationPopupForm'
 import { getDuration } from '@shared/utils/datalog-methods'
 import { durationType } from '@shared/shared-types'
-import { DurationStat } from './duration/durationStat'
-import { formatDuration } from '@shared/utils/format-duration'
+import { DurationStat } from './durationStat'
 
 const Duration = () => {
   const { setValue } = useFormContext()
   const clips = useWatch({ name: 'ocf.clips' })
   const fixedDuration = useWatch({ name: 'ocf.duration' })
 
-  const [value, setValueState] = useState<durationType>()
-  const [defaults, setDefaults] = useState<durationType>()
+  const [value, setValueState] = useState<durationType | null>(null)
 
   useEffect(() => {
-    if (clips || fixedDuration) {
-    }
-    console.log('d-clips', clips)
     const duration = getDuration(
       {
         duration: fixedDuration ? fixedDuration : undefined,
@@ -26,22 +20,20 @@ const Duration = () => {
       },
       'hms'
     )
-    const durationDefaults = getDuration({ clips: clips }, 'hms')
-    setDefaults(durationDefaults)
     setValueState(duration)
   }, [clips, fixedDuration])
 
   const update = (newValue: string) => {
-    setValue('ocf.duration', newValue, { shouldDirty: true })
+    setValue('ocf.duration', newValue)
   }
 
   const clear = () => {
-    setValue('ocf.duration', '')
+    setValue('ocf.duration', null)
   }
 
   return (
-    <DurationPopupForm value={value} defaults={defaults} update={update} clear={clear}>
-      <DurationStat duration={value} />
+    <DurationPopupForm value={value} update={update} clear={clear}>
+      <DurationStat value={value} />
     </DurationPopupForm>
   )
 }
