@@ -102,11 +102,12 @@ export type ProxyClipType = z.infer<typeof ProxyClipZod>
 
 const file = z.number().int().nonnegative().finite().optional()
 const size = z.number().nonnegative().finite().optional()
+const copiesarray = z.array(z.string()).optional()
 
 export const Sound = z.object({
   files: file,
   size: size,
-  copies: z.array(z.string()).optional(),
+  copies: copiesarray,
   clips: z.array(SoundClipZod).optional()
 })
 export type SoundType = z.infer<typeof Sound>
@@ -116,7 +117,7 @@ export const OCF = z.object({
   size: size,
   duration: timecode.optional(),
   reels: z.array(z.string()).optional(),
-  copies: z.array(z.string()).optional(),
+  copies: copiesarray,
   clips: z.array(OcfClipZod).optional()
 })
 export type OcfType = z.infer<typeof OCF>

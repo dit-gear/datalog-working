@@ -9,7 +9,7 @@ interface MultiSelectProps {
   name: string
   options: Option[]
   placeholder?: string
-  dataIndex: number
+  dataIndex?: number
   menuPosition?: 'fixed'
 }
 
@@ -34,10 +34,9 @@ function MultiSelectInner(
     onChange(ids) // Pass only IDs to parent
   }
 
-  const nextElement = document.querySelector(`[data-index="${dataIndex + 2}"]`) as HTMLElement
-
   const handleKeyDown: React.KeyboardEventHandler = (event) => {
-    if (event.key === 'Tab') {
+    if (event.key === 'Tab' && dataIndex) {
+      const nextElement = document.querySelector(`[data-index="${dataIndex + 2}"]`) as HTMLElement
       nextElement?.focus()
       event.preventDefault()
     }
@@ -56,7 +55,7 @@ function MultiSelectInner(
       menuPosition={menuPosition}
       name={name}
       ref={ref}
-      data-index={dataIndex}
+      {...(dataIndex && { 'data-index': dataIndex })}
     />
   )
 }

@@ -1,21 +1,40 @@
 import { useEffect } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
-import { FormControl, FormField, FormItem, FormLabel, Form } from '@components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, Form, FormMessage } from '@components/ui/form'
 import { Input } from '@components/ui/input'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { FilesType, Files } from '@shared/datalogTypes'
+import { OcfClipBaseType } from '@shared/datalogTypes'
 import { Button } from '@components/ui/button'
 import { deepEqual } from '@renderer/utils/compare'
 import { FileTypeReqType } from '../types'
+import z from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Textarea } from '@components/ui/textarea'
+import MultiSelectTextInput from '@components/MultiSelectTextInput'
+import {
+  Select,
+  SelectTrigger,
+  SelectItem,
+  SelectContent,
+  SelectValue
+} from '@components/ui/select'
 
 interface FilesPopupFormProps {
-  value: FilesType
+  value: any
   defaults: FilesType
   update: (data: FilesType) => void
   clear: () => void
   children: React.ReactNode
   header: string
 }
+
+const fileSchema = z.object({
+  files: z.coerce.number().int().nonnegative().finite().optional(),
+  size: z.coerce.number().nonnegative().finite().optional(),
+  sizeUnit: z.enum(['TB', 'GB', 'MB']),
+  copies: z.array(z.string()).optional()
+})
+type fileType = z.infer<typeof fileSchema>
 
 export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
   value,
@@ -26,23 +45,33 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
   header
 }) => {
   const BYTES_IN_GB = 1e9
-  const form = useForm({
+
+  const form = useForm<fileType>({
     defaultValues: {
       files: value.files || 0,
-      size: value.size ? Math.round(value.size / BYTES_IN_GB) : 0
-    }
+      size: value.size ? Math.round(value.size / BYTES_IN_GB) : 0,
+      sizeUnit: 'GB',
+      copies: []
+    },
+    mode: 'onSubmit',
+    resolver: zodResolver(fileSchema)
   })
+
   const {
+    control,
     handleSubmit,
     reset,
     formState: { isDirty }
   } = form
 
   useEffect(() => {
-    reset({ files: value.files, size: value.size ? Math.round(value.size / BYTES_IN_GB) : 0 })
+    reset({ clips: value.files, size: value.size ? Math.round(value.size / BYTES_IN_GB) : 0 })
   }, [value])
 
-  const onSubmit: SubmitHandler<FileTypeReqType> = (data): void => {
+  let currentIndex = 0
+  const assignIndex = (): number => currentIndex++
+
+  const onSubmit: SubmitHandler<any> = (data): void => {
     const { size, ...rest } = data
     const sizeInBytes = size ? size * BYTES_IN_GB : 0 // Convert from GB to Bytes
     const updated = { ...rest, Size: sizeInBytes }
@@ -52,7 +81,7 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
       size: defaults.size ? Math.round(defaults.size / BYTES_IN_GB) : 0
     }
     if (deepEqual(data, defaultsInGB)) return
-    update(updated) // in Bytes
+    //update(updated) // in Bytes
     reset(data) // in GB
   }
 
@@ -74,55 +103,118 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
             </div>
             <div className="grid gap-2">
               <FormField
-                name="size"
-                render={({ field }) => (
-                  <FormItem className="grid grid-cols-3 items-center gap-4">
-                    <FormLabel>Size in GB</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={0}
-                        step={1}
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                        onBlur={field.onBlur}
-                        className="col-span-2 h-8"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
                 name="files"
                 render={({ field }) => (
-                  <FormItem className="grid grid-cols-3 items-center gap-4">
+                  <FormItem className="grid grid-cols-3 items-center gap-2">
                     <FormLabel>Clips</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        min={0}
-                        value={field.value}
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
-                        onBlur={field.onBlur}
-                        className="col-span-2 h-8"
+                        type="text"
+                        className="col-span-1 h-8"
+                        {...field}
+                        onKeyDown={(e) => {
+                          const allowedKeys = [
+                            'Backspace',
+                            'ArrowLeft',
+                            'ArrowRight',
+                            'Delete',
+                            'Tab'
+                          ]
+                          if (!/^\d$/.test(e.key) && !allowedKeys.includes(e.key)) {
+                            e.preventDefault()
+                          }
+                        }}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormItem className="grid grid-cols-3 items-center gap-2">
+                <FormLabel>Size</FormLabel>
+
+                <FormControl className="col-span-1">
+                  <FormField
+                    name="size"
+                    render={({ field }) => (
+                      <Input
+                        type="text"
+                        className="h-8"
+                        {...field}
+                        onKeyDown={(e) => {
+                          const allowedKeys = [
+                            'Backspace',
+                            'ArrowLeft',
+                            'ArrowRight',
+                            'Delete',
+                            'Tab',
+                            '.'
+                          ]
+                          if (!/^\d$/.test(e.key) && !allowedKeys.includes(e.key)) {
+                            e.preventDefault()
+                          }
+                        }}
+                      />
+                    )}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormField
+                    control={control}
+                    name="sizeUnit"
+                    render={({ field }) => (
+                      <FormItem className="grid grid-cols-1 items-center gap-4">
+                        <FormControl>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <SelectTrigger className="h-8 w-16">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="TB">TB</SelectItem>
+                              <SelectItem value="GB">GB</SelectItem>
+                              <SelectItem value="MB">MB</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+              <FormField
+                name="copies"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col mt-3">
+                    <FormLabel>Copies</FormLabel>
+                    <FormControl>
+                      <div className="col-span-2">
+                        <MultiSelectTextInput {...field} />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <Button
-              size="sm"
-              onClick={() => {
-                reset({
-                  files: defaults.files,
-                  size: defaults.size && Math.round(defaults.size / BYTES_IN_GB)
-                })
-                clear()
-              }}
-            >
-              Reset
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button size="sm" onClick={() => console.log('click')}>
+                Set
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  reset({
+                    files: defaults.files,
+                    size: defaults.size && Math.round(defaults.size / BYTES_IN_GB)
+                  })
+                  clear()
+                }}
+              >
+                Reset
+              </Button>
+            </div>
           </div>
         </Form>
       </PopoverContent>

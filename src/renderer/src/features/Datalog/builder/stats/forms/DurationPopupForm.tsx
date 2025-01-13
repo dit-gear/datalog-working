@@ -1,5 +1,13 @@
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
-import { FormControl, FormField, FormItem, FormLabel, Form, FormMessage } from '@components/ui/form'
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  Form,
+  FormMessage,
+  FormDescription
+} from '@components/ui/form'
 import { Input } from '@components/ui/input'
 import { formatDurationToTC } from '@shared/utils/format-duration'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -38,6 +46,7 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
       minutes: value?.minutes,
       seconds: value?.seconds
     },
+    mode: 'all',
     resolver: zodResolver(durationSchema)
   })
   const {
@@ -79,6 +88,18 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
                           {...field}
                           className="h-8"
                           placeholder="HH"
+                          onKeyDown={(e) => {
+                            const allowedKeys = [
+                              'Backspace',
+                              'ArrowLeft',
+                              'ArrowRight',
+                              'Delete',
+                              'Tab'
+                            ]
+                            if (!/^\d$/.test(e.key) && !allowedKeys.includes(e.key)) {
+                              e.preventDefault()
+                            }
+                          }}
                         />
                       </FormControl>
                       <FormLabel>h</FormLabel>
@@ -100,6 +121,18 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
                           {...field}
                           className=" h-8"
                           placeholder="MM"
+                          onKeyDown={(e) => {
+                            const allowedKeys = [
+                              'Backspace',
+                              'ArrowLeft',
+                              'ArrowRight',
+                              'Delete',
+                              'Tab'
+                            ]
+                            if (!/^\d$/.test(e.key) && !allowedKeys.includes(e.key)) {
+                              e.preventDefault()
+                            }
+                          }}
                         />
                       </FormControl>
                       <FormLabel>m</FormLabel>
@@ -121,6 +154,18 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
                           {...field}
                           className=" h-8"
                           placeholder="SS"
+                          onKeyDown={(e) => {
+                            const allowedKeys = [
+                              'Backspace',
+                              'ArrowLeft',
+                              'ArrowRight',
+                              'Delete',
+                              'Tab'
+                            ]
+                            if (!/^\d$/.test(e.key) && !allowedKeys.includes(e.key)) {
+                              e.preventDefault()
+                            }
+                          }}
                         />
                       </FormControl>
                       <FormLabel>s</FormLabel>

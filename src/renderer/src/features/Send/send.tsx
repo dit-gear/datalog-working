@@ -70,7 +70,7 @@ const Send = ({ defaults }: SendProps) => {
                   <FormItem>
                     <FormLabel>To:</FormLabel>
                     <FormControl>
-                      <MultiSelectTextInput dataIndex={0} {...field} />
+                      <MultiSelectTextInput {...field} />
                     </FormControl>
                     {/*Array.isArray(errors.recipients) &&
               errors.recipients.length > 0 &&
@@ -114,7 +114,6 @@ const Send = ({ defaults }: SendProps) => {
                     <FormLabel>Attachments</FormLabel>
                     <FormControl>
                       <MultiSelect
-                        dataIndex={1}
                         menuPosition="fixed"
                         {...field}
                         value={mapPdfTypesToOptions(

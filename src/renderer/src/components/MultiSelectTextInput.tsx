@@ -9,15 +9,45 @@ interface MultiSelectTextInputProps {
   onBlur: () => void
   name: string
   placeholder?: string
-  dataIndex: number
+  dataIndex?: number
+}
+
+const isFocusable = (element: HTMLElement): boolean => {
+  return (
+    element.tabIndex >= 0 ||
+    element instanceof HTMLInputElement ||
+    element instanceof HTMLButtonElement ||
+    element instanceof HTMLTextAreaElement ||
+    element instanceof HTMLSelectElement ||
+    element instanceof HTMLAnchorElement
+  )
+}
+
+const findNextFocusable = (element: HTMLElement | null): HTMLElement | null => {
+  if (!element) return null
+
+  // Check if the current element is focusable
+  if (isFocusable(element)) {
+    return element
+  }
+
+  // Check the children of the current element
+  for (const child of Array.from(element.children)) {
+    const focusableChild = findNextFocusable(child as HTMLElement)
+    if (focusableChild) {
+      return focusableChild
+    }
+  }
+
+  // If no focusable child, check the next sibling
+  return findNextFocusable(element.nextElementSibling as HTMLElement)
 }
 
 const MultiSelectTextInput = forwardRef<
   SelectInstance<Option, true, GroupBase<Option>>,
   MultiSelectTextInputProps
->(({ value = [], onChange, onBlur, name, placeholder = '', dataIndex }, ref) => {
+>(({ value = [], onChange, onBlur, name, dataIndex, placeholder = '' }, ref) => {
   const [inputValue, setInputValue] = useState('')
-  const nextElement = document.querySelector(`[data-index="${dataIndex + 2}"]`) as HTMLElement
 
   const handleKeyDown: KeyboardEventHandler = (event) => {
     switch (event.key) {
@@ -25,9 +55,16 @@ const MultiSelectTextInput = forwardRef<
         if (inputValue && !value.includes(inputValue)) {
           onChange([...(value || []), inputValue])
           setInputValue('')
+          event.preventDefault()
+          break
         }
-        if (!inputValue) nextElement?.focus()
-        event.preventDefault()
+        if (!inputValue && dataIndex) {
+          const nextElement = document.querySelector(
+            `[data-index="${dataIndex + 2}"]`
+          ) as HTMLElement
+          nextElement?.focus()
+          event.preventDefault()
+        }
         break
 
       case 'Enter':
@@ -81,7 +118,7 @@ const MultiSelectTextInput = forwardRef<
       onBlur={handleBlur}
       name={name}
       ref={ref}
-      data-index={dataIndex}
+      {...(dataIndex && { 'data-index': dataIndex })}
     />
   )
 })
