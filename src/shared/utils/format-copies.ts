@@ -227,5 +227,5 @@ export const formatGroupedVolumes = (
   })
 
   // For each group, merge the volume names into a string
-  return groups.map((group) => group.volumes.join(', '))
+  return groups.map((group) => group.volumes.join(' + '))
 }

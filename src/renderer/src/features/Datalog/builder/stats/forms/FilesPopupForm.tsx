@@ -35,7 +35,6 @@ const fileSchema = z.object({
 const req = fileSchema.required()
 export type fileFormType = z.infer<typeof fileSchema>
 export type fileFormTypeRequired = z.infer<typeof req>
-type unitenum = 'tb' | 'gb' | 'mb'
 
 export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
   value,
@@ -62,20 +61,12 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
   const { control, handleSubmit, reset } = form
 
   useEffect(() => {
-    let size = 0
-    let unit: unitenum = 'gb'
-    if (value?.size) {
-      const [s, u] = formatBytes(value.size, { output: 'tuple', type: 'auto' })
-      size = s
-      unit = u as unitenum
-    }
     reset({
       files: value?.files ?? 0,
-      size: size,
-      sizeUnit: unit,
+      size: value?.size ? formatBytes(value.size, { output: 'number', type: 'gb' }) : 0,
+      sizeUnit: 'gb',
       copies: value?.copies ?? []
     })
-    form.setValue('sizeUnit', unit)
   }, [value])
 
   const onSubmit: SubmitHandler<fileFormType> = (data): void => {
@@ -103,38 +94,14 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
         <Form {...form}>
           <div className="grid gap-4">
             <div className="space-y-2">
-              <h4 className="font-medium leading-none">{header}</h4>
+              <h4
+                className={`font-medium leading-none ${header === 'ocf' ? 'uppercase' : 'capitalize'}`}
+              >
+                {header}
+              </h4>
               <p className="text-sm text-muted-foreground">Set the number of clips and size.</p>
             </div>
             <div className="grid gap-2">
-              <FormField
-                name="files"
-                render={({ field }) => (
-                  <FormItem className="grid grid-cols-3 items-center gap-2">
-                    <FormLabel>Clips</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        className="col-span-1 h-8"
-                        {...field}
-                        onKeyDown={(e) => {
-                          const allowedKeys = [
-                            'Backspace',
-                            'ArrowLeft',
-                            'ArrowRight',
-                            'Delete',
-                            'Tab'
-                          ]
-                          if (!/^\d$/.test(e.key) && !allowedKeys.includes(e.key)) {
-                            e.preventDefault()
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <FormItem className="grid grid-cols-3 items-center gap-2">
                 <FormLabel>Size</FormLabel>
 
@@ -187,6 +154,34 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
                 </FormControl>
                 <FormMessage />
               </FormItem>
+              <FormField
+                name="files"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-3 items-center gap-2">
+                    <FormLabel>Clips</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        className="col-span-1 h-8"
+                        {...field}
+                        onKeyDown={(e) => {
+                          const allowedKeys = [
+                            'Backspace',
+                            'ArrowLeft',
+                            'ArrowRight',
+                            'Delete',
+                            'Tab'
+                          ]
+                          if (!/^\d$/.test(e.key) && !allowedKeys.includes(e.key)) {
+                            e.preventDefault()
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               {enableCopies && (
                 <FormField
                   name="copies"

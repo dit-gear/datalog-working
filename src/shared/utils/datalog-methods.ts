@@ -1,8 +1,7 @@
 import { getReels as getReelsFunction, getReelsOptions } from './format-reel'
-import { formatBytes, FormatBytesOptions, FormatBytesTypes, FormatOutput } from './format-bytes'
+import { formatBytes, FormatBytesOptions, FormatOutput } from './format-bytes'
 import { formatDuration } from './format-duration'
 import {
-  DatalogType,
   OcfClipType,
   OcfType,
   ProxyType,
@@ -17,7 +16,6 @@ import {
   timecodeToSeconds,
   secondsToLargeTimecode
 } from './format-timecode'
-import { ProjectRootType } from '@shared/projectTypes'
 import { durationType } from '@shared/shared-types'
 import { formatCopiesFromString, formatCopiesFromClips } from './format-copies'
 import { Datalog } from '@shared/datalogClass'

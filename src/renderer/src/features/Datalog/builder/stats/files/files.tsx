@@ -14,14 +14,25 @@ import z from 'zod'
 const schema = z.object({
   files: OCF.shape.files.nullable(),
   size: OCF.shape.size.nullable(),
-  copies: OCF.shape.copies.nullable(),
-  clips: OCF.shape.clips
+  clips: OCF.shape.clips,
+  copies: OCF.shape.copies.nullable().optional()
 })
 type watched = z.infer<typeof schema>
 
-const Ocf = () => {
+interface FilesProps {
+  type: 'ocf' | 'sound' | 'proxy'
+}
+
+const Files = ({ type }: FilesProps) => {
   const { setValue } = useFormContext()
-  const ocfWatch = useWatch({ name: ['ocf.files', 'ocf.size', 'ocf.copies', 'ocf.clips'] })
+  const enableCopies = type !== 'proxy'
+  const fields = [`${type}.files`, `${type}.size`, `${type}.clips`]
+  if (enableCopies) {
+    fields.push(`${type}.copies`)
+  }
+  const ocfWatch = useWatch({
+    name: fields
+  })
 
   /*const ocf = useDebounce(
     {
@@ -37,19 +48,18 @@ const Ocf = () => {
   const [display, setDisplay] = useState<fileFormType | null>(null)
 
   useEffect(() => {
-    console.count('updated')
-    const ocf = {
+    const obj = {
       files: ocfWatch[0],
       size: ocfWatch[1],
-      copies: ocfWatch[2],
-      clips: ocfWatch[3]
+      clips: ocfWatch[2],
+      ...(enableCopies && { copies: ocfWatch[3] })
     } as watched
-    const size = ocf.size ?? sumClipSizes(ocf.clips)
+    const size = obj.size ?? sumClipSizes(obj.clips)
     const [sizeDisplay, sizeUnitDisplay] = formatBytes(size, { output: 'tuple' })
 
     const baseValues = {
-      files: ocf.files ?? countClipFiles(ocf.clips),
-      copies: ocf.copies ?? formatGroupedVolumes(ocf.clips)
+      files: obj.files ?? countClipFiles(obj.clips),
+      ...(enableCopies && { copies: obj.copies ?? formatGroupedVolumes(obj.clips) })
     }
 
     const formValues = {
@@ -65,7 +75,7 @@ const Ocf = () => {
     }
 
     setDisplay(
-      ocf.files || ocf.size || ocf.copies || (ocf.clips && ocf.clips.length > 0)
+      obj.files || obj.size || obj.copies || (obj.clips && obj.clips.length > 0)
         ? displayValues
         : null
     )
@@ -74,24 +84,31 @@ const Ocf = () => {
 
   const update = (newValue: fileFormType) => {
     console.log(newValue)
-    if (newValue.files) setValue('ocf.files', newValue.files)
-    if (newValue.size) setValue('ocf.size', newValue.size)
-    if (newValue.copies) setValue('ocf.copies', newValue.copies)
+    if (newValue.files) setValue(`${type}.files`, newValue.files)
+    if (newValue.size) setValue(`${type}.size`, newValue.size)
+    if (enableCopies && newValue.copies) setValue(`${type}.copies`, newValue.copies)
   }
 
   const clear = () => {
-    setValue('ocf.files', null)
-    setValue('ocf.size', null)
-    setValue('ocf.copies', null)
+    setValue(`${type}.files`, null)
+    setValue(`${type}.size`, null)
+    if (enableCopies) setValue(`${type}.copies`, null)
   }
 
   return (
-    <FilesPopupForm key="ocf" value={form} update={update} clear={clear} header="OCF" enableCopies>
-      <Stat label="OCF">
+    <FilesPopupForm
+      key={type}
+      value={form}
+      update={update}
+      clear={clear}
+      header={type}
+      enableCopies={enableCopies}
+    >
+      <Stat label={type} uppercase={type === 'ocf'}>
         <FilesStat value={display} />
       </Stat>
     </FilesPopupForm>
   )
 }
 
-export default Ocf
+export default Files
