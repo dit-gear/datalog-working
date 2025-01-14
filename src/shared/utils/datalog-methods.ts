@@ -28,14 +28,14 @@ type Clip = OcfClipType | ProxyClipType | SoundClipType
  * Utility to count how many “files” from an array of clips
  * (Sometimes you might interpret “files” simply as the count of those clips.)
  */
-function countClipFiles(clips: Clip[] | undefined): number {
+export function countClipFiles(clips: Clip[] | undefined): number {
   return clips?.length ?? 0
 }
 
 /**
  * Utility to sum the numeric `size` of an array of clips
  */
-function sumClipSizes(clips: Clip[] | undefined): number {
+export function sumClipSizes(clips: Clip[] | undefined): number {
   if (!clips) return 0
   return clips.reduce((acc, clip) => acc + (clip.size ?? 0), 0)
 }

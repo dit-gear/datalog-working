@@ -6,25 +6,6 @@ export type FormatBytesOptions<T extends FormatOutput = 'string'> = {
   output: T
   type?: FormatBytesTypes
 }
-/*
-export type FormatBytesOptions = {
-  type?: FormatBytesTypes
-  output: 'string' | 'number' | 'tuple'
-}
-
-export function formatBytes(
-  bytes: number,
-  options: { output: 'tuple'; type?: FormatBytesTypes }
-): [number, string]
-export function formatBytes(
-  bytes: number,
-  options: { output: 'number'; type?: FormatBytesTypes }
-): number
-export function formatBytes(
-  bytes: number,
-  options?: { output: 'string'; type?: FormatBytesTypes }
-): string
-export function formatBytes(bytes: number): string*/
 
 export function formatBytes<T extends FormatOutput>(
   bytes: number,
@@ -73,3 +54,15 @@ export function formatBytes<T extends FormatOutput>(
 // formatBytes(1210);       - Output: 1.21 KB
 // formatBytes(123456789);  - Output: 117 MB
 // formatBytes(1024, {isTuple: true}); // Output: [1, 'KB']
+
+/**
+ * Utility function that converts TB, GB or MB to byte
+ */
+export function convertToBytes(num: number, unit: 'tb' | 'gb' | 'mb'): number {
+  const conversions = {
+    tb: 1000 ** 4,
+    gb: 1000 ** 3,
+    mb: 1000 ** 2
+  }
+  return num * conversions[unit]
+}

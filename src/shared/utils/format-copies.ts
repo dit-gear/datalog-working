@@ -55,9 +55,8 @@ export function formatCopiesFromString(copies: string[] | undefined): CopyType[]
 
 /**
  * Takes an array of OcfClipType or SoundClipType and produces
- * an array of CopyType groups, grouping *by volume name*.
+ * an array of CopyType. (no grouping)
  */
-
 export const formatCopiesFromClipsNOTGROUPED = (
   clips: (OcfClipType | SoundClipType)[] | undefined
 ): CopyType[] => {
@@ -87,6 +86,10 @@ export const formatCopiesFromClipsNOTGROUPED = (
   }))
 }
 
+/**
+ * Takes an array of OcfClipType or SoundClipType and produces
+ * an array of CopyType groups, grouping *by volume name*.
+ */
 export const formatCopiesFromClips = (
   clips: (OcfClipType | SoundClipType)[] | undefined
 ): CopyType[] => {
@@ -178,27 +181,27 @@ export const formatCopiesFromClips = (
   })
 }
 
-/*
-export const getCopiesFromClips = (clips: OcfClipType[] | SoundClipType[]): CopyType[] => {
-  const total = clips.length
+/**
+ * Similar to formatCopiesFromClips but takes in clips and returns copies(volumes) as string[]
+ */
+export const formatGroupedVolumes = (
+  clips: (OcfClipType | SoundClipType)[] | undefined
+): string[] => {
+  if (!clips || clips.length === 0) return []
 
-  const volMap = new Map<string, Set<string>>()
-
-  clips.forEach((clip) => {
-    clip.copies.forEach((copy) => {
-      // If the path already exists, append the Clip to the array
-      if (volMap.has(copy.volume)) {
-        volMap.get(copy.volume)!.add(clip.clip)
-      } else {
-        // Otherwise, create a new entry with the current Clip
-        volMap.set(copy.volume, new Set([clip.clip]))
+  // Build a map of volume -> set of clip IDs that reference it
+  const volumeMap = new Map<string, Set<string>>()
+  for (const clip of clips) {
+    for (const copy of clip.copies) {
+      const vol = copy.volume
+      if (!volumeMap.has(vol)) {
+        volumeMap.set(vol, new Set())
       }
-    })
-  })
+      volumeMap.get(vol)!.add(clip.clip)
+    }
+  }
 
-  const groups: { volume: string[]; clips: Set<string> }[] = []
-
-  // Function to check if two sets overlap
+  // Helper: check for any overlap between two sets
   const hasOverlap = (setA: Set<string>, setB: Set<string>): boolean => {
     for (const item of setA) {
       if (setB.has(item)) return true
@@ -206,29 +209,23 @@ export const getCopiesFromClips = (clips: OcfClipType[] | SoundClipType[]): Copy
     return false
   }
 
-  // Iterate over each path in the pathMap
-  volMap.forEach((clipsSet, vol) => {
-    let addedToGroup = false
-
-    // Try to add to an existing group
+  // Group volumes where their clip sets do not overlap
+  const groups: { volumes: string[]; clips: Set<string> }[] = []
+  volumeMap.forEach((volClips, vol) => {
+    let added = false
     for (const group of groups) {
-      if (!hasOverlap(group.clips, clipsSet)) {
-        group.copies.push(vol) // Add the path to this group
-        clipsSet.forEach((clip) => group.clips.add(clip)) // Merge clips
-        addedToGroup = true
+      if (!hasOverlap(group.clips, volClips)) {
+        group.volumes.push(vol)
+        volClips.forEach((c) => group.clips.add(c))
+        added = true
         break
       }
     }
-
-    // If no group found, create a new group
-    if (!addedToGroup) {
-      groups.push({ paths: [path], clips: new Set(clipsSet) })
+    if (!added) {
+      groups.push({ volumes: [vol], clips: new Set(volClips) })
     }
   })
 
-  return groups.map((group) => ({
-    copies: group.paths.map(formatPath),
-    clips: [...group.clips],
-    count: [group.clips.size, total]
-  }))
-}*/
+  // For each group, merge the volume names into a string
+  return groups.map((group) => group.volumes.join(', '))
+}

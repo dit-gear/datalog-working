@@ -3,13 +3,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import { FormControl, FormField, FormItem, FormLabel, Form, FormMessage } from '@components/ui/form'
 import { Input } from '@components/ui/input'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { OcfClipBaseType } from '@shared/datalogTypes'
 import { Button } from '@components/ui/button'
-import { deepEqual } from '@renderer/utils/compare'
-import { FileTypeReqType } from '../types'
 import z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Textarea } from '@components/ui/textarea'
 import MultiSelectTextInput from '@components/MultiSelectTextInput'
 import {
   Select,
@@ -18,39 +14,46 @@ import {
   SelectContent,
   SelectValue
 } from '@components/ui/select'
+import { formatBytes, convertToBytes } from '@shared/utils/format-bytes'
+import { compareSizes } from '@renderer/utils/compare'
 
 interface FilesPopupFormProps {
-  value: any
+  value: fileFormType | null
   update: (data: any) => void
   clear: () => void
   children: React.ReactNode
   header: string
+  enableCopies: boolean
 }
 
 const fileSchema = z.object({
-  files: z.coerce.number().int().nonnegative().finite().optional(),
-  size: z.coerce.number().nonnegative().finite().optional(),
-  sizeUnit: z.enum(['TB', 'GB', 'MB']),
+  files: z.coerce.number().int().nonnegative().finite(),
+  size: z.coerce.number().nonnegative().finite(),
+  sizeUnit: z.enum(['tb', 'gb', 'mb']),
   copies: z.array(z.string()).optional()
 })
-type fileType = z.infer<typeof fileSchema>
+const req = fileSchema.required()
+export type fileFormType = z.infer<typeof fileSchema>
+export type fileFormTypeRequired = z.infer<typeof req>
+type unitenum = 'tb' | 'gb' | 'mb'
 
 export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
   value,
   update,
   clear,
   children,
-  header
+  header,
+  enableCopies
 }) => {
   const [open, setOpen] = useState(false)
-  const BYTES_IN_GB = 1e9
+  //const BYTES_IN_GB = 1e9
 
-  const form = useForm<fileType>({
+  const form = useForm<fileFormType>({
     defaultValues: {
-      files: value.files || 0,
-      size: value.size ? Math.round(value.size / BYTES_IN_GB) : 0,
-      sizeUnit: 'GB',
-      copies: value.copies ?? []
+      files: value?.files ?? 0,
+      size: value?.size ?? 0,
+      sizeUnit: 'gb',
+      copies: value?.copies ?? []
     },
     mode: 'onSubmit',
     resolver: zodResolver(fileSchema)
@@ -59,26 +62,38 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
   const { control, handleSubmit, reset } = form
 
   useEffect(() => {
+    let size = 0
+    let unit: unitenum = 'gb'
+    if (value?.size) {
+      const [s, u] = formatBytes(value.size, { output: 'tuple', type: 'auto' })
+      size = s
+      unit = u as unitenum
+    }
     reset({
-      files: value.files ?? 0,
-      size: value.size ? Math.round(value.size / BYTES_IN_GB) : 0,
-      sizeUnit: 'GB',
-      copies: value.copies ?? []
+      files: value?.files ?? 0,
+      size: size,
+      sizeUnit: unit,
+      copies: value?.copies ?? []
     })
+    form.setValue('sizeUnit', unit)
   }, [value])
 
-  const onSubmit: SubmitHandler<any> = (data): void => {
-    /*const { size, ...rest } = data
-    const sizeInBytes = size ? size * BYTES_IN_GB : 0 // Convert from GB to Bytes
-    const updated = { ...rest, Size: sizeInBytes }
-
-    const defaultsInGB = {
-      ...defaults,
-      size: defaults.size ? Math.round(defaults.size / BYTES_IN_GB) : 0
+  const onSubmit: SubmitHandler<fileFormType> = (data): void => {
+    if (!value) return
+    const sizeInBytes = data.size ? convertToBytes(data.size, data.sizeUnit) : 0
+    console.log('compareSizes result:', compareSizes(value.size, data.size, data.sizeUnit))
+    const set = {
+      files: data.files !== value.files ? data.files : null,
+      size: compareSizes(value.size, data.size, data.sizeUnit) ? null : sizeInBytes,
+      copies:
+        data.copies &&
+        value.copies &&
+        data.copies.slice().sort().join() !== value.copies.slice().sort().join()
+          ? data.copies
+          : null
     }
-    if (deepEqual(data, defaultsInGB)) return
-    //update(updated) // in Bytes
-    reset(data) // in GB*/
+    setOpen(false)
+    update(set)
   }
 
   return (
@@ -160,9 +175,9 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="TB">TB</SelectItem>
-                              <SelectItem value="GB">GB</SelectItem>
-                              <SelectItem value="MB">MB</SelectItem>
+                              <SelectItem value="tb">TB</SelectItem>
+                              <SelectItem value="gb">GB</SelectItem>
+                              <SelectItem value="mb">MB</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -172,29 +187,32 @@ export const FilesPopupForm: React.FC<FilesPopupFormProps> = ({
                 </FormControl>
                 <FormMessage />
               </FormItem>
-              <FormField
-                name="copies"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col mt-3">
-                    <FormLabel>Copies</FormLabel>
-                    <FormControl>
-                      <div className="col-span-2">
-                        <MultiSelectTextInput {...field} />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {enableCopies && (
+                <FormField
+                  name="copies"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col mt-3">
+                      <FormLabel>Copies</FormLabel>
+                      <FormControl>
+                        <div className="col-span-2">
+                          <MultiSelectTextInput {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
             <div className="flex flex-col gap-2">
-              <Button size="sm" onClick={() => console.log('click')}>
+              <Button size="sm" onClick={handleSubmit(onSubmit)}>
                 Set
               </Button>
               <Button
                 size="sm"
                 variant="secondary"
                 onClick={() => {
+                  setOpen(false)
                   clear()
                 }}
               >
