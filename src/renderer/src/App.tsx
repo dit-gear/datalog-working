@@ -76,16 +76,12 @@ function App(): JSX.Element {
                     New Shooting Day
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[80vw] h-[90vh]">
-                  {builderOpen && (
-                    <Builderdialog
-                      project={project.data}
-                      previousEntries={logs}
-                      selected={logEdit}
-                      setOpen={setBuilderOpen}
-                    />
-                  )}
-                </DialogContent>
+                <Builderdialog
+                  project={project.data}
+                  previousEntries={logs}
+                  selected={logEdit}
+                  setOpen={setBuilderOpen}
+                />
               </Dialog>
               <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
                 <DialogTrigger asChild>

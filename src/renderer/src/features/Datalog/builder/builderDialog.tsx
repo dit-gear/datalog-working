@@ -1,4 +1,5 @@
 import {
+  DialogContent,
   DialogClose,
   DialogDescription,
   DialogFooter,
@@ -72,8 +73,15 @@ const Builderdialog = ({
   }
 
   const datalogFormSchema = z.object({
-    id: datalogZod.shape.id,
-    day: datalogZod.shape.day,
+    id: z.string().min(1).max(50),
+    day: z.coerce
+      .number({
+        required_error: 'Day is required',
+        invalid_type_error: 'Day is required'
+      })
+      .int()
+      .gte(1, { message: 'Day must be greater than or equal to 1' })
+      .lte(999, { message: 'Day must be below 999' }),
     date: datalogZod.shape.date,
     unit: datalogZod.shape.unit.nullable(),
     ocf: makeNullableExcept(OCF, ['clips']),
@@ -110,13 +118,15 @@ const Builderdialog = ({
       },
       custom: selected?.custom ?? []
     },
-    mode: 'onSubmit',
+    mode: 'all',
     resolver: zodResolver(datalogFormSchema)
   })
 
-  const { formState, handleSubmit, reset } = form
-
-  console.log(formState)
+  const {
+    formState: { isValid },
+    handleSubmit,
+    reset
+  } = form
 
   const onSubmit: SubmitHandler<datalogFormType> = async (data): Promise<void> => {
     console.log('unclean:', data)
@@ -138,47 +148,47 @@ const Builderdialog = ({
   }
 
   return (
-    <Form {...form}>
-      <Tabs defaultValue="name" className="overflow-scroll">
-        <DialogHeader>
-          <DialogTitle>New Shooting Day</DialogTitle>
-          <DialogDescription>Create a summary of the shooting day</DialogDescription>
-          <div>
-            <div className="mx-auto max-w-7xl">
-              <StatsPanel />
+    <DialogContent className="sm:max-w-[100vw] h-[100vh]">
+      <Form {...form}>
+        <Tabs defaultValue="name" className="overflow-scroll">
+          <DialogHeader className="overflow-hidden">
+            <DialogTitle>New Shooting Day</DialogTitle>
+            <DialogDescription>Create a summary of the shooting day</DialogDescription>
+            <div>
+              <div className="mx-auto ">
+                <StatsPanel />
+              </div>
             </div>
+            <div className="flex justify-center">
+              <TabsList className="grid grid-cols-3 w-[400px] mt-4">
+                <TabsTrigger value="name">1. Name</TabsTrigger>
+                <TabsTrigger value="import">2. Import</TabsTrigger>
+                <TabsTrigger value="clips">3. Preview</TabsTrigger>
+              </TabsList>
+            </div>
+          </DialogHeader>
+          <div className="w-[80vw] ml-auto mr-auto mt-4 px-16 py-8 rounded-lg border">
+            <TabsContent value="name" asChild>
+              <Name project={project} />
+            </TabsContent>
+            <TabsContent value="import" asChild>
+              <Import project={project} />
+            </TabsContent>
+            <TabsContent value="clips" className="h-full" asChild>
+              <Preview />
+            </TabsContent>
           </div>
-          <div className="flex justify-center">
-            <TabsList className="grid grid-cols-3 w-[400px] mt-4">
-              <TabsTrigger value="name">1. Name</TabsTrigger>
-              <TabsTrigger value="import">2. Import</TabsTrigger>
-              <TabsTrigger value="clips">3. Preview</TabsTrigger>
-            </TabsList>
-          </div>
-        </DialogHeader>
-        <TabsContent value="name">
-          <Name project={project} />
-        </TabsContent>
-        <TabsContent value="import">
-          <Import project={project} />
-        </TabsContent>
-        <TabsContent value="clips" className="h-full">
-          <Preview />
-        </TabsContent>
-      </Tabs>
-      <DialogFooter className="mt-auto">
-        <DialogClose asChild>
-          <Button variant="ghost">Cancel</Button>
-        </DialogClose>
-        <Button
-          variant="default"
-          //disabled={!formState.isValid}
-          onClick={handleSubmit(onSubmit)}
-        >
-          Submit
-        </Button>
-      </DialogFooter>
-    </Form>
+        </Tabs>
+        <DialogFooter className="mt-auto">
+          <DialogClose asChild>
+            <Button variant="ghost">Cancel</Button>
+          </DialogClose>
+          <Button variant="default" disabled={!isValid} onClick={handleSubmit(onSubmit)}>
+            Submit
+          </Button>
+        </DialogFooter>
+      </Form>
+    </DialogContent>
   )
 }
 

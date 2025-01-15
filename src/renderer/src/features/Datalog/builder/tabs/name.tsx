@@ -55,13 +55,22 @@ export const Name = ({ project }: Nameprops) => {
                 <FormLabel>Day</FormLabel>
                 <FormControl>
                   <Input
-                    id="day"
-                    type="number"
-                    min={1}
-                    max={999}
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                    type="text"
                     className="w-16"
+                    {...field}
+                    onKeyDown={(e) => {
+                      const allowedKeys = [
+                        'Backspace',
+                        'ArrowLeft',
+                        'ArrowRight',
+                        'Delete',
+                        'Tab',
+                        '.'
+                      ]
+                      if (!/^\d$/.test(e.key) && !allowedKeys.includes(e.key)) {
+                        e.preventDefault()
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -88,15 +97,47 @@ export const Name = ({ project }: Nameprops) => {
               <FormItem>
                 <FormLabel>Unit</FormLabel>
                 <FormControl>
-                  <Input id="unit" type="text" className="w-32" {...field} />
+                  <Input type="text" className="w-32" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+        <FormField
+          control={control}
+          name="id"
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-1.5">
+              <FormLabel>Log Name</FormLabel>
+              <div className="flex gap-2 w-full max-w-sm">
+                <FormControl>
+                  <Input id="id" type="text" disabled={!folderEdit} className="" {...field} />
+                </FormControl>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={() => {
+                    setFolderEdit((prev) => {
+                      const newValue = !prev
+                      if (newValue) {
+                        setTimeout(() => {
+                          document.getElementById('id')?.focus()
+                        }, 0)
+                      }
+                      return newValue
+                    })
+                  }}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        <div className="flex flex-col gap-1.5">
+        {/*<div className="flex flex-col gap-1.5">
           <Label htmlFor="id">Log Name</Label>
           <div className="flex w-full max-w-sm items-center space-x-2">
             <Input
@@ -134,7 +175,7 @@ export const Name = ({ project }: Nameprops) => {
                   : null}
             </p>
           </div>
-        </div>
+        </div>*/}
       </dd>
     </div>
   )
