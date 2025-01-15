@@ -22,13 +22,10 @@ declare global {
       updateDatalog: (datalog: DatalogType) => Promise<Response>
       deleteDatalog: (datalog: DatalogType) => Promise<Response>
       onDatalogsLoaded: (callback: (datalogs: DatalogType[]) => void) => void
-      findOcf: () => Promise<ResponseWithClips>
-      removeLogPath: (paths: string[]) => Promise<ResponseWithClips>
+      getClips: (type: 'ocf' | 'sound' | 'proxy' | 'custom') => Promise<ResponseWithClips>
+      removeClips: (paths: string[], type: 'ocf' | 'sound') => Promise<ResponseWithClips>
       showProgress: (show: boolean, progress: number) => void
       showProgressListener: (callback: (show: boolean, progress: number) => void) => () => void
-      getSound: () => Promise<ResponseWithClips>
-      getProxies: () => Promise<ResponseWithClips>
-      getCsvMetadata: () => Promise<ResponseWithClips>
       onDirectoryLoaded: (
         callback: (event: Electron.IpcRendererEvent, files: TemplateDirectoryFile[]) => void
       ) => void

@@ -6,31 +6,15 @@ import {
   DialogTitle
 } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
-import { ScrollArea } from '@components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
-import { useEffect, useState } from 'react'
-import {
-  DatalogType,
-  DatalogDynamicZod,
-  CopyBaseType,
-  datalogZod,
-  OcfClipZod,
-  OcfClipType,
-  OCF,
-  Sound,
-  Proxy
-} from '@shared/datalogTypes'
+import { DatalogType, datalogZod, OCF, Sound, Proxy } from '@shared/datalogTypes'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ProjectRootType } from '@shared/projectTypes'
 import replaceTags, { formatDate } from '../../../utils/formatDynamicString'
 import { useToast } from '@components/lib/hooks/use-toast'
 import { Form } from '@components/ui/form'
-import { CopyType } from '@shared/datalogTypes'
-import { formatCopiesFromClips } from '../../../../../shared/utils/format-copies'
-import { DynamicTable } from './tabs/preview/table/DynamicTable'
 import StatsPanel from './stats/statspanel'
-import { mergeDirtyValues } from '../utils/merge-clips'
 import { removeEmptyFields } from '@renderer/utils/form'
 import Name from './tabs/name'
 import Import from './tabs/import/index'
@@ -74,26 +58,6 @@ const Builderdialog = ({
     return replaceTags(project.folder_template, tags)
   }
 
-  /*
- old form
- const form = useForm({
-    defaultValues: {
-      id: selected ? selected.id : defaultFolder(),
-      day: selected ? selected.day : defaultDay,
-      date: selected ? selected.date : formatDate(),
-      unit: selected ? selected.unit : project.unit ? project.unit : '',
-      ocf: selected ? selected.ocf : undefined,
-      proxy: selected ? selected.proxy : undefined, // {}
-      duration: selected ? selected.duration : undefined,
-      reels: selected ? selected.reels : [],
-      copies: selected ? selected.copies : [],
-      clips: selected ? selected.clips : []
-    },
-    mode: 'onSubmit',
-    resolver: zodResolver(DatalogDynamicZod(project, { transformDurationToReadable: true }))
-  })
-  */
-
   function makeNullableExcept<T extends z.ZodRawShape>(
     schema: z.ZodObject<T>,
     keysToExclude: (keyof T)[]
@@ -117,6 +81,7 @@ const Builderdialog = ({
     proxy: makeNullableExcept(Proxy, ['clips']),
     custom: datalogZod.shape.custom
   })
+  type datalogFormType = z.infer<typeof datalogFormSchema>
 
   const form = useForm({
     defaultValues: {
@@ -153,7 +118,7 @@ const Builderdialog = ({
 
   console.log(formState)
 
-  const onSubmit: SubmitHandler<DatalogType> = async (data): Promise<void> => {
+  const onSubmit: SubmitHandler<datalogFormType> = async (data): Promise<void> => {
     console.log('unclean:', data)
     const cleanedData = removeEmptyFields(data) as DatalogType
     try {
@@ -208,7 +173,7 @@ const Builderdialog = ({
         <Button
           variant="default"
           //disabled={!formState.isValid}
-          onClick={() => handleSubmit(onSubmit)()}
+          onClick={handleSubmit(onSubmit)}
         >
           Submit
         </Button>

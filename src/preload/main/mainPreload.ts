@@ -27,16 +27,14 @@ const mainApi = {
       callback(datalogs)
     })
   },
-  findOcf: () => ipcRenderer.invoke('findOcf'),
-  removeLogPath: (paths: string[]) => ipcRenderer.invoke('removeLogPath', paths),
+  getClips: (type: 'ocf' | 'sound' | 'proxy' | 'custom') => ipcRenderer.invoke('getClips', type),
+  removeClips: (paths: string[], type: 'ocf' | 'sound') =>
+    ipcRenderer.invoke('removeClips', paths, type),
   showProgressListener: (callback) => {
     const handler = (_, show, progress) => callback(show, progress)
     ipcRenderer.on('show-progress', handler)
     return () => ipcRenderer.removeListener('show-progress', handler)
   },
-  getSound: () => ipcRenderer.invoke('getSound'),
-  getProxies: () => ipcRenderer.invoke('getProxies'),
-  getCsvMetadata: () => ipcRenderer.invoke('getCsvMetadata'),
   openSendWindow: (selection?: DatalogType[]) => ipcRenderer.send('open-send-window', selection),
   exportPdf: (pdf: pdfType, selection?: DatalogType[]) =>
     ipcRenderer.send('pdf-to-export', pdf, selection)

@@ -26,7 +26,7 @@ const ParseCameraMetadata = async (filePath: string): Promise<CameraMetadataType
   return [...aleData, ...xmlData]
 }
 
-const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
+const addOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
   try {
     if (paths.length === 0) {
       const result = await dialog.showOpenDialog({
@@ -100,4 +100,4 @@ const ParseOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
   }
 }
 
-export default ParseOCF
+export default addOCF

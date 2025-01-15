@@ -7,7 +7,7 @@ import { soundClipsStore } from './builder-state'
 import { getAudioMetadata } from '../../file-processing/sound/audio-metadata'
 import logger from '../../logger'
 
-export const addSound = async (paths: string[] = []): Promise<ResponseWithClips> => {
+const addSound = async (paths: string[] = []): Promise<ResponseWithClips> => {
   try {
     if (paths.length === 0) {
       const result = await dialog.showOpenDialog({
@@ -94,3 +94,5 @@ export const addSound = async (paths: string[] = []): Promise<ResponseWithClips>
     return { success: false, error: message }
   }
 }
+
+export default addSound

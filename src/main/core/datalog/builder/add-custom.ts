@@ -13,7 +13,7 @@ import { createClipRegex, createFieldRegexMap } from './utils/createRegexMap'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
-const parseCsv = async (path?: string): Promise<ResponseWithClips> => {
+const addCustom = async (path?: string): Promise<ResponseWithClips> => {
   try {
     const settings = getActiveProject()?.custom_fields
 
@@ -116,4 +116,4 @@ const parseCsv = async (path?: string): Promise<ResponseWithClips> => {
   }
 }
 
-export default parseCsv
+export default addCustom

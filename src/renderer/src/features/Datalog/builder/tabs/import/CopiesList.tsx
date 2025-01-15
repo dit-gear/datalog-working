@@ -5,7 +5,7 @@ import { formatCopiesFromClips } from '@shared/utils/format-copies'
 
 interface CopiesListProps {
   type: 'ocf' | 'sound'
-  handleRemoveCopy: (copy: CopyType) => void
+  handleRemoveCopy: (copy: CopyType, type: 'ocf' | 'sound') => void
 }
 
 export const CopiesList = ({ type, handleRemoveCopy }: CopiesListProps) => {
@@ -45,7 +45,7 @@ export const CopiesList = ({ type, handleRemoveCopy }: CopiesListProps) => {
             <div className="ml-4 flex-shrink-0">
               <a
                 href="#"
-                onClick={() => handleRemoveCopy(copy)}
+                onClick={() => handleRemoveCopy(copy, type)}
                 className="font-medium text-indigo-400 hover:text-indigo-300"
               >
                 Remove
