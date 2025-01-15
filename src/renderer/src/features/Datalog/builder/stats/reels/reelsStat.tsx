@@ -12,7 +12,7 @@ export const ReelsStat = ({ reels }: ReelsStatProps) => {
   useEffect(() => {
     if (reels.length === 0) setDisplay(null)
 
-    const displayValue = reels.join(', ')
+    const displayValue = reels.toSorted().join(', ')
     const fontClass =
       displayValue.length < 20
         ? 'text-4xl'

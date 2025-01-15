@@ -139,7 +139,7 @@ const Builderdialog = ({
 
   return (
     <Form {...form}>
-      <Tabs defaultValue="name" className="overflow-hidden">
+      <Tabs defaultValue="name" className="overflow-scroll">
         <DialogHeader>
           <DialogTitle>New Shooting Day</DialogTitle>
           <DialogDescription>Create a summary of the shooting day</DialogDescription>

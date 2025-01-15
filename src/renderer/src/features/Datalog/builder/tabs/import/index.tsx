@@ -108,6 +108,7 @@ export const Import = ({ project }) => {
         <dt className="text-sm font-medium leading-6 text-white">Custom Metadata</dt>
         <dd className="flex mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 gap-4 items-center">
           <Button onClick={() => handleAddClips('custom')} variant="secondary" disabled={!project}>
+            <Plus className="mr-2 h-4 w-4" />
             Select CSV file
           </Button>
           <Button onClick={() => handleRemoveClipsLocal('custom')} variant="outline">

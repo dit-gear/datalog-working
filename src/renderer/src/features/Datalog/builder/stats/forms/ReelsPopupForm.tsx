@@ -53,7 +53,9 @@ export const ReelsPopupForm: React.FC<ReelsPopupFormProps> = ({
 
   return (
     <Popover open={open} onOpenChange={(v) => setOpen(v)}>
-      <PopoverTrigger className="min-w-12 min-h-10 text-left">{children}</PopoverTrigger>
+      <PopoverTrigger className="min-w-12 min-h-10 text-left rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+        {children}
+      </PopoverTrigger>
       <PopoverContent className="w-80">
         <Form {...form}>
           <div className="grid gap-4">
