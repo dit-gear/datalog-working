@@ -89,14 +89,18 @@ function groupReels(reelsArray: string[]): string[] {
   return Reels
 }
 
-export const getReelsOptionsZod = z.object({ grouped: z.boolean().optional() }).optional()
+export const ReelsOptionsZod = z.object({ grouped: z.boolean().optional() }).optional()
 
-export type getReelsOptions = z.infer<typeof getReelsOptionsZod>
+export type ReelsOptions = z.infer<typeof ReelsOptionsZod>
 /*export type getReelsOptions = {
   grouped?: boolean
 }*/
 
-export function getReels(clips: OcfClipType[] | string[], options: getReelsOptions = {}): string[] {
+export function formatReels(
+  clips: OcfClipType[] | string[] | undefined,
+  options: ReelsOptions = {}
+): string[] {
+  if (!clips) return []
   const reelsSet: Set<string> = new Set()
   let clipsWithoutReel = 0
   if (clips.length > 0 && typeof clips[0] === 'string') {

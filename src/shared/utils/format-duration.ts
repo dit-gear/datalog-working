@@ -68,6 +68,9 @@ export function formatDuration(
   const seconds = parseInt(secondsStr, 10) || 0
 
   if (options.asString) {
+    if (hours === 0 && minutes === 0 && seconds === 0) {
+      return ''
+    }
     const sep = options.separator ?? ', '
     const parts: string[] = []
 

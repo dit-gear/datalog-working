@@ -98,23 +98,23 @@ const Builderdialog = ({
       date: selected ? selected.date : formatDate(),
       unit: selected ? selected.unit : project.unit ? project.unit : '',
       ocf: {
-        files: selected?.ocf.files ?? null,
-        size: selected?.ocf.size ?? null,
-        duration: selected?.ocf.duration ?? null,
-        reels: selected?.ocf.reels ?? null,
-        copies: selected?.ocf.copies ?? null,
-        clips: selected?.ocf.clips ?? []
+        files: selected?.ocf?.files ?? null,
+        size: selected?.ocf?.size ?? null,
+        duration: selected?.ocf?.duration ?? null,
+        reels: selected?.ocf?.reels ?? null,
+        copies: selected?.ocf?.copies ?? null,
+        clips: selected?.ocf?.clips ?? []
       },
       sound: {
-        files: selected?.sound.files ?? null,
-        size: selected?.sound.size ?? null,
-        copies: selected?.sound.copies ?? null,
-        clips: selected?.ocf.clips ?? []
+        files: selected?.sound?.files ?? null,
+        size: selected?.sound?.size ?? null,
+        copies: selected?.sound?.copies ?? null,
+        clips: selected?.sound?.clips ?? []
       },
       proxy: {
-        files: selected?.sound.files ?? null,
-        size: selected?.sound.size ?? null,
-        clips: selected?.ocf.clips ?? []
+        files: selected?.proxy?.files ?? null,
+        size: selected?.proxy?.size ?? null,
+        clips: selected?.proxy?.clips ?? []
       },
       custom: selected?.custom ?? []
     },

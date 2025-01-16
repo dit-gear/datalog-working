@@ -3,8 +3,8 @@ import { DatalogType } from '@shared/datalogTypes'
 import { ProjectType } from '@shared/projectTypes'
 import NewProjectDialog from './components/newProjectDialog'
 import Builderdialog from './features/Datalog/builder/builderDialog'
-import { Dialog, DialogContent, DialogTrigger } from '@components/ui/dialog'
-import { Plus, Send as SendIcon, Settings2 as SettingsIcon } from 'lucide-react'
+import { Dialog, DialogTrigger } from '@components/ui/dialog'
+import { Plus, Settings2 as SettingsIcon } from 'lucide-react'
 import Settings from './features/Settings/Settings'
 import Table from './features/Datalog/table/Table'
 import ProgressDialog from './components/progressdialog'
@@ -50,7 +50,7 @@ function App(): JSX.Element {
 
   useEffect(() => {
     const handleDatalogsLoaded = (datalogs: DatalogType[]) => {
-      console.log(`datalogs: ${datalogs}`)
+      console.log('datalogs:', datalogs)
       setLogs(datalogs)
     }
 

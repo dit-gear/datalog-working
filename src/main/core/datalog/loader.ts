@@ -4,6 +4,7 @@ import logger from '../logger'
 import { DatalogDynamicType } from '@shared/datalogTypes'
 import { getActiveProject } from '../app-state/state'
 import { DatalogDynamicZod } from '@shared/datalogTypes'
+import { Notification } from 'electron'
 
 export const loadDatalog = async (filePath: string): Promise<DatalogDynamicType> => {
   const project = getActiveProject()
@@ -16,6 +17,11 @@ export const loadDatalog = async (filePath: string): Promise<DatalogDynamicType>
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred.'
     logger.error(`Error loading datalog at ${filePath}: ${message}`)
+    const notification = new Notification({
+      title: `Error loading datalog at ${filePath}`,
+      body: message
+    })
+    notification.show()
     throw new Error(message)
   }
 }

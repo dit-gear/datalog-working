@@ -149,9 +149,9 @@ export const datalogZod = z.object({
     .lte(999, { message: 'Day must be below 999' }),
   date: z.string().date(),
   unit: z.string().optional(),
-  ocf: OCF,
-  proxy: Proxy,
-  sound: Sound,
+  ocf: OCF.optional(),
+  proxy: Proxy.optional(),
+  sound: Sound.optional(),
   custom: z.array(Custom).optional()
 })
 
@@ -243,7 +243,9 @@ export const CustomFieldsZod = (project: ProjectRootType): z.ZodObject<any> => {
 }
 
 export const DatalogDynamicZod = (project: ProjectRootType) => {
-  return datalogZod.omit({ custom: true }).extend({ custom: CustomFieldsZod(project) })
+  return datalogZod
+    .omit({ custom: true })
+    .extend({ custom: z.array(CustomFieldsZod(project)).optional() })
 }
 
 /*export const DatalogDynamicZod = <T extends Record<string, any>>(

@@ -8,15 +8,15 @@ export type FormatBytesOptions<T extends FormatOutput = 'string'> = {
 }
 
 export function formatBytes<T extends FormatOutput>(
-  bytes: number,
+  bytes: number | undefined,
   options: FormatBytesOptions<T>
 ): T extends 'tuple' ? [number, string] : T extends 'number' ? number : string {
   const { output = 'string', type = 'auto' } = options
 
-  if (bytes === 0) {
+  if (!bytes || bytes === 0) {
     if (output === 'tuple') return [0, 'B'] as any
     if (output === 'number') return 0 as any
-    return '0 B' as any
+    return '' as any
   }
 
   const k = 1000

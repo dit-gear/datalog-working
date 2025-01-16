@@ -7,9 +7,51 @@ import {
   AccordionTrigger
 } from '@components/ui/accordion'
 import { ClipsTable } from './table/ClipsTable'
+import { useFieldArray } from 'react-hook-form'
 
 const Preview = () => {
-  return (
+  const fields = useFieldArray({ name: 'ocf.clips' })
+
+  console.table(fields)
+
+  const objA = [
+    {
+      id: 'x',
+      col1: '',
+      col2: ''
+    }
+  ]
+
+  const objB = [
+    {
+      id: '1',
+      col3: '',
+      col4: ''
+    },
+    {
+      id: '2',
+      col3: '',
+      col4: ''
+    },
+    {
+      id: '3',
+      col3: '',
+      col4: ''
+    }
+  ]
+
+  const mergedObj = [
+    {
+      id: 'x',
+      col1: '',
+      co12: '',
+      col3: '', // ['2', '']
+      col4: '' //['2', '']
+    }
+  ]
+
+  return <div></div>
+  /*return (
     <Accordion type="single" collapsible>
       <AccordionItem value="ocf">
         <AccordionTrigger className="text-sm font-medium leading-6 text-white">
@@ -60,7 +102,7 @@ const Preview = () => {
         </AccordionContent>
       </AccordionItem>
     </Accordion>
-  )
+  )*/
 }
 
 export default Preview

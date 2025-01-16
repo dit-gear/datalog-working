@@ -2,7 +2,7 @@ import { mergeClips } from './utils/datalog-clips'
 import { DatalogType, CopyType, OcfType, SoundType, ProxyType } from './datalogTypes'
 import { ProjectRootType } from './projectTypes'
 import { durationType } from '@shared/shared-types'
-import { getReelsOptions } from './utils/format-reel'
+import { ReelsOptions } from './utils/format-reel'
 import { FormatBytesTypes } from './utils/format-bytes'
 import { mergeDatalogs } from './utils/datalog-merge'
 import {
@@ -33,7 +33,11 @@ export class Datalog {
   public get date(): string {
     return this.raw.date
   }
-  private createCommonMethods(data: OcfType | SoundType | ProxyType) {
+  public get unit(): string {
+    return this.raw.unit ?? ''
+  }
+
+  private createCommonMethods(data: OcfType | SoundType | ProxyType | undefined) {
     return {
       files: (): number => getFiles(data),
       size: (options?: { type: FormatBytesTypes }): string =>
@@ -49,10 +53,10 @@ export class Datalog {
     const ocfData = this.raw.ocf
 
     return {
-      clips: ocfData.clips,
+      clips: ocfData?.clips ?? [],
       ...this.createCommonMethods(ocfData),
       copies: (): CopyType[] => getCopies(ocfData),
-      reels: (options?: getReelsOptions): string[] => getReels(ocfData, options),
+      reels: (options?: ReelsOptions): string[] => getReels(ocfData, options),
       duration: (): string => getDuration(ocfData, 'tc'),
       durationReadable: (): string => getDuration(ocfData, 'hms-string'),
       durationObject: (): durationType => getDuration(ocfData, 'hms'),
@@ -63,7 +67,7 @@ export class Datalog {
     const proxyData = this.raw.proxy
 
     return {
-      clips: proxyData,
+      clips: proxyData?.clips ?? [],
       ...this.createCommonMethods(proxyData)
     }
   }
@@ -72,7 +76,7 @@ export class Datalog {
     const soundData = this.raw.sound
 
     return {
-      clips: soundData.clips,
+      clips: soundData?.clips ?? [],
       ...this.createCommonMethods(soundData),
       copies: (): CopyType[] => getCopies(soundData)
     }

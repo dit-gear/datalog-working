@@ -1,4 +1,4 @@
-import { getReels as getReelsFunction, getReelsOptions } from './format-reel'
+import { formatReels, ReelsOptions } from './format-reel'
 import { formatBytes, FormatBytesOptions, FormatOutput } from './format-bytes'
 import { formatDuration } from './format-duration'
 import {
@@ -58,51 +58,75 @@ function sumClipDurations(clips: OcfClipType[] | undefined, fallbackFps = 24): s
 }
 
 export const getFiles = (
-  data: Pick<OcfType | ProxyType | SoundType, 'files' | 'clips'>
+  data: Pick<OcfType | ProxyType | SoundType, 'files' | 'clips'> | undefined
 ): number => {
+  if (!data) return 0
   return data?.files != null ? data.files : countClipFiles(data.clips)
 }
 
-export function getSize(data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'>): number
+export function getSize(
+  data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'> | undefined
+): number
 export function getSize<T extends FormatOutput>(
-  data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'>,
+  data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'> | undefined,
   options: FormatBytesOptions<T>
 ): T extends 'tuple' ? [number, string] : T extends 'number' ? number : string
 export function getSize<T extends FormatOutput>(
-  data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'>,
+  data: Pick<OcfType | ProxyType | SoundType, 'size' | 'clips'> | undefined,
   options?: FormatBytesOptions<T>
 ): number | string | [number, string] {
-  const size = data?.size != null ? data.size : sumClipSizes(data.clips)
+  const size = data?.size != null ? data.size : sumClipSizes(data?.clips)
   return options ? formatBytes(size, options) : size
 }
 
-export function getDuration(data: Pick<OcfType, 'duration' | 'clips'>, format: 'tc'): string
-export function getDuration(data: Pick<OcfType, 'duration' | 'clips'>, format: 'seconds'): number
-export function getDuration(data: Pick<OcfType, 'duration' | 'clips'>, format: 'hms'): durationType
-export function getDuration(data: Pick<OcfType, 'duration' | 'clips'>, format: 'hms-string'): string
 export function getDuration(
-  data: Pick<OcfType, 'duration' | 'clips'>,
+  data: Pick<OcfType, 'duration' | 'clips'> | undefined,
+  format: 'tc'
+): string
+export function getDuration(
+  data: Pick<OcfType, 'duration' | 'clips'> | undefined,
+  format: 'seconds'
+): number
+export function getDuration(
+  data: Pick<OcfType, 'duration' | 'clips'> | undefined,
+  format: 'hms'
+): durationType
+export function getDuration(
+  data: Pick<OcfType, 'duration' | 'clips'> | undefined,
+  format: 'hms-string'
+): string
+export function getDuration(
+  data: Pick<OcfType, 'duration' | 'clips'> | undefined,
   format: 'tc' | 'seconds' | 'hms' | 'hms-string'
 ): string | number | durationType {
-  const duration = data?.duration ?? sumClipDurations(data.clips)
-  if (format === 'seconds') return timecodeToSeconds(duration)
-  if (format === 'hms') return formatDuration(duration)
-  if (format === 'hms-string') return formatDuration(duration, { asString: true })
-  return duration
+  const duration = data?.duration ?? sumClipDurations(data?.clips)
+  switch (format) {
+    case 'seconds':
+      return timecodeToSeconds(duration)
+    case 'hms':
+      return formatDuration(duration)
+    case 'hms-string': {
+      return formatDuration(duration, { asString: true })
+    }
+    case 'tc':
+    default:
+      return duration
+  }
 }
 
 export const getReels = (
-  data: Pick<OcfType, 'reels' | 'clips'>,
-  options?: getReelsOptions
+  data: Pick<OcfType, 'reels' | 'clips'> | undefined,
+  options?: ReelsOptions
 ): string[] => {
-  if (data.reels !== undefined) {
-    return getReelsFunction(data.reels, options)
-  } else if (data.clips && data.clips.length > 0) {
-    return getReelsFunction(data.clips, options)
-  } else return []
+  if (!data) return []
+  const reels = data.reels ?? data.clips
+  return formatReels(reels, options)
 }
 
-export function getCopies(data: Pick<OcfType | SoundType, 'copies' | 'clips'>): CopyType[] {
+export function getCopies(
+  data: Pick<OcfType | SoundType, 'copies' | 'clips'> | undefined
+): CopyType[] {
+  if (!data) return []
   return data.copies ? formatCopiesFromString(data.copies) : formatCopiesFromClips(data.clips)
 }
 
