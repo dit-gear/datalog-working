@@ -167,7 +167,7 @@ const Builderdialog = ({
               </TabsList>
             </div>
           </DialogHeader>
-          <div className="w-[80vw] ml-auto mr-auto mt-4 px-16 py-8 rounded-lg border">
+          <div className="w-[80vw] ml-auto mr-auto mt-4 px-16 py-8 rounded-lg ">
             <TabsContent value="name" asChild>
               <Name project={project} />
             </TabsContent>
@@ -179,7 +179,7 @@ const Builderdialog = ({
             </TabsContent>
           </div>
         </Tabs>
-        <DialogFooter className="mt-auto">
+        <DialogFooter className="mt-auto pt-2 border-t">
           <DialogClose asChild>
             <Button variant="ghost">Cancel</Button>
           </DialogClose>

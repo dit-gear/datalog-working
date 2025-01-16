@@ -3,9 +3,17 @@ import { mergeDirtyValues } from '../../../utils/merge-clips'
 import { CopyType, CustomType, OcfClipType, ProxyType, SoundClipType } from '@shared/datalogTypes'
 import { useFormContext } from 'react-hook-form'
 import { CopiesList } from './CopiesList'
-import { Plus } from 'lucide-react'
+import { Plus, X, Delete } from 'lucide-react'
+import { Label } from '@components/ui/label'
+import { Section } from './section'
+import { ProjectRootType } from '@shared/projectTypes'
 
-export const Import = ({ project }) => {
+interface ImportProps {
+  project: ProjectRootType
+}
+
+export const Import = ({ project }: ImportProps) => {
+  const hasCustomFields = Boolean(project?.custom_fields)
   const { getValues, setValue, resetField, formState } = useFormContext()
 
   function updateClips(fieldPath: 'ocf.clips', newClips: OcfClipType[]): void
@@ -66,57 +74,92 @@ export const Import = ({ project }) => {
   }
 
   return (
-    <>
-      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-        <dt className="text-sm font-medium leading-6 text-white">OCF</dt>
-        <dd className="mt-2 text-sm text-white sm:col-span-2 sm:mt-0">
-          <CopiesList key="ocf" type="ocf" handleRemoveCopy={handleRemoveClips} />
-          <div className="flex gap-2">
-            <Button onClick={() => handleAddClips('ocf')} variant="secondary">
-              <Plus className="mr-2 h-4 w-4" />
-              Add OCF Folder
-            </Button>
-          </div>
-        </dd>
-      </div>
-      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-        <dt className="text-sm font-medium leading-6 text-white">Sound</dt>
-        <dd className="mt-2 text-sm text-white sm:col-span-2 sm:mt-0">
-          <CopiesList key="sound" type="sound" handleRemoveCopy={handleRemoveClips} />
-          <div className="flex gap-2">
-            <Button onClick={() => handleAddClips('sound')} variant="secondary">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Sound Folder
-            </Button>
-          </div>
-        </dd>
-      </div>
-      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-        <dt className="text-sm font-medium leading-6 text-white">Proxies</dt>
-        <dd className="flex mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 gap-4 items-center">
-          <Button onClick={() => handleAddClips('proxy')} variant="secondary">
-            {' '}
+    <div className="space-y-16 px-32">
+      <Section label="Original Camera Files" type="ocf" handleAddClips={handleAddClips}>
+        <CopiesList type="ocf" handleRemoveCopy={handleRemoveClips} />
+      </Section>
+      <Section label="Sound" type="sound" handleAddClips={handleAddClips}>
+        <CopiesList type="sound" handleRemoveCopy={handleRemoveClips} />
+      </Section>
+      <Section label="Proxies" type="proxy" handleAddClips={handleAddClips}>
+        <Button size="sm" onClick={() => handleRemoveClipsLocal('proxy')} variant="destructive">
+          <X className="mr-2 h-4 w-4" />
+          Clear
+        </Button>
+      </Section>
+      <Section
+        label="Custom Metadata"
+        type="custom"
+        handleAddClips={handleAddClips}
+        disabled={!hasCustomFields}
+      >
+        <Button size="sm" onClick={() => handleRemoveClipsLocal('custom')} variant="destructive">
+          <X className="mr-2 h-4 w-4" />
+          Clear
+        </Button>
+      </Section>
+      {/*<div>
+        <Label htmlFor="ocf-copies" className="text-base">
+          {`Original Camera Files (OCF)`}
+        </Label>
+        <p className="text-muted-foreground text-sm">102 clips added</p>
+        <CopiesList key="ocf" type="ocf" handleRemoveCopy={handleRemoveClips} />
+        <div className="mt-2 flex gap-2">
+          <Button size="sm" onClick={() => handleAddClips('ocf')}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Proxies Folder
+            Add Folder
           </Button>
-          <Button onClick={() => handleRemoveClipsLocal('proxy')} variant="outline">
-            Remove
-          </Button>
-        </dd>
+        </div>
       </div>
-      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-        <dt className="text-sm font-medium leading-6 text-white">Custom Metadata</dt>
-        <dd className="flex mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 gap-4 items-center">
-          <Button onClick={() => handleAddClips('custom')} variant="secondary" disabled={!project}>
+
+      <div>
+        <Label htmlFor="sound-copies" className="text-base">
+          Sound
+        </Label>
+        <p className="text-muted-foreground text-sm">42 clips added</p>
+        <CopiesList key="sound" type="sound" handleRemoveCopy={handleRemoveClips} />
+        <div className="mt-2 flex gap-2">
+          <Button size="sm" onClick={() => handleAddClips('sound')}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Folder
+          </Button>
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="proxies" className="text-base">
+          Proxies
+        </Label>
+        <p className="text-muted-foreground text-sm">40 clips added</p>
+        <div id="proxies" className="mt-2 flex gap-4">
+          <Button size="sm" onClick={() => handleAddClips('proxy')} variant="default">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Folder
+          </Button>
+          <Button size="sm" onClick={() => handleRemoveClipsLocal('proxy')} variant="destructive">
+            <X className="mr-2 h-4 w-4" />
+            Clear
+          </Button>
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="custom-metadata" className="text-base">
+          Custom Metadata
+        </Label>
+        <p className="text-muted-foreground text-sm">Enable Custom Fields to enable this option</p>
+        <div id="custom-metadata" className="mt-2 flex gap-4">
+          <Button size="sm" onClick={() => handleAddClips('custom')} disabled>
             <Plus className="mr-2 h-4 w-4" />
             Select CSV file
           </Button>
-          <Button onClick={() => handleRemoveClipsLocal('custom')} variant="outline">
-            Remove
+          {/*<Button size="sm" onClick={() => handleRemoveClipsLocal('custom')} variant="destructive">
+            <X className="mr-2 h-4 w-4" />
+            Clear
           </Button>
-        </dd>
-      </div>
-    </>
+        </div>
+      </div>*/}
+    </div>
   )
 }
 export default Import

@@ -2,6 +2,8 @@ import { CopyType, OcfClipType, SoundClipType } from '@shared/datalogTypes'
 import { useMemo, useState } from 'react'
 import { useWatch } from 'react-hook-form'
 import { formatCopiesFromClips } from '@shared/utils/format-copies'
+import { Button } from '@components/ui/button'
+import { XCircle } from 'lucide-react'
 
 interface CopiesListProps {
   type: 'ocf' | 'sound'
@@ -20,7 +22,7 @@ export const CopiesList = ({ type, handleRemoveCopy }: CopiesListProps) => {
 
   if (copies?.length > 0) {
     return (
-      <ul role="list" className="divide-y divide-white/10 rounded-md border border-white/20 mb-2">
+      <ul role="list" className="mt-2 divide-y divide-white/10 rounded-md border border-white/20">
         {copies?.map((copy, index) => (
           <li
             key={index}
@@ -30,7 +32,7 @@ export const CopiesList = ({ type, handleRemoveCopy }: CopiesListProps) => {
               <div className="ml-4 flex min-w-0 flex-1 gap-2">
                 <span className="flex-shrink-0 text-gray-400">Copy {index + 1}: </span>
                 {copy?.volumes?.map((vol, volIndex) => (
-                  <span key={volIndex} className="truncate font-medium">
+                  <span key={volIndex} className="truncate text-white font-medium">
                     {vol}
                     <span className="text-gray-400">
                       {volIndex < copy.volumes?.length - 1 && ', '}
@@ -43,13 +45,16 @@ export const CopiesList = ({ type, handleRemoveCopy }: CopiesListProps) => {
               </div>
             </div>
             <div className="ml-4 flex-shrink-0">
-              <a
+              {/*<a
                 href="#"
                 onClick={() => handleRemoveCopy(copy, type)}
                 className="font-medium text-indigo-400 hover:text-indigo-300"
               >
                 Remove
-              </a>
+              </a>*/}
+              <Button size="sm" variant="destructive" onClick={() => handleRemoveCopy(copy, type)}>
+                Remove
+              </Button>
             </div>
           </li>
         ))}
