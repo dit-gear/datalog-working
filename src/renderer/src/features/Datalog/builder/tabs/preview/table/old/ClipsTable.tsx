@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
 import { mergeClips } from '@shared/utils/datalog-clips'
 import { useWatch } from 'react-hook-form'
-import { flattenData } from './flattenData'
-import { generateColumns } from './Column'
-import DataTable from '../../../../../../components/DataTable'
+import { flattenData } from '../flattenData'
+import { generateColumns } from '../Column'
+import DataTable from '../../../../../../../components/DataTable'
 
 export const ClipsTable = () => {
   const ocf = useWatch({ name: 'ocf.clips' })

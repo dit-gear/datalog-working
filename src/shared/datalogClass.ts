@@ -17,7 +17,7 @@ import {
 
 export class Datalog {
   public readonly clips: any[]
-  private raw: DatalogType
+  public readonly raw: DatalogType
 
   constructor(data: DatalogType) {
     this.clips = mergeClips(data)

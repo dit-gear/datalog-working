@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import DataTable from '../../../../../../components/DataTable'
+import DataTable from '../../../../../../../components/DataTable'
 import { useFieldArray, useWatch } from 'react-hook-form'
 import { flattenData } from './flattenData'
 import { generateColumns } from './Column'
@@ -21,3 +21,5 @@ export const DynamicTable = ({ field }: DynamicTableProps) => {
 
   return <DataTable columns={columns} data={data} />
 }
+
+;['ocf', 0, 'value']

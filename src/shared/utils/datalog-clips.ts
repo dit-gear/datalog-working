@@ -1,4 +1,4 @@
-import { DatalogType } from '../datalogTypes'
+import { DatalogType, OcfClipType, SoundClipType, ProxyClipType, CustomType } from '../datalogTypes'
 import { rangesOverlap, timecodeToSeconds } from './format-timecode'
 
 // Example shape for the final merged result
@@ -52,7 +52,7 @@ export function mergeClips(
   // 1) Merge OCF
   mergeOcfClips(clipMap, datalog)
   // 2) Merge Proxy
-  //mergeProxyClips(clipMap, datalog)
+  mergeProxyClips(clipMap, datalog)
   // 3) Merge Custom
   //mergeCustomEntries(clipMap, datalog)
   // 4) Merge Sound (by timecode overlap)

@@ -33,7 +33,7 @@ const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
       proxySize: data.proxy.size(),
       duration: data.ocf.durationReadable(),
       reels: data.ocf.reels({ grouped: true }),
-      raw: data
+      raw: data.raw
     }))
   }
 
