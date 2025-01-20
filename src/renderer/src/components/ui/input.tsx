@@ -12,15 +12,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a') {
         e.currentTarget.select()
       }
-
     }
 
-    // Merged onKeyDown handler
     const handleKeyDown = (e) => {
-      handleInternalKeyDown(e) // Call internal handler
+      handleInternalKeyDown(e)
 
       if (onKeyDown) {
-        onKeyDown(e) // Call external handler passed via props
+        onKeyDown(e)
       }
     }
 

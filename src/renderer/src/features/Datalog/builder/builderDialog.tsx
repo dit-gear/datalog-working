@@ -21,6 +21,7 @@ import Name from './tabs/name'
 import Import from './tabs/import/index'
 import Preview from './tabs/preview'
 import z, { ZodTypeAny } from 'zod'
+import { lazy, Suspense } from 'react'
 
 interface BuilderdialogProps {
   project: ProjectRootType
@@ -29,12 +30,7 @@ interface BuilderdialogProps {
   setOpen: (value: boolean) => void
 }
 
-const Builderdialog = ({
-  project,
-  previousEntries,
-  selected,
-  setOpen
-}: BuilderdialogProps): JSX.Element => {
+const Builderdialog = ({ project, previousEntries, selected, setOpen }: BuilderdialogProps) => {
   const { toast } = useToast()
 
   function getNextDay(logs: DatalogType[]): number {
@@ -118,7 +114,7 @@ const Builderdialog = ({
       },
       custom: selected?.custom ?? []
     },
-    mode: 'all',
+    mode: 'onBlur',
     resolver: zodResolver(datalogFormSchema)
   })
 
@@ -146,6 +142,8 @@ const Builderdialog = ({
       toast({ description: 'There was an issue saving the entry' })
     }
   }
+
+  const Preview = lazy(() => import('./tabs/preview/index'))
 
   return (
     <DialogContent className="sm:max-w-[100vw] h-[100vh]">

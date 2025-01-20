@@ -1,40 +1,43 @@
 import { OcfClipType, SoundClipType, ProxyClipType, CustomType } from '@shared/datalogTypes'
+import { CameraMetadataZod, ProxyClipZod } from '@shared/datalogTypes'
 
-type type = 'ocf' | 'sound' | 'proxy' | 'custom'
+type tupleString = { path: string; edit: boolean; value: string }
+type tupleNumber = { path: string; edit: boolean; value: number }
+type tupleArray = { path: string; edit: boolean; value: string[] }
+
+export type valueTypes = tupleString | tupleNumber | tupleArray
 
 export interface MergedClip {
-  clip: string
-
-  size: [type, number, number]
-  //copies?: Array<{ volume: string; path: string; hash: string | null }>
-  tc_start: [type, number, string]
-  tc_end: [type, number, string]
-  duration: [type, number, string]
-  camera_model: [type, number, string]
-  camera_id: [type, number, string]
-  reel: [type, number, string]
-  fps: [type, number, string]
-  sensor_fps: [type, number, string]
-  lens: [type, number, string]
-  resolution: [type, number, string]
-  codec: [type, number, string]
-  gamma: [type, number, string]
-  wb: [type, number, string]
-  tint: [type, number, string]
-  lut: [type, number, string]
-  hash: string[]
+  clip: tupleString
+  size: tupleNumber
+  tc_start: tupleString
+  tc_end: tupleString
+  duration: tupleString
+  camera_model: tupleString
+  camera_id: tupleString
+  reel: tupleString
+  fps: tupleNumber
+  sensor_fps: tupleString
+  lens: tupleString
+  resolution: tupleString
+  codec: tupleString
+  gamma: tupleString
+  wb: tupleString
+  tint: tupleString
+  lut: tupleString
+  hash: tupleArray
 
   // Merged Sound references
-  sound: string[] // the names of overlapping sound clips
+  sound: tupleArray // the names of overlapping sound clips
 
   // proxy
-  proxy_size: [type, number, number]
-  proxy_format: [type, number, string]
-  proxy_codec: [type, number, string]
-  proxy_resolution: [type, number, string]
+  proxy_size: tupleNumber
+  proxy_format: tupleString
+  proxy_codec: tupleString
+  proxy_resolution: tupleString
 
   // Additional fields from custom, appended at the top level
-  [key: string]: unknown
+  [key: string]: valueTypes
 }
 
 export type OcfClipTypeExtended = OcfClipType & { id: string; index: number }
@@ -49,9 +52,14 @@ export interface extendedClips {
   custom: CustomClipTypeExtended[]
 }
 
+const ocfKeys = Object.keys(CameraMetadataZod.shape)
+//const proxyKeys = Object.keys(ProxyClipZod)
+console.log(ocfKeys)
+
 const editNotAllowed = new Set(['clip', 'tc_start', 'tc_end', 'sound', 'duration'])
 
-export function mergeClips(clips: extendedClips): MergedClip[] {
+export function createTableData(clips: extendedClips): MergedClip[] {
+  console.time('createTableData')
   const clipMap = new Map<string, MergedClip>()
 
   // 1) Merge OCF
@@ -63,6 +71,7 @@ export function mergeClips(clips: extendedClips): MergedClip[] {
   // 4) Merge Sound (by timecode overlap)
   //mergeSoundClips(clipMap, datalog)
 
+  console.timeEnd('createTableData')
   return Array.from(clipMap.values())
 }
 
@@ -74,24 +83,47 @@ function mergeOcfClips(
     const count = Array.isArray(clip.copies) ? clip.copies.length : 0
     return Math.max(max, count)
   }, 0)
-  const excludedProps = new Set(['index', 'id', 'copies'])
+  const excludedProps = new Set(['index', 'id', 'copies', 'hash'])
   mergeIntoMap(clipMap, ocfClips, (merged, ocfClip) => {
-    Object.keys(ocfClip).forEach((prop) => {
-      if (excludedProps.has(prop)) return
-      merged[prop] = ['ocf', ocfClip.index, !editNotAllowed.has(prop), ocfClip[prop]]
+    ocfKeys.forEach((prop) => {
+      merged[prop] = {
+        path: `ocf.clips[${ocfClip.index}]`,
+        edit: !editNotAllowed.has(prop),
+        value: Object.prototype.hasOwnProperty.call(ocfClip, prop) ? ocfClip[prop] : ''
+      }
     })
+    /*Object.keys(ocfClip).forEach((prop) => {
+      if (excludedProps.has(prop)) return
+      merged[prop] = {
+        path: `ocf.clips[${ocfClip.index}]`,
+        edit: !editNotAllowed.has(prop),
+        value: ocfClip[prop]
+      }
+    })*/
     // Process the "copies" property exclusively.
     if (!merged['hash']) {
-      merged['hash'] = []
+      merged['hash'] = {
+        path: `ocf.clips[${ocfClip.index}]`,
+        edit: false,
+        value: []
+      }
     }
 
     for (let i = 0; i < maxCopies; i++) {
       if (Array.isArray(ocfClip.copies) && ocfClip.copies[i]) {
         const copy = ocfClip.copies[i]
-        merged[`copy_${i + 1}`] = ['ocf', ocfClip.index, false, copy.volume]
-        if (copy.hash) merged['hash'].push(copy.hash)
+        merged[`copy_${i + 1}`] = {
+          path: `ocf.clips[${ocfClip.index}]`,
+          edit: false,
+          value: copy.volume
+        }
+        if (copy.hash) merged['hash'].value.push(copy.hash)
       } else {
-        merged[`copy_${i + 1}`] = ['ocf', ocfClip.index, false, 'No Copy']
+        merged[`copy_${i + 1}`] = {
+          path: `ocf.clips[${ocfClip.index}]`,
+          edit: false,
+          value: 'No Copy'
+        }
       }
     }
   })
@@ -105,7 +137,11 @@ function mergeProxyClips(
   mergeIntoMap(clipMap, proxyClips, (merged, proxyClip) => {
     Object.keys(proxyClip).forEach((prop) => {
       if (excludedProps.has(prop)) return
-      merged[`proxy_${prop}`] = ['proxy', proxyClip.index, true, proxyClip[prop]]
+      merged[`proxy_${prop}`] = {
+        path: `proxy.clips[${proxyClip.index}]`,
+        edit: true,
+        value: proxyClip[prop]
+      }
     })
   })
 }
@@ -118,7 +154,11 @@ function mergeCustomEntries(
   mergeIntoMap(clipMap, customClips, (merged, customClip) => {
     Object.keys(customClip).forEach((prop) => {
       if (excludedProps.has(prop)) return
-      merged[prop] = ['custom', customClip.index, !editNotAllowed.has(prop), customClip[prop]]
+      merged[prop] = {
+        path: `custom[${customClip.index}]`,
+        edit: !editNotAllowed.has(prop),
+        value: customClip[prop]
+      }
     })
   })
 }
@@ -146,7 +186,7 @@ function mergeIntoMap<T extends { clip: string }>(
 ----------------------------------- */
 function getOrCreateClip(clipMap: Map<string, MergedClip>, clipName: string): MergedClip {
   if (!clipMap.has(clipName)) {
-    clipMap.set(clipName, { clip: clipName } as MergedClip)
+    clipMap.set(clipName, {} as MergedClip)
   }
   // Non-null assertion is safe because we just set it above
   return clipMap.get(clipName)!
