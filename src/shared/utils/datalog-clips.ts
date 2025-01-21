@@ -1,4 +1,4 @@
-import { DatalogType, OcfClipType, SoundClipType, ProxyClipType, CustomType } from '../datalogTypes'
+import { DatalogType } from '../datalogTypes'
 import { rangesOverlap, timecodeToSeconds } from './format-timecode'
 
 // Example shape for the final merged result

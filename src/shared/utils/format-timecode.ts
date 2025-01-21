@@ -220,13 +220,10 @@ export function addTimecodeValidation<T extends ZodObject<any>>(
   return schema.superRefine((data, ctx) => {
     const fps = data.fps
 
-    // Determine if any timecode fields are provided
-    const timecodesProvided = timecodeFields.some((field) => data[field])
-
-    if (timecodesProvided && fps === undefined) {
+    if (data.duration && fps === undefined) {
       ctx.addIssue({
         code: ZodIssueCode.custom,
-        message: 'fps is required when timecodes are provided.',
+        message: 'fps is required when duration timecode is provided.',
         path: ['fps']
       })
       // Early return to prevent further validation if fps is missing

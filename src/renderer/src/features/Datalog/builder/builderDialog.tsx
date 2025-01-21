@@ -124,6 +124,10 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
     reset
   } = form
 
+  const onError = (errors) => {
+    console.log('Errors:', errors)
+  }
+
   const onSubmit: SubmitHandler<datalogFormType> = async (data): Promise<void> => {
     console.log('unclean:', data)
     const cleanedData = removeEmptyFields(data) as DatalogType
@@ -181,7 +185,7 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
           <DialogClose asChild>
             <Button variant="ghost">Cancel</Button>
           </DialogClose>
-          <Button variant="default" disabled={!isValid} onClick={handleSubmit(onSubmit)}>
+          <Button variant="default" disabled={!isValid} onClick={handleSubmit(onSubmit, onError)}>
             Submit
           </Button>
         </DialogFooter>

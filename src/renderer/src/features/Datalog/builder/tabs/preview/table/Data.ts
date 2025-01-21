@@ -1,5 +1,14 @@
-import { OcfClipType, SoundClipType, ProxyClipType, CustomType } from '@shared/datalogTypes'
-import { CameraMetadataZod, ProxyClipZod } from '@shared/datalogTypes'
+import {
+  OcfClipType,
+  SoundClipType,
+  ProxyClipType,
+  CustomType,
+  OcfClipZod
+} from '@shared/datalogTypes'
+import { CameraMetadataZod } from '@shared/datalogTypes'
+import { ProjectRootType } from '@shared/projectTypes'
+import { rangesOverlap, timecodeToSeconds } from '@shared/utils/format-timecode'
+import z from 'zod'
 
 type tupleString = { path: string; edit: boolean; value: string }
 type tupleNumber = { path: string; edit: boolean; value: number }
@@ -51,16 +60,27 @@ export interface extendedClips {
   proxy: ProxyClipTypeExtended[]
   custom: CustomClipTypeExtended[]
 }
-
-const ocfKeys = Object.keys(CameraMetadataZod.shape)
-//const proxyKeys = Object.keys(ProxyClipZod)
+const OcfClipWithoutCopies = CameraMetadataZod.extend({ size: z.number() })
+const ocfKeys = Object.keys(OcfClipWithoutCopies.shape)
 console.log(ocfKeys)
+const editNotAllowed = new Set([
+  'clip',
+  'tc_start',
+  'tc_end',
+  'sound',
+  'duration',
+  'size',
+  'proxy_size'
+])
 
-const editNotAllowed = new Set(['clip', 'tc_start', 'tc_end', 'sound', 'duration'])
+function isPlainObject(val: any): val is object {
+  return Object.prototype.toString.call(val) === '[object Object]'
+}
 
 export function createTableData(clips: extendedClips): MergedClip[] {
   console.time('createTableData')
   const clipMap = new Map<string, MergedClip>()
+  if (!clips.ocf.length) return []
 
   // 1) Merge OCF
   mergeOcfClips(clipMap, clips.ocf)
@@ -69,7 +89,9 @@ export function createTableData(clips: extendedClips): MergedClip[] {
   // 3) Merge Custom
   mergeCustomEntries(clipMap, clips.custom)
   // 4) Merge Sound (by timecode overlap)
-  //mergeSoundClips(clipMap, datalog)
+  mergeSoundClips(clipMap, clips.sound)
+
+  mergeDefaults(clipMap)
 
   console.timeEnd('createTableData')
   return Array.from(clipMap.values())
@@ -83,7 +105,7 @@ function mergeOcfClips(
     const count = Array.isArray(clip.copies) ? clip.copies.length : 0
     return Math.max(max, count)
   }, 0)
-  const excludedProps = new Set(['index', 'id', 'copies', 'hash'])
+
   mergeIntoMap(clipMap, ocfClips, (merged, ocfClip) => {
     ocfKeys.forEach((prop) => {
       merged[prop] = {
@@ -92,14 +114,7 @@ function mergeOcfClips(
         value: Object.prototype.hasOwnProperty.call(ocfClip, prop) ? ocfClip[prop] : ''
       }
     })
-    /*Object.keys(ocfClip).forEach((prop) => {
-      if (excludedProps.has(prop)) return
-      merged[prop] = {
-        path: `ocf.clips[${ocfClip.index}]`,
-        edit: !editNotAllowed.has(prop),
-        value: ocfClip[prop]
-      }
-    })*/
+
     // Process the "copies" property exclusively.
     if (!merged['hash']) {
       merged['hash'] = {
@@ -146,6 +161,40 @@ function mergeProxyClips(
   })
 }
 
+function mergeSoundClips(
+  clipMap: Map<string, MergedClip>,
+  soundClips: SoundClipTypeExtended[] = []
+): void {
+  for (const [, mergedClip] of clipMap) {
+    // If there's no OCF timecode or fps, skip
+    if (!mergedClip.tc_start.value || !mergedClip.tc_end.value) {
+      continue
+    }
+
+    const ocfStartFrames = timecodeToSeconds(mergedClip.tc_start.value)
+    const ocfEndFrames = timecodeToSeconds(mergedClip.tc_end.value)
+
+    // Find any soundClips that overlap
+    for (const sClip of soundClips) {
+      if (!sClip.tc_start || !sClip.tc_end) {
+        continue
+      }
+      const soundStart = timecodeToSeconds(sClip.tc_start)
+      const soundEnd = timecodeToSeconds(sClip.tc_end)
+
+      if (rangesOverlap(ocfStartFrames, ocfEndFrames, soundStart, soundEnd)) {
+        if (!mergedClip.sound) {
+          mergedClip.sound = { path: `sound.clips[${sClip.index}]`, edit: false, value: [] }
+        }
+        // Optionally avoid duplicates:
+        if (!mergedClip.sound.value.includes(sClip.clip)) {
+          mergedClip.sound.value.push(sClip.clip)
+        }
+      }
+    }
+  }
+}
+
 function mergeCustomEntries(
   clipMap: Map<string, MergedClip>,
   customClips: CustomClipTypeExtended[] = []
@@ -154,10 +203,53 @@ function mergeCustomEntries(
   mergeIntoMap(clipMap, customClips, (merged, customClip) => {
     Object.keys(customClip).forEach((prop) => {
       if (excludedProps.has(prop)) return
-      merged[prop] = {
-        path: `custom[${customClip.index}]`,
-        edit: !editNotAllowed.has(prop),
-        value: customClip[prop]
+      const value = customClip[prop]
+      const basePath = `custom[${customClip.index}]${typeof value === 'object' && value !== null ? `.${prop}` : ''}`
+
+      if (Array.isArray(value)) {
+        const processedArray = value
+          .map((item) => (isPlainObject(item) ? JSON.stringify(item) : item))
+          .join(', ')
+        merged[prop] = {
+          path: `custom[${customClip.index}]`,
+          edit: false,
+          value: processedArray
+        }
+      } else if (typeof value === 'object' && value !== null) {
+        Object.keys(value).forEach((nestedKey) => {
+          merged[`${prop}_${nestedKey}`] = {
+            path: `${basePath}.${nestedKey}`,
+            edit: false,
+            value: value[nestedKey]
+          }
+        })
+      } else {
+        merged[prop] = {
+          path: `custom[${customClip.index}]`,
+          edit: false,
+          value: value
+        }
+      }
+    })
+  })
+}
+
+function mergeDefaults(clipMap: Map<string, MergedClip>): void {
+  const allKeys = new Set<string>()
+  clipMap.forEach((mergedClip) => {
+    Object.keys(mergedClip).forEach((key) => allKeys.add(key))
+  })
+
+  // Add missing keys with defaults for each MergedClip.
+  clipMap.forEach((mergedClip) => {
+    allKeys.forEach((key) => {
+      if (!(key in mergedClip)) {
+        // Adjust default value for specific keys as needed.
+        mergedClip[key] = {
+          path: '',
+          edit: false,
+          value: ''
+        }
       }
     })
   })

@@ -14,7 +14,7 @@ interface SectionProps {
 }
 
 export const Section = ({ type, label, disabled, handleAddClips, children }: SectionProps) => {
-  const clips = useWatch({ name: `${type}${type !== 'custom' && '.clips'}` })
+  const clips = useWatch({ name: type === 'custom' ? 'custom' : `${type}.clips` })
 
   if (type === 'ocf' || type === 'sound') {
     return (
@@ -35,7 +35,7 @@ export const Section = ({ type, label, disabled, handleAddClips, children }: Sec
   } else if (type === 'proxy' || type === 'custom') {
     return (
       <div key={type}>
-        <Label htmlFor="sound-copies" className="text-base">
+        <Label htmlFor={`${type}-copies`} className="text-base">
           {label}
         </Label>
         <p className="text-muted-foreground text-sm">

@@ -3,6 +3,7 @@ import DataTable from './table/DataTable'
 import { createTableData } from './table/Data'
 import { useWatch, useFieldArray } from 'react-hook-form'
 import { createColumns } from './table/Column'
+import ErrorBoundary from '@renderer/utils/ErrorBoundary'
 
 const Preview = memo(() => {
   const ocfFields = useWatch({ name: 'ocf.clips' }) || []
@@ -17,6 +18,8 @@ const Preview = memo(() => {
   const [data, setData] = useState<any>([])
   const [columns, setColumns] = useState<any>([])
   const previousClips = useRef<string | null>(null)
+
+  console.table(customFields)
 
   const clips = useMemo(
     () => ({
@@ -48,6 +51,10 @@ const Preview = memo(() => {
   //const data = useMemo(() => createTableData(clips), [clips])
   //const columns = useMemo(() => createColumns(data), [data])
 
-  return <DataTable columns={columns} data={data} />
+  return (
+    <ErrorBoundary>
+      <DataTable columns={columns} data={data} />
+    </ErrorBoundary>
+  )
 })
 export default Preview

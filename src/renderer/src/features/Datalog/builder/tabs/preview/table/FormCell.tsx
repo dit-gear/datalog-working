@@ -66,7 +66,7 @@ const FormCell = ({ rowIndex, column, value, totalRows, handleSave }: FormCellPr
             <FormControl>
               <Input
                 {...field}
-                id={value.id}
+                id={`${value.path}.${column.id}`}
                 ref={inputRef}
                 onKeyDown={handleKeyDown}
                 onBlur={handleSubmit((data) => onSubmit(data, null))}
