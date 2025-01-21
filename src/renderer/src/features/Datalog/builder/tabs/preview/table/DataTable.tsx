@@ -1,16 +1,18 @@
-import { memo, useState, useEffect } from 'react'
+import { memo, useMemo, useState, useEffect } from 'react'
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { EditingCellType, TempValue } from './types'
 import FormCell from './FormCell'
 import { useFormContext } from 'react-hook-form'
+import { formatBytes } from '@shared/utils/format-bytes'
+import { MergedClip } from './Data'
 
-interface DataTableProps<TData> {
-  columns: ColumnDef<TData, unknown>[] // Columns array from @tanstack/react-table
-  data: TData[] // Data array matching the structure passed to the table
+interface DataTableProps {
+  columns: ColumnDef<MergedClip>[] // Columns array from @tanstack/react-table
+  data: MergedClip[] // Data array matching the structure passed to the table
 }
 
-const DataTable = memo(<TData extends object>({ columns, data }: DataTableProps<TData>) => {
+const DataTable = memo(({ columns, data }: DataTableProps) => {
   const { setValue } = useFormContext()
   const [editingCell, setEditingCell] = useState<EditingCellType>(null)
   const [temporaryValue, setTemporaryValue] = useState<TempValue>(null)
@@ -39,63 +41,69 @@ const DataTable = memo(<TData extends object>({ columns, data }: DataTableProps<
 
       return () => clearTimeout(timer) // Clean up if needed
     }
+    return
   }, [temporaryValue])
 
-  // Augment columns so we can intercept `cell` rendering
-  const editableColumns = columns.map((col) => ({
-    ...col,
-    cell: (props: any) => {
-      const { row, column } = props
-      const rowIndex = row.index
-      const colId = column.id
-      const value = row.getValue(colId)
+  const editableColumns = useMemo(() => {
+    return columns.map((col) => ({
+      ...col,
+      cell: (props: any) => {
+        const { row, column } = props
+        const rowIndex = row.index
+        const colId = column.id
+        const value = row.getValue(colId)
 
-      if (!value) {
-        return null
-      }
-      const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.colId === colId
+        if (!value) {
+          return null
+        }
+        if ((colId === 'size' || colId === 'proxy_size') && typeof value.value === 'number') {
+          return (
+            <span className="whitespace-nowrap">
+              {formatBytes(value.value, { output: 'string' })}
+            </span>
+          )
+        }
+        const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.colId === colId
 
-      // If cell is not marked editable, just render its value
-      if (!value.edit) {
-        return <span className="whitespace-nowrap">{value.value}</span>
-      }
+        // If cell is not marked editable, just render its value
+        if (!value.edit) {
+          return <span className="whitespace-nowrap">{value.value}</span>
+        }
 
-      // If currently editing this cell, show <FormCell>
-      if (isEditing) {
+        // If currently editing this cell, show <FormCell>
+        if (isEditing) {
+          return (
+            <FormCell
+              rowIndex={rowIndex}
+              column={column}
+              value={value}
+              totalRows={data.length}
+              handleSave={(v, n) =>
+                handleSave(
+                  `${value.path}.${column.id}`,
+                  { rowIndex, colId, value: v },
+                  v,
+                  value.value,
+                  n
+                )
+              }
+            />
+          )
+        }
+
         return (
-          <FormCell
-            rowIndex={rowIndex}
-            column={column}
-            value={value}
-            totalRows={data.length}
-            handleSave={(v, n) =>
-              handleSave(
-                `${value.path}.${column.id}`,
-                { rowIndex, colId, value: v },
-                v,
-                value.value,
-                n
-              )
-            }
-            // When leaving the input (onBlur), we exit editing mode
-            //onBlur={(next) => setEditingCell(next)}
-          />
+          <span
+            className="whitespace-nowrap -ml-2 py-3 pl-3 pr-12 cursor-text"
+            onClick={() => setEditingCell({ rowIndex, colId })}
+          >
+            {temporaryValue?.rowIndex === rowIndex && temporaryValue?.colId === colId
+              ? temporaryValue?.value
+              : value.value}
+          </span>
         )
       }
-
-      // Otherwise, read-only text — double-click to edit
-      return (
-        <span
-          className="whitespace-nowrap -ml-2 py-3 pl-3 pr-12 cursor-text"
-          onClick={() => setEditingCell({ rowIndex, colId })}
-        >
-          {temporaryValue?.rowIndex === rowIndex && temporaryValue?.colId === colId
-            ? temporaryValue?.value
-            : value.value}
-        </span>
-      )
-    }
-  }))
+    }))
+  }, [columns, editingCell, temporaryValue, data.length])
 
   const table = useReactTable({
     data,

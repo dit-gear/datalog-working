@@ -1,3 +1,14 @@
+import isEqual from 'lodash/isEqual'
+import { useRef } from 'react'
+
+export function useDeepCompareMemoize<T>(value: T): T {
+  const ref = useRef<T>(value)
+  if (!isEqual(value, ref.current)) {
+    ref.current = value
+  }
+  return ref.current
+}
+
 export function deepEqual(obj1, obj2) {
   // Check if both values are strictly equal
   if (obj1 === obj2) {

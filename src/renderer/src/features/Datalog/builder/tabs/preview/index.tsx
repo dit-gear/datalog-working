@@ -1,7 +1,7 @@
-import { useMemo, memo, useState, useEffect, useRef, Suspense, lazy } from 'react'
+import { useMemo, memo, useState, useEffect, useRef } from 'react'
 import DataTable from './table/DataTable'
 import { createTableData } from './table/Data'
-import { useWatch, useFieldArray } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 import { createColumns } from './table/Column'
 import ErrorBoundary from '@renderer/utils/ErrorBoundary'
 
@@ -10,16 +10,10 @@ const Preview = memo(() => {
   const soundFields = useWatch({ name: 'sound.clips' }) || []
   const proxyFields = useWatch({ name: 'proxy.clips' }) || []
   const customFields = useWatch({ name: 'custom' }) || []
-  //const { fields: ocfFields } = useFieldArray({ name: 'ocf.clips' })
-  //const { fields: soundFields } = useFieldArray({ name: 'sound.clips' })
-  //const { fields: proxyFields } = useFieldArray({ name: 'proxy.clips' })
-  //const { fields: customFields } = useFieldArray({ name: 'custom' })
 
   const [data, setData] = useState<any>([])
   const [columns, setColumns] = useState<any>([])
   const previousClips = useRef<string | null>(null)
-
-  console.table(customFields)
 
   const clips = useMemo(
     () => ({
@@ -47,9 +41,6 @@ const Preview = memo(() => {
     setData(newData)
     setColumns(newColumns)
   }, [clips])
-
-  //const data = useMemo(() => createTableData(clips), [clips])
-  //const columns = useMemo(() => createColumns(data), [data])
 
   return (
     <ErrorBoundary>
