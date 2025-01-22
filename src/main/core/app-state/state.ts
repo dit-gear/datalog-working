@@ -6,7 +6,6 @@ let rootPath: string = ''
 let projectsInRootPath: ProjectInRootMenuItem[] | null = null
 let activeProjectPath: string = ''
 let activeProject: ProjectRootType | null = null
-let tray: Electron.Tray | null = null
 const appPath = app.getPath('userData')
 const datalogStore = new Map<string, DatalogDynamicType>()
 export const sendWindowDataMap = new Map<
@@ -32,11 +31,6 @@ export const setActiveProjectPath = (newProject: string): void => {
 export const getActiveProject = (): ProjectRootType | null => activeProject
 export const setActiveProject = (newProject: ProjectRootType | null): void => {
   activeProject = newProject
-}
-
-export const getTray = (): Electron.Tray | null => tray
-export const setTray = (newTray: Tray): void => {
-  tray = newTray
 }
 
 export const getAppPath = (): string => appPath

@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, session } from 'electron'
+import { app, shell, BrowserWindow, session, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/appIconlight.png?asset'
@@ -14,6 +14,7 @@ import {
 import { openWindow } from './utils/open-window'
 import { closeAllWatchers } from './core/app-state/watchers/closing'
 import logger from './core/logger'
+import trayManager from './core/menu'
 
 // Initialize the application
 app.setName('Datalog')
@@ -101,31 +102,20 @@ app.whenReady().then(() => {
 
   setupIpcHandlers()
   loadState()
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      //getMainWindow({ ensureOpen: true })
-    }
-  })
 })
 
-// Quit when all windows are closed, except on macOS.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  // DO NOTHING. ELSE I WILL QUIT
 })
 
 process.on('SIGINT', async () => {
   logger.debug('SIGINT received. Shutting down...')
-  await closeAllWatchers()
-  process.exit(0)
+  app.quit()
 })
 
 process.on('SIGTERM', async () => {
   logger.debug('SIGTERM received. Shutting down...')
-  await closeAllWatchers()
-  process.exit(0)
+  app.quit()
 })
 
 const flushWinstonLogs = async (): Promise<void> => {
@@ -137,12 +127,16 @@ const flushWinstonLogs = async (): Promise<void> => {
 
 app.on('will-quit', async (event) => {
   event.preventDefault()
-
   try {
     logger.debug('App is quitting. Performing cleanup...')
+    BrowserWindow.getAllWindows().forEach((win) => win.destroy())
+    trayManager.destroyTray()
     await closeAllWatchers()
+    ipcMain.removeAllListeners()
+
+    // Flush logs after watchers close
     await flushWinstonLogs()
-    console.log('Cleanup complete. Quitting app.') // logger has ended, using console.
+    console.log('Cleanup complete. Quitting app.')
   } catch (error) {
     console.error('Error during app quit cleanup:', error)
   } finally {

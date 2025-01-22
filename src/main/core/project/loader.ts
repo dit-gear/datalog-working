@@ -21,7 +21,7 @@ import {
 } from '../../../shared/projectTypes'
 import logger from '../logger'
 import { ZodType } from 'zod'
-import { updateTray } from '../menu'
+import trayManager from '../menu'
 import { updateProjectFolder } from './updater'
 import { ensureDirectoryExists } from '../../utils/crud'
 
@@ -147,7 +147,7 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
       templatesDir
     }
     setActiveProject(data)
-    updateTray()
+    trayManager.createOrUpdateTray()
     logger.debug(`${data.project_name} loaded`)
     return { success: true, data }
   } catch (error) {
@@ -179,5 +179,5 @@ export const loadProjectsInRootPath = async (): Promise<void> => {
   })
   logger.debug('Loaded projects in root path')
   setProjectsInRootPath(projects)
-  updateTray()
+  trayManager.createOrUpdateTray()
 }

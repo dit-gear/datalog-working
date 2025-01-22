@@ -2,7 +2,7 @@ import { Menu, app, Tray, nativeImage } from 'electron'
 import { getMainWindow } from '../index'
 import { OpenModalTypes } from '@shared/shared-types'
 import { ProjectRootType, ProjectInRootMenuItem } from '@shared/projectTypes'
-import { getTray, setTray, getProjectsInRootPath, getActiveProject } from './app-state/state'
+import { getProjectsInRootPath, getActiveProject } from './app-state/state'
 import { handleChangeProject } from './project/manager'
 import { handleRootDirChange } from './app-state/updater'
 import { createEditorWindow } from '../editor/editorWindow'
@@ -25,7 +25,6 @@ const buildContextMenu = (
   projects: ProjectInRootMenuItem[] | null,
   activeProject: ProjectRootType | null
 ): Menu => {
-  //const activeProject = projects?.find((proj) => proj.active)
   return Menu.buildFromTemplate([
     {
       id: 'active',
@@ -112,7 +111,7 @@ const buildContextMenu = (
     }
   ])
 }
-
+/*
 const createTray = (
   projects: ProjectInRootMenuItem[] | null,
   activeProject: ProjectRootType | null
@@ -139,4 +138,34 @@ export const updateTray = (): void => {
   const contextMenu = buildContextMenu(projects, activeProject)
   Menu.setApplicationMenu(contextMenu)
   tray.setContextMenu(contextMenu)
+}*/
+
+class TrayManager {
+  private tray: Electron.Tray | null = null
+
+  createOrUpdateTray(): void {
+    const projects = getProjectsInRootPath()
+    const activeProject = getActiveProject()
+    const contextMenu = buildContextMenu(projects, activeProject)
+    if (!this.tray) {
+      this.tray = new Tray(trayIcon) // Create the tray if it doesn't exist
+    }
+    this.tray.setContextMenu(contextMenu) // Update the context menu
+  }
+
+  updateTooltip(tooltip: string) {
+    if (this.tray) {
+      this.tray.setToolTip(tooltip)
+    }
+  }
+
+  destroyTray() {
+    if (this.tray) {
+      this.tray.destroy()
+      this.tray = null
+    }
+  }
 }
+
+const trayManager = new TrayManager()
+export default trayManager

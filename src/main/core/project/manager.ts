@@ -2,7 +2,7 @@ import { loadProject } from './loader'
 import { updateState } from '../app-state/updater'
 import { getRootPath, getProjectsInRootPath, setProjectsInRootPath } from '../app-state/state'
 import { getMainWindow } from '../../index'
-import { updateTray } from '../menu'
+import trayManager from '../menu'
 import {
   closeProjectWatchers,
   initProjectWatchers
@@ -25,7 +25,7 @@ export const handleChangeProject = async (selectedProjectPath: string): Promise<
     }))
     setProjectsInRootPath(updatedProjects)
     await initProjectWatchers()
-    updateTray()
+    trayManager.createOrUpdateTray()
 
     const mainWindow = await getMainWindow()
 
