@@ -2,12 +2,12 @@ import fs from 'fs'
 import YAML from 'yaml'
 import logger from '../logger'
 import { DatalogDynamicType } from '@shared/datalogTypes'
-import { getActiveProject } from '../app-state/state'
+import { appState } from '../app-state/state'
 import { DatalogDynamicZod } from '@shared/datalogTypes'
 import { Notification } from 'electron'
 
 export const loadDatalog = async (filePath: string): Promise<DatalogDynamicType> => {
-  const project = getActiveProject()
+  const project = appState.activeProject
   if (!project) throw new Error('No active project found')
   try {
     const datalog = fs.readFileSync(filePath, 'utf8')

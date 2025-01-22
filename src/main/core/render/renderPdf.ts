@@ -2,7 +2,7 @@ import { pdfType } from '@shared/projectTypes'
 import { DatalogType } from '@shared/datalogTypes'
 import { DataObjectType } from '@shared/shared-types'
 import fs from 'fs/promises'
-import { getActiveProject, datalogs as datalogStore } from '../app-state/state'
+import { datalogs as datalogStore, appState } from '../app-state/state'
 import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 import { getReactTemplate } from '@shared/utils/getReactTemplate'
 import { createRenderWorker } from './renderWorkerHelper'
@@ -14,7 +14,7 @@ interface renderPdfProps {
   selection?: DatalogType | DatalogType[]
 }
 export const renderPdf = async ({ pdf, selection }: renderPdfProps) => {
-  const project = getActiveProject()
+  const project = appState.activeProject
   if (!project) throw new Error('No project')
   const datalogs = Array.from(datalogStore().values())
   if (!datalogs) throw new Error('No datalogs')

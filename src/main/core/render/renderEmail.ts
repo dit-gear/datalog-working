@@ -1,7 +1,7 @@
 import { emailType } from '@shared/projectTypes'
 import { DataObjectType } from '@shared/shared-types'
 import fs from 'fs/promises'
-import { getActiveProject, datalogs as datalogStore, sendWindowDataMap } from '../app-state/state'
+import { datalogs as datalogStore, sendWindowDataMap, appState } from '../app-state/state'
 import { getReactTemplate } from '@shared/utils/getReactTemplate'
 import { createRenderWorker } from './renderWorkerHelper'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
@@ -15,7 +15,7 @@ interface renderEmailProps {
 }
 
 export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
-  const project = getActiveProject()
+  const project = appState.activeProject
   if (!project) throw new Error('No project')
   const datalogs = Array.from(datalogStore().values())
   if (!datalogs) throw new Error('no datalogs')

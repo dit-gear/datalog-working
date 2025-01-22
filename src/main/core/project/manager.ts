@@ -1,6 +1,6 @@
 import { loadProject } from './loader'
 import { updateState } from '../app-state/updater'
-import { getRootPath, getProjectsInRootPath, setProjectsInRootPath } from '../app-state/state'
+import { appState } from '../app-state/state'
 import { getMainWindow } from '../../index'
 import trayManager from '../menu'
 import {
@@ -18,24 +18,25 @@ export const handleChangeProject = async (selectedProjectPath: string): Promise<
     const data = activeProject.data
 
     // Insert function here.
-    const projectsInRootPath = getProjectsInRootPath() || []
+    const projectsInRootPath = appState.projectsInRootPath || []
     const updatedProjects = projectsInRootPath?.map((project) => ({
       ...project,
       active: project.path === selectedProjectPath
     }))
-    setProjectsInRootPath(updatedProjects)
+    appState.projectsInRootPath = updatedProjects
     await initProjectWatchers()
     trayManager.createOrUpdateTray()
 
     const mainWindow = await getMainWindow()
 
     mainWindow?.webContents.send('project-loaded', {
-      rootPath: getRootPath(),
+      rootPath: appState.rootPath,
       projectPath: selectedProjectPath,
       data
     })
     logger.debug('handleChangeProject completed successfully')
   } catch (error) {
-    logger.error('handleChangeProject error:', error)
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    logger.error('handleChangeProject error:', message)
   }
 }

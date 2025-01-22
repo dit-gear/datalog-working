@@ -1,12 +1,12 @@
 import { updateState } from '../app-state/updater'
-import { setActiveProject } from '../app-state/state'
+import { appState } from '../app-state/state'
 import { Notification } from 'electron'
 import logger from '../logger'
 import { closeProjectWatchers } from '../app-state/watchers/projectWatchers/manager'
 
-export const unloadActiveProject = async () => {
+export const forceUnloadActiveproject = async () => {
   await Promise.allSettled([closeProjectWatchers(), updateState({})])
-  setActiveProject(null)
+  appState.activeProject = null
 
   if (Notification.isSupported()) {
     new Notification({
@@ -17,5 +17,10 @@ export const unloadActiveProject = async () => {
   } else {
     logger.debug('Notifications is disabled')
   }
-  logger.debug('Project unmounted succseefully')
+  logger.debug('Project unmounted succesfully')
+}
+
+export const unloadProject = async () => {
+  await closeProjectWatchers()
+  appState.activeProject = null
 }

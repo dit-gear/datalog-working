@@ -5,7 +5,7 @@ import YAML from 'yaml'
 import { updateState } from '../app-state/updater' // Adjust the import path as necessary
 import { loadProject, loadProjectsInRootPath } from './loader'
 import { CreateNewProjectResult } from '@shared/projectTypes' // Adjust path as needed
-import { getRootPath, getActiveProjectPath } from '../app-state/state'
+import { appState } from '../app-state/state'
 import logger from '../logger'
 
 async function createTemplateFolder(basePath: string): Promise<void> {
@@ -24,7 +24,7 @@ async function createTemplateFolder(basePath: string): Promise<void> {
 }
 
 async function createProject(projectName: string): Promise<CreateNewProjectResult> {
-  const newProjectPath = path.join(getRootPath(), projectName)
+  const newProjectPath = path.join(appState.rootPath, projectName)
   const filepath = path.join(newProjectPath, 'config.yaml')
   const defaultYaml = {
     project_name: projectName,
@@ -64,10 +64,14 @@ export async function createNewProject(projectName: string): Promise<CreateNewPr
   if (result.success) {
     logger.debug('Project created successfully')
     await loadProjectsInRootPath()
-    const project = await loadProject(getActiveProjectPath())
+    const project = await loadProject(appState.activeProjectPath)
     return {
       success: true,
-      project: { rootPath: getRootPath(), projectPath: getActiveProjectPath(), data: project.data }
+      project: {
+        rootPath: appState.rootPath,
+        projectPath: appState.activeProjectPath,
+        data: project.data
+      }
     }
   }
 

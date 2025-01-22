@@ -3,10 +3,11 @@ import fs from 'fs'
 import path from 'path'
 import { state, error } from './types'
 import { encryptData } from '../../utils/encryption'
-import { getRootPath, setRootPath, setActiveProjectPath } from './state'
+import { appState } from './state'
 import logger from '../logger'
 import { loadProjectsInRootPath } from '../project/loader'
 import { getMainWindow } from '../../index'
+import { unloadProject } from '../project/unload'
 
 interface updateProps {
   newRootPath?: string
@@ -25,11 +26,11 @@ async function saveStateToFile(data: state): Promise<error | undefined> {
 }
 
 export async function updateState({ newRootPath, newActiveProject }: updateProps): Promise<void> {
-  const rootPath = newRootPath ? newRootPath : getRootPath()
-  const activeProject = newActiveProject ? newActiveProject : ''
+  const rootPath = newRootPath ? newRootPath : appState.rootPath
+  const activeProject = newActiveProject ?? null
   await saveStateToFile({ rootPath, activeProject })
-  newRootPath && setRootPath(newRootPath)
-  setActiveProjectPath(activeProject)
+  newRootPath && (appState.rootPath = newRootPath)
+  appState.activeProjectPath = activeProject
   logger.debug(`State updated. Root: ${rootPath} Project: ${activeProject}`)
 }
 
@@ -47,6 +48,7 @@ export const handleRootDirChange = async (): Promise<void> => {
       if (!fs.existsSync(newRootPath)) {
         fs.mkdirSync(newRootPath)
       }
+      await unloadProject()
       updateState({ newRootPath })
       await loadProjectsInRootPath()
       const mainWindow = await getMainWindow()

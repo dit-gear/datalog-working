@@ -3,7 +3,7 @@ import { dialog } from 'electron'
 import fs from 'fs'
 import Papa from 'papaparse'
 import { ocfClipsStore } from './builder-state'
-import { getActiveProject } from '../../app-state/state'
+import { appState } from '../../app-state/state'
 import logger from '../../logger'
 import chardet from 'chardet'
 import iconv from 'iconv-lite'
@@ -15,7 +15,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024
 
 const addCustom = async (path?: string): Promise<ResponseWithClips> => {
   try {
-    const settings = getActiveProject()?.custom_fields
+    const settings = appState.activeProject?.custom_fields
 
     if (
       !Array.isArray(settings?.fields) ||

@@ -2,14 +2,16 @@ import fs from 'fs'
 import path from 'path'
 import YAML from 'yaml'
 import logger from '../logger'
-import { getActiveProjectPath } from '../app-state/state'
+import { appState } from '../app-state/state'
 import { DatalogType } from '@shared/datalogTypes'
 import { Response } from '@shared/shared-types'
+import { ensureDirectoryExists } from '../../utils/crud'
 
 const updateDatalog = async (data: DatalogType): Promise<Response> => {
   try {
+    await ensureDirectoryExists(path.join(appState.activeProjectPath, 'logs'))
     const yaml = YAML.stringify(data)
-    const filepath = path.join(getActiveProjectPath(), 'logs', `${data.id}.datalog`)
+    const filepath = path.join(appState.activeProjectPath, 'logs', `${data.id}.datalog`)
     fs.writeFileSync(filepath, yaml, 'utf8')
     return { success: true }
   } catch (error) {

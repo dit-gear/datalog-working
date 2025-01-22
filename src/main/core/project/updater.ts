@@ -2,7 +2,7 @@ import { ProjectToUpdate, UpdateProjectResult, ProjectType } from '@shared/proje
 import YAML from 'yaml'
 import fs from 'fs'
 import path from 'path'
-import { getActiveProjectPath, getRootPath, getAppPath, getActiveProject } from '../app-state/state'
+import { appState } from '../app-state/state'
 import { loadProject } from './loader'
 import { updateState } from '../app-state/updater'
 import logger from '../logger'
@@ -21,7 +21,7 @@ export const updateProjectNameFromFolderRename = async (projectPath: string) => 
     logger.debug('renamingInProgress is true')
     return
   }
-  let project = getActiveProject()
+  let project = appState.activeProject
   logger.debug(project ? project.toString() : 'no project!')
   if (!project) return
   const newprojectname = path.basename(projectPath)
@@ -29,9 +29,9 @@ export const updateProjectNameFromFolderRename = async (projectPath: string) => 
   const projectYaml = YAML.stringify(project.settings.project)
   await updateState({ newActiveProject: projectPath })
   try {
-    const projectSettingsPath = path.join(getActiveProjectPath(), 'config.yaml')
+    const projectSettingsPath = path.join(appState.activeProjectPath, 'config.yaml')
     fs.writeFileSync(projectSettingsPath, projectYaml, 'utf-8')
-    const result = await loadProject(getActiveProjectPath())
+    const result = await loadProject(appState.activeProjectPath)
     if (result.success) {
       return
     }
@@ -45,10 +45,10 @@ export const updateProjectNameFromFolderRename = async (projectPath: string) => 
 
 export const updateProjectFromFile = async () => {
   if (savingInProgress || renamingInProgress) return
-  await loadProject(getActiveProjectPath())
-  const rootPath = getRootPath()
-  const projectPath = getActiveProjectPath()
-  const data = getActiveProject()
+  await loadProject(appState.activeProjectPath)
+  const rootPath = appState.rootPath
+  const projectPath = appState.activeProjectPath
+  const data = appState.activeProject
 
   const loadedProject: ProjectType = {
     rootPath,
@@ -66,11 +66,11 @@ export const updateProjectFromFile = async () => {
 }
 
 export const updateProjectFolder = async (newprojectname: string) => {
-  const newpath = path.join(getRootPath(), newprojectname)
+  const newpath = path.join(appState.rootPath, newprojectname)
   renamingInProgress = true
   try {
     // stop project watchers
-    fs.renameSync(getActiveProjectPath(), newpath)
+    fs.renameSync(appState.activeProjectPath, newpath)
     await updateState({ newActiveProject: newpath })
     //reinitialize project watchers
   } finally {
@@ -87,25 +87,25 @@ export const updateProject = async ({
     const globalYaml = YAML.stringify(update_settings.global)
 
     const newprojectname = update_settings.project.project_name
-    const oldprojectname = getFileName(getActiveProjectPath())
+    const oldprojectname = getFileName(appState.activeProjectPath)
 
     if (newprojectname !== oldprojectname && !renamingInProgress) {
       await updateProjectFolder(newprojectname)
     }
-    const projectSettingsPath = path.join(getActiveProjectPath(), 'config.yaml')
-    const globalSettingsPath = path.join(getAppPath(), 'config.yaml')
+    const projectSettingsPath = path.join(appState.activeProjectPath, 'config.yaml')
+    const globalSettingsPath = path.join(appState.appPath, 'config.yaml')
     savingInProgress = true
     try {
       fs.writeFileSync(projectSettingsPath, projectYaml, 'utf8')
       fs.writeFileSync(globalSettingsPath, globalYaml, 'utf8')
-      const result = await loadProject(getActiveProjectPath())
+      const result = await loadProject(appState.activeProjectPath)
       savingInProgress = false
       if (result.success) {
         return {
           success: true,
           project: {
-            rootPath: getRootPath(),
-            projectPath: getActiveProjectPath(),
+            rootPath: appState.rootPath,
+            projectPath: appState.activeProjectPath,
             data: result.data
           }
         }

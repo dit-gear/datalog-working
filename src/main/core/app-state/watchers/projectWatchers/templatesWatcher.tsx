@@ -1,5 +1,5 @@
 import chokidar, { FSWatcher } from 'chokidar'
-import { getActiveProjectPath, getAppPath, getActiveProject, setActiveProject } from '../../state'
+import { appState } from '../../state'
 import logger from '../../../logger'
 import { TemplateDirectoryFile } from '@shared/projectTypes'
 import { ensureDirectoryExists } from '../../../../utils/crud'
@@ -21,7 +21,7 @@ const resolveTemplate = (
 }
 
 const isValidTemplateFile = (filePath: string, action: 'add' | 'remove'): boolean => {
-  const { dirs } = getTemplateDirectories(getActiveProjectPath(), getAppPath())
+  const { dirs } = getTemplateDirectories()
   const isInDirectory = dirs.some((dir) => filePath.startsWith(dir))
   if (!isInDirectory) {
     return false
@@ -49,7 +49,7 @@ const isValidTemplateFile = (filePath: string, action: 'add' | 'remove'): boolea
 }
 
 export const initTemplateWatcher = async () => {
-  const { dirs, subdirs } = getTemplateDirectories(getActiveProjectPath(), getAppPath())
+  const { dirs, subdirs } = getTemplateDirectories()
 
   // Ensure directories exist
   await Promise.all(subdirs.map(ensureDirectoryExists))
@@ -94,20 +94,20 @@ const updateTemplatesDir = (filePath: string, action: 'add' | 'remove') => {
     const editorWindow = getEditorWindow()
   }
   if (!isValidTemplateFile(filePath, action)) return
-  const activeProject = getActiveProject()
+  const activeProject = appState.activeProject
   if (!activeProject) return
 
   const { templatesDir } = activeProject
 
   if (action === 'add') {
-    const { detailed: directories } = getTemplateDirectories(getActiveProjectPath(), getAppPath())
+    const { detailed: directories } = getTemplateDirectories()
     const newTemplate = resolveTemplate(filePath, directories)
     if (!newTemplate) return
     activeProject.templatesDir = [...templatesDir, newTemplate]
   } else if (action === 'remove') {
     activeProject.templatesDir = templatesDir.filter((template) => template.path !== filePath)
   }
-  setActiveProject(activeProject)
+  appState.activeProject = activeProject
   const editorWindow = getEditorWindow()
   if (editorWindow) {
     editorWindow.webContents.send('directory-changed', activeProject.templatesDir)

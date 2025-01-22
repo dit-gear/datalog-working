@@ -1,13 +1,13 @@
 import chokidar, { FSWatcher } from 'chokidar'
-import { getActiveProjectPath } from '../../state'
+import { appState } from '../../state'
 import { updateProjectFromFile } from '../../../project/updater'
-import { unloadActiveProject } from '../../../project/unload'
+import { forceUnloadActiveproject } from '../../../project/unload'
 import logger from '../../../logger'
 
 let settingsWatcher: FSWatcher | null = null
 
 export const initSettingsWatcher = async () => {
-  const projectPath = getActiveProjectPath()
+  const projectPath = appState.activeProjectPath
   if (!projectPath) throw Error
   settingsWatcher = chokidar.watch(`${projectPath}/config.yaml`, { ignoreInitial: true })
 
@@ -20,7 +20,7 @@ export const initSettingsWatcher = async () => {
   })
 
   settingsWatcher.on('unlink', () => {
-    unloadActiveProject()
+    forceUnloadActiveproject()
   })
 }
 

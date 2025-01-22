@@ -5,13 +5,7 @@ import { dialog } from 'electron'
 import YAML from 'yaml'
 import { LoadProjectDataResult } from './types'
 import findFilesByType from '../../utils/find-files-by-type'
-import {
-  getRootPath,
-  getActiveProjectPath,
-  setProjectsInRootPath,
-  setActiveProject,
-  getAppPath
-} from '../app-state/state'
+import { appState } from '../app-state/state'
 import {
   ProjectSchemaZod,
   GlobalSchemaZodNullable,
@@ -44,9 +38,10 @@ const parseSettingsFile = async <T>(filePath: string, schema: ZodType<T>): Promi
 }
 
 export const getTemplateDirectories = (
-  projectPath: string,
-  appPath: string
+  _projectPath?: string
 ): { dirs: string[]; subdirs: string[]; detailed: TemplateDirectoryFile[] } => {
+  const projectPath = _projectPath ?? appState.activeProjectPath
+  const appPath = appState.appPath
   const dirs = [`${projectPath}/templates/`, `${appPath}/templates/`]
   const subdirs = [
     `${projectPath}/templates/email`,
@@ -88,11 +83,8 @@ const loadTemplateDirectory = async (
   }
 }
 
-const loadTemplates = async (
-  projectPath: string,
-  appPath: string
-): Promise<TemplateDirectoryFile[]> => {
-  const { detailed: directories } = getTemplateDirectories(projectPath, appPath)
+const loadTemplates = async (projectPath: string): Promise<TemplateDirectoryFile[]> => {
+  const { detailed: directories } = getTemplateDirectories(projectPath)
 
   const templates = await Promise.all(directories.map(loadTemplateDirectory))
   return templates.flat()
@@ -100,7 +92,7 @@ const loadTemplates = async (
 
 export const loadProject = async (selectedProjectpath: string): Promise<LoadProjectDataResult> => {
   logger.debug('loadProject started')
-  const globalFilePath = path.join(getAppPath(), 'config.yaml')
+  const globalFilePath = path.join(appState.appPath, 'config.yaml')
   if (!fs.existsSync(globalFilePath)) {
     fs.writeFileSync(globalFilePath, '', 'utf8')
   }
@@ -132,7 +124,7 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
     if (projectSettings.project_name !== path.basename(selectedProjectpath)) {
       await updateProjectFolder(projectSettings.project_name)
     }
-    const templatesDir = await loadTemplates(selectedProjectpath, getAppPath())
+    const templatesDir = await loadTemplates(selectedProjectpath)
     const folderTemplate = projectSettings.folder_template || globalSettings?.folder_template
     const data: ProjectRootType = {
       ...globalSettings,
@@ -146,7 +138,7 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
       },
       templatesDir
     }
-    setActiveProject(data)
+    appState.activeProject = data
     trayManager.createOrUpdateTray()
     logger.debug(`${data.project_name} loaded`)
     return { success: true, data }
@@ -163,9 +155,9 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
 
 export const loadProjectsInRootPath = async (): Promise<void> => {
   logger.debug('loadProjectInRootPath started')
-  const projectPath = getActiveProjectPath()
+  const projectPath = appState.activeProjectPath
 
-  const yamlFiles = await findFilesByType(getRootPath(), 'yaml', {
+  const yamlFiles = await findFilesByType(appState.rootPath, 'yaml', {
     includeFileName: 'config.yaml',
     maxDepth: 1
   })
@@ -178,6 +170,6 @@ export const loadProjectsInRootPath = async (): Promise<void> => {
     }
   })
   logger.debug('Loaded projects in root path')
-  setProjectsInRootPath(projects)
+  appState.projectsInRootPath = projects
   trayManager.createOrUpdateTray()
 }

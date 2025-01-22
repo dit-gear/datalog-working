@@ -5,12 +5,7 @@ import icon from '../../resources/appIconlight.png?asset'
 import { ProjectType } from '../shared/projectTypes'
 import { loadState } from './core/app-state/loader'
 import { setupIpcHandlers } from './setupIpcHandlers'
-import {
-  getRootPath,
-  getActiveProjectPath,
-  getActiveProject,
-  datalogs
-} from './core/app-state/state'
+import { datalogs, appState } from './core/app-state/state'
 import { openWindow } from './utils/open-window'
 import { closeAllWatchers } from './core/app-state/watchers/closing'
 import logger from './core/logger'
@@ -35,9 +30,9 @@ export async function getMainWindow({ ensureOpen = false } = {}): Promise<Browse
 
 // Function to create the main window
 async function createWindow(): Promise<void> {
-  const rootPath = getRootPath()
-  const projectPath = getActiveProjectPath()
-  const data = getActiveProject()
+  const rootPath = appState.rootPath
+  const projectPath = appState.activeProjectPath
+  const data = appState.activeProject
 
   const loadedProject: ProjectType = {
     rootPath,

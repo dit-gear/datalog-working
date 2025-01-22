@@ -1,8 +1,8 @@
-import { Menu, app, Tray, nativeImage } from 'electron'
+import { Menu, app, Tray } from 'electron'
 import { getMainWindow } from '../index'
 import { OpenModalTypes } from '@shared/shared-types'
 import { ProjectRootType, ProjectInRootMenuItem } from '@shared/projectTypes'
-import { getProjectsInRootPath, getActiveProject } from './app-state/state'
+import { appState } from './app-state/state'
 import { handleChangeProject } from './project/manager'
 import { handleRootDirChange } from './app-state/updater'
 import { createEditorWindow } from '../editor/editorWindow'
@@ -144,9 +144,7 @@ class TrayManager {
   private tray: Electron.Tray | null = null
 
   createOrUpdateTray(): void {
-    const projects = getProjectsInRootPath()
-    const activeProject = getActiveProject()
-    const contextMenu = buildContextMenu(projects, activeProject)
+    const contextMenu = buildContextMenu(appState.projectsInRootPath, appState.activeProject)
     if (!this.tray) {
       this.tray = new Tray(trayIcon) // Create the tray if it doesn't exist
     }

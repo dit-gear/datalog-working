@@ -5,12 +5,7 @@ import { LoadedFile, InitialEditorData, ChangedFile } from '../../shared/shared-
 import { TemplateDirectoryFile } from '@shared/projectTypes'
 import { moveFileToTrash } from '../utils/crud'
 import { getEditorWindow } from './editorWindow'
-import {
-  getActiveProjectPath,
-  getAppPath,
-  getActiveProject,
-  datalogs
-} from '../core/app-state/state'
+import { datalogs, appState } from '../core/app-state/state'
 import logger from '../core/logger'
 
 export function setupEditorIpcHandlers(): void {
@@ -19,9 +14,7 @@ export function setupEditorIpcHandlers(): void {
   ipcMain.handle('initial-editor-data', async (): Promise<InitialEditorData> => {
     try {
       const loadedDatalogs = Array.from(datalogs().values())
-      const rootPath = getAppPath()
-      const projectPath = getActiveProjectPath()
-      const activeProject = getActiveProject()
+      const { rootPath, activeProjectPath: projectPath, activeProject } = appState
 
       if (!activeProject) throw Error('No active project')
 

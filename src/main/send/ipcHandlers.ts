@@ -3,11 +3,7 @@ import { ipcMain } from 'electron'
 import fs from 'fs/promises'
 import { InitialSendData, Response } from '@shared/shared-types'
 import { emailType } from '@shared/projectTypes'
-import {
-  getActiveProject,
-  datalogs as datalogStore,
-  sendWindowDataMap
-} from '../core/app-state/state'
+import { appState, datalogs as datalogStore, sendWindowDataMap } from '../core/app-state/state'
 import { getSendWindow } from './sendWindow'
 import { renderEmail } from '../core/render/renderEmail'
 import { emailprovider } from '../core/send-email'
@@ -15,7 +11,7 @@ import { emailprovider } from '../core/send-email'
 export function setupSendIpcHandlers(): void {
   ipcMain.handle('initial-send-data', async (event): Promise<InitialSendData> => {
     try {
-      const project = getActiveProject()
+      const project = appState.activeProject
       const datalogs = Array.from(datalogStore().values())
       if (!project) throw Error
       const windowId = event.sender.id

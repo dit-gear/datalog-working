@@ -1,5 +1,5 @@
 import chokidar, { FSWatcher } from 'chokidar'
-import { getActiveProjectPath, datalogs } from '../../state'
+import { datalogs, appState } from '../../state'
 import { loadDatalog } from '../../../datalog/loader'
 import logger from '../../../logger'
 import { getMainWindow } from '../../../../index'
@@ -10,7 +10,7 @@ let datalogsWatcher: FSWatcher | null = null
 let debouncedUpdate: NodeJS.Timeout | null = null
 
 export const initDatalogWatcher = async () => {
-  const projectPath = getActiveProjectPath()
+  const projectPath = appState.activeProjectPath
   if (!projectPath) throw new Error('Project path not found in initDatalogWatcher')
 
   const watchPattern = `${projectPath}/logs/`

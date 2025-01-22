@@ -1,9 +1,9 @@
 import chokidar, { FSWatcher } from 'chokidar'
-import { getActiveProjectPath, getRootPath } from '../state'
+import { appState } from '../state'
 import logger from '../../logger'
 import { loadProjectsInRootPath } from '../../project/loader'
 import { updateProjectNameFromFolderRename } from '../../project/updater'
-import { unloadActiveProject } from '../../project/unload'
+import { forceUnloadActiveproject } from '../../project/unload'
 
 let rootWatcher: FSWatcher | null = null
 
@@ -14,7 +14,7 @@ export const initRootWatcher = async () => {
   const renamedDirs: Set<{ oldPath: string; newPath: string }> = new Set()
   let pendingUnlink: string | null = null
 
-  rootWatcher = chokidar.watch(getRootPath(), {
+  rootWatcher = chokidar.watch(appState.rootPath, {
     ignoreInitial: true,
     depth: 0,
     awaitWriteFinish: true
@@ -62,11 +62,11 @@ export const initRootWatcher = async () => {
 
   async function processDirectoryChanges() {
     logger.debug('Processing directory changes')
-    const activeProjectPath = getActiveProjectPath()
+    const activeProjectPath = appState.activeProjectPath
 
     if (activeProjectPath && pendingUnlink === activeProjectPath) {
       logger.debug(`Active project path deleted: ${activeProjectPath}`)
-      await unloadActiveProject()
+      await forceUnloadActiveproject()
     }
 
     const renamedProject = [...renamedDirs].find((entry) => entry.oldPath === activeProjectPath)
