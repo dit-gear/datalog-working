@@ -20,8 +20,8 @@ import { removeEmptyFields } from '@renderer/utils/form'
 import Name from './tabs/name'
 import Import from './tabs/import/index'
 import Preview from './tabs/preview'
-import z, { ZodTypeAny } from 'zod'
-import { lazy, Suspense } from 'react'
+import z from 'zod'
+import { useEffect } from 'react'
 
 interface BuilderdialogProps {
   project: ProjectRootType
@@ -32,6 +32,10 @@ interface BuilderdialogProps {
 
 const Builderdialog = ({ project, previousEntries, selected, setOpen }: BuilderdialogProps) => {
   const { toast } = useToast()
+
+  useEffect(() => {
+    window.mainApi.clearClipsStore()
+  }, [setOpen])
 
   function getNextDay(logs: DatalogType[]): number {
     let highestDay = logs[0].day
@@ -146,8 +150,6 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
       toast({ description: 'There was an issue saving the entry' })
     }
   }
-
-  const Preview = lazy(() => import('./tabs/preview/index'))
 
   return (
     <DialogContent className="sm:max-w-[100vw] h-[100vh]">

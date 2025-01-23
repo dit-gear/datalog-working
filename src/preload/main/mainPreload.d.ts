@@ -24,6 +24,7 @@ declare global {
       onDatalogsLoaded: (callback: (datalogs: DatalogType[]) => void) => void
       getClips: (type: 'ocf' | 'sound' | 'proxy' | 'custom') => Promise<ResponseWithClips>
       removeClips: (paths: string[], type: 'ocf' | 'sound') => Promise<ResponseWithClips>
+      clearClipsStore: () => Promise<Response>
       showProgress: (show: boolean, progress: number) => void
       showProgressListener: (callback: (show: boolean, progress: number) => void) => () => void
       onDirectoryLoaded: (

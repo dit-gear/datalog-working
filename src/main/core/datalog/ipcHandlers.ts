@@ -9,6 +9,7 @@ import { removeOcf, removeSound } from './builder/remove-ocf'
 import updateDatalog from './updater'
 import deleteDatalog from './delete'
 import { createSendWindow } from '../../send/sendWindow'
+import { clearClipsStore } from './builder/builder-state'
 
 export function setupDatalogIpcHandlers(): void {
   ipcMain.handle(
@@ -53,5 +54,9 @@ export function setupDatalogIpcHandlers(): void {
 
   ipcMain.on('open-send-window', (_, selection: DatalogType | DatalogType[]) => {
     createSendWindow(undefined, selection)
+  })
+
+  ipcMain.handle('clear-clips-store', async (): Promise<Response> => {
+    return await clearClipsStore()
   })
 }

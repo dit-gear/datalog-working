@@ -40,7 +40,7 @@ export const Section = ({ type, label, disabled, handleAddClips, children }: Sec
         </Label>
         <p className="text-muted-foreground text-sm">
           {disabled
-            ? 'Enable Custom fields to enable this option'
+            ? 'Add Custom fields in app settings to enable this option'
             : `${clips && clips.length > 0 ? clips.length : 'No'} clips added`}
         </p>
         <div className="mt-2 flex gap-2">
