@@ -16,7 +16,7 @@ import {
   timecodeToSeconds,
   secondsToLargeTimecode
 } from './format-timecode'
-import { durationType } from '@shared/shared-types'
+import { DurationType } from '@shared/shared-types'
 import { formatCopiesFromString, formatCopiesFromClips } from './format-copies'
 import { Datalog } from '@shared/datalogClass'
 
@@ -90,7 +90,7 @@ export function getDuration(
 export function getDuration(
   data: Pick<OcfType, 'duration' | 'clips'> | undefined,
   format: 'hms'
-): durationType
+): DurationType
 export function getDuration(
   data: Pick<OcfType, 'duration' | 'clips'> | undefined,
   format: 'hms-string'
@@ -98,7 +98,7 @@ export function getDuration(
 export function getDuration(
   data: Pick<OcfType, 'duration' | 'clips'> | undefined,
   format: 'tc' | 'seconds' | 'hms' | 'hms-string'
-): string | number | durationType {
+): string | number | DurationType {
   const duration = data?.duration ?? sumClipDurations(data?.clips)
   switch (format) {
     case 'seconds':
@@ -180,11 +180,11 @@ export function getTotalSize<T extends FormatOutput>(
 
 export function getTotalDuration(data: Datalog[], format: 'tc'): string
 export function getTotalDuration(data: Datalog[], format: 'hms-string'): string
-export function getTotalDuration(data: Datalog[], format: 'hms'): durationType
+export function getTotalDuration(data: Datalog[], format: 'hms'): DurationType
 export function getTotalDuration(
   data: Datalog[],
   format: 'tc' | 'hms' | 'hms-string'
-): string | durationType {
+): string | DurationType {
   const duration = data.reduce((sum, log) => sum + log.ocf.durationAsSeconds(), 0)
   const durationTC = secondsToLargeTimecode(duration)
   if (format === 'hms') return formatDuration(durationTC)

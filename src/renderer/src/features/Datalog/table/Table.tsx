@@ -10,8 +10,17 @@ interface TableProps {
   handleEdit: (datalog: DatalogType) => void
 }
 
+export class PublicDatalog extends Datalog {
+  public accessRaw: DatalogType // Override raw as public
+
+  constructor(data: DatalogType) {
+    super(data)
+    this.accessRaw = data // Reassign explicitly because it's private in the base class
+  }
+}
+
 const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
-  const classLogs = React.useMemo(() => logs.map((log) => new Datalog(log)), [logs])
+  const classLogs = React.useMemo(() => logs.map((log) => new PublicDatalog(log)), [logs])
 
   const handleDelete = async (datalog: DatalogType) => {
     try {
@@ -23,7 +32,7 @@ const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
 
   const handlers = useMemo(() => ({ handleDelete, handleEdit }), [handleDelete, handleEdit])
 
-  const DatalogRows = (logs: Datalog[]): any[] => {
+  const DatalogRows = (logs: PublicDatalog[]): LogSum[] => {
     return logs.map((data) => ({
       id: data.id,
       day: data.day,
@@ -31,9 +40,9 @@ const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
       unit: data.unit,
       ocfSize: data.ocf.size(),
       proxySize: data.proxy.size(),
-      duration: data.ocf.durationReadable(),
+      duration: data.ocf.duration(),
       reels: data.ocf.reels({ grouped: true }),
-      raw: data.raw
+      raw: data.accessRaw
     }))
   }
 

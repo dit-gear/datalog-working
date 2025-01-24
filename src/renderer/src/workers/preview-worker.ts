@@ -23,8 +23,10 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
   const { code, type, dataObject, id } = event.data
   let components: Record<string, unknown> = {}
 
+  console.log(dataObject)
+
   try {
-    const { DataObject } = await import('@shared/utils/datalog-methods')
+    const { DataObject } = await import('@shared/datalogClass')
     if (type === 'email') {
       const {
         Html,

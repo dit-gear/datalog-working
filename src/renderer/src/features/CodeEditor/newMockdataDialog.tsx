@@ -34,8 +34,11 @@ export const NewMockdataDialog: React.FC<props> = ({ children }) => {
       content: generateProjectJson(initialData)
     }
     try {
-      await window.editorApi.saveNewFile(File)
-      setOpen(false)
+      const res = await window.editorApi.saveNewFile(File)
+      if (res.success) {
+        setOpen(false)
+        return
+      } else if (res.error) console.log(res.error)
     } catch (error) {
       console.error('Failed to save file:', error)
     }

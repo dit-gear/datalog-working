@@ -1,4 +1,4 @@
-import { durationType } from '@shared/shared-types'
+import { DurationType } from '@shared/shared-types'
 import { secondsToTimecode } from './format-timecode'
 
 // Options when asString is true
@@ -34,9 +34,9 @@ export type FormatDurationOptions = FormatDurationAsStringOptions | FormatDurati
  * @param {string} [options.separator=', '] - The separator used in the formatted string when `asString` is `true`.
  *   - Defaults to `', '`.
  *
- * @returns {string | durationType} - The formatted duration.
+ * @returns {string | DurationType} - The formatted duration.
  *   - Returns a `string` if `options.asString` is `true`.
- *   - Returns a `durationType` object (`{ hours: number; minutes: number; seconds: number; }`) if `options.asString` is `false` or not provided.
+ *   - Returns a `DurationType` object (`{ hours: number; minutes: number; seconds: number; }`) if `options.asString` is `false` or not provided.
  *
  * @example
  * // Returns: { hours: 100, minutes: 30, seconds: 45 }
@@ -54,12 +54,12 @@ export type FormatDurationOptions = FormatDurationAsStringOptions | FormatDurati
  * // Returns: "12h | 34m | 56s"
  * const formattedDuration = formatDuration("12:34:56:78", { asString: true, separator: ' | ' });
  */
-export function formatDuration(time: string, options?: FormatDurationAsObjectOptions): durationType
+export function formatDuration(time: string, options?: FormatDurationAsObjectOptions): DurationType
 export function formatDuration(time: string, options: FormatDurationAsStringOptions): string
 export function formatDuration(
   time: string,
   options: FormatDurationOptions = {}
-): durationType | string {
+): DurationType | string {
   const [hoursStr, minutesStr, secondsStr] = time.split(':')
 
   // Convert each to a number, defaulting to 0 if parse fails
@@ -90,7 +90,7 @@ export function formatDuration(
   }
 }
 
-export function formatDurationToTC(duration: durationType): string {
+export function formatDurationToTC(duration: DurationType): string {
   const { hours, minutes, seconds } = duration
   const sec = hours * 3600 + minutes * 60 + seconds
   return secondsToTimecode(sec)

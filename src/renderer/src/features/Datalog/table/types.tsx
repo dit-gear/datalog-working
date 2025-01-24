@@ -1,11 +1,13 @@
-import z from 'zod'
-import { datalogZod } from '@shared/datalogTypes'
+import { DatalogType } from '@shared/datalogTypes'
 
-const LogSum = datalogZod.pick({ id: true, day: true, date: true, unit: true }).extend({
-  ocfSize: z.string(),
-  proxySize: z.string(),
-  duration: z.string(),
-  reels: z.array(z.string()),
-  raw: datalogZod
-})
-export type LogSum = z.infer<typeof LogSum>
+export interface LogSum {
+  id: string
+  day: string
+  date: string
+  unit: string
+  ocfSize: string
+  proxySize: string
+  duration: string
+  reels: string[]
+  raw: DatalogType
+}

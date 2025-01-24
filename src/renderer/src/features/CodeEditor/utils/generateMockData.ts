@@ -1,5 +1,5 @@
 import { InitialEditorData } from '@shared/shared-types'
-import { ClipDynamicZod } from '@shared/datalogTypes'
+//import { ClipDynamicZod } from '@shared/datalogTypes'
 import { z } from 'zod'
 
 const getRandomOption = (...options: string[]): string => {

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import Stat from '@components/stat'
-import { durationType } from '@shared/shared-types'
+import { DurationType } from '@shared/shared-types'
 
 interface DurationStatProps {
-  value: durationType | null
+  value: DurationType | null
 }
 
 export const DurationStat = ({ value }: DurationStatProps) => {
-  const [display, setDisplay] = useState<durationType | null>(null)
+  const [display, setDisplay] = useState<DurationType | null>(null)
 
   useEffect(() => {
     setDisplay(value)

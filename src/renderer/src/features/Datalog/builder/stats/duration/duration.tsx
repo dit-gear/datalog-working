@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { DurationPopupForm } from '../forms/DurationPopupForm'
 import { getDuration } from '@shared/utils/datalog-methods'
-import { durationType } from '@shared/shared-types'
+import { DurationType } from '@shared/shared-types'
 import { DurationStat } from './durationStat'
 
 const Duration = () => {
@@ -10,7 +10,7 @@ const Duration = () => {
   const clips = useWatch({ name: 'ocf.clips' })
   const fixedDuration = useWatch({ name: 'ocf.duration' })
 
-  const [value, setValueState] = useState<durationType | null>(null)
+  const [value, setValueState] = useState<DurationType | null>(null)
 
   useEffect(() => {
     const duration = getDuration(

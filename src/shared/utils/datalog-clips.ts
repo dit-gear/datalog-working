@@ -54,7 +54,7 @@ export function mergeClips(
   // 2) Merge Proxy
   mergeProxyClips(clipMap, datalog)
   // 3) Merge Custom
-  //mergeCustomEntries(clipMap, datalog)
+  mergeCustomEntries(clipMap, datalog)
   // 4) Merge Sound (by timecode overlap)
   mergeSoundClips(clipMap, datalog)
 

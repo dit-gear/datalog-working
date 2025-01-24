@@ -3,14 +3,14 @@ import { FormControl, FormField, FormItem, FormLabel, Form, FormMessage } from '
 import { Input } from '@components/ui/input'
 import { formatDurationToTC } from '@shared/utils/format-duration'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { durationType } from '@shared/shared-types'
+import { DurationType } from '@shared/shared-types'
 import { Button } from '@components/ui/button'
 import z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
 
 interface DurationPopupFormProps {
-  value: durationType | null
+  value: DurationType | null
   update: (data: string) => void
   clear: () => void
   children: React.ReactNode
@@ -30,7 +30,7 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
   children
 }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const form = useForm<durationType>({
+  const form = useForm<DurationType>({
     defaultValues: {
       hours: value?.hours,
       minutes: value?.minutes,
@@ -53,7 +53,7 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
     })
   }, [value])
 
-  const onSubmit: SubmitHandler<durationType> = (data): void => {
+  const onSubmit: SubmitHandler<DurationType> = (data): void => {
     if (data !== value) {
       const duration = formatDurationToTC(data)
       update(duration)

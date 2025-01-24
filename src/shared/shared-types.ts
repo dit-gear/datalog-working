@@ -1,7 +1,7 @@
 import { TemplateDirectoryFile, ProjectRootType, emailType } from './projectTypes'
 import { DatalogDynamicType } from './datalogTypes'
 
-export type durationType = {
+export type DurationType = {
   hours: number
   minutes: number
   seconds: number

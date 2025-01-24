@@ -34,12 +34,7 @@ const copy = z.object({
 })
 const copies = z.array(copy)
 export type CopyBaseType = z.infer<typeof copy>
-
-/*export type PathType = {
-  volume: string | null
-  fullPath: string
-  relativePath: string
-}*/
+const size = z.number().nonnegative().finite()
 
 export type CopyType = {
   volumes: string[]
@@ -47,25 +42,9 @@ export type CopyType = {
   count: [number, number]
 }
 
-/*export const ClipZod = z
-  .object({
-    clip: z.string(),
-    size: z.number(),
-    copies: Copies,
-    duration: z.number().optional(),
-    image: z.string().optional(), // Not in use
-    proxy: ProxyZod.optional()
-  })
-  .extend(CameraMetadataZod.merge)
-
-export const Files = z.object({
-  files: z.number().int().nonnegative().finite().optional(),
-  size: z.number().nonnegative().finite().optional()
-})*/
-
 const OcfClipBaseZod = z.object({
   clip: z.string(),
-  size: z.number(),
+  size: size,
   copies: copies
 })
 
@@ -78,10 +57,10 @@ export const OcfClipZod = addTimecodeValidation(OcfClipBaseZod.merge(CameraMetad
 export type OcfClipType = z.infer<typeof OcfClipZod>
 export type OcfClipBaseType = z.infer<typeof OcfClipBaseZod>
 
-const SoundClipZod = addTimecodeValidation(
+export const SoundClipZod = addTimecodeValidation(
   z.object({
     clip: z.string(),
-    size: z.number(),
+    size: size,
     copies: copies,
     tc_start: z.string().optional(),
     tc_end: z.string().optional()
@@ -91,9 +70,9 @@ const SoundClipZod = addTimecodeValidation(
 
 export type SoundClipType = z.infer<typeof SoundClipZod>
 
-const ProxyClipZod = z.object({
+export const ProxyClipZod = z.object({
   clip: z.string(),
-  size: z.number().nonnegative().finite(),
+  size: size,
   format: z.string().optional(),
   codec: z.string().optional(),
   resolution: z.string().optional()
@@ -101,12 +80,12 @@ const ProxyClipZod = z.object({
 export type ProxyClipType = z.infer<typeof ProxyClipZod>
 
 const file = z.number().int().nonnegative().finite().optional()
-const size = z.number().nonnegative().finite().optional()
+const sizeOptional = z.optional(size)
 const copiesarray = z.array(z.string()).optional()
 
 export const Sound = z.object({
   files: file,
-  size: size,
+  size: sizeOptional,
   copies: copiesarray,
   clips: z.array(SoundClipZod).optional()
 })
@@ -114,7 +93,7 @@ export type SoundType = z.infer<typeof Sound>
 
 export const OCF = z.object({
   files: file,
-  size: size,
+  size: sizeOptional,
   duration: timecode.optional(),
   reels: z.array(z.string()).optional(),
   copies: copiesarray,
@@ -124,7 +103,7 @@ export type OcfType = z.infer<typeof OCF>
 
 export const Proxy = z.object({
   files: file,
-  size: size,
+  size: sizeOptional,
   clips: z.array(ProxyClipZod).optional()
 })
 export type ProxyType = z.infer<typeof Proxy>
@@ -246,6 +225,15 @@ export const DatalogDynamicZod = (project: ProjectRootType) => {
   return datalogZod
     .omit({ custom: true })
     .extend({ custom: z.array(CustomFieldsZod(project)).optional() })
+}
+
+const ClipZod = OcfClipBaseZod.merge(CameraMetadataZod).extend({
+  sound: z.array(z.string()).optional(),
+  proxy: ProxyClipZod.omit({ clip: true })
+})
+
+export const ClipDynamicZod = (project: ProjectRootType) => {
+  return ClipZod.merge(CustomFieldsZod(project))
 }
 
 /*export const DatalogDynamicZod = <T extends Record<string, any>>(

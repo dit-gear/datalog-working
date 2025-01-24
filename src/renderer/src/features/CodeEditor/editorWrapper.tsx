@@ -132,7 +132,7 @@ const EditorWrapper = () => {
                   onClick={() => handleTabClick(file.path)}
                   {...(isActive && { action: { onClick: () => handleCloseTab(file) } })}
                 >
-                  {file.name}
+                  <span className="text-xs">{file.name}</span>
                 </CustomTab>
               )
             })}
@@ -184,9 +184,8 @@ const EditorWrapper = () => {
       <ResizableHandle withHandle />
       <ResizablePanel className="flex flex-col m-2 gap-2">
         <div className="flex items-center justify-between">
-          <span className="font-semibold">Preview</span>
           <div className="flex gap-2">
-            <Button size="sm" variant="secondary" className="rounded">
+            <Button size="sm" variant="secondary" className="rounded text-xs">
               Docs
             </Button>
           </div>

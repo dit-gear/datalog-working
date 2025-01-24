@@ -3,7 +3,7 @@ import { FormControl, FormField, FormItem, FormLabel, Form } from '@components/u
 import { Input } from '@components/ui/input'
 import { formatDuration, formatDurationToMS } from '@shared/utils/format-duration'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { durationType } from '@shared/shared-types'
+import { DurationType } from '@shared/shared-types'
 import { Button } from '@components/ui/button'
 
 interface DurationPopupFormProps {
@@ -21,7 +21,7 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
 }) => {
   const { hours, minutes, seconds } = formatDuration(value)
 
-  const form = useForm<durationType>({
+  const form = useForm<DurationType>({
     defaultValues: {
       hours: hours,
       minutes: minutes,
@@ -30,7 +30,7 @@ export const DurationPopupForm: React.FC<DurationPopupFormProps> = ({
   })
   const { handleSubmit, reset } = form
 
-  const onSubmit: SubmitHandler<durationType> = (data): void => {
+  const onSubmit: SubmitHandler<DurationType> = (data): void => {
     const duration = formatDurationToMS(data.hours, data.minutes, sec ? data.seconds : 0)
     update(duration)
     reset(data)
