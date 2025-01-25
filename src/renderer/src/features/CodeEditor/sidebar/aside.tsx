@@ -11,13 +11,13 @@ import Group from './group'
 import { TemplateDirectoryFile } from '@shared/projectTypes'
 import { useInitialData } from '../dataContext'
 
-const Aside = (): JSX.Element => {
+const Aside = () => {
   const { initialData } = useInitialData()
   const [files, setFiles] = useState<TemplateDirectoryFile[]>(
-    initialData.activeProject.templatesDir
+    initialData.activeProject.templatesDir ?? []
   )
 
-  const handleDirectoryChanged = (_, files: TemplateDirectoryFile[]): void => {
+  const handleDirectoryChanged = (files: TemplateDirectoryFile[]): void => {
     setFiles(files)
   }
 

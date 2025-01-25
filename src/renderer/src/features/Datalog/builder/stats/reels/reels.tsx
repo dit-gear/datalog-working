@@ -16,11 +16,11 @@ const Reels = () => {
   useEffect(() => {
     const reels = getReels(
       { reels: fixedReels ? fixedReels : undefined, clips: clips },
-      { grouped: false }
+      { rangeMerging: false }
     )
     const reelsGrouped = getReels(
       { reels: fixedReels ? fixedReels : undefined, clips: clips },
-      { grouped: true }
+      { rangeMerging: true }
     )
     setReels(reels)
     setReelsGrouped(reelsGrouped)

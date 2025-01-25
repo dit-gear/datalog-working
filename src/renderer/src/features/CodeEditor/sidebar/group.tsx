@@ -21,7 +21,7 @@ interface GroupProps {
   files: TemplateDirectoryFile[]
 }
 
-const Group = ({ type, files }: GroupProps): JSX.Element => {
+const Group = ({ type, files }: GroupProps) => {
   const handleDelete = async (file: TemplateDirectoryFile): Promise<void> => {
     const response = await window.editorApi.deleteFile(file)
     if (response.success) {
@@ -43,7 +43,7 @@ const Group = ({ type, files }: GroupProps): JSX.Element => {
         <NewFileDialog mode={type} />
         <CollapsibleContent>
           <SidebarMenuSub className="pr-0 mr-0">
-            {files
+            {files && files
               .filter((file) => file.type === type)
               .map((file) => (
                 <SidebarMenuSubItem key={file.path}>

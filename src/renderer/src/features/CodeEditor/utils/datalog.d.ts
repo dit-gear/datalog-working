@@ -145,7 +145,7 @@ type Datalog = {
      * You can optionally group reels by passing `{group=true}`
      *
      * @param {ReelsOptions} [options] - Optional settings for formatting reels.
-     * @param {boolean} [options.group=false] - Whether to group consecutive reels.
+     * @param {boolean} [options.rangeMerging=false] - Whether to group consecutive reels.
      *
      * @returns {string[]} An array of reel names.
      *
@@ -154,9 +154,9 @@ type Datalog = {
      * const reels = dataObject.ocf.reels();
      * console.log(reels); // Output: ['Reel1', 'Reel2', 'Reel3']
      *
-     * // Retrieve grouped reels
-     * const groupedReels = datalog.ocf.reels({ group: true });
-     * console.log(groupedReels); // Output: ['Reel1 - Reel3', '+ 2 other clips']
+     * // Retrieve merged reels
+     * const mergedReels = datalog.ocf.reels({ rangeMerging: true });
+     * console.log(mergedReels); // Output: ['Reel1 - Reel3', '+ 2 other clips']
      * ```
      */
     reels(options?: ReelsOptions): string[]

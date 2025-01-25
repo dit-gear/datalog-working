@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import fs from 'fs'
+import fs from 'fs/promises'
 import path from 'path'
 import { LoadedFile, InitialEditorData, ChangedFile } from '../../shared/shared-types'
 import { TemplateDirectoryFile } from '@shared/projectTypes'
@@ -38,10 +38,10 @@ export function setupEditorIpcHandlers(): void {
   })
 
   // Handle reading a file
-  ipcMain.on('request-read-file', (event, file: TemplateDirectoryFile) => {
+  ipcMain.on('request-read-file', async (event, file: TemplateDirectoryFile) => {
     try {
       const ext = path.extname(file.path).toLowerCase()
-      const content = fs.readFileSync(file.path, 'utf8')
+      const content = await fs.readFile(file.path, 'utf8')
       const filetype = ext === '.jsx' ? 'jsx' : ext === '.tsx' ? 'tsx' : undefined
 
       if (!filetype) {
@@ -62,16 +62,33 @@ export function setupEditorIpcHandlers(): void {
   // Handle saving a file
   ipcMain.handle('save-new-file', async (_, file: ChangedFile) => {
     try {
+      logger.debug('save-new-file operation started')
+
       const dir = path.dirname(file.path)
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true })
-      }
-      if (fs.existsSync(file.path)) {
+      console.log(file.path)
+
+      // Ensure the directory exists. If it doesn't, create it recursively.
+      await fs.mkdir(dir, { recursive: true })
+
+      try {
+        // Check if the file already exists
+        await fs.access(file.path)
+        // If no error is thrown, the file exists
         throw new Error('File already exists')
+      } catch (error: any) {
+        if (error.code !== 'ENOENT') {
+          // If the error is something other than "file does not exist", rethrow it
+          throw error
+        }
+        // If the file does not exist, proceed to create it
       }
-      fs.writeFileSync(file.path, file.content, 'utf8')
+      // Write the file since it doesn't exist
+      await fs.writeFile(file.path, file.content, 'utf8')
+      logger.debug(`saved file ${file.path}`)
+
       return { success: true }
     } catch (error) {
+      logger.error(`save-new-file operation failed: ${(error as Error).message}`)
       return { success: false, error: (error as Error).message }
     }
   })
@@ -80,7 +97,7 @@ export function setupEditorIpcHandlers(): void {
     try {
       await Promise.all(
         files.map(async (file) => {
-          fs.writeFileSync(file.path, file.content, 'utf-8')
+          fs.writeFile(file.path, file.content, 'utf-8')
         })
       )
       return

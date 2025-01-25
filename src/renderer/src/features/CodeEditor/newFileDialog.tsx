@@ -18,7 +18,7 @@ import { Button } from '@components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group'
 import { useInitialData } from './dataContext'
 import { EmailStarter } from '../../templates/EmailStarter'
-import { LoadedFile } from '@shared/shared-types'
+import { ChangedFile } from '@shared/shared-types'
 import { Plus } from 'lucide-react'
 import { SidebarMenuAction } from '@components/ui/sidebar'
 import {
@@ -36,12 +36,10 @@ interface NewFileDialogProps {
 const FormSchema = z.object({
   filename: z
     .string()
+    .min(1)
     // eslint-disable-next-line no-useless-escape
     .regex(/^[a-zA-Z0-9_-]+$/, {
       message: 'Filename must only contain alphanumeric characters, underscores, or hyphens.'
-    })
-    .refine((val) => val.slice(0, -4).length >= 1, {
-      message: 'Filename must be at least 1 character long'
     }),
   ext: z.enum(['tsx', 'jsx']),
   scope: z.enum(['project', 'global'])
@@ -52,41 +50,40 @@ const NewFileDialog = ({ mode }: NewFileDialogProps) => {
   const path = { project: initialData.projectPath, global: initialData.rootPath }
   const [open, setOpen] = useState<boolean>(false)
   const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
     defaultValues: {
       filename: '',
       ext: 'tsx',
       scope: 'project'
     },
-    mode: 'onSubmit'
+    mode: 'onSubmit',
+    resolver: zodResolver(FormSchema)
   })
 
-  function onSubmit(values: z.infer<typeof FormSchema>): void {
-    const File: LoadedFile = {
-      name: values.filename,
+  const { handleSubmit, control } = form
+
+  const onSubmit = async (values: z.infer<typeof FormSchema>): Promise<void> => {
+    console.log('onsubmit launched')
+    console.log(`${path[values.scope]}/templates/${mode}/${values.filename}.${values.ext}`)
+    const File: ChangedFile = {
       path: `${path[values.scope]}/templates/${mode}/${values.filename}.${values.ext}`,
-      type: mode,
-      scope: values.scope,
-      content: EmailStarter,
-      filetype: values.ext
+      content: EmailStarter
     }
-    window.editorApi
-      .saveNewFile(File)
-      .then((response) => {
-        if (response.success) {
-          console.log('File saved successfully')
-          setOpen(false)
-        } else {
-          throw new Error(response.error)
-        }
+    try {
+      const res = await window.editorApi.saveNewFile(File)
+      if (res.success) {
+        console.log('File saved successfully')
+        setOpen(false)
+      } else {
+        throw new Error(res.error)
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'unknown error'
+      console.error('Failed to save file:', error)
+      form.setError('filename', {
+        type: 'manual',
+        message: message
       })
-      .catch((error) => {
-        console.error('Failed to save file:', error)
-        form.setError('filename', {
-          type: 'manual',
-          message: error.message
-        })
-      })
+    }
   }
   useEffect(() => {
     if (open) {
@@ -95,10 +92,10 @@ const NewFileDialog = ({ mode }: NewFileDialogProps) => {
   }, [open])
 
   useEffect(() => {
-    if (open === false) {
-      form.reset({ filename: '', scope: 'project' })
+    if (!open) {
+      form.reset({ filename: '', ext: 'tsx', scope: 'project' })
     }
-  }, [form, open])
+  }, [form.reset, open])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -109,7 +106,7 @@ const NewFileDialog = ({ mode }: NewFileDialogProps) => {
       </DialogTrigger>
       <DialogContent className="backdrop-blur-sm">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <form className="flex flex-col gap-4">
             <DialogHeader>
               <DialogTitle>
                 New <span className={mode === 'pdf' ? 'uppercase' : 'capitalize'}>{mode}</span>{' '}
@@ -122,7 +119,7 @@ const NewFileDialog = ({ mode }: NewFileDialogProps) => {
             </DialogHeader>
             <div className="flex gap-4">
               <FormField
-                control={form.control}
+                control={control}
                 name="filename"
                 render={({ field }) => (
                   <FormItem className="w-full">
@@ -135,30 +132,30 @@ const NewFileDialog = ({ mode }: NewFileDialogProps) => {
                 )}
               />
               <FormField
-                control={form.control}
+                control={control}
                 name="ext"
-                render={({ field }) => (
-                  <FormItem className="min-w-24">
-                    <Select defaultValue={field.value} onValueChange={field.onChange}>
-                      <FormLabel className="text-transparent">Extension</FormLabel>
-                      <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder=".tsx" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem key={'tsx'} value={'tsx'}>
-                          {'.tsx'}
-                        </SelectItem>
-                        <SelectItem key={'jsx'} value={'jsx'}>
-                          {'.jsx'}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  console.log('Current ext value:', field.value)
+                  return (
+                    <FormItem className="min-w-24">
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormLabel className="text-transparent">Extension</FormLabel>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="tsx">.tsx</SelectItem>
+                          <SelectItem value="jsx">.jsx</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }}
               />
             </div>
             <FormField
-              control={form.control}
+              control={control}
               name="scope"
               render={({ field }) => (
                 <FormItem className="space-y-3">
@@ -190,9 +187,11 @@ const NewFileDialog = ({ mode }: NewFileDialogProps) => {
             />
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="ghost">Cancel</Button>
+                <Button variant="ghost" type="button">
+                  Cancel
+                </Button>
               </DialogClose>
-              <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
+              <Button type="button" onClick={handleSubmit(onSubmit)}>
                 Save
               </Button>
             </DialogFooter>

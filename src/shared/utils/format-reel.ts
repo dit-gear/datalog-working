@@ -89,11 +89,11 @@ function groupReels(reelsArray: string[]): string[] {
   return Reels
 }
 
-export const ReelsOptionsZod = z.object({ grouped: z.boolean().optional() }).optional()
+export const ReelsOptionsZod = z.object({ rangeMerging: z.boolean().optional() }).optional()
 
 export type ReelsOptions = z.infer<typeof ReelsOptionsZod>
 /*export type getReelsOptions = {
-  grouped?: boolean
+  rangeMerging?: boolean
 }*/
 
 export function formatReels(
@@ -118,7 +118,7 @@ export function formatReels(
   }
   const reelsArray = Array.from(reelsSet)
 
-  if (!options.grouped) return reelsArray
+  if (!options.rangeMerging) return reelsArray
   const groups = groupReels(reelsArray)
   if (clipsWithoutReel) {
     groups.push(`+ ${clipsWithoutReel} other clip${clipsWithoutReel > 1 ? 's' : ''}`)

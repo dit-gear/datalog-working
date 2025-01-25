@@ -41,7 +41,7 @@ const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
       ocfSize: data.ocf.size(),
       proxySize: data.proxy.size(),
       duration: data.ocf.duration(),
-      reels: data.ocf.reels({ grouped: true }),
+      reels: data.ocf.reels({ rangeMerging: true }),
       raw: data.accessRaw
     }))
   }
@@ -52,18 +52,3 @@ const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
 })
 
 export default Table
-
-/*
-const DatalogRows = (logs: DatalogType[]): LogSum[] => {
-    return logs.map((data) => ({
-      id: data.id,
-      day: data.day,
-      date: data.date,
-      unit: data.unit,
-      ocfSize: getOCFSize(data),
-      proxySize: getProxySize(data),
-      duration: getDuration(data, { separator: ' ', asString: true }),
-      reels: getReels(data, { grouped: true }),
-      raw: data
-    }))
-  } */
