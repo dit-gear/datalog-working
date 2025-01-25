@@ -115,6 +115,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     previewWorker.onmessage = (e): void => {
       const { id, type, code, error } = e.data
       if (code) {
+        console.log('from worker:', type, code, error)
         const previewEvent = new CustomEvent('preview-update', { detail: { type, code } })
         window.dispatchEvent(previewEvent)
       } else if (error) {
