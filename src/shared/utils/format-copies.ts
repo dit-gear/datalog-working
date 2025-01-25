@@ -1,48 +1,5 @@
 import { OcfClipType, SoundClipType, CopyType, CopyBaseType } from '@shared/datalogTypes'
 
-export function getVolumeName(filePath: string): string | null {
-  if (typeof filePath !== 'string') {
-    return null
-  }
-
-  // Check if the file path starts with '/Volumes/' (external or mounted volumes)
-  if (filePath.startsWith('/Volumes/')) {
-    const parts = filePath.split('/')
-    return parts.length > 2 ? parts[2] : null
-  } else {
-    // Check if the path is from the local system volume
-    // Split the path and look for system root indications
-    const parts = filePath.split('/')
-    // Usually, the local system starts directly under the root '/', e.g., '/Users/name'
-    if (parts.length > 1) {
-      switch (parts[1]) {
-        case 'Users':
-        case 'Applications':
-        case 'System':
-        case 'Library':
-          // This is the main system volume, which is generally named 'Macintosh HD' unless renamed
-          return 'Macintosh HD'
-        default:
-          // You might want to add more cases as needed or handle it differently
-          return null
-      }
-    }
-  }
-
-  return null // default return if none of the conditions are met
-}
-
-/*
-const formatPath = (path: string): PathType => {
-  const volumesPrefix = `/Volumes/${getVolumeName(path)}`
-
-  return {
-    volume: getVolumeName(path), // Volume name (e.g., root or drive letter)
-    fullPath: path,
-    relativePath: path.startsWith(volumesPrefix) ? path.slice(volumesPrefix.length) : path // Rest of the path after the volume
-  }
-}*/
-
 export function formatCopiesFromString(copies: string[] | undefined): CopyType[] {
   if (!copies || copies.length === 0) return []
 

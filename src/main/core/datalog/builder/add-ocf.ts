@@ -64,7 +64,7 @@ const addOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
               ...existingClip.copies,
               ...newClip.copies.filter(
                 (copy) =>
-                  !existingClip.copies.some((existingCopy) => existingCopy.path === copy.path)
+                  !existingClip.copies.some((existingCopy) => existingCopy.volume === copy.volume)
               )
             ]
             ocfClipsStore().set(existingClip.clip, existingClip)

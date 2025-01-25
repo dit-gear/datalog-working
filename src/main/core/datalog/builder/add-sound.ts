@@ -1,5 +1,6 @@
 import { dialog } from 'electron'
 import fs from 'fs'
+import pathnode from 'path'
 import { ResponseWithClips, SoundClipType } from '@shared/datalogTypes'
 import findFilesByType from '../../../utils/find-files-by-type'
 import processMHL from '../../file-processing/mhl/process-mhl'
@@ -45,7 +46,7 @@ const addSound = async (paths: string[] = []): Promise<ResponseWithClips> => {
               ...existingClip.copies,
               ...newClip.copies.filter(
                 (copy) =>
-                  !existingClip.copies.some((existingCopy) => existingCopy.path === copy.path)
+                  !existingClip.copies.some((existingCopy) => existingCopy.volume === copy.volume)
               )
             ]
             soundClipsStore().set(existingClip.clip, existingClip)
@@ -59,9 +60,17 @@ const addSound = async (paths: string[] = []): Promise<ResponseWithClips> => {
 
     const files: SoundClipType[] = []
     for (const clip of newClips) {
-      const filePath = `${clip.copies[0].path}/${clip.clip}.wav`
+      const wavFiles = await findFilesByType(paths[0], 'wav')
+      const filePath = wavFiles.find(
+        (file) => pathnode.basename(file, pathnode.extname(file)) === `${clip.clip}`
+      )
+      if (!filePath) {
+        logger.error(`No matching .wav file found for clip "${clip.clip}"`)
+        continue
+      }
+
       try {
-        fs.statSync(filePath) // Ensure the file exists
+        fs.statSync(filePath)
       } catch (error) {
         logger.error(`File not found: ${filePath}, skipping. Error: ${error}`)
         continue
@@ -81,7 +90,6 @@ const addSound = async (paths: string[] = []): Promise<ResponseWithClips> => {
         continue
       }
     }
-    console.log(files)
 
     files.forEach((item) => {
       soundClipsStore().set(item.clip, item)

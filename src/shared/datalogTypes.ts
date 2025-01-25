@@ -29,7 +29,6 @@ export type CameraMetadataType = z.infer<typeof CameraMetadataZod>
 
 const copy = z.object({
   volume: z.string(),
-  path: z.string(),
   hash: z.string().nullable()
 })
 const copies = z.array(copy)

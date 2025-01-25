@@ -96,7 +96,6 @@ function isClassicRow(row: classicRow | ascRow): row is classicRow {
 async function processFile(
   filePath: string,
   volume: string,
-  path: string,
   extensions: string[],
   sequentialFileTypes: Set<string>
 ): Promise<OcfClipBaseType[]> {
@@ -153,9 +152,7 @@ async function processFile(
         acc[baseClipName] = acc[baseClipName] || {
           clip: baseClipName,
           size: 0,
-          copies: [
-            { volume: volume, path: path, hash: md5 || sha1 || xxhash64 || xxhash64be || null }
-          ]
+          copies: [{ volume: volume, hash: md5 || sha1 || xxhash64 || xxhash64be || null }]
         }
 
         // Sum the sizes
@@ -194,7 +191,7 @@ async function readAndParseMHLFiles(
 
   const results: OcfClipBaseType[][] = await Promise.all(
     filePaths.map(async (filePath) => {
-      const result = await processFile(filePath, volume, path, extensions, sequentialFileTypes)
+      const result = await processFile(filePath, volume, extensions, sequentialFileTypes)
       updateProgress()
       return result
     })

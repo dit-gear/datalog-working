@@ -13,7 +13,7 @@ export interface MergedClip {
   clip: string
   // OCF fields
   size?: number
-  copies?: Array<{ volume: string; path: string; hash: string | null }>
+  copies?: Array<{ volume: string; hash: string | null }>
   tc_start?: string
   tc_end?: string
   duration?: string

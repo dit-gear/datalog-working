@@ -213,6 +213,7 @@ export const emailZodObj = z.object({
 export const GlobalSchemaZod = z.object({
   folder_template: z.string().optional(),
   unit: z.string().optional(),
+  custom_info: z.array(z.record(z.string())).optional(),
   default_ocf_paths: z.array(z.string()).optional(),
   default_proxies_path: z.string().optional(),
   default_audio_paths: z.string().optional(),
