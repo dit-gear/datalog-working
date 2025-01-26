@@ -114,22 +114,22 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
       throw new Error('Invalid project settings')
     }
 
-    const folderTemplateExist = projectSettings.folder_template || globalSettings?.folder_template
+    const folderTemplateExist = projectSettings.logid_template || globalSettings?.logid_template
 
     if (!folderTemplateExist) {
       throw new Error(
-        'folder_template must be present in either global settings or project settings'
+        'logid_template must be present in either global settings or project settings'
       )
     }
     if (projectSettings.project_name !== path.basename(selectedProjectpath)) {
       await updateProjectFolder(projectSettings.project_name)
     }
     const templatesDir = await loadTemplates(selectedProjectpath)
-    const folderTemplate = projectSettings.folder_template || globalSettings?.folder_template
+    const folderTemplate = projectSettings.logid_template || globalSettings?.logid_template
     const data: ProjectRootType = {
       ...globalSettings,
       ...projectSettings,
-      folder_template: folderTemplate as string,
+      logid_template: folderTemplate as string,
       settings: {
         project: projectSettings,
         ...(globalSettings && Object.keys(globalSettings).length > 0

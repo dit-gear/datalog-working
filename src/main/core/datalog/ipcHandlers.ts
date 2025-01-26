@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron'
 import { DatalogType, ResponseWithClips } from '@shared/datalogTypes'
 import { Response } from '@shared/shared-types'
+import addDefaults from './builder/add-defaults'
 import addOCF from './builder/add-ocf'
 import addSound from './builder/add-sound'
 import addProxies from './builder/add-proxies'
@@ -12,6 +13,15 @@ import { createSendWindow } from '../../send/sendWindow'
 import { clearClipsStore } from './builder/builder-state'
 
 export function setupDatalogIpcHandlers(): void {
+  ipcMain.handle(
+    'getDefaultClips',
+    async (
+      _,
+      paths: { ocf: string[] | null; sound: string[] | null; proxy: string | null }
+    ): Promise<ResponseWithClips> => {
+      return await addDefaults(paths)
+    }
+  )
   ipcMain.handle(
     'getClips',
     async (_, type: 'ocf' | 'sound' | 'proxy' | 'custom'): Promise<ResponseWithClips> => {
@@ -44,9 +54,12 @@ export function setupDatalogIpcHandlers(): void {
     }
   )
 
-  ipcMain.handle('update-datalog', async (_, datalog: DatalogType): Promise<Response> => {
-    return await updateDatalog(datalog)
-  })
+  ipcMain.handle(
+    'update-datalog',
+    async (_, datalog: DatalogType, isNew: boolean): Promise<Response> => {
+      return await updateDatalog(datalog, isNew)
+    }
+  )
 
   ipcMain.handle('delete-datalog', async (_, datalog: DatalogType): Promise<Response> => {
     return await deleteDatalog(datalog)

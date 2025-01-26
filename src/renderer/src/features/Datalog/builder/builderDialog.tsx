@@ -22,6 +22,8 @@ import Import from './tabs/import/index'
 import Preview from './tabs/preview'
 import z from 'zod'
 import { useEffect } from 'react'
+import DefaultsDialog from './defaultsDialog'
+import FileExistDialog from './fileExistsDialog'
 
 interface BuilderdialogProps {
   project: ProjectRootType
@@ -50,13 +52,15 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
   const defaultDay =
     previousEntries && previousEntries?.length > 0 ? getNextDay(previousEntries) : 1
 
+  const tags = {
+    day: defaultDay,
+    projectName: project.project_name,
+    unit: project.unit,
+    log: project.logid_template
+  }
+
   const defaultId = (): string => {
-    const tags = {
-      day: defaultDay,
-      projectName: project.project_name,
-      unit: project.unit
-    }
-    return replaceTags(project.folder_template, tags)
+    return replaceTags(project.logid_template, tags)
   }
 
   function makeNullableExcept<T extends z.ZodRawShape>(
@@ -133,14 +137,16 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
   }
 
   const onSubmit: SubmitHandler<datalogFormType> = async (data): Promise<void> => {
-    console.log('unclean:', data)
     const cleanedData = removeEmptyFields(data) as DatalogType
+    const isNew = !selected
     try {
-      const res = await window.mainApi.updateDatalog(cleanedData)
+      const res = await window.mainApi.updateDatalog(cleanedData, isNew)
       if (res.success) {
         toast({ description: 'Data saved' })
         reset()
         setOpen(false)
+      } else if (res.cancelled) {
+        return
       } else {
         console.error(res.error)
         toast({ description: `There was an issue saving the entry: ${res.error}` })
@@ -188,10 +194,12 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
             <Button variant="ghost">Cancel</Button>
           </DialogClose>
           <Button variant="default" disabled={!isValid} onClick={handleSubmit(onSubmit, onError)}>
-            Submit
+            {selected ? 'Update' : 'Submit'}
           </Button>
         </DialogFooter>
+        <DefaultsDialog project={project} tags={tags} disabled={!!selected} />
       </Form>
+      <FileExistDialog />
     </DialogContent>
   )
 }

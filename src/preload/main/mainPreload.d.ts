@@ -19,9 +19,14 @@ declare global {
       onProjectLoaded: (callback: (project: ProjectType) => void) => void
       updateProject: (project: ProjectToUpdate) => Promise<UpdateProjectResult>
       getFolderPath: () => Promise<ResponseWithString>
-      updateDatalog: (datalog: DatalogType) => Promise<Response>
+      updateDatalog: (datalog: DatalogType, isNew: boolean) => Promise<Response>
       deleteDatalog: (datalog: DatalogType) => Promise<Response>
       onDatalogsLoaded: (callback: (datalogs: DatalogType[]) => void) => void
+      getDefaultClips: (paths: {
+        ocf: string[] | null
+        sound: string[] | null
+        proxy: string | null
+      }) => Promise<ResponseWithClips>
       getClips: (type: 'ocf' | 'sound' | 'proxy' | 'custom') => Promise<ResponseWithClips>
       removeClips: (paths: string[], type: 'ocf' | 'sound') => Promise<ResponseWithClips>
       clearClipsStore: () => Promise<Response>

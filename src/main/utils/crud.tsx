@@ -22,3 +22,12 @@ export async function ensureDirectoryExists(dirPath: string): Promise<void> {
     logger.debug(`Directory created successfully: ${dirPath}`)
   }
 }
+
+export async function fileExists(path: string): Promise<boolean> {
+  try {
+    await fs.access(path)
+    return true
+  } catch {
+    return false
+  }
+}

@@ -34,7 +34,7 @@ export const Name = ({ project }: Nameprops) => {
       unit: unitwatch !== '' ? unitwatch : undefined,
       projectName: project.project_name
     }
-    setValue('id', replaceTags(project.folder_template, tags))
+    setValue('id', replaceTags(project.logid_template, tags))
   }, [daywatch, datewatch, unitwatch])
 
   return (

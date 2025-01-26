@@ -5,6 +5,7 @@ type Tags = {
   date?: string
   projectName?: string
   unit?: string
+  log?: string
 }
 
 //type TagFunction = (state?: number, date?: Date, projectName?: string, unit?: string) => string
@@ -57,13 +58,15 @@ function replaceTags(template: string, tags: Tags): string {
 
     //Others
     '<project>': (tag) => returnString(tag.projectName),
-    '<unit>': (tag) => returnString(tag.unit)
+    '<unit>': (tag) => returnString(tag.unit),
+
+    '<log>': (tag) => replaceTags(tag.log || '', tags)
   }
 
   return template.replace(/<[^>]+>/g, (tag) => {
     const tagFunction = tagFunctions[tag]
     return tagFunction ? tagFunction(tags) : tag
-    //return tagFunction ? tagFunction(day, date) : tag
   })
 }
+
 export default replaceTags

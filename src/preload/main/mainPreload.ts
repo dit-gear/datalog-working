@@ -20,13 +20,19 @@ const mainApi = {
   createNewProject: (projectName) => ipcRenderer.invoke('create-new-project', projectName),
   updateProject: (project) => ipcRenderer.invoke('update-project', project),
   getFolderPath: () => ipcRenderer.invoke('getFolderPath'),
-  updateDatalog: (datalog: DatalogType) => ipcRenderer.invoke('update-datalog', datalog),
+  updateDatalog: (datalog: DatalogType, isNew: boolean) =>
+    ipcRenderer.invoke('update-datalog', datalog, isNew),
   deleteDatalog: (datalog: DatalogType) => ipcRenderer.invoke('delete-datalog', datalog),
   onDatalogsLoaded: (callback: (datalogs: DatalogType[]) => void) => {
     ipcRenderer.on('datalogs-loaded', (_, datalogs: DatalogType[]) => {
       callback(datalogs)
     })
   },
+  getDefaultClips: (paths: {
+    ocf: string[] | null
+    sound: string[] | null
+    proxy: string | null
+  }) => ipcRenderer.invoke('getDefaultClips', paths),
   getClips: (type: 'ocf' | 'sound' | 'proxy' | 'custom') => ipcRenderer.invoke('getClips', type),
   removeClips: (paths: string[], type: 'ocf' | 'sound') =>
     ipcRenderer.invoke('removeClips', paths, type),
@@ -41,9 +47,23 @@ const mainApi = {
     ipcRenderer.send('pdf-to-export', pdf, selection)
 }
 
+const sharedApi = {
+  onShowOverwriteConfirmation: (callback: (file: string) => void) => {
+    ipcRenderer.on('show-overwrite-confirmation', (_, file: string) => {
+      callback(file)
+    })
+  },
+
+  // Send overwrite response
+  sendOverwriteResponse: (shouldOverwrite: boolean) => {
+    ipcRenderer.send('overwrite-response', shouldOverwrite)
+  }
+}
+
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('mainApi', mainApi)
+    contextBridge.exposeInMainWorld('sharedApi', sharedApi)
   } catch (error) {
     console.error(error)
   }

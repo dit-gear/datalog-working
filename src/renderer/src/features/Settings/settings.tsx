@@ -47,19 +47,21 @@ const Settings: React.FC<SettingsDialogProps> = ({
 
   const defaultValues = (defaults: ProjectSettingsType) => ({
     project_project_name: defaults.project?.project_name ?? '',
-    project_folder_template: defaults.project?.folder_template ?? '',
+    project_logid_template: defaults.project?.logid_template ?? '',
     project_unit: defaults.project?.unit ?? '',
     project_default_ocf_paths: defaults.project?.default_ocf_paths ?? [],
-    project_default_proxies_path: defaults.project?.default_proxies_path ?? '',
+    project_default_sound_paths: defaults.project.default_sound_paths ?? [],
+    project_default_proxy_path: defaults.project?.default_proxy_path ?? '',
     project_parse_camera_metadata: defaults.project?.parse_camera_metadata ?? true,
     project_custom_fields: defaults.project?.custom_fields ?? undefined,
     project_emails: defaults.project?.emails ?? [],
     project_email_api: defaults.project?.email_api ?? undefined,
     project_pdfs: defaults.project?.pdfs ?? [],
-    global_folder_template: defaults.global?.folder_template ?? '',
+    global_logid_template: defaults.global?.logid_template ?? '',
     global_unit: defaults.global?.unit ?? '',
     global_default_ocf_paths: defaults.global?.default_ocf_paths ?? [],
-    global_default_proxies_path: defaults.global?.default_proxies_path ?? '',
+    global_default_sound_paths: defaults.global?.default_sound_paths ?? [],
+    global_default_proxy_path: defaults.global?.default_proxy_path ?? '',
     global_parse_camera_metadata: defaults.global?.parse_camera_metadata ?? true,
     global_custom_fields: defaults.global?.custom_fields ?? undefined,
     global_emails: defaults.global?.emails ?? [],
@@ -79,6 +81,8 @@ const Settings: React.FC<SettingsDialogProps> = ({
     formState: { isSubmitting, isSubmitSuccessful, errors },
     reset
   } = form
+
+  console.log(errors)
 
   const onSubmit: SubmitHandler<formSchemaType> = async (data) => {
     const cleanedData = removeEmptyFields(data, [

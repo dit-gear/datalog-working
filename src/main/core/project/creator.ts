@@ -28,7 +28,7 @@ async function createProject(projectName: string): Promise<CreateNewProjectResul
   const filepath = path.join(newProjectPath, 'config.yaml')
   const defaultYaml = {
     project_name: projectName,
-    folder_template: 'D<dd>_<yymmdd>'
+    logid_template: 'D<dd>_<yymmdd>'
   }
   const yaml = YAML.stringify(defaultYaml)
 

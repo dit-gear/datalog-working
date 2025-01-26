@@ -11,12 +11,12 @@ interface GeneralTabProps {
 const GeneralTab: React.FC<GeneralTabProps> = ({ scope }) => {
   const { control, trigger } = useFormContext<formSchemaType>()
 
-  const projectFolderTemplateValue = useWatch({ control, name: 'project_folder_template' })
-  const globalFolderTemplateValue = useWatch({ control, name: 'global_folder_template' })
+  const projectFolderTemplateValue = useWatch({ control, name: 'project_logid_template' })
+  const globalFolderTemplateValue = useWatch({ control, name: 'global_logid_template' })
 
   useEffect(() => {
     if (projectFolderTemplateValue !== undefined || globalFolderTemplateValue !== undefined) {
-      trigger(['project_folder_template', 'global_folder_template'])
+      trigger(['project_logid_template', 'global_logid_template'])
     }
   }, [projectFolderTemplateValue, globalFolderTemplateValue, trigger])
 
@@ -35,10 +35,10 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ scope }) => {
               descriptionTag={['Required for Project', `Tag: <project_name>`]}
             />
             <FormRow
-              name="project_folder_template"
-              label="Entry Name Format"
-              description="Set Entry Name Format for dynamically naming your entries and folders"
-              descriptionTag={['Required (project or global)', 'Tag: None']}
+              name="project_logid_template"
+              label="Log ID Template"
+              description="Set log ID template for dynamically naming your datalogs and folders"
+              descriptionTag={['Required (project or global)', 'Tag: <log>']}
             />
             <FormRow
               name="project_unit"
@@ -57,10 +57,10 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ scope }) => {
               disabled
             />
             <FormRow
-              name="global_folder_template"
-              label="Entry Name Format"
-              description="Set Entry Name Format for dynamically naming your entries and folders"
-              descriptionTag={['Required (project or global)', 'Tag: None']}
+              name="global_logid_template"
+              label="Log ID Template"
+              description="Set log ID template for dynamically naming your datalogs and folders"
+              descriptionTag={['Required (project or global)', 'Tag: <log>']}
             />
             <FormRow
               name="global_unit"

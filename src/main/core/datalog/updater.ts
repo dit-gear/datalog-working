@@ -1,19 +1,39 @@
-import fs from 'fs'
+import fs from 'fs/promises'
 import path from 'path'
 import YAML from 'yaml'
 import logger from '../logger'
 import { appState } from '../app-state/state'
 import { DatalogType } from '@shared/datalogTypes'
 import { Response } from '@shared/shared-types'
-import { ensureDirectoryExists } from '../../utils/crud'
+import { ensureDirectoryExists, fileExists } from '../../utils/crud'
 import { clearClipsStore } from './builder/builder-state'
+import { getMainWindow } from '../../index'
+import { ipcMain } from 'electron'
 
-const updateDatalog = async (data: DatalogType): Promise<Response> => {
+const updateDatalog = async (data: DatalogType, isNew: boolean): Promise<Response> => {
+  const win = await getMainWindow()
   try {
     await ensureDirectoryExists(path.join(appState.activeProjectPath, 'logs'))
     const yaml = YAML.stringify(data)
     const filepath = path.join(appState.activeProjectPath, 'logs', `${data.id}.datalog`)
-    fs.writeFileSync(filepath, yaml, 'utf8')
+    const file = await fileExists(filepath)
+    if (file && isNew) {
+      win?.webContents.send('show-overwrite-confirmation', path.basename(filepath))
+
+      const shouldOverwrite = await new Promise<boolean>((resolve) => {
+        const handler = (_, response: boolean) => {
+          resolve(response)
+          ipcMain.removeListener('overwrite-response', handler)
+        }
+        ipcMain.on('overwrite-response', handler)
+      })
+
+      if (!shouldOverwrite) {
+        return { success: false, error: 'User canceled the overwrite.', cancelled: true }
+      }
+    }
+
+    await fs.writeFile(filepath, yaml, 'utf8')
     await clearClipsStore()
     return { success: true }
   } catch (error) {

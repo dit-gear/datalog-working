@@ -211,12 +211,25 @@ export const emailZodObj = z.object({
 })
 
 export const GlobalSchemaZod = z.object({
-  folder_template: z.string().optional(),
-  unit: z.string().optional(),
+  logid_template: z
+    .string()
+    .regex(/^[a-zA-Z0-9<>_-]*$/, {
+      message: 'The log ID contains illegal characters.'
+    })
+    .regex(/^(?!.*<log>).*$/, {
+      message: `The field cannot contain it's tag "<log>".`
+    })
+    .optional(),
+  unit: z
+    .string()
+    .regex(/^(?!.*<unit>).*$/, {
+      message: `The field cannot contain it's tag "<unit>".`
+    })
+    .optional(),
   custom_info: z.array(z.record(z.string())).optional(),
   default_ocf_paths: z.array(z.string()).optional(),
-  default_proxies_path: z.string().optional(),
-  default_audio_paths: z.string().optional(),
+  default_sound_paths: z.array(z.string()).optional(),
+  default_proxy_path: z.string().optional(),
   parse_camera_metadata: z.boolean().default(true).optional(),
   custom_fields: additionalParsing.optional(),
   emails: z.array(emailZodObj).optional(),
@@ -259,31 +272,31 @@ export const ProjectRootZod = ProjectSchemaZod.merge(
 
   .refine(
     (data) => {
-      // Check if folder_template is defined in either project or global settings
-      const projectFolderTemplate = data.settings.project.folder_template
-      const globalFolderTemplate = data.settings.global?.folder_template
+      // Check if logid_template is defined in either project or global settings
+      const projectFolderTemplate = data.settings.project.logid_template
+      const globalFolderTemplate = data.settings.global?.logid_template
 
-      // Ensure that folder_template exists in at least one of them
+      // Ensure that logid_template exists in at least one of them
       return !!projectFolderTemplate || !!globalFolderTemplate
     },
     {
-      message: 'folder_template must be present in either project or global settings'
+      message: 'logid_template must be present in either project or global settings'
     }
   )
   .transform((data) => {
-    // Safely return a version of data with folder_template as a required string
-    const folder_template =
-      data.settings.project.folder_template || data.settings.global?.folder_template
+    // Safely return a version of data with logid_template as a required string
+    const logid_template =
+      data.settings.project.logid_template || data.settings.global?.logid_template
 
-    // TypeScript check to ensure folder_template is not undefined
-    if (!folder_template) {
-      throw new Error('folder_template is required but was not found.')
+    // TypeScript check to ensure logid_template is not undefined
+    if (!logid_template) {
+      throw new Error('logid_template is required but was not found.')
     }
 
-    // Return the complete object with folder_template included
+    // Return the complete object with logid_template included
     return {
       ...data,
-      folder_template
+      logid_template
     }
   })
 
