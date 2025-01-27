@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import logger from '../core/logger'
+//import logger from '../core/logger'
 
 interface FindFilesOptions {
   includeFileName?: string
@@ -56,7 +56,7 @@ export default async function findFilesByType(
       }
     }
   } catch (error) {
-    logger.warn(`Error reading ${fileType} in ${directory}. Errormessage: ${error}`)
+    //logger.warn(`Error reading ${fileType} in ${directory}. Errormessage: ${error}`)
   }
   return files
 }

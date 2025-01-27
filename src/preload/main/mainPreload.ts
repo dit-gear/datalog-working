@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { OpenModalTypes } from '../../shared/shared-types'
-import { DatalogType } from '@shared/datalogTypes'
+import { DatalogType, OcfClipType, SoundClipType } from '@shared/datalogTypes'
 import { pdfType } from '@shared/projectTypes'
 
 // Custom APIs for renderer
@@ -33,7 +33,10 @@ const mainApi = {
     sound: string[] | null
     proxy: string | null
   }) => ipcRenderer.invoke('getDefaultClips', paths),
-  getClips: (type: 'ocf' | 'sound' | 'proxy' | 'custom') => ipcRenderer.invoke('getClips', type),
+  getClips: (
+    type: 'ocf' | 'sound' | 'proxy' | 'custom',
+    storedClips: OcfClipType[] | SoundClipType[]
+  ) => ipcRenderer.invoke('getClips', type, storedClips),
   removeClips: (paths: string[], type: 'ocf' | 'sound') =>
     ipcRenderer.invoke('removeClips', paths, type),
   clearClipsStore: () => ipcRenderer.invoke('clear-clips-store'),

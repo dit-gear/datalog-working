@@ -1,16 +1,18 @@
-import { ipcMain } from 'electron'
-import { DatalogType, ResponseWithClips } from '@shared/datalogTypes'
+import { ipcMain, dialog } from 'electron'
+import { DatalogType, OcfClipType, ResponseWithClips, SoundClipType } from '@shared/datalogTypes'
 import { Response } from '@shared/shared-types'
+import { spawnWorker } from './builder/workers/workerManager'
 import addDefaults from './builder/add-defaults'
 import addOCF from './builder/add-ocf'
 import addSound from './builder/add-sound'
-import addProxies from './builder/add-proxies'
+import addProxy from './builder/add-proxy'
 import addCustom from './builder/add-custom'
 import { removeOcf, removeSound } from './builder/remove-ocf'
 import updateDatalog from './updater'
 import deleteDatalog from './delete'
 import { createSendWindow } from '../../send/sendWindow'
 import { clearClipsStore } from './builder/builder-state'
+import logger from '../logger'
 
 export function setupDatalogIpcHandlers(): void {
   ipcMain.handle(
@@ -24,18 +26,55 @@ export function setupDatalogIpcHandlers(): void {
   )
   ipcMain.handle(
     'getClips',
-    async (_, type: 'ocf' | 'sound' | 'proxy' | 'custom'): Promise<ResponseWithClips> => {
+    async (
+      _,
+      type: 'ocf' | 'sound' | 'proxy' | 'custom',
+      storedClips: OcfClipType[] | SoundClipType[]
+    ): Promise<ResponseWithClips> => {
+      let paths: string | string[] | null = null
+      if (type === 'custom') {
+        const csvdialog = await dialog.showOpenDialog({
+          title: 'Select a CSV file',
+          filters: [{ name: 'CSV Files', extensions: ['csv'] }],
+          properties: ['openFile']
+        })
+        if (csvdialog.canceled) return { success: false, error: 'User cancelled', cancelled: true }
+        paths = csvdialog.filePaths[0]
+      } else {
+        const dialogResult = await dialog.showOpenDialog({ properties: ['openDirectory'] })
+        if (dialogResult.canceled)
+          return { success: false, error: 'User cancelled', cancelled: true }
+        paths = dialogResult.filePaths
+      }
+      if (!paths) {
+        return { success: false, error: 'No valid path selected' }
+      }
+
+      let scriptName = ''
       switch (type) {
         case 'ocf':
-          return await addOCF()
+          scriptName = 'addOCFWorker'
+          break
         case 'sound':
-          return await addSound()
+          scriptName = 'addSoundWorker'
+          break
         case 'proxy':
-          return await addProxies()
+          scriptName = 'addProxyWorker'
+          break
         case 'custom':
-          return await addCustom()
+          scriptName = 'addCustomWorker'
+          break
         default:
-          throw new Error(`Unknown type: ${type}`)
+          return { success: false, error: `Unknown type: ${type}` }
+      }
+
+      try {
+        console.log('scriptname:', scriptName)
+        const { promise } = spawnWorker(scriptName, { paths, storedClips })
+        return await promise
+      } catch (error) {
+        logger.error(error?.toString())
+        return { success: false, error: String(error) }
       }
     }
   )

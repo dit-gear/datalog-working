@@ -1,6 +1,4 @@
-import addOCF from './add-ocf'
-import addSound from './add-sound'
-import addProxies from './add-proxies'
+import { spawnWorker, cancelWorker } from './workers/workerManager'
 import { ResponseWithClips } from '@shared/datalogTypes'
 import logger from '../../logger'
 
@@ -9,29 +7,73 @@ const addDefaults = async (paths: {
   sound: string[] | null
   proxy: string | null
 }): Promise<ResponseWithClips> => {
-  try {
-    const [ocfResult, soundResult] = await Promise.all([
-      paths.ocf ? addOCF(paths.ocf) : null,
-      paths.sound ? addSound(paths.sound) : null
-    ])
+  let ocfResult: ResponseWithClips
+  let soundResult: ResponseWithClips
+  let proxyResult: ResponseWithClips | null = null
 
-    const proxyResult = paths.proxy ? await addProxies(paths.proxy) : null
+  try {
+    const promises: Promise<void>[] = []
+    // OCF worker
+    if (paths.ocf) {
+      const { workerId, promise } = spawnWorker('addOCFWorker', {
+        paths: paths.ocf,
+        storedClips: []
+      })
+      promises.push(
+        promise.then((res: ResponseWithClips) => {
+          ocfResult = res
+        })
+      )
+    }
+
+    // Sound worker
+    if (paths.sound) {
+      const { workerId, promise } = spawnWorker('addSoundWorker', {
+        paths: paths.sound,
+        storedClips: []
+      })
+      promises.push(
+        promise.then((res: ResponseWithClips) => {
+          soundResult = res
+        })
+      )
+    }
+
+    if (promises.length > 0) await Promise.all(promises)
+
+    //@ts-ignore
+    if (!ocfResult?.success) {
+      //@ts-ignore
+      throw new Error(ocfResult?.error ?? 'OCF error')
+    }
+    // Safely check Sound (if used)
+    //@ts-ignore
+    if (!soundResult?.success) {
+      //@ts-ignore
+      throw new Error(soundResult?.error ?? 'Sound error')
+    }
+
+    if (paths.proxy && ocfResult.success) {
+      const { workerId, promise } = spawnWorker('addProxyWorker', {
+        paths: paths.proxy,
+        storedClips: ocfResult?.clips?.ocf ?? []
+      })
+      proxyResult = await promise
+      if (!proxyResult.success) throw new Error(proxyResult.error)
+    }
 
     const clips: Record<string, any> = {}
-    if (ocfResult?.success) {
+    //@ts-ignore
+    if (ocfResult && ocfResult.success && ocfResult.clips.ocf) {
+      //@ts-ignore
       clips.ocf = ocfResult.clips.ocf
-    } else if (ocfResult?.error) {
-      throw new Error(ocfResult.error)
-    }
-    if (soundResult?.success) {
+    } //@ts-ignore
+    if (soundResult && soundResult.success && soundResult.clips.sound) {
+      //@ts-ignore
       clips.sound = soundResult.clips.sound
-    } else if (soundResult?.error) {
-      throw new Error(soundResult.error)
     }
-    if (proxyResult?.success) {
+    if (proxyResult && proxyResult.success && proxyResult.clips.proxy) {
       clips.proxy = proxyResult.clips.proxy
-    } else if (proxyResult?.error) {
-      throw new Error()
     }
 
     return {

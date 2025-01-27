@@ -7,7 +7,7 @@ import {
   ResponseWithString,
   OpenModalTypes
 } from '@shared/shared-types'
-import { DatalogType, ResponseWithClips } from '@shared/datalogTypes'
+import { DatalogType, OcfClipType, ResponseWithClips, SoundClipType } from '@shared/datalogTypes'
 import { TemplateDirectoryFile, pdfType } from '@shared/projectTypes'
 
 declare global {
@@ -27,7 +27,10 @@ declare global {
         sound: string[] | null
         proxy: string | null
       }) => Promise<ResponseWithClips>
-      getClips: (type: 'ocf' | 'sound' | 'proxy' | 'custom') => Promise<ResponseWithClips>
+      getClips: (
+        type: 'ocf' | 'sound' | 'proxy' | 'custom',
+        storedClips: OcfClipType[] | SoundClipType[]
+      ) => Promise<ResponseWithClips>
       removeClips: (paths: string[], type: 'ocf' | 'sound') => Promise<ResponseWithClips>
       clearClipsStore: () => Promise<Response>
       showProgress: (show: boolean, progress: number) => void

@@ -31,7 +31,8 @@ export const Import = ({ project }: ImportProps) => {
 
   const handleAddClips = async (type: 'ocf' | 'sound' | 'proxy' | 'custom'): Promise<void> => {
     try {
-      const res = await window.mainApi.getClips(type)
+      const currentClips = getValues(`${type === 'sound' ? 'sound' : 'ocf'}.clips`)
+      const res = await window.mainApi.getClips(type, currentClips)
       if (res.success) {
         const { ocf, sound, proxy, custom } = res.clips
         if (!ocf && !sound && !proxy && !custom) {
@@ -98,67 +99,6 @@ export const Import = ({ project }: ImportProps) => {
           Clear
         </Button>
       </Section>
-      {/*<div>
-        <Label htmlFor="ocf-copies" className="text-base">
-          {`Original Camera Files (OCF)`}
-        </Label>
-        <p className="text-muted-foreground text-sm">102 clips added</p>
-        <CopiesList key="ocf" type="ocf" handleRemoveCopy={handleRemoveClips} />
-        <div className="mt-2 flex gap-2">
-          <Button size="sm" onClick={() => handleAddClips('ocf')}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Folder
-          </Button>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="sound-copies" className="text-base">
-          Sound
-        </Label>
-        <p className="text-muted-foreground text-sm">42 clips added</p>
-        <CopiesList key="sound" type="sound" handleRemoveCopy={handleRemoveClips} />
-        <div className="mt-2 flex gap-2">
-          <Button size="sm" onClick={() => handleAddClips('sound')}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Folder
-          </Button>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="proxies" className="text-base">
-          Proxies
-        </Label>
-        <p className="text-muted-foreground text-sm">40 clips added</p>
-        <div id="proxies" className="mt-2 flex gap-4">
-          <Button size="sm" onClick={() => handleAddClips('proxy')} variant="default">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Folder
-          </Button>
-          <Button size="sm" onClick={() => handleRemoveClipsLocal('proxy')} variant="destructive">
-            <X className="mr-2 h-4 w-4" />
-            Clear
-          </Button>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="custom-metadata" className="text-base">
-          Custom Metadata
-        </Label>
-        <p className="text-muted-foreground text-sm">Enable Custom Fields to enable this option</p>
-        <div id="custom-metadata" className="mt-2 flex gap-4">
-          <Button size="sm" onClick={() => handleAddClips('custom')} disabled>
-            <Plus className="mr-2 h-4 w-4" />
-            Select CSV file
-          </Button>
-          {/*<Button size="sm" onClick={() => handleRemoveClipsLocal('custom')} variant="destructive">
-            <X className="mr-2 h-4 w-4" />
-            Clear
-          </Button>
-        </div>
-      </div>*/}
     </div>
   )
 }

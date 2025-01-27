@@ -1,10 +1,14 @@
 import { dialog } from 'electron'
-import logger from '../../logger'
+//import logger from '../../logger'
 import findFilesByType from '../../../utils/find-files-by-type'
 import processMHL from '../../file-processing/mhl/process-mhl'
 import processALE from '../../file-processing/camera/process-ale'
-import { ocfClipsStore } from './builder-state'
-import { CameraMetadataType, OcfClipBaseType, ResponseWithClips } from '@shared/datalogTypes'
+import type {
+  CameraMetadataType,
+  OcfClipBaseType,
+  OcfClipType,
+  ResponseWithClips
+} from '@shared/datalogTypes'
 
 const ParseCameraMetadata = async (filePath: string): Promise<CameraMetadataType[]> => {
   const [aleFiles, xmlFiles] = await Promise.all([
@@ -26,20 +30,17 @@ const ParseCameraMetadata = async (filePath: string): Promise<CameraMetadataType
   return [...aleData, ...xmlData]
 }
 
-const addOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
+interface addOCFProps {
+  paths: string[]
+  storedClips: OcfClipType[]
+}
+
+const addOCF = async ({ paths, storedClips }: addOCFProps): Promise<ResponseWithClips> => {
+  console.log('addOCF started, recieved paths:', paths)
   try {
-    if (paths.length === 0) {
-      const result = await dialog.showOpenDialog({
-        title: 'Select an OCF path',
-        properties: ['openDirectory']
-      })
-
-      if (result.canceled)
-        return { success: false, error: 'User cancelled operation', cancelled: true }
-      paths = [result.filePaths[0]]
-    }
-
     // We'll accumulate new clips and metadata before updating state
+    const store = new Map<string, OcfClipType>(storedClips.map((clip) => [clip.clip, clip]))
+
     let newClips: OcfClipBaseType[] = []
 
     await Promise.all(
@@ -56,7 +57,7 @@ const addOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
 
         // Handle Copies merging
         mhlData.forEach((newClip) => {
-          let existingClip = ocfClipsStore().get(newClip.clip)
+          let existingClip = store.get(newClip.clip)
 
           if (existingClip) {
             // If the clip already exists, merge the Copies
@@ -67,7 +68,7 @@ const addOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
                   !existingClip.copies.some((existingCopy) => existingCopy.volume === copy.volume)
               )
             ]
-            ocfClipsStore().set(existingClip.clip, existingClip)
+            store.set(existingClip.clip, existingClip)
           } else {
             // If the clip doesn't exist, add it to the list of new clips
             newClips.push(newClip)
@@ -89,15 +90,17 @@ const addOCF = async (paths: string[] = []): Promise<ResponseWithClips> => {
     })
 
     mergedWithMetadata.map((item) => {
-      ocfClipsStore().set(item.clip, item)
+      store.set(item.clip, item)
     })
 
-    return { success: true, clips: { ocf: Array.from(ocfClipsStore().values()) } }
+    return { success: true, clips: { ocf: Array.from(store.values()) } }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred.'
-    logger.error(`Error parsing OCF: ${message}`)
+    //logger.error(`Error parsing OCF: ${message}`)
     return { success: false, error: message }
   }
 }
 
 export default addOCF
+
+// Remove logger and everything that can't be run in worker!

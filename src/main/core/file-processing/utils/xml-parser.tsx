@@ -1,5 +1,4 @@
 import { XMLParser, XMLValidator } from 'fast-xml-parser'
-import logger from '../../logger'
 
 export async function parseXML(fileData: string): Promise<any> {
   const options = {
@@ -15,7 +14,6 @@ export async function parseXML(fileData: string): Promise<any> {
 
   if (XMLValidator.validate(fileData) !== true) {
     const message = 'Invalid file'
-    logger.error(message)
     throw new Error(message)
   }
 

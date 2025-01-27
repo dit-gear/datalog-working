@@ -99,3 +99,28 @@
       @apply bg-background text-foreground;
     }
   }
+
+  /* Apply to all scrollable elements */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f0f0f0; /* Track color */
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #888; /* Thumb color */
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Hover color */
+}
+
+/* Firefox-specific styling */
+* {
+  scrollbar-width: thin; /* Thin scrollbar */
+  scrollbar-color: #888 #f0f0f0; /* Thumb color Track color */
+}

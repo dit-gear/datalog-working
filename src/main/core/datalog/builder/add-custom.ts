@@ -2,8 +2,6 @@ import { ResponseWithClips, CustomType } from '@shared/datalogTypes'
 import { dialog } from 'electron'
 import fs from 'fs'
 import Papa from 'papaparse'
-import { ocfClipsStore } from './builder-state'
-import { appState } from '../../app-state/state'
 import logger from '../../logger'
 import chardet from 'chardet'
 import iconv from 'iconv-lite'
@@ -13,7 +11,7 @@ import { createClipRegex, createFieldRegexMap } from './utils/createRegexMap'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
-const addCustom = async (path?: string): Promise<ResponseWithClips> => {
+const addCustom = async (path: string): Promise<ResponseWithClips> => {
   try {
     const settings = appState.activeProject?.custom_fields
 
@@ -28,17 +26,6 @@ const addCustom = async (path?: string): Promise<ResponseWithClips> => {
         success: false,
         error: message
       }
-    }
-
-    // Prompt user to select a CSV file if path is not provided
-    if (!path) {
-      const { canceled, filePaths } = await dialog.showOpenDialog({
-        title: 'Select a CSV file',
-        filters: [{ name: 'CSV Files', extensions: ['csv'] }],
-        properties: ['openFile']
-      })
-      if (canceled) return { success: false, error: 'User cancelled operation', cancelled: true }
-      path = filePaths[0]
     }
 
     // Check file size

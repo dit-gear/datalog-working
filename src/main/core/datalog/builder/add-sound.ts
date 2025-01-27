@@ -1,27 +1,19 @@
 import { dialog } from 'electron'
 import fs from 'fs'
 import pathnode from 'path'
-import { ResponseWithClips, SoundClipType } from '@shared/datalogTypes'
+import type { ResponseWithClips, SoundClipType } from '@shared/datalogTypes'
 import findFilesByType from '../../../utils/find-files-by-type'
 import processMHL from '../../file-processing/mhl/process-mhl'
-import { soundClipsStore } from './builder-state'
 import { getAudioMetadata } from '../../file-processing/sound/audio-metadata'
-import logger from '../../logger'
 
-const addSound = async (paths: string[] = []): Promise<ResponseWithClips> => {
+interface addSoundProps {
+  paths: string[]
+  storedClips: SoundClipType[]
+}
+
+const addSound = async ({ paths, storedClips }: addSoundProps): Promise<ResponseWithClips> => {
   try {
-    if (paths.length === 0) {
-      const result = await dialog.showOpenDialog({
-        title: 'Select Sound folder',
-        properties: ['openDirectory']
-      })
-
-      if (result.canceled)
-        return { success: false, error: 'User cancelled operation', cancelled: true }
-      paths = [result.filePaths[0]]
-    }
-
-    // We'll accumulate new clips and metadata before updating state
+    const store = new Map<string, SoundClipType>(storedClips.map((clip) => [clip.clip, clip]))
     let newClips: SoundClipType[] = []
 
     await Promise.all(
@@ -38,7 +30,7 @@ const addSound = async (paths: string[] = []): Promise<ResponseWithClips> => {
         console.log('mhl', mhlData)
         // Handle Copies merging
         mhlData.forEach((newClip) => {
-          let existingClip = soundClipsStore().get(newClip.clip)
+          let existingClip = store.get(newClip.clip)
 
           if (existingClip) {
             // If the clip already exists, merge the Copies
@@ -49,7 +41,7 @@ const addSound = async (paths: string[] = []): Promise<ResponseWithClips> => {
                   !existingClip.copies.some((existingCopy) => existingCopy.volume === copy.volume)
               )
             ]
-            soundClipsStore().set(existingClip.clip, existingClip)
+            store.set(existingClip.clip, existingClip)
           } else {
             // If the clip doesn't exist, add it to the list of new clips
             newClips.push(newClip)
@@ -65,14 +57,14 @@ const addSound = async (paths: string[] = []): Promise<ResponseWithClips> => {
         (file) => pathnode.basename(file, pathnode.extname(file)) === `${clip.clip}`
       )
       if (!filePath) {
-        logger.error(`No matching .wav file found for clip "${clip.clip}"`)
+        console.error(`No matching .wav file found for clip "${clip.clip}"`)
         continue
       }
 
       try {
         fs.statSync(filePath)
       } catch (error) {
-        logger.error(`File not found: ${filePath}, skipping. Error: ${error}`)
+        console.error(`File not found: ${filePath}, skipping. Error: ${error}`)
         continue
       }
 
@@ -86,19 +78,19 @@ const addSound = async (paths: string[] = []): Promise<ResponseWithClips> => {
           ...(tc_end ? { tc_end } : {})
         })
       } catch (error) {
-        logger.error(`Error reading metadata for ${filePath}: ${error}`)
+        console.error(`Error reading metadata for ${filePath}: ${error}`)
         continue
       }
     }
 
     files.forEach((item) => {
-      soundClipsStore().set(item.clip, item)
+      store.set(item.clip, item)
     })
 
-    return { success: true, clips: { sound: Array.from(soundClipsStore().values()) } }
+    return { success: true, clips: { sound: Array.from(store.values()) } }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred.'
-    logger.error(`Error parsing sound: ${message}`)
+    console.error(`Error parsing sound: ${message}`)
     return { success: false, error: message }
   }
 }

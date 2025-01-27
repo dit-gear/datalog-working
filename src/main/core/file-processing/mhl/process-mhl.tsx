@@ -1,8 +1,8 @@
-import { OcfClipBaseType } from '@shared/datalogTypes'
+import type { OcfClipBaseType } from '@shared/datalogTypes'
 import fs from 'fs'
 import { mhlClassicZod, mhlClassicType, classicRow } from './schemas/classic-mhl-schema'
 import { mhlAscZod, mhlAscType, ascRow } from './schemas/asc-mhl-schema'
-import logger from '../../logger'
+//import logger from '../../logger'
 import { parseXML } from '../utils/xml-parser'
 
 const AllowedVideoExt = [
@@ -106,21 +106,21 @@ async function processFile(
 
     if (!success) {
       const msg = 'Error parsing MHL file'
-      logger.error(`${msg}:`, error)
+      //logger.error(`${msg}:`, error)
       throw new Error(msg)
     }
 
-    logger.debug('success')
+    //logger.debug('success')
     let filteredFiles: classicRow[] | ascRow[] = []
 
     if (type === 'classic') {
-      logger.debug('is mhlclassic')
+      //logger.debug('is mhlclassic')
       const mhlData = data as mhlClassicType
       filteredFiles = (
         Array.isArray(mhlData.hashlist.hash) ? mhlData.hashlist.hash : [mhlData.hashlist.hash]
       ).filter((row) => extensions.some((ext) => row.file.toLowerCase().endsWith(ext)))
     } else if (type === 'asc') {
-      logger.debug('is ascmhl')
+      //logger.debug('is ascmhl')
       filteredFiles = (data as mhlAscType).hashlist.hashes.hash.filter((row) =>
         extensions.some((ext) => row.path.text.toLowerCase().endsWith(ext))
       )
@@ -167,7 +167,7 @@ async function processFile(
     return Object.values(grouped) as OcfClipBaseType[]
   } catch (err) {
     if (err instanceof Error) {
-      logger.error(`Error processing file ${filePath}: ${err.message}`)
+      //logger.error(`Error processing file ${filePath}: ${err.message}`)
     }
     throw err
   }

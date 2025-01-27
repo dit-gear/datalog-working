@@ -1,14 +1,19 @@
-import { dialog } from 'electron'
 import fs from 'fs'
 import path from 'path'
-import { ProxyClipType, ResponseWithClips } from '@shared/datalogTypes'
-import { ocfClipsStore } from './builder-state'
-import logger from '../../logger'
+import type { OcfClipType, ProxyClipType, ResponseWithClips } from '@shared/datalogTypes'
 import { getProxyMetadata } from '../../file-processing/proxies/proxy-metadata'
 
 const extensions = new Set(['.mov', '.mxf', '.mp4'])
 
-const getProxys = async (directory: string): Promise<ProxyClipType[]> => {
+interface addProxyProps {
+  paths: string
+  storedClips: OcfClipType[]
+}
+
+const getProxys = async (
+  directory: string,
+  store: Map<string, OcfClipType>
+): Promise<ProxyClipType[]> => {
   try {
     const files = fs.readdirSync(directory)
 
@@ -17,7 +22,7 @@ const getProxys = async (directory: string): Promise<ProxyClipType[]> => {
       const fileStats = fs.statSync(filePath)
 
       if (fileStats.isDirectory()) {
-        return await getProxys(filePath)
+        return await getProxys(filePath, store)
       }
 
       if (fileStats.isFile()) {
@@ -25,7 +30,7 @@ const getProxys = async (directory: string): Promise<ProxyClipType[]> => {
 
         if (extensions.has(ext)) {
           const filenameWithoutExt = path.basename(file, ext)
-          const matchedClip = ocfClipsStore().get(filenameWithoutExt)
+          const matchedClip = store.get(filenameWithoutExt)
 
           if (matchedClip) {
             const { codec, resolution } = await getProxyMetadata(filePath)
@@ -48,44 +53,19 @@ const getProxys = async (directory: string): Promise<ProxyClipType[]> => {
   }
 }
 
-/*const matchClips = (clips: ClipType[], proxies: FileInfo[], directory: string): ClipType[] => {
-  return clips.map((clip) => {
-    const matchedFile = proxies.find((proxy) => proxy.filename === clip.clip)
-
-    if (matchedFile) {
-      return {
-        ...clip,
-        proxy: {
-          path: directory,
-          ...(({ filename, ...rest }) => rest)(matchedFile)
-        }
-      }
-    }
-    return clip
-  })
-}*/
-
-const addProxies = async (folderPath?: string): Promise<ResponseWithClips> => {
+const addProxy = async ({ paths, storedClips }: addProxyProps): Promise<ResponseWithClips> => {
   try {
-    if (!folderPath) {
-      const result = await dialog.showOpenDialog({
-        properties: ['openDirectory']
-      })
-
-      if (result.canceled) {
-        return { success: false, error: 'User cancelled operation', cancelled: true }
-      }
-      folderPath = result.filePaths[0]
-    }
-    const proxys = await getProxys(folderPath)
+    const directory = Array.isArray(paths) ? paths[0] : paths
+    const store = new Map<string, OcfClipType>(storedClips.map((clip) => [clip.clip, clip]))
+    const proxys = await getProxys(directory, store)
     if (proxys.length === 0) return { success: false, error: 'No matching proxies could be found' }
 
     return { success: true, clips: { proxy: proxys } }
   } catch (error) {
     const message = `Error while getting proxies: ${error instanceof Error ? error.message : 'unknown error'}`
-    logger.error(message)
+    console.error(message)
     return { success: false, error: message }
   }
 }
 
-export default addProxies
+export default addProxy
