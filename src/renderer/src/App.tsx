@@ -7,14 +7,13 @@ import { Dialog, DialogTrigger } from '@components/ui/dialog'
 import { Plus, Settings2 as SettingsIcon } from 'lucide-react'
 import Settings from './features/Settings/Settings'
 import Table from './features/Datalog/table/Table'
-import ProgressDialog from './components/progressdialog'
 import { Toaster } from '@components/ui/toaster'
 import { Button } from '@components/ui/button'
 import { SelectedProvider } from './features/Datalog/SelectedContext'
 import SendButton from './features/Datalog/SendButton'
 import ExportButton from './features/Datalog/ExportButton'
 
-function App(): JSX.Element {
+function App() {
   const [project, setProject] = useState<ProjectType>()
   const [logs, setLogs] = useState<DatalogType[]>()
   const [logEdit, setLogEdit] = useState<DatalogType>()
@@ -127,7 +126,6 @@ function App(): JSX.Element {
             )}
           </div>
         </div>
-        <ProgressDialog />
         <Toaster />
       </SelectedProvider>
     </div>

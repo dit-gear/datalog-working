@@ -1,18 +1,20 @@
+import { useState } from 'react'
 import { Button } from '@components/ui/button'
 import { mergeDirtyValues } from '../../../utils/merge-clips'
 import { CopyType, CustomType, OcfClipType, ProxyType, SoundClipType } from '@shared/datalogTypes'
 import { useFormContext } from 'react-hook-form'
 import { CopiesList } from './CopiesList'
-import { Plus, X, Delete } from 'lucide-react'
-import { Label } from '@components/ui/label'
+import { X } from 'lucide-react'
 import { Section } from './section'
 import { ProjectRootType } from '@shared/projectTypes'
+import LoadingDialog from '@components/LoadingDialog'
 
 interface ImportProps {
   project: ProjectRootType
 }
 
 export const Import = ({ project }: ImportProps) => {
+  const [loadingOpen, setLoadingOpen] = useState<boolean>(false)
   const hasCustomFields = Boolean(project?.custom_fields)
   const { getValues, setValue, resetField, formState } = useFormContext()
 
@@ -32,6 +34,7 @@ export const Import = ({ project }: ImportProps) => {
   const handleAddClips = async (type: 'ocf' | 'sound' | 'proxy' | 'custom'): Promise<void> => {
     try {
       const currentClips = getValues(`${type === 'sound' ? 'sound' : 'ocf'}.clips`)
+      setLoadingOpen(true)
       const res = await window.mainApi.getClips(type, currentClips)
       if (res.success) {
         const { ocf, sound, proxy, custom } = res.clips
@@ -48,6 +51,8 @@ export const Import = ({ project }: ImportProps) => {
       }
     } catch (error) {
       console.error(error)
+    } finally {
+      setLoadingOpen(false)
     }
   }
 
@@ -99,6 +104,7 @@ export const Import = ({ project }: ImportProps) => {
           Clear
         </Button>
       </Section>
+      <LoadingDialog open={loadingOpen} />
     </div>
   )
 }

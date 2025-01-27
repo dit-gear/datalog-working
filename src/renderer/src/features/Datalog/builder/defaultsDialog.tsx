@@ -12,6 +12,7 @@ import replaceTags from '@renderer/utils/formatDynamicString'
 import { ProjectRootType } from '@shared/projectTypes'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
+import LoadingDialog from '@components/LoadingDialog'
 
 interface DefaultsDialogProps {
   project: ProjectRootType
@@ -29,6 +30,7 @@ function hasDefaultPaths(project: ProjectRootType): boolean {
 
 const DefaultsDialog = ({ project, tags, disabled }: DefaultsDialogProps) => {
   const [open, setOpen] = useState<boolean>(!disabled && hasDefaultPaths(project))
+  const [loadingOpen, setLoadingOpen] = useState<boolean>(false)
   const { setValue } = useFormContext()
   const defaultPaths = {
     'OCF Paths': (project.default_ocf_paths || []).map((path) => replaceTags(path, tags)),
@@ -43,49 +45,55 @@ const DefaultsDialog = ({ project, tags, disabled }: DefaultsDialogProps) => {
       sound: defaultPaths['Sound Paths'].length > 0 ? defaultPaths['Sound Paths'] : null,
       proxy: defaultPaths['Proxy Path'].length > 0 ? defaultPaths['Proxy Path'][0] : null
     }
+    setOpen(false)
+    setLoadingOpen(true)
     try {
       const res = await window.mainApi.getDefaultClips(Paths)
       if (res.success) {
         res.clips.ocf && setValue('ocf.clips', res.clips.ocf)
         res.clips.sound && setValue('sound.clips', res.clips.sound)
         res.clips.proxy && setValue('proxy.clips', res.clips.proxy)
-        setOpen(false)
       }
     } catch (error) {
       console.log(error)
+    } finally {
+      setLoadingOpen(false)
     }
   }
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Import from default paths?</AlertDialogTitle>
-          <AlertDialogDescription className="flex flex-col gap-2">
-            {Object.entries(defaultPaths).map(
-              ([key, paths]) =>
-                paths.length > 0 && (
-                  <span key={key}>
-                    <strong>{key}:</strong>
-                    {paths.length > 1 ? (
-                      <ul>
-                        {paths.map((path, index) => (
-                          <li key={index}>{path}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>{paths[0]}</p>
-                    )}
-                  </span>
-                )
-            )}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Skip</AlertDialogCancel>
-          <AlertDialogAction onClick={handleImportDefaults}>Import</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <div>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Import from default paths?</AlertDialogTitle>
+            <AlertDialogDescription className="flex flex-col gap-2">
+              {Object.entries(defaultPaths).map(
+                ([key, paths]) =>
+                  paths.length > 0 && (
+                    <span key={key}>
+                      <strong>{key}:</strong>
+                      {paths.length > 1 ? (
+                        <ul>
+                          {paths.map((path, index) => (
+                            <li key={index}>{path}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>{paths[0]}</p>
+                      )}
+                    </span>
+                  )
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Skip</AlertDialogCancel>
+            <AlertDialogAction onClick={handleImportDefaults}>Import</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <LoadingDialog open={loadingOpen} />
+    </div>
   )
 }
 
