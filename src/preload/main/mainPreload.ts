@@ -37,9 +37,11 @@ const mainApi = {
     type: 'ocf' | 'sound' | 'proxy' | 'custom',
     storedClips: OcfClipType[] | SoundClipType[]
   ) => ipcRenderer.invoke('getClips', type, storedClips),
-  removeClips: (paths: string[], type: 'ocf' | 'sound') =>
-    ipcRenderer.invoke('removeClips', paths, type),
-  clearClipsStore: () => ipcRenderer.invoke('clear-clips-store'),
+  removeClips: (
+    paths: string[],
+    type: 'ocf' | 'sound',
+    storedClips: OcfClipType[] | SoundClipType[]
+  ) => ipcRenderer.invoke('removeClips', paths, type, storedClips),
   showProgressListener: (callback) => {
     const handler = (_, show, progress) => callback(show, progress)
     ipcRenderer.on('show-progress', handler)

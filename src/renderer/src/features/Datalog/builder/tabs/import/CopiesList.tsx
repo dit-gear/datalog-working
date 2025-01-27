@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react'
 import { useWatch } from 'react-hook-form'
 import { formatCopiesFromClips } from '@shared/utils/format-copies'
 import { Button } from '@components/ui/button'
-import { XCircle } from 'lucide-react'
 
 interface CopiesListProps {
   type: 'ocf' | 'sound'
@@ -45,13 +44,6 @@ export const CopiesList = ({ type, handleRemoveCopy }: CopiesListProps) => {
               </div>
             </div>
             <div className="ml-4 flex-shrink-0">
-              {/*<a
-                href="#"
-                onClick={() => handleRemoveCopy(copy, type)}
-                className="font-medium text-indigo-400 hover:text-indigo-300"
-              >
-                Remove
-              </a>*/}
               <Button size="sm" variant="destructive" onClick={() => handleRemoveCopy(copy, type)}>
                 Remove
               </Button>

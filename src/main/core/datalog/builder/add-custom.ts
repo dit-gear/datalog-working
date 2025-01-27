@@ -1,27 +1,37 @@
-import { ResponseWithClips, CustomType } from '@shared/datalogTypes'
-import { dialog } from 'electron'
+import type { ResponseWithClips, CustomType, OcfClipType } from '@shared/datalogTypes'
 import fs from 'fs'
 import Papa from 'papaparse'
-import logger from '../../logger'
 import chardet from 'chardet'
 import iconv from 'iconv-lite'
 import { parseField } from '../../file-processing/csv/parse-csv-column'
 import { parseString } from '../../file-processing/csv/parse-string'
 import { createClipRegex, createFieldRegexMap } from './utils/createRegexMap'
+import type { additionalParsing } from '@shared/projectTypes'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
-const addCustom = async (path: string): Promise<ResponseWithClips> => {
+interface addCustomProps {
+  paths: string | string[]
+  storedClips: OcfClipType[]
+  custom_fields?: additionalParsing
+}
+
+const addCustom = async ({
+  paths,
+  storedClips,
+  custom_fields
+}: addCustomProps): Promise<ResponseWithClips> => {
   try {
-    const settings = appState.activeProject?.custom_fields
+    const store = new Map<string, OcfClipType>(storedClips.map((clip) => [clip.clip, clip]))
+    const path = Array.isArray(paths) ? paths[0] : paths
 
     if (
-      !Array.isArray(settings?.fields) ||
-      settings.fields.length === 0 ||
-      !settings.fields.every((field) => typeof field === 'object' && field !== null)
+      !Array.isArray(custom_fields?.fields) ||
+      custom_fields.fields.length === 0 ||
+      !custom_fields.fields.every((field) => typeof field === 'object' && field !== null)
     ) {
       const message = 'Settings fields is empty or does not contain valid objects'
-      logger.warn(message)
+      console.warn(message)
       return {
         success: false,
         error: message
@@ -32,7 +42,7 @@ const addCustom = async (path: string): Promise<ResponseWithClips> => {
     const stats = await fs.promises.stat(path)
     if (stats.size > MAX_FILE_SIZE) {
       const message = 'CSV file is too large'
-      logger.warn(message)
+      console.warn(message)
       return { success: false, error: message }
     }
 
@@ -56,27 +66,27 @@ const addCustom = async (path: string): Promise<ResponseWithClips> => {
     })
 
     // Pre-compile the regex for `settings.clip.regex`, if available
-    const clipRegex = await createClipRegex(settings.clip.regex)
+    const clipRegex = await createClipRegex(custom_fields.clip.regex)
 
     // Pre-compile regex patterns for each field if available, and store them in a map
-    const fieldRegexMap = await createFieldRegexMap(settings.fields)
+    const fieldRegexMap = await createFieldRegexMap(custom_fields.fields)
 
     let customClips: CustomType[] = []
 
     for (const row of parsed.data) {
-      let clipcolumn: string | undefined = row[settings.clip.column]
+      let clipcolumn: string | undefined = row[custom_fields.clip.column]
       if (!clipcolumn) continue
 
       // Use the pre-compiled clip regex, if available
       clipRegex && (clipcolumn = parseString(clipcolumn, clipRegex))
 
-      const matchingOcfClip = ocfClipsStore().get(clipcolumn)
+      const matchingOcfClip = store.get(clipcolumn)
       if (!matchingOcfClip) continue
 
       const dataRow: Record<string, unknown> = {} // Create a dataRow object to hold new fields
 
       // Iterate over each field in the settings.fields array and extract/parse the values from the current row
-      for (const field of settings.fields) {
+      for (const field of custom_fields.fields) {
         parseField(field, row, dataRow, fieldRegexMap)
       }
 
@@ -97,7 +107,6 @@ const addCustom = async (path: string): Promise<ResponseWithClips> => {
     return { success: true, clips: { custom: customClips } }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown error'
-    logger.error(message)
     console.error(message)
     return { success: false, error: message }
   }

@@ -21,7 +21,6 @@ import Name from './tabs/name'
 import Import from './tabs/import/index'
 import Preview from './tabs/preview'
 import z from 'zod'
-import { useEffect } from 'react'
 import DefaultsDialog from './defaultsDialog'
 import FileExistDialog from './fileExistsDialog'
 
@@ -34,10 +33,6 @@ interface BuilderdialogProps {
 
 const Builderdialog = ({ project, previousEntries, selected, setOpen }: BuilderdialogProps) => {
   const { toast } = useToast()
-
-  useEffect(() => {
-    window.mainApi.clearClipsStore()
-  }, [setOpen])
 
   function getNextDay(logs: DatalogType[]): number {
     let highestDay = logs[0].day

@@ -4,7 +4,9 @@ import { Worker } from 'node:worker_threads'
 import createAddOCFWorker from './addOCFWorker?modulePath'
 import createAddSoundWorker from './addSoundWorker?modulePath'
 import createAddProxyWorker from './addProxyWorker?modulePath'
+import createAddCustomWorker from './addCustomWorker?modulePath'
 import logger from '../../../logger'
+import { additionalParsing } from '@shared/projectTypes'
 
 interface WorkerInfo {
   worker: Worker
@@ -18,13 +20,17 @@ let workerCounter = 0
 const workerFactoryMap: Record<string, string> = {
   addOCFWorker: createAddOCFWorker,
   addSoundWorker: createAddSoundWorker,
-  addProxyWorker: createAddProxyWorker
-  // Add other mappings as needed
+  addProxyWorker: createAddProxyWorker,
+  addCustomWorker: createAddCustomWorker
 }
 
 export function spawnWorker(
-  scriptName: 'addOCFWorker' | 'addSoundWorker' | 'addProxyWorker' | 'addCustomWorker',
-  payload: { paths: string | string[]; storedClips: OcfClipType[] | SoundClipType[] }
+  scriptName: string,
+  payload: {
+    paths: string | string[]
+    storedClips: OcfClipType[] | SoundClipType[]
+    custom_fields?: additionalParsing
+  }
 ): { workerId: string; promise: Promise<ResponseWithClips> } {
   logger.debug(`Spawning worker: ${scriptName} with payload:`, payload)
   const createWorker = workerFactoryMap[scriptName]

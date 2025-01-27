@@ -3,16 +3,13 @@ import { DatalogType, OcfClipType, ResponseWithClips, SoundClipType } from '@sha
 import { Response } from '@shared/shared-types'
 import { spawnWorker } from './builder/workers/workerManager'
 import addDefaults from './builder/add-defaults'
-import addOCF from './builder/add-ocf'
-import addSound from './builder/add-sound'
-import addProxy from './builder/add-proxy'
-import addCustom from './builder/add-custom'
-import { removeOcf, removeSound } from './builder/remove-ocf'
+import { removeOcf, removeSound } from './builder/remove'
 import updateDatalog from './updater'
 import deleteDatalog from './delete'
 import { createSendWindow } from '../../send/sendWindow'
-import { clearClipsStore } from './builder/builder-state'
 import logger from '../logger'
+import { additionalParsing } from '@shared/projectTypes'
+import { appState } from '../app-state/state'
 
 export function setupDatalogIpcHandlers(): void {
   ipcMain.handle(
@@ -32,6 +29,7 @@ export function setupDatalogIpcHandlers(): void {
       storedClips: OcfClipType[] | SoundClipType[]
     ): Promise<ResponseWithClips> => {
       let paths: string | string[] | null = null
+      let custom_fields: additionalParsing | undefined
       if (type === 'custom') {
         const csvdialog = await dialog.showOpenDialog({
           title: 'Select a CSV file',
@@ -39,7 +37,8 @@ export function setupDatalogIpcHandlers(): void {
           properties: ['openFile']
         })
         if (csvdialog.canceled) return { success: false, error: 'User cancelled', cancelled: true }
-        paths = csvdialog.filePaths[0]
+        paths = csvdialog.filePaths
+        custom_fields = appState.activeProject?.custom_fields
       } else {
         const dialogResult = await dialog.showOpenDialog({ properties: ['openDirectory'] })
         if (dialogResult.canceled)
@@ -70,7 +69,7 @@ export function setupDatalogIpcHandlers(): void {
 
       try {
         console.log('scriptname:', scriptName)
-        const { promise } = spawnWorker(scriptName, { paths, storedClips })
+        const { promise } = spawnWorker(scriptName, { paths, storedClips, custom_fields })
         return await promise
       } catch (error) {
         logger.error(error?.toString())
@@ -81,12 +80,17 @@ export function setupDatalogIpcHandlers(): void {
 
   ipcMain.handle(
     'removeClips',
-    async (_, paths: string[], type: 'ocf' | 'sound'): Promise<ResponseWithClips> => {
+    async (
+      _,
+      paths: string[],
+      type: 'ocf' | 'sound',
+      storedClips: OcfClipType[] | SoundClipType[]
+    ): Promise<ResponseWithClips> => {
       switch (type) {
         case 'ocf':
-          return await removeOcf(paths)
+          return await removeOcf(paths, storedClips)
         case 'sound':
-          return await removeSound(paths)
+          return await removeSound(paths, storedClips)
         default:
           throw new Error(`Unknown type: ${type}`)
       }
@@ -106,9 +110,5 @@ export function setupDatalogIpcHandlers(): void {
 
   ipcMain.on('open-send-window', (_, selection: DatalogType | DatalogType[]) => {
     createSendWindow(undefined, selection)
-  })
-
-  ipcMain.handle('clear-clips-store', async (): Promise<Response> => {
-    return await clearClipsStore()
   })
 }

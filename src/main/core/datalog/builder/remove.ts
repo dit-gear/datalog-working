@@ -1,9 +1,11 @@
-import { ocfClipsStore, soundClipsStore } from './builder-state'
 import { OcfClipType, SoundClipType, ResponseWithClips } from '@shared/datalogTypes'
 import logger from '../../logger'
 
-export const removeOcf = async (volumes: string[]): Promise<ResponseWithClips> => {
-  const ocfClipsMap = ocfClipsStore()
+export const removeOcf = async (
+  volumes: string[],
+  storedClips: OcfClipType[]
+): Promise<ResponseWithClips> => {
+  const ocfClipsMap = new Map<string, OcfClipType>(storedClips.map((clip) => [clip.clip, clip]))
 
   try {
     const volSet = new Set(volumes)
@@ -19,7 +21,7 @@ export const removeOcf = async (volumes: string[]): Promise<ResponseWithClips> =
       }
     }
 
-    return { success: true, clips: { ocf: Array.from(ocfClipsStore().values()) } }
+    return { success: true, clips: { ocf: Array.from(ocfClipsMap.values()) } }
   } catch (error) {
     const message = `Error while trying to remove path: ${
       error instanceof Error ? error.message : 'Unknown issue'
@@ -29,8 +31,11 @@ export const removeOcf = async (volumes: string[]): Promise<ResponseWithClips> =
   }
 }
 
-export const removeSound = async (volumes: string[]): Promise<ResponseWithClips> => {
-  const soundClipsMap = soundClipsStore()
+export const removeSound = async (
+  volumes: string[],
+  storedClips: SoundClipType[]
+): Promise<ResponseWithClips> => {
+  const soundClipsMap = new Map<string, SoundClipType>(storedClips.map((clip) => [clip.clip, clip]))
 
   try {
     const volSet = new Set(volumes)
@@ -46,7 +51,7 @@ export const removeSound = async (volumes: string[]): Promise<ResponseWithClips>
       }
     }
 
-    return { success: true, clips: { sound: Array.from(soundClipsStore().values()) } }
+    return { success: true, clips: { sound: Array.from(soundClipsMap.values()) } }
   } catch (error) {
     const message = `Error while trying to remove path: ${
       error instanceof Error ? error.message : 'Unknown issue'

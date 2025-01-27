@@ -6,7 +6,6 @@ import { appState } from '../app-state/state'
 import { DatalogType } from '@shared/datalogTypes'
 import { Response } from '@shared/shared-types'
 import { ensureDirectoryExists, fileExists } from '../../utils/crud'
-import { clearClipsStore } from './builder/builder-state'
 import { getMainWindow } from '../../index'
 import { ipcMain } from 'electron'
 
@@ -34,7 +33,6 @@ const updateDatalog = async (data: DatalogType, isNew: boolean): Promise<Respons
     }
 
     await fs.writeFile(filepath, yaml, 'utf8')
-    await clearClipsStore()
     return { success: true }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred.'

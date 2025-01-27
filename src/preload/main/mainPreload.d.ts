@@ -31,8 +31,11 @@ declare global {
         type: 'ocf' | 'sound' | 'proxy' | 'custom',
         storedClips: OcfClipType[] | SoundClipType[]
       ) => Promise<ResponseWithClips>
-      removeClips: (paths: string[], type: 'ocf' | 'sound') => Promise<ResponseWithClips>
-      clearClipsStore: () => Promise<Response>
+      removeClips: (
+        paths: string[],
+        type: 'ocf' | 'sound',
+        storedClips: OcfClipType[] | SoundClipType[]
+      ) => Promise<ResponseWithClips>
       showProgress: (show: boolean, progress: number) => void
       showProgressListener: (callback: (show: boolean, progress: number) => void) => () => void
       onDirectoryLoaded: (

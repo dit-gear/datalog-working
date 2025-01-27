@@ -51,10 +51,10 @@ export const Import = ({ project }: ImportProps) => {
     }
   }
 
-  /** Used for removing clips that is stored in both main process and renderer */
   const handleRemoveClips = async (copy: CopyType, type: 'ocf' | 'sound'): Promise<void> => {
     try {
-      const res = await window.mainApi.removeClips(copy.volumes, type)
+      const currentClips = getValues(`${type}.clips`)
+      const res = await window.mainApi.removeClips(copy.volumes, type, currentClips)
       if (res.success) {
         const { ocf, sound } = res.clips
         if (!ocf && !sound) {
