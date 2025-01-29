@@ -4,17 +4,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSub,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuSubContent,
-  DropdownMenuGroup
+  DropdownMenuTrigger
 } from '@components/ui/dropdown-menu'
 import { Checkbox } from '@components/ui/checkbox'
-import { MoreHorizontal, Trash2, Pencil, FileDown } from 'lucide-react'
+import { MoreHorizontal, Trash2, Pencil } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import { DatalogType } from '@shared/datalogTypes'
-import { DropdownMenuPortal, DropdownMenuSubTrigger } from '@radix-ui/react-dropdown-menu'
 
 export const Columns = (handlers: {
   handleDelete: (datalog: DatalogType) => void

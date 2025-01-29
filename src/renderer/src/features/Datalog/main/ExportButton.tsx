@@ -40,7 +40,7 @@ const ExportButton = ({ pdfs }: ExportButtonProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button disabled={!selection?.length}>
           <FileDown className="mr-2 h-4 w-4" />
           <span>Export PDF {selection && selection?.length > 0 && `(${selection.length})`}</span>
         </Button>

@@ -4,10 +4,10 @@ import { DatalogType } from '@shared/datalogTypes'
 import { LogSum } from './types'
 import { Columns } from './Column'
 import { Datalog } from '@shared/datalogClass'
+import { useNavigate } from 'react-router-dom'
 
 interface TableProps {
   logs: DatalogType[]
-  handleEdit: (datalog: DatalogType) => void
 }
 
 export class PublicDatalog extends Datalog {
@@ -19,7 +19,8 @@ export class PublicDatalog extends Datalog {
   }
 }
 
-const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
+const Table: React.FC<TableProps> = React.memo(({ logs }) => {
+  const navigate = useNavigate()
   const classLogs = React.useMemo(() => logs.map((log) => new PublicDatalog(log)), [logs])
 
   const handleDelete = async (datalog: DatalogType) => {
@@ -29,6 +30,8 @@ const Table: React.FC<TableProps> = React.memo(({ logs, handleEdit }) => {
       console.error(error)
     }
   }
+
+  const handleEdit = (datalog: DatalogType) => navigate(`/builder/${datalog.id}`)
 
   const handlers = useMemo(() => ({ handleDelete, handleEdit }), [handleDelete, handleEdit])
 

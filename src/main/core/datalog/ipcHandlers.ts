@@ -9,7 +9,8 @@ import deleteDatalog from './delete'
 import { createSendWindow } from '../../send/sendWindow'
 import logger from '../logger'
 import { additionalParsing } from '@shared/projectTypes'
-import { appState } from '../app-state/state'
+import { appState, datalogs } from '../app-state/state'
+import { ProjectType } from '@shared/projectTypes'
 
 export function setupDatalogIpcHandlers(): void {
   ipcMain.handle(
@@ -110,5 +111,22 @@ export function setupDatalogIpcHandlers(): void {
 
   ipcMain.on('open-send-window', (_, selection: DatalogType | DatalogType[]) => {
     createSendWindow(undefined, selection)
+  })
+
+  ipcMain.handle('get-project', (): ProjectType => {
+    const rootPath = appState.rootPath
+    const projectPath = appState.activeProjectPath
+    const data = appState.activeProject
+
+    const loadedProject: ProjectType = {
+      rootPath,
+      ...(projectPath && { projectPath }),
+      ...(data && { data })
+    }
+    return loadedProject
+  })
+
+  ipcMain.handle('get-datalogs', (): DatalogType[] => {
+    return Array.from(datalogs().values())
   })
 }

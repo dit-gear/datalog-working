@@ -6,7 +6,10 @@ const SendButton = () => {
   const { selection } = useSelectedContext()
   return (
     <>
-      <Button onClick={() => window.mainApi.openSendWindow(selection)}>
+      <Button
+        onClick={() => window.mainApi.openSendWindow(selection)}
+        disabled={!selection?.length}
+      >
         <SendIcon className="mr-2 h-4 w-4" />
         <span>Send {selection && selection?.length > 0 && `(${selection.length})`}</span>
       </Button>

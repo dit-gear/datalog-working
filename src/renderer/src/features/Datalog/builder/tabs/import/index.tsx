@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@components/ui/button'
-import { mergeDirtyValues } from '../../../utils/merge-clips'
+import { mergeDirtyValues } from '../../utils/merge-clips'
 import { CopyType, CustomType, OcfClipType, ProxyType, SoundClipType } from '@shared/datalogTypes'
 import { useFormContext } from 'react-hook-form'
 import { CopiesList } from './CopiesList'
@@ -80,7 +80,7 @@ export const Import = ({ project }: ImportProps) => {
   }
 
   return (
-    <div className="space-y-16 px-32">
+    <div className="space-y-16">
       <Section label="Original Camera Files" type="ocf" handleAddClips={handleAddClips}>
         <CopiesList type="ocf" handleRemoveCopy={handleRemoveClips} />
       </Section>

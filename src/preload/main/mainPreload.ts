@@ -9,6 +9,8 @@ const mainApi = {
     ipcRenderer.on('root-path-changed', (_, dirFolderPath) => {
       callback(dirFolderPath)
     }),
+  getProject: () => ipcRenderer.invoke('get-project'),
+  getDatalogs: () => ipcRenderer.invoke('get-datalogs'),
   onProjectLoaded: (callback) =>
     ipcRenderer.on('project-loaded', (_, project) => {
       callback(project)

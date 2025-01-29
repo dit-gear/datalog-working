@@ -1,30 +1,41 @@
 import { useState, useEffect, useCallback } from 'react'
 import { DatalogType } from '@shared/datalogTypes'
 import { ProjectType } from '@shared/projectTypes'
-import NewProjectDialog from './components/newProjectDialog'
-import Builderdialog from './features/Datalog/builder/builderDialog'
+import NewProjectDialog from '../../../components/newProjectDialog'
+import Builderdialog from '../builder/builderDialog'
 import { Dialog, DialogTrigger } from '@components/ui/dialog'
 import { Plus, Settings2 as SettingsIcon } from 'lucide-react'
-import Settings from './features/Settings/Settings'
-import Table from './features/Datalog/table/Table'
+import Settings from '../Settings/Settings'
+import Table from './table/Table'
 import { Toaster } from '@components/ui/toaster'
 import { Button } from '@components/ui/button'
-import { SelectedProvider } from './features/Datalog/SelectedContext'
-import SendButton from './features/Datalog/SendButton'
-import ExportButton from './features/Datalog/ExportButton'
+import { SelectedProvider } from './SelectedContext'
+import SendButton from './SendButton'
+import ExportButton from './ExportButton'
+import { useNavigate } from 'react-router-dom'
+import { useIpcNavigation } from '../hooks/useIpcNavigation'
+import { useProject } from '../hooks/useProject'
+import { useDatalogs } from '../hooks/useDatalogs'
+import { useIpcListeners } from '../hooks/useIpcListeners'
 
-function App() {
-  const [project, setProject] = useState<ProjectType>()
-  const [logs, setLogs] = useState<DatalogType[]>()
+function Main() {
+  //const [project, setProject] = useState<ProjectType>()
+  //const [logs, setLogs] = useState<DatalogType[]>()
   const [logEdit, setLogEdit] = useState<DatalogType>()
   const [builderOpen, setBuilderOpen] = useState<boolean>(false)
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
   const [newProjectOpen, setNewProjectOpen] = useState<boolean>(false)
+  useIpcNavigation()
+  useIpcListeners()
+  const navigate = useNavigate()
 
-  const handleProjectLoad = useCallback((project: ProjectType): void => {
+  const { data: project } = useProject()
+  const { data: logs } = useDatalogs()
+
+  /*const handleProjectLoad = useCallback((project: ProjectType): void => {
     console.log('Project loaded', project)
     setProject(project)
-  }, [])
+  }, [])*/
 
   const handleBuilderClose = useCallback(
     (open: boolean) => {
@@ -33,12 +44,7 @@ function App() {
     },
     [logEdit]
   )
-
-  const handleItemToEdit = useCallback((datalog: DatalogType): void => {
-    setLogEdit(datalog)
-    setBuilderOpen(true)
-  }, [])
-
+  /*
   useEffect(() => {
     const handleProjectLoaded = (project: ProjectType) => {
       handleProjectLoad(project)
@@ -54,10 +60,10 @@ function App() {
     }
 
     window.mainApi.onDatalogsLoaded(handleDatalogsLoaded)
-  }, [])
+  }, [])*/
 
   return (
-    <div className="border-t">
+    <div className="h-[calc(100vh-36px)] border-t">
       <SelectedProvider>
         <div className="container flex flex-col mx-auto w-full h-dvh sm:px-6 lg:px-8 bg-zinc-950">
           <div>
@@ -68,6 +74,11 @@ function App() {
             <div className="flex justify-end gap-4">
               <SendButton />
               <ExportButton pdfs={project.data.pdfs} />
+              <Button onClick={() => navigate('/builder')}>
+                <Plus className="mr-2 h-4 w-4" />
+                New Shooting Day
+              </Button>
+              {/*
               <Dialog open={builderOpen} onOpenChange={handleBuilderClose}>
                 <DialogTrigger asChild>
                   <Button>
@@ -95,12 +106,12 @@ function App() {
                   open={settingsOpen}
                   setOpen={setSettingsOpen}
                 />
-              </Dialog>
+              </Dialog>*/}
             </div>
           )}
           {logs && (
             <div className="grow">
-              <Table logs={logs} handleEdit={handleItemToEdit} />
+              <Table logs={logs} />
             </div>
           )}
           {!project?.data && (
@@ -109,7 +120,7 @@ function App() {
             </div>
           )}
           <div className="flex flex-col mt-4 place-items-center gap-4">
-            {project?.rootPath && !project?.projectPath && (
+            {/*project?.rootPath && !project?.projectPath && (
               <Dialog open={newProjectOpen} onOpenChange={setNewProjectOpen}>
                 <DialogTrigger asChild>
                   <Button>
@@ -123,7 +134,7 @@ function App() {
                   setOpen={setNewProjectOpen}
                 />
               </Dialog>
-            )}
+            )*/}
           </div>
         </div>
         <Toaster />
@@ -132,4 +143,4 @@ function App() {
   )
 }
 
-export default App
+export default Main

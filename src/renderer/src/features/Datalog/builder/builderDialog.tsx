@@ -1,11 +1,3 @@
-import {
-  DialogContent,
-  DialogClose,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { DatalogType, datalogZod, OCF, Sound, Proxy } from '@shared/datalogTypes'
@@ -153,16 +145,12 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
   }
 
   return (
-    <DialogContent className="sm:max-w-[100vw] h-[100vh]">
+    <div className="relative mx-auto max-w-screen-2xl px-4">
       <Form {...form}>
-        <Tabs defaultValue="name" className="overflow-scroll">
-          <DialogHeader className="overflow-hidden">
-            <DialogTitle>New Shooting Day</DialogTitle>
-            <DialogDescription>Create a summary of the shooting day</DialogDescription>
-            <div>
-              <div className="mx-auto ">
-                <StatsPanel />
-              </div>
+        <Tabs defaultValue="name" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="overflow-hidden col-span-6">
+            <div className="mx-auto">
+              <StatsPanel />
             </div>
             <div className="flex justify-center">
               <TabsList className="grid grid-cols-3 w-[400px] mt-4">
@@ -171,7 +159,53 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
                 <TabsTrigger value="clips">3. Preview</TabsTrigger>
               </TabsList>
             </div>
-          </DialogHeader>
+          </div>
+          <TabsContent value="name" asChild className="col-span-3">
+            <div className="lg:col-start-2 col-span-3">
+              <Name project={project} />
+            </div>
+          </TabsContent>
+          <TabsContent value="import" asChild>
+            <div className="lg:col-start-2 col-span-3">
+              <Import project={project} />
+            </div>
+          </TabsContent>
+          <TabsContent value="clips" className="h-full" asChild>
+            <div className="col-span-6">
+              <Preview />
+            </div>
+          </TabsContent>
+        </Tabs>
+        <div className="fixed left-0 right-0 bottom-0 w-full flex justify-end gap-10 px-6 py-4">
+          <Button variant="ghost">Cancel</Button>
+          <Button variant="default" disabled={!isValid} onClick={handleSubmit(onSubmit, onError)}>
+            {selected ? 'Update' : 'Submit'}
+          </Button>
+        </div>
+        <DefaultsDialog project={project} tags={tags} disabled={!!selected} />
+      </Form>
+      <FileExistDialog />
+    </div>
+  )
+}
+
+export default Builderdialog
+
+/*<div className="sm:max-w-[100vw] h-[100vh]">
+      <Form {...form}>
+        <Tabs defaultValue="name" className="overflow-scroll">
+          <div className="overflow-hidden">
+            <div className="mx-auto ">
+              <StatsPanel />
+            </div>
+            <div className="flex justify-center">
+              <TabsList className="grid grid-cols-3 w-[400px] mt-4">
+                <TabsTrigger value="name">1. Name</TabsTrigger>
+                <TabsTrigger value="import">2. Import</TabsTrigger>
+                <TabsTrigger value="clips">3. Preview</TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
           <div className="w-[80vw] ml-auto mr-auto mt-4 px-16 py-8 rounded-lg ">
             <TabsContent value="name" asChild>
               <Name project={project} />
@@ -184,19 +218,13 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
             </TabsContent>
           </div>
         </Tabs>
-        <DialogFooter className="mt-auto pt-2 border-t">
-          <DialogClose asChild>
-            <Button variant="ghost">Cancel</Button>
-          </DialogClose>
+        <div className="mt-auto pt-2 border-t">
+          <Button variant="ghost">Cancel</Button>
           <Button variant="default" disabled={!isValid} onClick={handleSubmit(onSubmit, onError)}>
             {selected ? 'Update' : 'Submit'}
           </Button>
-        </DialogFooter>
+        </div>
         <DefaultsDialog project={project} tags={tags} disabled={!!selected} />
       </Form>
       <FileExistDialog />
-    </DialogContent>
-  )
-}
-
-export default Builderdialog
+    </div> */

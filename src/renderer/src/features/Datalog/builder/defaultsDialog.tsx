@@ -79,7 +79,7 @@ const DefaultsDialog = ({ project, tags, disabled }: DefaultsDialogProps) => {
                           ))}
                         </ul>
                       ) : (
-                        <p>{paths[0]}</p>
+                        <span>{paths[0]}</span>
                       )}
                     </span>
                   )

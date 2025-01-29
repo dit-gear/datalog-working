@@ -16,6 +16,8 @@ declare global {
       onRootPathChanged: (callback: (dirFolderPath: string) => void) => void
       onOpenModalInDatalog: (callback: (modal: OpenModalTypes) => void) => void
       createNewProject: (projectName: string) => Promise<CreateNewProjectResult>
+      getProject: () => ProjectType
+      getDatalogs: () => DatalogType[]
       onProjectLoaded: (callback: (project: ProjectType) => void) => void
       updateProject: (project: ProjectToUpdate) => Promise<UpdateProjectResult>
       getFolderPath: () => Promise<ResponseWithString>
