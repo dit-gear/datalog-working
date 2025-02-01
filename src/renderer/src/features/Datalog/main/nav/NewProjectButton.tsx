@@ -11,7 +11,7 @@ const NewProjectButton = () => {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3 items-center">
           <Clapperboard className="size-16" />
-          <h1 className="text-xl font-bold">No Project loaded</h1>
+          <h1 className="text-xl font-bold">No Project Loaded</h1>
         </div>
 
         <Button onClick={() => navigate('/new-project')}>

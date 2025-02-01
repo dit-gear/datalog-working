@@ -3,20 +3,16 @@ import { updateState } from '../app-state/updater'
 import { appState } from '../app-state/state'
 import { getDatalogWindow } from '../../datalog/datalogWindow'
 import trayManager from '../menu'
-import {
-  closeProjectWatchers,
-  initProjectWatchers
-} from '../app-state/watchers/projectWatchers/manager'
+import { initProjectWatchers } from '../app-state/watchers/projectWatchers/manager'
 import logger from '../logger'
+import { unloadProject } from './unload'
 
 export const handleChangeProject = async (selectedProjectPath: string): Promise<void> => {
   logger.debug('handleChangeProject started')
   try {
-    await closeProjectWatchers()
-    const activeProject = await loadProject(selectedProjectPath)
-    updateState({ newActiveProject: selectedProjectPath })
-    const data = activeProject.data
-
+    await unloadProject()
+    await loadProject(selectedProjectPath)
+    await updateState({ newActiveProject: selectedProjectPath })
     // Insert function here.
     const projectsInRootPath = appState.projectsInRootPath || []
     const updatedProjects = projectsInRootPath?.map((project) => ({
@@ -27,13 +23,6 @@ export const handleChangeProject = async (selectedProjectPath: string): Promise<
     await initProjectWatchers()
     trayManager.createOrUpdateTray()
 
-    const mainWindow = await getDatalogWindow()
-
-    mainWindow?.webContents.send('project-loaded', {
-      rootPath: appState.rootPath,
-      projectPath: selectedProjectPath,
-      data
-    })
     logger.debug('handleChangeProject completed successfully')
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'

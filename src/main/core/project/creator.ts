@@ -7,6 +7,7 @@ import { loadProject, loadProjectsInRootPath } from './loader'
 import { CreateNewProjectResult } from '@shared/projectTypes' // Adjust path as needed
 import { appState } from '../app-state/state'
 import logger from '../logger'
+import { unloadProject } from './unload'
 
 async function createTemplateFolder(basePath: string): Promise<void> {
   const emailPath = path.join(basePath, 'templates', 'email')
@@ -59,6 +60,7 @@ async function createProject(projectName: string): Promise<CreateNewProjectResul
 }
 
 export async function createNewProject(projectName: string): Promise<CreateNewProjectResult> {
+  await unloadProject()
   const result = await createProject(projectName)
 
   if (result.success) {

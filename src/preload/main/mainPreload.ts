@@ -22,7 +22,7 @@ const mainApi = {
   offProjectLoaded: (handler: (event: Electron.IpcRendererEvent, project: ProjectType) => void) => {
     ipcRenderer.removeListener('project-loaded', handler)
   },
-  createNewProject: (projectName) => ipcRenderer.invoke('create-new-project', projectName),
+  createNewProject: (projectName: string) => ipcRenderer.invoke('create-new-project', projectName),
   updateProject: (project) => ipcRenderer.invoke('update-project', project),
   getFolderPath: () => ipcRenderer.invoke('getFolderPath'),
   updateDatalog: (datalog: DatalogType, isNew: boolean) =>

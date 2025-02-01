@@ -1,5 +1,5 @@
 import { updateState } from '../app-state/updater'
-import { appState } from '../app-state/state'
+import { appState, datalogs } from '../app-state/state'
 import { Notification } from 'electron'
 import logger from '../logger'
 import { closeProjectWatchers } from '../app-state/watchers/projectWatchers/manager'
@@ -7,6 +7,8 @@ import { closeProjectWatchers } from '../app-state/watchers/projectWatchers/mana
 export const forceUnloadActiveproject = async () => {
   await Promise.allSettled([closeProjectWatchers(), updateState({})])
   appState.activeProject = null
+  appState.activeProjectPath = null
+  datalogs().clear()
 
   if (Notification.isSupported()) {
     new Notification({
@@ -20,7 +22,16 @@ export const forceUnloadActiveproject = async () => {
   logger.debug('Project unmounted succesfully')
 }
 
-export const unloadProject = async () => {
-  await closeProjectWatchers()
-  appState.activeProject = null
+export const unloadProject = async (): Promise<void> => {
+  logger.debug('unloading project...')
+  try {
+    await closeProjectWatchers()
+    datalogs().clear()
+    appState.activeProject = null
+    appState.activeProjectPath = null
+    logger.debug('successfully unloaded project')
+  } catch (error) {
+    logger.error('failed unloading project')
+    throw new Error()
+  }
 }
