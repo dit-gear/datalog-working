@@ -10,16 +10,6 @@ import { createSendWindow } from '../send/sendWindow'
 import { exportPdf } from './export/exportPdf'
 import trayIcon from '../../../resources/trayIcon.png?asset'
 
-const handleOpenModalInDatalog = async (modal: OpenModalTypes): Promise<void> => {
-  const mainWindow = await getDatalogWindow({ ensureOpen: true })
-  if (mainWindow?.webContents.isLoading()) {
-    mainWindow.webContents.once('did-finish-load', () => {
-      mainWindow.webContents.send('open-modal-datalogWindow', modal)
-    })
-  } else {
-    mainWindow?.webContents.send('open-modal-datalogWindow', modal)
-  }
-}
 // pass active project!
 const buildContextMenu = (
   projects: ProjectInRootMenuItem[] | null,
@@ -85,7 +75,7 @@ const buildContextMenu = (
         },
         {
           label: 'New Project',
-          click: () => handleOpenModalInDatalog('new-project')
+          click: () => getDatalogWindow({ navigate: 'new-project' })
         },
         { type: 'separator' },
         { label: 'Change Root Folder', click: (): Promise<void> => handleRootDirChange() }
@@ -111,34 +101,6 @@ const buildContextMenu = (
     }
   ])
 }
-/*
-const createTray = (
-  projects: ProjectInRootMenuItem[] | null,
-  activeProject: ProjectRootType | null
-): void => {
-  //let trayicon = nativeImage.createFromPath(appIcon)
-  //trayicon = trayicon.resize({ width: 32, height: 32 })
-  let tray = new Tray(trayIcon)
-
-  const contextMenu = buildContextMenu(projects, activeProject)
-
-  Menu.setApplicationMenu(contextMenu)
-  tray.setContextMenu(contextMenu)
-  setTray(tray)
-}
-
-export const updateTray = (): void => {
-  const tray = getTray()
-  const projects = getProjectsInRootPath()
-  const activeProject = getActiveProject()
-  if (!tray) {
-    createTray(projects, activeProject)
-    return
-  }
-  const contextMenu = buildContextMenu(projects, activeProject)
-  Menu.setApplicationMenu(contextMenu)
-  tray.setContextMenu(contextMenu)
-}*/
 
 class TrayManager {
   private tray: Electron.Tray | null = null

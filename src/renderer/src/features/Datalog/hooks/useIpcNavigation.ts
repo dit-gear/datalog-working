@@ -6,11 +6,17 @@ export function useIpcNavigation() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    window.mainApi.openBuilder(() => {
-      navigate('/builder')
-    })
-    window.mainApi.openSettings(() => {
-      navigate('/settings')
-    })
+    const builderCallback = () => navigate('/builder')
+    const settingsCallback = () => navigate('/settings')
+    const newProjectCallback = () => navigate('/new-project')
+
+    window.mainApi.openBuilder(builderCallback)
+    window.mainApi.openSettings(settingsCallback)
+    window.mainApi.openNewProject(newProjectCallback)
+    return () => {
+      window.mainApi.removeOpenBuilder(builderCallback)
+      window.mainApi.removeOpenSettings(settingsCallback)
+      window.mainApi.removeOpenNewProject(newProjectCallback)
+    }
   }, [navigate])
 }

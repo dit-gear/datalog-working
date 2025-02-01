@@ -47,7 +47,11 @@ declare global {
       ) => void
       openSendWindow: (selection?: DatalogType[]) => void
       openBuilder: (callback: () => void) => void
+      removeOpenBuilder: (callback: () => void) => void
       openSettings: (callback: () => void) => void
+      removeOpenSettings: (callback: () => void) => void
+      openNewProject: (callback: () => void) => void
+      removeOpenNewProject: (callback: () => void) => void
       exportPdf: (pdf: pdfType, selection?: DatalogType[]) => void
     }
   }

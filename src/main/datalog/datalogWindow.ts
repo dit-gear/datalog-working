@@ -48,6 +48,9 @@ export async function getDatalogWindow({
           case 'settings':
             mainWindow?.webContents.send('open-settings')
             break
+          case 'new-project':
+            mainWindow?.webContents.send('open-new-project')
+            break
           default:
             // Optionally handle unknown navigate values
             console.warn(`Unknown navigate value: ${navigate}`)
