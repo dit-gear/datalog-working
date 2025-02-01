@@ -1,33 +1,21 @@
-import { Routes, Route, useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import Main from './main/main'
 import BuilderPage from './builder/builderPage'
+import SettingsPage from './Settings/settingsPage'
 import { Toaster } from '@components/ui/toaster'
 
-type AppRouterProps = {
-  defaultRoute?: string | null
-}
-
-function AppRouter({ defaultRoute }: AppRouterProps) {
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (defaultRoute) {
-      navigate(`/${defaultRoute}`, { replace: true })
-    }
-  }, [defaultRoute])
-
+function AppRouter() {
   return (
-    <>
+    <Router>
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/builder" element={<BuilderPage />} />
         <Route path="/builder/:logId" element={<BuilderPage />} />
-        {/*<Route path="/settings" element={<SettingsPage />} />
-        <Route path="new-project" element={<NewProjectPage />} />*/}
+        <Route path="/settings" element={<SettingsPage />} />
+        {/*<Route path="new-project" element={<NewProjectPage />} />*/}
       </Routes>
       <Toaster />
-    </>
+    </Router>
   )
 }
 

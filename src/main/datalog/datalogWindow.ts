@@ -3,11 +3,8 @@ import icon from '../../../resources/appIconlight.png?asset'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import { openWindow } from '../utils/open-window'
-import { appState, datalogs } from '../core/app-state/state'
-import { ProjectType } from '@shared/projectTypes'
 
 let mainWindow: BrowserWindow | null = null
-let initialRoute: string = '/'
 
 interface getDatalogWindowProps {
   ensureOpen?: boolean
@@ -67,28 +64,9 @@ export async function getDatalogWindow({
   }
   return mainWindow
 }
-/*
-export async function getInitialRoute(): Promise<string> {
-  return initialRoute
-}
-
-export async function showDatalogWindow(): Promise<void> {
-  console.log('showWindow called')
-  mainWindow && openWindow(mainWindow)
-}*/
 
 // Function to create the main window
 async function createWindow(route: string = '/'): Promise<void> {
-  const rootPath = appState.rootPath
-  const projectPath = appState.activeProjectPath
-  const data = appState.activeProject
-
-  const loadedProject: ProjectType = {
-    rootPath,
-    ...(projectPath && { projectPath }),
-    ...(data && { data })
-  }
-
   mainWindow = new BrowserWindow({
     width: 1600,
     height: 1000,
@@ -105,14 +83,8 @@ async function createWindow(route: string = '/'): Promise<void> {
     }
   })
 
-  // **Handling did-finish-load event**
-  /*mainWindow.webContents.on('did-finish-load', () => {
-    const loadedDatalogs = Array.from(datalogs().values())
-    mainWindow?.webContents.send('project-loaded', loadedProject) // Send a message to the renderer
-    mainWindow?.webContents.send('datalogs-loaded', loadedDatalogs)
-  })*/
-
   mainWindow.on('ready-to-show', () => {
+    //mainWindow && mainWindow.webContents.openDevTools({ mode: 'detach' })
     mainWindow && mainWindow.show() // Show the window when it's ready to be shown
   })
 
@@ -134,10 +106,4 @@ async function createWindow(route: string = '/'): Promise<void> {
     url = `${fileURL}?defaultRoute=${encodeURIComponent(route)}`
   }
   mainWindow.loadURL(url)
-  /*
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/index.html`)
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }*/
 }

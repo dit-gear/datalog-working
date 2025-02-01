@@ -9,36 +9,21 @@ import { ProjectSettingsType, ProjectType, TemplateDirectoryFile } from '@shared
 import { formSchemaType, formSchema, Scope } from './types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { ScrollArea } from '@components/ui/scroll-area'
-
-import {
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogDescription,
-  DialogClose,
-  DialogTitle
-} from '@components/ui/dialog'
 import GeneralTab from './GeneralTab'
 import PathsTab from './Paths/PathsTab'
 import ParsingTab from './Parsing/ParsingTab'
 import EmailTab from './Email/EmailTab'
 import PdfTab from './PDF/PdfTab'
+import { useNavigate } from 'react-router-dom'
 
 interface SettingsDialogProps {
   defaults: ProjectSettingsType
   templates: TemplateDirectoryFile[]
-  setProject: Dispatch<SetStateAction<ProjectType | undefined>>
-  open: boolean
-  setOpen: Dispatch<SetStateAction<boolean>>
+  //setProject: Dispatch<SetStateAction<ProjectType | undefined>>
 }
 
-const Settings: React.FC<SettingsDialogProps> = ({
-  defaults,
-  templates,
-  setProject,
-  open,
-  setOpen
-}) => {
+const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
+  const navigate = useNavigate()
   const [scope, setScope] = useState<Scope>('project')
 
   useEffect(() => {
@@ -97,27 +82,23 @@ const Settings: React.FC<SettingsDialogProps> = ({
     try {
       const result = await window.mainApi.updateProject({ update_settings, update_email_api })
       if (result.success) {
-        setProject(result.project)
+        //setProject(result.project)
         console.log('project should be set with:', result.project)
-        setOpen(false)
+        navigate('/')
       }
     } catch (error) {
       console.log(error)
     }
   }
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (!open) {
       reset(defaultValues(defaults))
     }
-  }, [open])
+  }, [open])*/
 
   return (
-    <DialogContent className=" w-[100vw] h-[100vh] max-w-[100vw] max-h-[100vh] bg-black/40 backdrop-blur-sm">
-      <DialogHeader className="hidden">
-        <DialogTitle>Settings</DialogTitle>
-        <DialogDescription>Settings</DialogDescription>
-      </DialogHeader>
+    <div className="relative">
       <FormProvider {...form}>
         <Form {...form}>
           <form id="settings" onSubmit={handleSubmit(onSubmit)}>
@@ -151,39 +132,40 @@ const Settings: React.FC<SettingsDialogProps> = ({
                   </TabsTrigger>
                 </TabsList>
               </nav>
-              <ScrollArea className="h-[90vh]">
-                <TabsContent value="general">
-                  <GeneralTab scope={scope} />
-                </TabsContent>
-                <TabsContent value="paths">
-                  <PathsTab scope={scope} />
-                </TabsContent>
-                <TabsContent value="parsing" className="mt-0 pt-2">
-                  <ParsingTab scope={scope} />
-                </TabsContent>
-                <TabsContent value="email">
-                  <EmailTab scope={scope} templates={templates} />
-                </TabsContent>
-                <TabsContent value="pdf">
-                  <PdfTab scope={scope} templates={templates} />
-                </TabsContent>
-              </ScrollArea>
 
-              <DialogFooter className="md:col-span-2 mt-2">
-                <DialogClose asChild>
-                  <Button variant="ghost">Close</Button>
-                </DialogClose>
+              <TabsContent value="general">
+                <GeneralTab scope={scope} />
+              </TabsContent>
+              <TabsContent value="paths">
+                <PathsTab scope={scope} />
+              </TabsContent>
+              <TabsContent value="parsing" className="mt-0 pt-2">
+                <ParsingTab scope={scope} />
+              </TabsContent>
+              <TabsContent value="email">
+                <EmailTab scope={scope} templates={templates} />
+              </TabsContent>
+              <TabsContent value="pdf">
+                <PdfTab scope={scope} templates={templates} />
+              </TabsContent>
+
+              <div className="fixed left-0 right-0 bottom-0 w-full flex justify-end gap-10 px-6 py-4">
+                <Button variant="ghost" onClick={() => navigate('/')}>
+                  Close
+                </Button>
                 <Button form="settings" type="submit" disabled={isSubmitting || isSubmitSuccessful}>
                   {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <></>}
                   {isSubmitting ? 'Please wait' : isSubmitSuccessful ? 'Saved' : 'Save'}
                 </Button>
-              </DialogFooter>
+              </div>
             </Tabs>
           </form>
         </Form>
       </FormProvider>
-    </DialogContent>
+    </div>
   )
 }
 
 export default Settings
+
+// w-[100vw] h-[100vh] max-w-[100vw] max-h-[100vh] bg-black/40 backdrop-blur-sm

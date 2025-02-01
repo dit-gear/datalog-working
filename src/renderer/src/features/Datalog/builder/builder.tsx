@@ -23,10 +23,9 @@ interface BuilderdialogProps {
   project: ProjectRootType
   previousEntries?: DatalogType[]
   selected?: DatalogType
-  setOpen: (value: boolean) => void
 }
 
-const Builder = ({ project, previousEntries, selected, setOpen }: BuilderdialogProps) => {
+const Builder = ({ project, previousEntries, selected }: BuilderdialogProps) => {
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -89,7 +88,7 @@ const Builder = ({ project, previousEntries, selected, setOpen }: BuilderdialogP
       if (res.success) {
         toast({ title: `${data.id} has been ${isNew ? 'saved' : 'updated'}` })
         reset()
-        setOpen(false)
+        navigate('/')
       } else if (res.cancelled) {
         return
       } else {

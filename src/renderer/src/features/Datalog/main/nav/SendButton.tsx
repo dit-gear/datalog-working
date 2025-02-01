@@ -1,6 +1,6 @@
 import { Button } from '@components/ui/button'
 import { SendIcon } from 'lucide-react'
-import { useSelectedContext } from './SelectedContext'
+import { useSelectedContext } from '../SelectedContext'
 
 const SendButton = () => {
   const { selection } = useSelectedContext()

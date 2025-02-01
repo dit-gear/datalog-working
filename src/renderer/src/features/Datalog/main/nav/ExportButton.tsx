@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useProject } from '../../hooks/useProject'
 import {
   Dialog,
   DialogContent,
@@ -16,15 +17,13 @@ import {
   SelectValue
 } from '@components/ui/select'
 import { Button } from '@components/ui/button'
-import { useSelectedContext } from './SelectedContext'
+import { useSelectedContext } from '../SelectedContext'
 import { pdfType } from '@shared/projectTypes'
 import { FileDown } from 'lucide-react'
 
-interface ExportButtonProps {
-  pdfs?: pdfType[]
-}
-
-const ExportButton = ({ pdfs }: ExportButtonProps) => {
+const ExportButton = () => {
+  const { data: project } = useProject()
+  const pdfs = project?.data?.pdfs ?? []
   const { selection } = useSelectedContext()
   const [open, setOpen] = useState<boolean>(false)
   const [selectedPreset, setSelectedPreset] = useState<pdfType | null>(null)
@@ -50,7 +49,7 @@ const ExportButton = ({ pdfs }: ExportButtonProps) => {
           <DialogTitle>Select PDF to Export</DialogTitle>
           <DialogDescription hidden>Select PDF to Export</DialogDescription>
         </DialogHeader>
-        {pdfs && pdfs.length > 0 ? (
+        {!!pdfs.length ? (
           <Select
             onValueChange={(v) => setSelectedPreset(pdfs.find((pdf) => pdf.id === v) || null)}
             defaultValue={selectedPreset?.id ?? undefined}

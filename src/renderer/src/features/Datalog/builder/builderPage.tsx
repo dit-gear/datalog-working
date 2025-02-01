@@ -1,4 +1,3 @@
-// renderer/pages/BuilderPage.tsx
 import { useParams, useNavigate } from 'react-router-dom'
 import { useProject } from '../hooks/useProject'
 import { useDatalogs } from '../hooks/useDatalogs'
@@ -8,13 +7,13 @@ import { Button } from '@components/ui/button'
 function BuilderPage() {
   const navigate = useNavigate()
   const { logId } = useParams<{ logId?: string }>()
-  const { data: project } = useProject()
-  const { data: logs, isLoading } = useDatalogs()
+  const { data: project, isLoading: projectsLoading } = useProject()
+  const { data: logs, isLoading: datalogsLoading } = useDatalogs()
 
   const selectedLog = logs.find((log) => log.id === logId)
   console.log(selectedLog, logId)
 
-  if (isLoading) {
+  if (projectsLoading || datalogsLoading || !project?.data) {
     return null
   }
 
@@ -26,16 +25,7 @@ function BuilderPage() {
           Back
         </Button>
       </div>
-      {project?.data ? (
-        <Builder
-          project={project.data}
-          previousEntries={logs}
-          selected={selectedLog}
-          setOpen={() => navigate('/')}
-        />
-      ) : (
-        <p>Loading project...</p>
-      )}
+      <Builder project={project.data} previousEntries={logs} selected={selectedLog} />
     </div>
   )
 }
