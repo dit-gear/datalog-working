@@ -6,11 +6,11 @@ import { appState } from '../app-state/state'
 import { DatalogType } from '@shared/datalogTypes'
 import { Response } from '@shared/shared-types'
 import { ensureDirectoryExists, fileExists } from '../../utils/crud'
-import { getMainWindow } from '../../index'
+import { getDatalogWindow } from '../../datalog/datalogWindow'
 import { ipcMain } from 'electron'
 
 const updateDatalog = async (data: DatalogType, isNew: boolean): Promise<Response> => {
-  const win = await getMainWindow()
+  const win = await getDatalogWindow()
   try {
     await ensureDirectoryExists(path.join(appState.activeProjectPath, 'logs'))
     const yaml = YAML.stringify(data)

@@ -1,24 +1,33 @@
-import { HashRouter as Router, Routes, Route } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-
+import { Routes, Route, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import Main from './main/main'
 import BuilderPage from './builder/builderPage'
 import { Toaster } from '@components/ui/toaster'
 
-const queryClient = new QueryClient()
+type AppRouterProps = {
+  defaultRoute?: string | null
+}
 
-function AppRouter() {
+function AppRouter({ defaultRoute }: AppRouterProps) {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (defaultRoute) {
+      navigate(`/${defaultRoute}`, { replace: true })
+    }
+  }, [defaultRoute])
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Main />} />
-          <Route path="/builder" element={<BuilderPage />} />
-          <Route path="/builder/:logId" element={<BuilderPage />} />
-        </Routes>
-        <Toaster />
-      </Router>
-    </QueryClientProvider>
+    <>
+      <Routes>
+        <Route path="/" element={<Main />} />
+        <Route path="/builder" element={<BuilderPage />} />
+        <Route path="/builder/:logId" element={<BuilderPage />} />
+        {/*<Route path="/settings" element={<SettingsPage />} />
+        <Route path="new-project" element={<NewProjectPage />} />*/}
+      </Routes>
+      <Toaster />
+    </>
   )
 }
 

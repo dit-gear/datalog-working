@@ -6,14 +6,11 @@ export function useIpcNavigation() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    //do nothing
-    /*
-    window.mainApi.onNavigateToBuilder((logId?: string) => {
-      if (logId) navigate(`/builder/${logId}`)
-      else navigate('/builder')
+    window.mainApi.openBuilder(() => {
+      navigate('/builder')
     })
-    window.mainApi.onNavigateToSettings(() => {
+    window.mainApi.openSettings(() => {
       navigate('/settings')
-    })*/
+    })
   }, [navigate])
 }

@@ -11,6 +11,7 @@ import logger from '../logger'
 import { additionalParsing } from '@shared/projectTypes'
 import { appState, datalogs } from '../app-state/state'
 import { ProjectType } from '@shared/projectTypes'
+//import { showDatalogWindow, getInitialRoute } from '../../datalog/datalogWindow'
 
 export function setupDatalogIpcHandlers(): void {
   ipcMain.handle(
@@ -128,5 +129,7 @@ export function setupDatalogIpcHandlers(): void {
 
   ipcMain.handle('get-datalogs', (): DatalogType[] => {
     return Array.from(datalogs().values())
-  })
+  }) /*
+  ipcMain.handle('get-route', () => getInitialRoute())
+  ipcMain.once('show-datalog', async () => showDatalogWindow())*/
 }

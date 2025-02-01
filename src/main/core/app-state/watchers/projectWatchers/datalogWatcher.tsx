@@ -2,7 +2,7 @@ import chokidar, { FSWatcher } from 'chokidar'
 import { datalogs, appState } from '../../state'
 import { loadDatalog } from '../../../datalog/loader'
 import logger from '../../../logger'
-import { getMainWindow } from '../../../../index'
+import { getDatalogWindow } from '../../../../datalog/datalogWindow'
 import { ensureDirectoryExists } from '../../../../utils/crud'
 
 let datalogsWatcher: FSWatcher | null = null
@@ -73,7 +73,7 @@ const debounceIpcUpdate = () => {
 // Function to send IPC update
 const sendIpcUpdate = async () => {
   const allDatalogs = Array.from(datalogs().values())
-  const mainWindow = await getMainWindow()
+  const mainWindow = await getDatalogWindow()
   if (mainWindow) {
     mainWindow.webContents.send('datalogs-loaded', allDatalogs)
   }

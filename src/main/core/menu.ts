@@ -1,5 +1,5 @@
 import { Menu, app, Tray } from 'electron'
-import { getMainWindow } from '../index'
+import { getDatalogWindow } from '../datalog/datalogWindow'
 import { OpenModalTypes } from '@shared/shared-types'
 import { ProjectRootType, ProjectInRootMenuItem } from '@shared/projectTypes'
 import { appState } from './app-state/state'
@@ -11,7 +11,7 @@ import { exportPdf } from './export/exportPdf'
 import trayIcon from '../../../resources/trayIcon.png?asset'
 
 const handleOpenModalInDatalog = async (modal: OpenModalTypes): Promise<void> => {
-  const mainWindow = await getMainWindow({ ensureOpen: true })
+  const mainWindow = await getDatalogWindow({ ensureOpen: true })
   if (mainWindow?.webContents.isLoading()) {
     mainWindow.webContents.once('did-finish-load', () => {
       mainWindow.webContents.send('open-modal-datalogWindow', modal)
@@ -34,7 +34,7 @@ const buildContextMenu = (
 
     {
       label: 'Open Datalog Window',
-      click: () => getMainWindow({ ensureOpen: true }),
+      click: () => getDatalogWindow({ ensureOpen: true }),
       enabled: Boolean(activeProject)
     }, // Opens main window
     { type: 'separator' },
@@ -63,7 +63,7 @@ const buildContextMenu = (
     { type: 'separator' },
     {
       label: 'New Shooting Day',
-      click: () => handleOpenModalInDatalog('new-shooting-day'),
+      click: () => getDatalogWindow({ navigate: 'builder' }),
       enabled: Boolean(activeProject)
     },
     { type: 'separator' },
@@ -95,7 +95,7 @@ const buildContextMenu = (
     { label: 'Code Editor', click: (): void => createEditorWindow() }, // Opens code editor window.
     {
       label: 'Project Settings',
-      click: () => handleOpenModalInDatalog('project-settings'),
+      click: () => getDatalogWindow({ navigate: 'settings' }),
       enabled: Boolean(activeProject)
     }, // Opens main window and open settings modal.
     { type: 'separator' },

@@ -1,10 +1,10 @@
 import { Button } from '@components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
-import { DatalogType, datalogZod, OCF, Sound, Proxy } from '@shared/datalogTypes'
+import { DatalogType } from '@shared/datalogTypes'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ProjectRootType } from '@shared/projectTypes'
-import replaceTags, { formatDate } from '../../../utils/formatDynamicString'
+import { formatDate } from '../../../utils/formatDynamicString'
 import { useToast } from '@components/lib/hooks/use-toast'
 import { Form } from '@components/ui/form'
 import StatsPanel from './stats/statspanel'
@@ -12,9 +12,12 @@ import { removeEmptyFields } from '@renderer/utils/form'
 import Name from './tabs/name'
 import Import from './tabs/import/index'
 import Preview from './tabs/preview'
-import z from 'zod'
 import DefaultsDialog from './defaultsDialog'
 import FileExistDialog from './fileExistsDialog'
+import { useNavigate } from 'react-router-dom'
+import { datalogFormSchema, datalogFormType } from './utils/schema'
+import { getNextDay } from './utils/getNextDay'
+import { getDefaultId } from './utils/getDefaultId'
 
 interface BuilderdialogProps {
   project: ProjectRootType
@@ -23,19 +26,10 @@ interface BuilderdialogProps {
   setOpen: (value: boolean) => void
 }
 
-const Builderdialog = ({ project, previousEntries, selected, setOpen }: BuilderdialogProps) => {
+const Builder = ({ project, previousEntries, selected, setOpen }: BuilderdialogProps) => {
   const { toast } = useToast()
+  const navigate = useNavigate()
 
-  function getNextDay(logs: DatalogType[]): number {
-    let highestDay = logs[0].day
-
-    for (const log of logs) {
-      if (log.day > highestDay) {
-        highestDay = log.day
-      }
-    }
-    return highestDay + 1
-  }
   const defaultDay =
     previousEntries && previousEntries?.length > 0 ? getNextDay(previousEntries) : 1
 
@@ -46,45 +40,9 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
     log: project.logid_template
   }
 
-  const defaultId = (): string => {
-    return replaceTags(project.logid_template, tags)
-  }
-
-  function makeNullableExcept<T extends z.ZodRawShape>(
-    schema: z.ZodObject<T>,
-    keysToExclude: (keyof T)[]
-  ) {
-    const newShape = Object.fromEntries(
-      Object.entries(schema.shape).map(([key, propSchema]) => [
-        key,
-        keysToExclude.includes(key as keyof T) ? propSchema : propSchema.nullable()
-      ])
-    )
-    return z.object(newShape)
-  }
-
-  const datalogFormSchema = z.object({
-    id: z.string().min(1).max(50),
-    day: z.coerce
-      .number({
-        required_error: 'Day is required',
-        invalid_type_error: 'Day is required'
-      })
-      .int()
-      .gte(1, { message: 'Day must be greater than or equal to 1' })
-      .lte(999, { message: 'Day must be below 999' }),
-    date: datalogZod.shape.date,
-    unit: datalogZod.shape.unit.nullable(),
-    ocf: makeNullableExcept(OCF, ['clips']),
-    sound: makeNullableExcept(Sound, ['clips']),
-    proxy: makeNullableExcept(Proxy, ['clips']),
-    custom: datalogZod.shape.custom
-  })
-  type datalogFormType = z.infer<typeof datalogFormSchema>
-
   const form = useForm({
     defaultValues: {
-      id: selected ? selected.id : defaultId(),
+      id: selected ? selected.id : getDefaultId(project.logid_template, tags),
       day: selected ? selected.day : defaultDay,
       date: selected ? selected.date : formatDate(),
       unit: selected ? selected.unit : project.unit ? project.unit : '',
@@ -129,18 +87,18 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
     try {
       const res = await window.mainApi.updateDatalog(cleanedData, isNew)
       if (res.success) {
-        toast({ description: 'Data saved' })
+        toast({ title: `${data.id} has been ${isNew ? 'saved' : 'updated'}` })
         reset()
         setOpen(false)
       } else if (res.cancelled) {
         return
       } else {
         console.error(res.error)
-        toast({ description: `There was an issue saving the entry: ${res.error}` })
+        toast({ title: 'Issue saving datalog', description: `${res.error}` })
       }
     } catch (error) {
       console.error(error)
-      toast({ description: 'There was an issue saving the entry' })
+      toast({ title: 'Issue saving datalog', description: 'Please try again' })
     }
   }
 
@@ -177,7 +135,9 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
           </TabsContent>
         </Tabs>
         <div className="fixed left-0 right-0 bottom-0 w-full flex justify-end gap-10 px-6 py-4">
-          <Button variant="ghost">Cancel</Button>
+          <Button variant="ghost" onClick={() => navigate('/')}>
+            Cancel
+          </Button>
           <Button variant="default" disabled={!isValid} onClick={handleSubmit(onSubmit, onError)}>
             {selected ? 'Update' : 'Submit'}
           </Button>
@@ -189,42 +149,4 @@ const Builderdialog = ({ project, previousEntries, selected, setOpen }: Builderd
   )
 }
 
-export default Builderdialog
-
-/*<div className="sm:max-w-[100vw] h-[100vh]">
-      <Form {...form}>
-        <Tabs defaultValue="name" className="overflow-scroll">
-          <div className="overflow-hidden">
-            <div className="mx-auto ">
-              <StatsPanel />
-            </div>
-            <div className="flex justify-center">
-              <TabsList className="grid grid-cols-3 w-[400px] mt-4">
-                <TabsTrigger value="name">1. Name</TabsTrigger>
-                <TabsTrigger value="import">2. Import</TabsTrigger>
-                <TabsTrigger value="clips">3. Preview</TabsTrigger>
-              </TabsList>
-            </div>
-          </div>
-          <div className="w-[80vw] ml-auto mr-auto mt-4 px-16 py-8 rounded-lg ">
-            <TabsContent value="name" asChild>
-              <Name project={project} />
-            </TabsContent>
-            <TabsContent value="import" asChild>
-              <Import project={project} />
-            </TabsContent>
-            <TabsContent value="clips" className="h-full" asChild>
-              <Preview />
-            </TabsContent>
-          </div>
-        </Tabs>
-        <div className="mt-auto pt-2 border-t">
-          <Button variant="ghost">Cancel</Button>
-          <Button variant="default" disabled={!isValid} onClick={handleSubmit(onSubmit, onError)}>
-            {selected ? 'Update' : 'Submit'}
-          </Button>
-        </div>
-        <DefaultsDialog project={project} tags={tags} disabled={!!selected} />
-      </Form>
-      <FileExistDialog />
-    </div> */
+export default Builder

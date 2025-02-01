@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { DatalogType } from '@shared/datalogTypes'
 import { ProjectType } from '@shared/projectTypes'
 import NewProjectDialog from '../../../components/newProjectDialog'
-import Builderdialog from '../builder/builderDialog'
+import Builderdialog from '../builder/builder'
 import { Dialog, DialogTrigger } from '@components/ui/dialog'
 import { Plus, Settings2 as SettingsIcon } from 'lucide-react'
 import Settings from '../Settings/Settings'
@@ -19,48 +19,12 @@ import { useDatalogs } from '../hooks/useDatalogs'
 import { useIpcListeners } from '../hooks/useIpcListeners'
 
 function Main() {
-  //const [project, setProject] = useState<ProjectType>()
-  //const [logs, setLogs] = useState<DatalogType[]>()
-  const [logEdit, setLogEdit] = useState<DatalogType>()
-  const [builderOpen, setBuilderOpen] = useState<boolean>(false)
-  const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
-  const [newProjectOpen, setNewProjectOpen] = useState<boolean>(false)
   useIpcNavigation()
   useIpcListeners()
   const navigate = useNavigate()
 
   const { data: project } = useProject()
   const { data: logs } = useDatalogs()
-
-  /*const handleProjectLoad = useCallback((project: ProjectType): void => {
-    console.log('Project loaded', project)
-    setProject(project)
-  }, [])*/
-
-  const handleBuilderClose = useCallback(
-    (open: boolean) => {
-      if (logEdit) setLogEdit(undefined)
-      setBuilderOpen(open)
-    },
-    [logEdit]
-  )
-  /*
-  useEffect(() => {
-    const handleProjectLoaded = (project: ProjectType) => {
-      handleProjectLoad(project)
-    }
-
-    window.mainApi.onProjectLoaded(handleProjectLoaded)
-  }, [handleProjectLoad])
-
-  useEffect(() => {
-    const handleDatalogsLoaded = (datalogs: DatalogType[]) => {
-      console.log('datalogs:', datalogs)
-      setLogs(datalogs)
-    }
-
-    window.mainApi.onDatalogsLoaded(handleDatalogsLoaded)
-  }, [])*/
 
   return (
     <div className="h-[calc(100vh-36px)] border-t">

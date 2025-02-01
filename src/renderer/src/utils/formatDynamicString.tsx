@@ -1,6 +1,6 @@
 import { format, parse } from 'date-fns'
 
-type Tags = {
+export type Tags = {
   day?: number
   date?: string
   projectName?: string

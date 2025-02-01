@@ -6,7 +6,7 @@ import { encryptData } from '../../utils/encryption'
 import { appState } from './state'
 import logger from '../logger'
 import { loadProjectsInRootPath } from '../project/loader'
-import { getMainWindow } from '../../index'
+import { getDatalogWindow } from '../../datalog/datalogWindow'
 import { unloadProject } from '../project/unload'
 
 interface updateProps {
@@ -51,7 +51,7 @@ export const handleRootDirChange = async (): Promise<void> => {
       await unloadProject()
       updateState({ newRootPath })
       await loadProjectsInRootPath()
-      const mainWindow = await getMainWindow()
+      const mainWindow = await getDatalogWindow()
       mainWindow?.webContents.send('project-loaded', {
         newRootPath
       })

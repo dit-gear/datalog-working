@@ -9,21 +9,25 @@ import {
 } from '@shared/shared-types'
 import { DatalogType, OcfClipType, ResponseWithClips, SoundClipType } from '@shared/datalogTypes'
 import { TemplateDirectoryFile, pdfType } from '@shared/projectTypes'
+import { IpcRendererEvent } from 'electron'
 
 declare global {
   interface Window {
     mainApi: {
       onRootPathChanged: (callback: (dirFolderPath: string) => void) => void
-      onOpenModalInDatalog: (callback: (modal: OpenModalTypes) => void) => void
       createNewProject: (projectName: string) => Promise<CreateNewProjectResult>
+      getInitialRoute: () => Promise<string>
+      showDatalogWindow: () => void
       getProject: () => ProjectType
       getDatalogs: () => DatalogType[]
-      onProjectLoaded: (callback: (project: ProjectType) => void) => void
+      onProjectLoaded: (callback: (_, project: ProjectType) => void) => void
+      offProjectLoaded: (handler: (_, project: ProjectType) => void) => void
       updateProject: (project: ProjectToUpdate) => Promise<UpdateProjectResult>
       getFolderPath: () => Promise<ResponseWithString>
       updateDatalog: (datalog: DatalogType, isNew: boolean) => Promise<Response>
       deleteDatalog: (datalog: DatalogType) => Promise<Response>
-      onDatalogsLoaded: (callback: (datalogs: DatalogType[]) => void) => void
+      onDatalogsLoaded: (callback: (_, datalogs: DatalogType[]) => void) => void
+      offDatalogsLoaded: (handler: (_, datalogs: DatalogType[]) => void) => void
       getDefaultClips: (paths: {
         ocf: string[] | null
         sound: string[] | null
@@ -38,12 +42,12 @@ declare global {
         type: 'ocf' | 'sound',
         storedClips: OcfClipType[] | SoundClipType[]
       ) => Promise<ResponseWithClips>
-      showProgress: (show: boolean, progress: number) => void
-      showProgressListener: (callback: (show: boolean, progress: number) => void) => () => void
       onDirectoryLoaded: (
         callback: (event: Electron.IpcRendererEvent, files: TemplateDirectoryFile[]) => void
       ) => void
       openSendWindow: (selection?: DatalogType[]) => void
+      openBuilder: (callback: () => void) => void
+      openSettings: (callback: () => void) => void
       exportPdf: (pdf: pdfType, selection?: DatalogType[]) => void
     }
   }

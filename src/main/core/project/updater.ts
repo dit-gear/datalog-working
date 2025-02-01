@@ -6,7 +6,7 @@ import { appState } from '../app-state/state'
 import { loadProject } from './loader'
 import { updateState } from '../app-state/updater'
 import logger from '../logger'
-import { getMainWindow } from '../../index'
+import { getDatalogWindow } from '../../datalog/datalogWindow'
 
 const getFileName = (filePath: string): string => {
   return filePath.split('/').pop() || filePath
@@ -55,7 +55,7 @@ export const updateProjectFromFile = async () => {
     ...(projectPath && { projectPath }),
     ...(data && { data })
   }
-  const mainWindow = await getMainWindow()
+  const mainWindow = await getDatalogWindow()
   if (mainWindow?.webContents.isLoading()) {
     mainWindow.webContents.once('did-finish-load', () => {
       mainWindow?.webContents.send('project-loaded', loadedProject)

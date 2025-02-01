@@ -1,7 +1,7 @@
 import { loadProject } from './loader'
 import { updateState } from '../app-state/updater'
 import { appState } from '../app-state/state'
-import { getMainWindow } from '../../index'
+import { getDatalogWindow } from '../../datalog/datalogWindow'
 import trayManager from '../menu'
 import {
   closeProjectWatchers,
@@ -27,7 +27,7 @@ export const handleChangeProject = async (selectedProjectPath: string): Promise<
     await initProjectWatchers()
     trayManager.createOrUpdateTray()
 
-    const mainWindow = await getMainWindow()
+    const mainWindow = await getDatalogWindow()
 
     mainWindow?.webContents.send('project-loaded', {
       rootPath: appState.rootPath,

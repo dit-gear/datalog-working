@@ -2,7 +2,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useProject } from '../hooks/useProject'
 import { useDatalogs } from '../hooks/useDatalogs'
-import Builderdialog from './builderDialog'
+import Builder from './builder'
 import { Button } from '@components/ui/button'
 
 function BuilderPage() {
@@ -27,7 +27,7 @@ function BuilderPage() {
         </Button>
       </div>
       {project?.data ? (
-        <Builderdialog
+        <Builder
           project={project.data}
           previousEntries={logs}
           selected={selectedLog}

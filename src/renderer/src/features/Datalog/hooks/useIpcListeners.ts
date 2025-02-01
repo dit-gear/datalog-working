@@ -16,8 +16,8 @@ export function useIpcListeners() {
     window.mainApi.onProjectLoaded(handleProjectLoaded)
 
     return () => {
-      // If your Electron preload supports "off" calls, remove the listener here
-      // window.mainApi.offProjectLoaded(handleProjectLoaded)
+      
+      window.mainApi.offProjectLoaded(handleProjectLoaded)
     }
   }, [queryClient])
 
@@ -30,7 +30,9 @@ export function useIpcListeners() {
     window.mainApi.onDatalogsLoaded(handleDatalogsLoaded)
 
     return () => {
-      // window.mainApi.offDatalogsLoaded(handleDatalogsLoaded)
+      window.mainApi.offDatalogsLoaded(handleDatalogsLoaded)
     }
   }, [queryClient])
 }
+
+// TODO: CHECK REMOVED LISTENER

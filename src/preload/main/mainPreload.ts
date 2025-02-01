@@ -1,7 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { OpenModalTypes } from '../../shared/shared-types'
 import { DatalogType, OcfClipType, SoundClipType } from '@shared/datalogTypes'
-import { pdfType } from '@shared/projectTypes'
+import { pdfType, ProjectType } from '@shared/projectTypes'
 
 // Custom APIs for renderer
 const mainApi = {
@@ -9,27 +8,39 @@ const mainApi = {
     ipcRenderer.on('root-path-changed', (_, dirFolderPath) => {
       callback(dirFolderPath)
     }),
+  getInitialRoute: () => ipcRenderer.invoke('get-route'),
+  showDatalogWindow: (): void => ipcRenderer.send('show-datalog'),
   getProject: () => ipcRenderer.invoke('get-project'),
   getDatalogs: () => ipcRenderer.invoke('get-datalogs'),
-  onProjectLoaded: (callback) =>
-    ipcRenderer.on('project-loaded', (_, project) => {
-      callback(project)
-    }),
-  onOpenModalInDatalog: (callback: (modal: OpenModalTypes) => void) =>
-    ipcRenderer.on('open-modal-datalogWindow', (_, modal: OpenModalTypes) => {
-      callback(modal)
-    }),
+
+  //load project
+  onProjectLoaded: (callback: (project: ProjectType) => void) => {
+    const handler = (_event, project: ProjectType) => callback(project)
+    ipcRenderer.on('project-loaded', handler)
+    return handler
+  },
+  offProjectLoaded: (handler: (event: Electron.IpcRendererEvent, project: ProjectType) => void) => {
+    ipcRenderer.removeListener('project-loaded', handler)
+  },
   createNewProject: (projectName) => ipcRenderer.invoke('create-new-project', projectName),
   updateProject: (project) => ipcRenderer.invoke('update-project', project),
   getFolderPath: () => ipcRenderer.invoke('getFolderPath'),
   updateDatalog: (datalog: DatalogType, isNew: boolean) =>
     ipcRenderer.invoke('update-datalog', datalog, isNew),
   deleteDatalog: (datalog: DatalogType) => ipcRenderer.invoke('delete-datalog', datalog),
+
+  // load datalogs
   onDatalogsLoaded: (callback: (datalogs: DatalogType[]) => void) => {
-    ipcRenderer.on('datalogs-loaded', (_, datalogs: DatalogType[]) => {
-      callback(datalogs)
-    })
+    const handler = (_event, datalogs: DatalogType[]) => callback(datalogs)
+    ipcRenderer.on('datalogs-loaded', handler)
+    return handler
   },
+  offDatalogsLoaded: (
+    handler: (event: Electron.IpcRendererEvent, datalogs: DatalogType[]) => void
+  ) => {
+    ipcRenderer.removeListener('datalogs-loaded', handler)
+  },
+
   getDefaultClips: (paths: {
     ocf: string[] | null
     sound: string[] | null
@@ -44,12 +55,9 @@ const mainApi = {
     type: 'ocf' | 'sound',
     storedClips: OcfClipType[] | SoundClipType[]
   ) => ipcRenderer.invoke('removeClips', paths, type, storedClips),
-  showProgressListener: (callback) => {
-    const handler = (_, show, progress) => callback(show, progress)
-    ipcRenderer.on('show-progress', handler)
-    return () => ipcRenderer.removeListener('show-progress', handler)
-  },
   openSendWindow: (selection?: DatalogType[]) => ipcRenderer.send('open-send-window', selection),
+  openBuilder: (callback: () => void) => ipcRenderer.on('open-builder', () => callback()),
+  openSettings: (callback: () => void) => ipcRenderer.on('open-settings', () => callback()),
   exportPdf: (pdf: pdfType, selection?: DatalogType[]) =>
     ipcRenderer.send('pdf-to-export', pdf, selection)
 }
