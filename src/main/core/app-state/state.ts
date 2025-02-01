@@ -1,5 +1,10 @@
 import { app, BrowserWindow } from 'electron'
-import { ProjectRootType, emailType, ProjectInRootMenuItem } from '@shared/projectTypes'
+import {
+  ProjectRootType,
+  emailType,
+  ProjectInRootMenuItem,
+  ProjectType
+} from '@shared/projectTypes'
 import { DatalogDynamicType, DatalogType } from '@shared/datalogTypes'
 
 const datalogStore = new Map<string, DatalogDynamicType>()
@@ -57,6 +62,14 @@ class AppState {
 
   get appPath(): string {
     return this._appPath
+  }
+
+  get project(): ProjectType {
+    return {
+      rootPath: this._rootPath,
+      ...(this._activeProjectPath && { projectPath: this._activeProjectPath }),
+      ...(this._activeProject && { data: this._activeProject })
+    }
   }
 }
 

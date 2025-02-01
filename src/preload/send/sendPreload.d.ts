@@ -11,9 +11,5 @@ declare global {
       getMultipleFileContent: (filePaths: string[]) => Promise<Record<string, string>>
       sendEmail: (email: emailType) => Promise<Response>
     }
-    sharedApi: {
-      onShowOverwriteConfirmation: (callback: (filePath: string) => void) => void
-      sendOverwriteResponse: (shouldOverwrite: boolean) => void
-    }
   }
 }

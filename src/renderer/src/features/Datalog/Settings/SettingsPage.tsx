@@ -7,7 +7,12 @@ function SettingsPage() {
   const navigate = useNavigate()
   const { data: project, isLoading } = useProject()
 
-  if (isLoading || !project?.data) {
+  if (isLoading) {
+    return null
+  }
+
+  if (!project?.data) {
+    navigate('/new-project')
     return null
   }
 

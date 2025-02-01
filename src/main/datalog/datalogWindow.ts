@@ -3,43 +3,26 @@ import icon from '../../../resources/appIconlight.png?asset'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import { openWindow } from '../utils/open-window'
+import { appState, datalogs } from '../core/app-state/state'
 
 let mainWindow: BrowserWindow | null = null
 
 interface getDatalogWindowProps {
+  update?: boolean
   ensureOpen?: boolean
   navigate?: 'builder' | 'settings' | 'new-project'
 }
 
-/*function waitForNavigationComplete(navigationId, timeout = 5000) {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      ipcMain.removeListener('navigation-complete', onNavigationComplete)
-      reject(new Error('Navigation timeout'))
-    }, timeout)
-
-    const onNavigationComplete = (event, receivedId) => {
-      if (receivedId === navigationId) {
-        clearTimeout(timer)
-        ipcMain.removeListener('navigation-complete', onNavigationComplete)
-        resolve()
-      }
-    }
-
-    ipcMain.once('navigation-complete', onNavigationComplete)
-
-  })
-}*/
-
 // Getter function to access mainWindow
 export async function getDatalogWindow({
+  update,
   ensureOpen,
   navigate
 }: getDatalogWindowProps = {}): Promise<BrowserWindow | null> {
   if (!mainWindow && (ensureOpen || navigate)) await createWindow(navigate)
 
   if (mainWindow) {
-    const handleNavigation = () => {
+    const handleActions = () => {
       if (navigate) {
         switch (navigate) {
           case 'builder':
@@ -56,14 +39,14 @@ export async function getDatalogWindow({
             console.warn(`Unknown navigate value: ${navigate}`)
         }
       }
+      if (update) {
+        mainWindow?.webContents.send('project-loaded', appState.project)
+        mainWindow?.webContents.send('datalogs-loaded', Array.from(datalogs().values()))
+      }
+
       if (mainWindow && (ensureOpen || navigate)) openWindow(mainWindow)
     }
-    if (mainWindow.webContents.isLoading()) {
-      //
-    } else {
-      // If already loaded, handle navigation immediately
-      handleNavigation()
-    }
+    if (!mainWindow.webContents.isLoading()) handleActions()
   }
   return mainWindow
 }

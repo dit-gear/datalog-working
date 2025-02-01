@@ -14,7 +14,6 @@ import { IpcRendererEvent } from 'electron'
 declare global {
   interface Window {
     mainApi: {
-      onRootPathChanged: (callback: (dirFolderPath: string) => void) => void
       createNewProject: (projectName: string) => Promise<CreateNewProjectResult>
       getInitialRoute: () => Promise<string>
       showDatalogWindow: () => void
@@ -42,9 +41,6 @@ declare global {
         type: 'ocf' | 'sound',
         storedClips: OcfClipType[] | SoundClipType[]
       ) => Promise<ResponseWithClips>
-      onDirectoryLoaded: (
-        callback: (event: Electron.IpcRendererEvent, files: TemplateDirectoryFile[]) => void
-      ) => void
       openSendWindow: (selection?: DatalogType[]) => void
       openBuilder: (callback: () => void) => void
       removeOpenBuilder: (callback: () => void) => void
@@ -53,6 +49,10 @@ declare global {
       openNewProject: (callback: () => void) => void
       removeOpenNewProject: (callback: () => void) => void
       exportPdf: (pdf: pdfType, selection?: DatalogType[]) => void
+    }
+    sharedApi: {
+      onShowOverwriteConfirmation: (callback: (filePath: string) => void) => void
+      sendOverwriteResponse: (shouldOverwrite: boolean) => void
     }
   }
 }

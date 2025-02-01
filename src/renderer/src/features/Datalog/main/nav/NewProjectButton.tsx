@@ -1,24 +1,17 @@
-import { Button } from '@components/ui/button'
-import { Plus, Clapperboard } from 'lucide-react'
 import { useProject } from '../../hooks/useProject'
 import { useNavigate } from 'react-router-dom'
+import EmptyStateCard from '@components/EmptyStateCard'
 
 const NewProjectButton = () => {
-  const { data: project } = useProject()
+  const { data: project, isLoading } = useProject()
   const navigate = useNavigate()
-  if (project?.data) {
+  if (!project?.data && !isLoading) {
     return (
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-3 items-center">
-          <Clapperboard className="size-16" />
-          <h1 className="text-xl font-bold">No Project Loaded</h1>
-        </div>
-
-        <Button onClick={() => navigate('/new-project')}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Project
-        </Button>
-      </div>
+      <EmptyStateCard
+        title="No project Loaded"
+        buttonLabel="New Project"
+        buttonAction={() => navigate('/new-project')}
+      />
     )
   } else return null
 }

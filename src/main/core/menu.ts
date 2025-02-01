@@ -1,6 +1,5 @@
 import { Menu, app, Tray } from 'electron'
 import { getDatalogWindow } from '../datalog/datalogWindow'
-import { OpenModalTypes } from '@shared/shared-types'
 import { ProjectRootType, ProjectInRootMenuItem } from '@shared/projectTypes'
 import { appState } from './app-state/state'
 import { handleChangeProject } from './project/manager'
@@ -9,12 +8,16 @@ import { createEditorWindow } from '../editor/editorWindow'
 import { createSendWindow } from '../send/sendWindow'
 import { exportPdf } from './export/exportPdf'
 import trayIcon from '../../../resources/trayIcon.png?asset'
+import logger from './logger'
 
-// pass active project!
-const buildContextMenu = (
-  projects: ProjectInRootMenuItem[] | null,
+interface buildContextMenuProps {
+  projects: ProjectInRootMenuItem[] | null
   activeProject: ProjectRootType | null
-): Menu => {
+}
+// pass active project!
+const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): Menu => {
+  logger.debug('creating menu...')
+
   return Menu.buildFromTemplate([
     {
       id: 'active',
@@ -106,7 +109,10 @@ class TrayManager {
   private tray: Electron.Tray | null = null
 
   createOrUpdateTray(): void {
-    const contextMenu = buildContextMenu(appState.projectsInRootPath, appState.activeProject)
+    const contextMenu = buildContextMenu({
+      projects: appState.projectsInRootPath,
+      activeProject: appState.activeProject
+    })
     if (!this.tray) {
       this.tray = new Tray(trayIcon) // Create the tray if it doesn't exist
     }

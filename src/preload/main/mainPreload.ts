@@ -4,10 +4,6 @@ import { pdfType, ProjectType } from '@shared/projectTypes'
 
 // Custom APIs for renderer
 const mainApi = {
-  onRootPathChanged: (callback) =>
-    ipcRenderer.on('root-path-changed', (_, dirFolderPath) => {
-      callback(dirFolderPath)
-    }),
   getInitialRoute: () => ipcRenderer.invoke('get-route'),
   showDatalogWindow: (): void => ipcRenderer.send('show-datalog'),
   getProject: () => ipcRenderer.invoke('get-project'),

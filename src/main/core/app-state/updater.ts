@@ -8,6 +8,7 @@ import logger from '../logger'
 import { loadProjectsInRootPath } from '../project/loader'
 import { getDatalogWindow } from '../../datalog/datalogWindow'
 import { unloadProject } from '../project/unload'
+import { closeRootWatcher, initRootWatcher } from './watchers/rootWatcher'
 
 interface updateProps {
   newRootPath?: string
@@ -48,13 +49,11 @@ export const handleRootDirChange = async (): Promise<void> => {
       if (!fs.existsSync(newRootPath)) {
         fs.mkdirSync(newRootPath)
       }
-      await unloadProject()
-      updateState({ newRootPath })
+      await Promise.allSettled([unloadProject(), closeRootWatcher()])
+      await updateState({ newRootPath })
       await loadProjectsInRootPath()
-      const mainWindow = await getDatalogWindow()
-      mainWindow?.webContents.send('project-loaded', {
-        newRootPath
-      })
+      await initRootWatcher()
+      getDatalogWindow({ update: true })
     } catch (error) {
       logger.error(`Error changing root: ${error}`)
     }

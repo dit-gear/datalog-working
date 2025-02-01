@@ -154,7 +154,7 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
 }
 
 export const loadProjectsInRootPath = async (): Promise<void> => {
-  logger.debug('loadProjectInRootPath started')
+  logger.debug('loadProjectsInRootPath started')
   const projectPath = appState.activeProjectPath
 
   const yamlFiles = await findFilesByType(appState.rootPath, 'yaml', {

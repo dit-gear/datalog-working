@@ -8,16 +8,13 @@ import SettingsButton from './nav/SettingsButton'
 import NewProjectButton from './nav/NewProjectButton'
 import { useIpcNavigation } from '../hooks/useIpcNavigation'
 import { useProject } from '../hooks/useProject'
-import { useDatalogs } from '../hooks/useDatalogs'
 import { useIpcListeners } from '../hooks/useIpcListeners'
-import { Loader2 } from 'lucide-react'
 
 function Main() {
   useIpcNavigation()
   useIpcListeners()
 
   const { data: project } = useProject()
-  const { data: logs, isLoading } = useDatalogs()
 
   return (
     <div>
@@ -33,13 +30,8 @@ function Main() {
             <BuilderButton />
             <SettingsButton />
           </div>
-          {logs && (
-            <div className="grow">
-              <Table logs={logs} />
-            </div>
-          )}
-          <div className="flex flex-col mt-60 place-items-center gap-4">
-            {isLoading && <Loader2 className="animate-spin" />}
+          <div className="grow">
+            <Table />
             <NewProjectButton />
           </div>
         </div>

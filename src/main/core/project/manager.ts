@@ -22,7 +22,7 @@ export const handleChangeProject = async (selectedProjectPath: string): Promise<
     appState.projectsInRootPath = updatedProjects
     await initProjectWatchers()
     trayManager.createOrUpdateTray()
-
+    getDatalogWindow({ update: true })
     logger.debug('handleChangeProject completed successfully')
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'

@@ -1,57 +1,26 @@
-import React, { useMemo } from 'react'
-import DataTable from './DataTable'
-import { DatalogType } from '@shared/datalogTypes'
-import { LogSum } from './types'
-import { Columns } from './Column'
-import { Datalog } from '@shared/datalogClass'
+import TableConstructor from './TableConstructor'
+import EmptyStateCard from '@components/EmptyStateCard'
 import { useNavigate } from 'react-router-dom'
+import { useDatalogs } from '../../hooks/useDatalogs'
+import { useProject } from '../../hooks/useProject'
 
-interface TableProps {
-  logs: DatalogType[]
-}
-
-export class PublicDatalog extends Datalog {
-  public accessRaw: DatalogType // Override raw as public
-
-  constructor(data: DatalogType) {
-    super(data)
-    this.accessRaw = data // Reassign explicitly because it's private in the base class
-  }
-}
-
-const Table: React.FC<TableProps> = React.memo(({ logs }) => {
+const Table = () => {
   const navigate = useNavigate()
-  const classLogs = React.useMemo(() => logs.map((log) => new PublicDatalog(log)), [logs])
+  const { data: logs } = useDatalogs()
+  const { data: project } = useProject()
 
-  const handleDelete = async (datalog: DatalogType) => {
-    try {
-      await window.mainApi.deleteDatalog(datalog)
-    } catch (error) {
-      console.error(error)
-    }
-  }
+  if (!project?.data) return null
 
-  const handleEdit = (datalog: DatalogType) => navigate(`/builder/${datalog.id}`)
+  if (!logs.length)
+    return (
+      <EmptyStateCard
+        title="No Logs Loaded"
+        buttonLabel="New Shooting Day"
+        buttonAction={() => navigate('/builder')}
+      />
+    )
 
-  const handlers = useMemo(() => ({ handleDelete, handleEdit }), [handleDelete, handleEdit])
-
-  const DatalogRows = (logs: PublicDatalog[]): LogSum[] => {
-    return logs.map((data) => ({
-      id: data.id,
-      day: data.day,
-      date: data.date,
-      unit: data.unit,
-      ocfSize: data.ocf.size(),
-      proxySize: data.proxy.size(),
-      duration: data.ocf.duration(),
-      reels: data.ocf.reels({ rangeMerging: true }),
-      raw: data.accessRaw
-    }))
-  }
-
-  const columns = useMemo(() => Columns(handlers), [handlers])
-
-  return <DataTable columns={columns} data={DatalogRows(classLogs)} />
-})
+  return <TableConstructor logs={logs} />
+}
 
 export default Table

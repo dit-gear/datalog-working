@@ -11,7 +11,7 @@ const SettingsButton = () => {
       variant="secondary"
       size="icon"
       onClick={() => navigate('/settings')}
-      disabled={!project}
+      disabled={!project?.data}
     >
       <SettingsIcon className="h-4 w-4" />
     </Button>
