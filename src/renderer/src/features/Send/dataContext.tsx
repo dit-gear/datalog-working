@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { emailType, pdfType, TemplateDirectoryFile, ProjectRootType } from '@shared/projectTypes'
+import { emailType, pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
 import { DataObjectType } from './types'
 import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 
@@ -9,6 +9,7 @@ type DataContextType = {
   projectEmails: emailType[]
   projectPdfs: pdfType[]
   projectTemplates: TemplateDirectoryFile[]
+  projectName: string
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined)
@@ -18,6 +19,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [projectEmails, setProjectEmails] = useState<emailType[]>([])
   const [projectPdfs, setProjectPdfs] = useState<pdfType[]>([])
   const [projectTemplates, setProjectTemplates] = useState<TemplateDirectoryFile[]>([])
+  const [projectName, setProjectName] = useState<string>('')
   const [data, setData] = useState<DataObjectType>()
 
   useEffect(() => {
@@ -25,6 +27,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       try {
         const fetchedData = await window.sendApi.fetchInitialData()
 
+        setProjectName(fetchedData.project.project_name)
         if (fetchedData.project.emails) setProjectEmails(fetchedData.project.emails)
         if (fetchedData.project.pdfs) setProjectPdfs(fetchedData.project.pdfs)
         if (fetchedData.selectedEmail) setDefaultSelectedEmail(fetchedData.selectedEmail)
@@ -50,7 +53,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <DataContext.Provider
-      value={{ data, defaultSelectedEmail, projectEmails, projectPdfs, projectTemplates }}
+      value={{
+        data,
+        defaultSelectedEmail,
+        projectEmails,
+        projectPdfs,
+        projectTemplates,
+        projectName
+      }}
     >
       {children}
     </DataContext.Provider>

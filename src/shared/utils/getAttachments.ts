@@ -25,15 +25,3 @@ export function getPdfAttachments(
   // Return either the PDF objects or their names
   return getNamesOnly ? matchedPdfs.map((pdf) => pdf.name) : matchedPdfs
 }
-
-interface Option {
-  label: string
-  value: string
-}
-
-export function mapPdfTypesToOptions(pdfs: pdfType[]): Option[] {
-  return pdfs.map((pdf) => ({
-    label: `${pdf.name} (${pdf.output_name_pattern})`, // Use the `name` from pdfType as the label
-    value: pdf.id // Use the `id` from pdfType as the value
-  }))
-}

@@ -24,7 +24,6 @@ import {
 } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { getFileName } from '@renderer/utils/formatString'
 import { Switch } from '@components/ui/switch'
 import { nanoid } from 'nanoid/non-secure'
 
@@ -64,7 +63,7 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
   const assignIndex = (): number => currentIndex++
 
   const onSubmit: SubmitHandler<pdfWitoutIDType> = (data): void => {
-    console.log(data)
+    console.log('emailedit:', emailEdit?.pdf.id)
     if (emailEdit !== null) {
       update(emailEdit.index, { id: emailEdit.pdf.id, ...data })
     } else {
@@ -74,7 +73,8 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
   }
   useEffect(() => {
     if (emailEdit) {
-      reset(emailEdit.pdf)
+      const { id, ...rest } = emailEdit.pdf
+      reset(rest)
       setOpen(true)
     }
   }, [emailEdit])

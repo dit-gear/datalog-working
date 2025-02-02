@@ -1,18 +1,25 @@
-import { TabsTrigger } from '@components/ui/tabs'
 import { FormField, FormItem, FormControl } from '@components/ui/form'
 import { Select, SelectContent, SelectItem } from '@components/ui/select'
 import { SelectTrigger } from '@components/SelectIconTrigger'
 import { useDataContext } from '../dataContext'
 import { useFormContext } from 'react-hook-form'
 
-const EmailTab = () => {
+interface EmailTabProps {
+  active: boolean
+  onTabClick: (id: string, type: 'email') => void
+}
+const EmailTab = ({ active, onTabClick }: EmailTabProps) => {
   const { projectTemplates } = useDataContext()
-  const { control } = useFormContext()
+  const { control, getValues } = useFormContext()
 
   return (
-    <TabsTrigger value="email" className="border-t border-l border-r rounded-t-lg px-4 pb-2">
-      <span className="flex gap-4 h-4 items-center">
-        Email Preview
+    <div
+      className={`${active ? 'bg-accent' : 'bg-background'} border-t border-l border-r rounded-t-md pl-4  pb-2 text-sm ring-offset-background transition-colors hover:bg-accent`}
+    >
+      <span className="flex">
+        <button onClick={() => onTabClick(getValues('react'), 'email')} className="pr-4">
+          Email Preview
+        </button>
         <FormField
           control={control}
           name="react"
@@ -21,11 +28,12 @@ const EmailTab = () => {
               <FormControl>
                 <Select
                   defaultValue={field.value}
-                  onValueChange={(value) => field.onChange(value)} // Update the form state
+                  onValueChange={(value) => {
+                    field.onChange(value), onTabClick(value, 'email')
+                  }}
                 >
                   <SelectTrigger />
                   <SelectContent>
-                    <SelectItem value="plain-text">Plain-text</SelectItem>
                     {projectTemplates
                       .filter((template) => template.type === 'email')
                       .map((template) => (
@@ -40,7 +48,7 @@ const EmailTab = () => {
           )}
         />
       </span>
-    </TabsTrigger>
+    </div>
   )
 }
 

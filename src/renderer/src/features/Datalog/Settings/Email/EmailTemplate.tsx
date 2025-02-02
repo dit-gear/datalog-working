@@ -28,7 +28,8 @@ import MultiSelect from '@components/MultiSelect'
 import { Button } from '@components/ui/button'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Switch } from '@components/ui/switch'
-import { getPdfAttachments, mapPdfTypesToOptions } from '@shared/utils/getAttachments'
+import { getPdfAttachments } from '@shared/utils/getAttachments'
+import { mapPdfTypesToOptions } from '@renderer/utils/mapPdfTypes'
 
 interface EmailTemplateProps {
   append: (email: emailType) => void

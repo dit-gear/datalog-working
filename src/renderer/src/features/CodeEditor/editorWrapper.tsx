@@ -3,14 +3,14 @@ import Editor, { EditorHandle } from './editor'
 import { FileQuestion } from 'lucide-react'
 import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from '@components/ui/resizable'
 import { Button } from '@components/ui/button'
-import { DatabaseIcon, SearchCodeIcon, SettingsIcon, Loader2, XIcon } from 'lucide-react'
+import { DatabaseIcon, SearchCodeIcon, SettingsIcon } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem
 } from '@components/ui/dropdown-menu'
-import Preview from './preview'
+import Preview from '../../components/Preview'
 import { CustomTab } from '@components/CustomTab'
 import { LoadedFile } from '@shared/shared-types'
 import { handleApiResponse } from '@renderer/utils/handleApiResponse'

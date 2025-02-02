@@ -8,14 +8,15 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { Button } from '@components/ui/button'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@components/ui/resizable'
 import { emailType, emailZodObj } from '@shared/projectTypes'
-import { getPdfAttachments, mapPdfTypesToOptions } from '@shared/utils/getAttachments'
+import { getPdfAttachments } from '@shared/utils/getAttachments'
+import { mapPdfTypesToOptions } from '@renderer/utils/mapPdfTypes'
 import { useDataContext } from './dataContext'
 import { Previews } from './preview/previews'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Send as Sendicon, Check } from 'lucide-react'
 import { Toaster } from '@components/ui/toaster'
-import { ToastAction } from '@components/ui/toast'
 import { useToast } from '@components/lib/hooks/use-toast'
+import { useTags } from './utils/useTags'
 
 interface SendProps {
   defaults: emailType | null
@@ -23,6 +24,7 @@ interface SendProps {
 
 const Send = ({ defaults }: SendProps) => {
   const { projectPdfs } = useDataContext()
+  const tags = useTags()
   const [sentSuccess, setSendSuccess] = useState<boolean>(false)
   const { toast } = useToast()
   const form = useForm<emailType>({
@@ -117,7 +119,8 @@ const Send = ({ defaults }: SendProps) => {
                         menuPosition="fixed"
                         {...field}
                         value={mapPdfTypesToOptions(
-                          getPdfAttachments(projectPdfs, field.value ?? [])
+                          getPdfAttachments(projectPdfs, field.value ?? []),
+                          tags ?? undefined
                         )}
                         onChange={(newValues) => {
                           const updatedAttachments = newValues
@@ -198,7 +201,5 @@ const Send = ({ defaults }: SendProps) => {
     </div>
   )
 }
-
-//<div className="min-h-[calc(100vh-36px)] border-t flex flex-col">
 
 export default Send

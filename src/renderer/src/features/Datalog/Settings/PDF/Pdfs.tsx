@@ -30,7 +30,8 @@ const Pdfs: React.FC<PdfProps> = ({ scope, templates }) => {
   const { control } = useFormContext<formSchemaType>()
   const { fields, append, remove, update } = useFieldArray({
     control,
-    name: `${scope}_pdfs`
+    name: `${scope}_pdfs`,
+    keyName: 'fieldId'
   })
 
   const [pdfEdit, setPdfEdit] = useState<pdfEditType | null>(null)
@@ -63,7 +64,7 @@ const Pdfs: React.FC<PdfProps> = ({ scope, templates }) => {
                   <p>Output Name:</p>
                   <p>{pdf.output_name_pattern}</p>
                   <p>React template:</p>
-                  <p>{getFileName(pdf.react)}</p>
+                  <p>{pdf.react ? getFileName(pdf.react) : pdf.react}</p>
                   <p>Show in menu:</p>
                   <p className="text-white">{pdf.enabled && '✔'}</p>
                 </AccordionContent>
