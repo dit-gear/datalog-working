@@ -144,14 +144,6 @@ const EditorWrapper = () => {
                 <DatabaseIcon className="h-4 w-4" />
               </Button>
             </NewMockdataDialog>
-            <Button
-              size="sm"
-              variant="secondary"
-              className="rounded"
-              onClick={() => editorRef.current?.openFind()}
-            >
-              <SearchCodeIcon className="h-4 w-4" />
-            </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

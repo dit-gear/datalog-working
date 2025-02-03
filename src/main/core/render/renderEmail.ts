@@ -8,6 +8,7 @@ import { getPdfAttachments } from '@shared/utils/getAttachments'
 import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 import { WorkerRequest } from './types'
 import logger from '../logger'
+import { getFileName } from '@shared/utils/formatDynamicString'
 
 interface renderEmailProps {
   email: emailType
@@ -39,6 +40,7 @@ export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
             id: email.name,
             code,
             type: emailpath.type,
+            message: email.message,
             dataObject
           }
           const renderedEmail = await emailWorker.render(req)
@@ -64,12 +66,18 @@ export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
             id: att.id,
             code: codepdf,
             type: pdfpath.type,
+            message: email.message,
             dataObject
           }
           const renderedPdf = await pdfWorker.render(reqpdf)
           attachmentsToSend.push({
             content: renderedPdf.code,
-            filename: att.output_name_pattern
+            filename: getFileName({
+              selection,
+              outputName: att.output_name_pattern,
+              fallbackName: att.name,
+              projectName: appState.activeProject!.project_name!
+            })
           })
         }
       }

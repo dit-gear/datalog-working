@@ -15,12 +15,13 @@ type dataobjectType = {
 interface PreviewWorkerRequest {
   code: string
   type: 'email' | 'pdf'
+  message?: string
   dataObject: dataobjectType
   id: number
 }
 
 self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void> => {
-  const { code, type, dataObject, id } = event.data
+  const { code, type, message, dataObject, id } = event.data
   let components: Record<string, unknown> = {}
 
   console.log(dataObject)
@@ -102,11 +103,13 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
       return module.exports.default;
     `
 
-    const Component = new Function('React', ...Object.keys(components), 'data', wrappedCode)(
-      React,
-      ...Object.values(components),
-      data
-    )
+    const Component = new Function(
+      'React',
+      ...Object.keys(components),
+      'data',
+      'message',
+      wrappedCode
+    )(React, ...Object.values(components), data, message)
 
     if (type === 'email') {
       //const renderedContent = ReactDOMServer.renderToString(React.createElement(Component))

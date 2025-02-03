@@ -6,7 +6,7 @@ import { transform } from 'sucrase'
 import { WorkerRequest } from './types'
 
 parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
-  const { code, type, dataObject, id } = event
+  const { code, type, message, dataObject, id } = event
   let components: Record<string, unknown> = {}
   let pdf
   let render
@@ -102,6 +102,7 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
       React,
       ...components,
       data,
+      message,
       // If PDF is needed, inject the preloaded pdf function.
       ...(pdf ? { pdf } : {}),
       // Provide a minimal console.

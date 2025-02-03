@@ -53,7 +53,7 @@ export const Header = () => {
   }, [])
 
   const sendToWorker = useCallback(
-    (code: string, type: 'email' | 'pdf') => {
+    (code: string, type: 'email' | 'pdf', message: string) => {
       try {
         if (!previewWorkerRef.current) throw new Error('Worker not initialized')
         if (!data) throw new Error('No project data available')
@@ -61,6 +61,7 @@ export const Header = () => {
         const request = {
           code: code,
           type: type,
+          message: message,
           dataObject: {
             project: data.project,
             selection: data.selection,
@@ -81,7 +82,7 @@ export const Header = () => {
       const template = getReactTemplate(defaultSelectedEmail.react, projectTemplates, 'email')
       if (template) {
         fetchFileContent(template.path).then((content) => {
-          sendToWorker(content, 'email')
+          sendToWorker(content, 'email', '')
         })
       }
     }
