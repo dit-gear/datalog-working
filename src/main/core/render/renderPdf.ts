@@ -13,7 +13,7 @@ interface renderPdfProps {
   pdf: pdfType
   selection?: DatalogType | DatalogType[]
 }
-export const renderPdf = async ({ pdf, selection }: renderPdfProps) => {
+export const renderPdf = async ({ pdf, selection }: renderPdfProps): Promise<string> => {
   const project = appState.activeProject
   if (!project) throw new Error('No project')
   const datalogs = Array.from(datalogStore().values())
@@ -41,7 +41,7 @@ export const renderPdf = async ({ pdf, selection }: renderPdfProps) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown error'
     logger.error(`Error in renderPdf: ${message}`)
-    return
+    throw new Error(message)
   } finally {
     pdfWorker.terminate()
   }

@@ -1,5 +1,5 @@
 import { pdfType } from '@shared/projectTypes'
-import replaceTags, { Tags } from './formatDynamicString'
+import replaceTags, { Tags } from '../../../shared/utils/formatDynamicString'
 
 interface Option {
   label: string

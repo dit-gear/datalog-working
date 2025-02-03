@@ -6,7 +6,7 @@ import DatePicker from '@components/DatePicker'
 import { Button } from '@components/ui/button'
 import { Label } from '@components/ui/label'
 import { Pencil } from 'lucide-react'
-import replaceTags from '../../../../utils/formatDynamicString'
+import replaceTags from '../../../../../../shared/utils/formatDynamicString'
 import { ProjectRootType } from '@shared/projectTypes'
 
 interface Nameprops {

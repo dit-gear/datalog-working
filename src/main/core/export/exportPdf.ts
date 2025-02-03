@@ -4,6 +4,8 @@ import { renderPdf } from '../render/renderPdf'
 import { pdfType } from '@shared/projectTypes'
 import { DatalogType } from '@shared/datalogTypes'
 import logger from '../logger'
+import replaceTags, { Tags } from '@shared/utils/formatDynamicString'
+import { appState } from '../app-state/state'
 
 interface exportPdfProps {
   pdf: pdfType
@@ -12,11 +14,6 @@ interface exportPdfProps {
 
 export const exportPdf = async ({ pdf, selection }: exportPdfProps) => {
   try {
-    const res = await renderPdf({ pdf, selection })
-    if (!res) {
-      throw new Error('Failed to render PDF')
-    }
-
     // Open file dialog to get the save location
     const { filePath } = await dialog.showSaveDialog({
       title: `Save ${pdf.name} PDF`,
@@ -33,9 +30,12 @@ export const exportPdf = async ({ pdf, selection }: exportPdfProps) => {
       return
     }
 
-    // Decode the base64 string and save to the selected location
-    const pdfBuffer = Buffer.from(res, 'base64')
-    await fs.writeFile(filePath, pdfBuffer)
+    const res = await renderPdf({ pdf, selection })
+    if (!res) {
+      throw new Error('Failed to render PDF')
+    }
+
+    await fs.writeFile(filePath, Buffer.from(res))
 
     const successotification = new Notification({
       title: 'Export Complete',

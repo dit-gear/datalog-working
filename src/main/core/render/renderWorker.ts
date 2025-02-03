@@ -1,7 +1,7 @@
 import { parentPort } from 'worker_threads'
 import { createContext, Script } from 'vm'
 import React from 'react'
-import { render } from '@react-email/render'
+//import { render } from '@react-email/render'
 import { transform } from 'sucrase'
 import { WorkerRequest } from './types'
 
@@ -9,10 +9,16 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
   const { code, type, dataObject, id } = event
   let components: Record<string, unknown> = {}
   let pdf
+  let render
+
+  const cleanedCode = code.replace(/^\s*import\s.*?;$/gm, '')
 
   try {
-    const { DataObject } = await import('@shared/utils/datalog-methods')
+    // Import shared data class.
+    const { DataObject } = await import('@shared/datalogClass')
+
     if (type === 'email') {
+      // Dynamically import individual email components.
       const {
         Html,
         Head,
@@ -55,19 +61,12 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
         Text
       }
     } else if (type === 'pdf') {
-      const {
-        Document,
-        Page,
-        View,
-        Text,
-        Link,
-        Image,
-        Font,
-        StyleSheet,
-        PDFViewer,
-        pdf: importedpdf
-      } = await import('@react-pdf/renderer')
-      pdf = importedpdf
+      // Preload the PDF module and destructure its components.
+      const pdfModule = await import('@react-pdf/renderer')
+      pdf = pdfModule.pdf // Preloaded pdf rendering function
+      render = pdfModule.renderToBuffer
+
+      const { Document, Page, View, Text, Link, Image, Font, StyleSheet } = pdfModule
 
       components = {
         Document,
@@ -77,68 +76,62 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
         Link,
         Image,
         Font,
-        StyleSheet,
-        PDFViewer
+        StyleSheet
       }
     }
+
+    // Create the data object.
     const data = new DataObject(dataObject.project, dataObject.selection, dataObject.all)
 
-    const transpiledCode = transform(code, {
+    // Transpile user code.
+    const transpiledCode = transform(cleanedCode, {
       transforms: ['typescript', 'jsx', 'imports'],
       preserveDynamicImport: true
     }).code
 
+    // Wrap the code to simulate a module environment.
     const wrappedCode = `
       const module = { exports: {} };
       const exports = module.exports;
       ${transpiledCode}
       module.exports.default;
     `
-    // Create a sandbox environment. It's important not to expose Node APIs.
+
+    // Construct the sandbox with injected modules and values.
     const sandbox: Record<string, unknown> = {
-      // Provide the globals needed by the code
       React,
       ...components,
       data,
-      // Provide a console if needed, or omit it entirely
-      console: {
-        log: (...args: unknown[]) => {
-          // Restrict logging or pipe it to main process logs if desired
-          // Or leave this empty to avoid logging from user code
-        }
-      }
-      // No require, no process, no Node globals
+      // If PDF is needed, inject the preloaded pdf function.
+      ...(pdf ? { pdf } : {}),
+      // Provide a minimal console.
+      console: { log: () => {} }
     }
 
-    // Create a context from the sandbox
+    // Create a secure context.
     const context = createContext(sandbox, {
       name: 'secure-sandbox',
-      origin: 'electron://backend', // Just a label
-      codeGeneration: {
-        strings: true,
-        wasm: false
-      }
+      origin: 'electron://backend',
+      codeGeneration: { strings: true, wasm: false }
     })
 
-    // Create and run a script in the secure context
+    // Create and run the script in the secure sandbox.
     const script = new Script(wrappedCode, { filename: 'UserComponent.js' })
-    const Component = script.runInContext(context, {
-      timeout: 1000 // execution timeout (in ms)
-    })
+    const Component = script.runInContext(context, { timeout: 1000 })
 
-    // `Component` should now be the user’s default exported React component
     if (!Component) {
       throw new Error('No component was exported by the user code')
     }
 
+    // Render output based on type.
     if (type === 'email') {
-      // For email, we render to an HTML string
-      const renderedContent = await render(React.createElement(Component), { plainText: false })
+      const renderedContent = await render(React.createElement(Component), {
+        plainText: false
+      })
       parentPort?.postMessage({ id, code: renderedContent })
     } else if (type === 'pdf') {
-      // For PDF, we create a string representation of PDF document
-      const pdfDocument = await pdf(React.createElement(Component)).toBuffer()
-      parentPort?.postMessage({ id, code: pdfDocument.toString('base64') })
+      const pdfDocument = await render(React.createElement(Component))
+      parentPort?.postMessage({ id, code: pdfDocument })
     }
   } catch (error) {
     console.error('Error in render-worker', error)

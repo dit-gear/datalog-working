@@ -7,7 +7,7 @@
     "src/preload/**/*.d.ts",
     "src/shared/**/*.ts",
     "src/main/core/app-state/state.tsx"
-, "src/shared/utils/getAttachments.ts", "src/shared/utils/getLatestDatalog.ts", "src/shared/utils/format-copies.ts"],
+, "src/shared/utils/getAttachments.ts", "src/shared/utils/getLatestDatalog.ts", "src/shared/utils/format-copies.ts", "src/shared/utils/formatDynamicString.tsx"],
   "compilerOptions": {
     "moduleResolution": "bundler",
     "composite": true,
