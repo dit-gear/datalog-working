@@ -1,3 +1,5 @@
+import { DatalogType } from '@shared/datalogTypes'
+import { getFirstAndLastDatalogs } from '@shared/utils/datalog-merge'
 import { format, parse } from 'date-fns'
 
 export type Tags = {
@@ -70,3 +72,39 @@ function replaceTags(template: string, tags: Tags): string {
 }
 
 export default replaceTags
+
+const tags = (log: DatalogType, projectName: string): Tags => {
+  return {
+    day: log.day,
+    date: log.date,
+    projectName: projectName,
+    unit: log.unit,
+    log: log.id
+  }
+}
+
+interface getFileNameProps {
+  selection: DatalogType | DatalogType[] | undefined
+  outputName: string
+  fallbackName: string
+  projectName: string
+}
+export const getFileName = ({
+  selection,
+  outputName,
+  fallbackName,
+  projectName
+}: getFileNameProps): string => {
+  if (!selection) return fallbackName
+
+  if (Array.isArray(selection) && selection.length > 1) {
+    const { first, last } = getFirstAndLastDatalogs(selection)
+
+    const firstName = replaceTags(outputName, tags(first, projectName))
+    const lastName = replaceTags(outputName, tags(last, projectName))
+    return `${firstName}-${lastName}`
+  } else {
+    const logs = Array.isArray(selection) ? selection[0] : selection
+    return replaceTags(outputName, tags(logs, projectName))
+  }
+}

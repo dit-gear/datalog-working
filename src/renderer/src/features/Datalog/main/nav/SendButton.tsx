@@ -7,7 +7,7 @@ const SendButton = () => {
   return (
     <>
       <Button
-        onClick={() => window.mainApi.openSendWindow(selection)}
+        onClick={() => window.mainApi.openSendWindow(selection?.length === 1 ? selection[0] : selection)}
         disabled={!selection?.length}
       >
         <SendIcon className="mr-2 h-4 w-4" />

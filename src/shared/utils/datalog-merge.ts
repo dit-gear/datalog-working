@@ -2,18 +2,43 @@ import { DatalogType } from '@shared/datalogTypes'
 import { Datalog } from '@shared/datalogClass'
 import { getTotalFiles, getTotalSize, getTotalDuration } from '@shared/utils/datalog-methods' // optional if you prefer direct usage
 
-export const mergeDatalogs = (datalogs: DatalogType[]): DatalogType => {
+export const getFirstAndLastDatalogs = (
+  datalogs: DatalogType[]
+): { first: DatalogType; last: DatalogType } => {
+  if (!datalogs.length) throw new Error('No datalogs provided')
+
+  const sorted = [...datalogs].sort((a, b) => {
+    if (a.date !== b.date) return a.date.localeCompare(b.date)
+    if (a.day !== b.day) return a.day - b.day
+    const unitA = a.unit || ''
+    const unitB = b.unit || ''
+    return unitA.localeCompare(unitB)
+  })
+
+  return { first: sorted[0], last: sorted[sorted.length - 1] }
+}
+
+function mergeNumbers(a, b) {
+  const digits = b.toString().length
+  return a + b / Math.pow(10, digits)
+}
+
+export const mergeDatalogs = (datalogs: DatalogType | DatalogType[]): DatalogType => {
+  if (!Array.isArray(datalogs)) return datalogs
   const wrapped = datalogs.map((d) => new Datalog(d))
 
   // Simple helper to check if a raw property is “set” on any Datalog
   const propertyIsSetOnAny = (items: DatalogType[], getter: (d: DatalogType) => unknown): boolean =>
     items.some((d) => getter(d) != null)
 
+  const { first, last } = getFirstAndLastDatalogs(datalogs)
+
   // Start with a basic merged object
   const merged: DatalogType = {
-    id: datalogs[0].id,
-    day: datalogs[0].day,
-    date: datalogs[0].date,
+    id: `${first.id} - ${last.id}`,
+    day: mergeNumbers(first.day, last.day),
+    date: `${first.date} - ${last.date}`,
+    unit: datalogs.map((item) => item.unit).join(', '),
     ocf: {},
     proxy: {},
     sound: {}

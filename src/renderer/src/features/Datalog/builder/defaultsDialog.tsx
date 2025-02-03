@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@components/ui/alert-dialog'
-import replaceTags from '@renderer/utils/formatDynamicString'
+import replaceTags from '@shared/utils/formatDynamicString'
 import { ProjectRootType } from '@shared/projectTypes'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'

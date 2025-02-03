@@ -4,7 +4,6 @@ import { FormControl, FormField, FormItem, FormMessage, FormLabel } from '@compo
 import { Input } from '@components/ui/input'
 import DatePicker from '@components/DatePicker'
 import { Button } from '@components/ui/button'
-import { Label } from '@components/ui/label'
 import { Pencil } from 'lucide-react'
 import replaceTags from '../../../../../../shared/utils/formatDynamicString'
 import { ProjectRootType } from '@shared/projectTypes'

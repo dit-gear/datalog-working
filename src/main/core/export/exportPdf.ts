@@ -1,23 +1,46 @@
-import { dialog, Notification } from 'electron'
+import { dialog, Notification, app } from 'electron'
 import fs from 'fs/promises'
 import { renderPdf } from '../render/renderPdf'
 import { pdfType } from '@shared/projectTypes'
 import { DatalogType } from '@shared/datalogTypes'
 import logger from '../logger'
 import replaceTags, { Tags } from '@shared/utils/formatDynamicString'
-import { appState } from '../app-state/state'
+import { appState, datalogs } from '../app-state/state'
+import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 
 interface exportPdfProps {
   pdf: pdfType
-  selection?: DatalogType | DatalogType[]
+  selection: DatalogType | DatalogType[]
 }
 
 export const exportPdf = async ({ pdf, selection }: exportPdfProps) => {
+  if (!selection) {
+    const project = appState.activeProject
+    if (!project) throw new Error('No project')
+    const _datalogs = Array.from(datalogs().values())
+    if (!_datalogs) throw new Error('No datalogs')
+    selection = getLatestDatalog(_datalogs, project)
+  }
+
+  const log = Array.isArray(selection) ? selection[0] : selection
+
+  const tags: Tags = {
+    day: log.day,
+    date: log.date,
+    projectName: appState.activeProject?.project_name,
+    unit: log.unit,
+    log: log.id
+  }
+
+  const outputName = replaceTags(pdf.output_name_pattern, tags)
+
+  app.focus()
+
   try {
     // Open file dialog to get the save location
     const { filePath } = await dialog.showSaveDialog({
-      title: `Save ${pdf.name} PDF`,
-      defaultPath: pdf.output_name_pattern, // Default name for the file
+      title: `Save ${pdf.name}`,
+      defaultPath: outputName, // Default name for the file
       filters: [
         { name: 'PDF Files', extensions: ['pdf'] },
         { name: 'All Files', extensions: ['*'] }

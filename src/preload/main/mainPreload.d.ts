@@ -41,7 +41,7 @@ declare global {
         type: 'ocf' | 'sound',
         storedClips: OcfClipType[] | SoundClipType[]
       ) => Promise<ResponseWithClips>
-      openSendWindow: (selection?: DatalogType[]) => void
+      openSendWindow: (selection?: DatalogType | DatalogType[]) => void
       openBuilder: (callback: () => void) => void
       removeOpenBuilder: (callback: () => void) => void
       openSettings: (callback: () => void) => void

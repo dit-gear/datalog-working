@@ -7,6 +7,7 @@ import { getTemplateDirectories } from '../../../project/loader'
 import { getEditorWindow } from '../../../../editor/editorWindow'
 import path from 'path'
 import fs from 'fs'
+import { getDatalogWindow } from '../../../../datalog/datalogWindow'
 
 let templatesWatcher: FSWatcher | null = null
 
@@ -109,6 +110,7 @@ const updateTemplatesDir = (filePath: string, action: 'add' | 'remove') => {
   }
   appState.activeProject = activeProject
   const editorWindow = getEditorWindow()
+  getDatalogWindow({ update: true })
   if (editorWindow) {
     editorWindow.webContents.send('directory-changed', activeProject.templatesDir)
   }

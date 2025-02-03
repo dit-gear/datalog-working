@@ -1,4 +1,4 @@
-import replaceTags, { Tags } from '@renderer/utils/formatDynamicString'
+import replaceTags, { Tags } from '@shared/utils/formatDynamicString'
 
 export const getDefaultId = (template: string, tags: Tags): string => {
   return replaceTags(template, tags)

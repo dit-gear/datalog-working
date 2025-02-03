@@ -51,7 +51,8 @@ const mainApi = {
     type: 'ocf' | 'sound',
     storedClips: OcfClipType[] | SoundClipType[]
   ) => ipcRenderer.invoke('removeClips', paths, type, storedClips),
-  openSendWindow: (selection?: DatalogType[]) => ipcRenderer.send('open-send-window', selection),
+  openSendWindow: (selection?: DatalogType | DatalogType[]) =>
+    ipcRenderer.send('open-send-window', selection),
 
   openBuilder: (callback: () => void) => ipcRenderer.on('open-builder', () => callback()),
   removeOpenBuilder: (callback: () => void) => {
