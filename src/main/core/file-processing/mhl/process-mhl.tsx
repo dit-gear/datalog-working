@@ -102,7 +102,7 @@ async function processFile(
   try {
     const fileData = fs.readFileSync(filePath, 'utf8')
     const parsedXML = await parseXML(fileData)
-    const { success, data, type, error } = await getValidMhlData(parsedXML)
+    const { success, data, type } = await getValidMhlData(parsedXML)
 
     if (!success) {
       const msg = 'Error parsing MHL file'
@@ -206,14 +206,7 @@ async function processMHL(
   type: 'ocf' | 'sound'
 ): Promise<OcfClipBaseType[]> {
   let progress = 0
-  let isCancelled = false
   let showProgressFlag = false
-
-  const progressTimeout = setTimeout(() => {
-    if (isCancelled) return
-    showProgressFlag = true
-    //mainWindow?.webContents.send('show-progress', 0)
-  }, 100)
 
   const progressCallback = (updatedProgress: number): void => {
     progress = updatedProgress

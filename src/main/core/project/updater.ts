@@ -82,6 +82,7 @@ export const updateProject = async ({
   update_settings,
   update_email_api
 }: ProjectToUpdate): Promise<UpdateProjectResult> => {
+  console.log(update_email_api) // add this later, this removes build error
   try {
     const projectYaml = YAML.stringify(update_settings.project)
     const globalYaml = YAML.stringify(update_settings.global)

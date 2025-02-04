@@ -143,7 +143,7 @@ export function secondsToLargeTimecode(totalSeconds: number): string {
  *    @param fps           - Frames per second
  *    @returns             - The duration timecode in "HH:MM:SS:FF"
  */
-function getTimecodeDuration(startTimecode: string, endTimecode: string, fps: number): string {
+/*function getTimecodeDuration(startTimecode: string, endTimecode: string, fps: number): string {
   const startFrames = timecodeToFrames(startTimecode, fps)
   const endFrames = timecodeToFrames(endTimecode, fps)
 
@@ -155,7 +155,7 @@ function getTimecodeDuration(startTimecode: string, endTimecode: string, fps: nu
   }
 
   return framesToTimecode(durationFrames, fps)
-}
+}*/
 
 /**
  *    Calculate the duration between two timecodes, both given in frames,
@@ -166,10 +166,10 @@ function getTimecodeDuration(startTimecode: string, endTimecode: string, fps: nu
  *    @param endFrames   - End time in frames
  *    @returns           - Duration in frames
  */
-function getDurationInFrames(startFrames: number, endFrames: number): number {
+/*function getDurationInFrames(startFrames: number, endFrames: number): number {
   const duration = endFrames - startFrames
   return duration < 0 ? 0 : duration // or throw an error if negative
-}
+}*/
 
 /**
  *    Check if one time range (a1, a2) overlaps or is inside the other

@@ -91,9 +91,6 @@ export const initTemplateWatcher = async () => {
 }
 
 const updateTemplatesDir = (filePath: string, action: 'add' | 'remove') => {
-  if (filePath.endsWith('mockData.json')) {
-    const editorWindow = getEditorWindow()
-  }
   if (!isValidTemplateFile(filePath, action)) return
   const activeProject = appState.activeProject
   if (!activeProject) return

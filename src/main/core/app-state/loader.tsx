@@ -1,6 +1,6 @@
 import { app } from 'electron'
 import fs from 'fs/promises'
-import { stateZod, state, error } from './types'
+import { stateZod, state } from './types'
 import { ProjectType } from '../../../shared/projectTypes'
 import { decryptData } from '../../utils/encryption'
 import path from 'path'

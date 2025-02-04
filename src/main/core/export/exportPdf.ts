@@ -10,7 +10,7 @@ import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 
 interface exportPdfProps {
   pdf: pdfType
-  selection: DatalogType | DatalogType[]
+  selection?: DatalogType | DatalogType[]
 }
 
 export const exportPdf = async ({ pdf, selection }: exportPdfProps) => {

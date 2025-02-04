@@ -1,4 +1,4 @@
-import { spawnWorker, cancelWorker } from './workers/workerManager'
+import { spawnWorker } from './workers/workerManager'
 import { ResponseWithClips } from '@shared/datalogTypes'
 import logger from '../../logger'
 
@@ -15,7 +15,7 @@ const addDefaults = async (paths: {
     const promises: Promise<void>[] = []
     // OCF worker
     if (paths.ocf) {
-      const { workerId, promise } = spawnWorker('addOCFWorker', {
+      const { promise } = spawnWorker('addOCFWorker', {
         paths: paths.ocf,
         storedClips: []
       })
@@ -28,7 +28,7 @@ const addDefaults = async (paths: {
 
     // Sound worker
     if (paths.sound) {
-      const { workerId, promise } = spawnWorker('addSoundWorker', {
+      const { promise } = spawnWorker('addSoundWorker', {
         paths: paths.sound,
         storedClips: []
       })
@@ -54,7 +54,7 @@ const addDefaults = async (paths: {
     }
 
     if (paths.proxy && ocfResult.success) {
-      const { workerId, promise } = spawnWorker('addProxyWorker', {
+      const { promise } = spawnWorker('addProxyWorker', {
         paths: paths.proxy,
         storedClips: ocfResult?.clips?.ocf ?? []
       })
