@@ -30,6 +30,9 @@ export default defineConfig({
     }
   },
   renderer: {
+    worker: {
+      format: 'es'
+    },
     resolve: {
       alias: {
         '@renderer': resolve('src/renderer/src'),

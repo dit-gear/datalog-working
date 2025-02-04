@@ -1,9 +1,11 @@
+import { is } from '@electron-toolkit/utils'
 import winston from 'winston'
 import DailyRotateFile from 'winston-daily-rotate-file'
 
 const winstonconfig = (logDir: string) => {
+  const level = is.dev ? 'debug' : 'info'
   return {
-    level: 'debug', // Set the default log level
+    level: level,
     format: winston.format.combine(
       winston.format.timestamp({
         format: 'YYYY-MM-DD HH:mm:ss'
