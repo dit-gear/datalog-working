@@ -1,4 +1,3 @@
-import { dialog } from 'electron'
 import fs from 'fs'
 import pathnode from 'path'
 import type { ResponseWithClips, SoundClipType } from '@shared/datalogTypes'
@@ -22,7 +21,7 @@ const addSound = async ({ paths, storedClips }: addSoundProps): Promise<Response
 
         if (mhlFiles.length === 0) {
           const message = 'No MHL files found in the selected directory.'
-          dialog.showErrorBox('Error', message)
+          console.log(message)
           return
         }
 

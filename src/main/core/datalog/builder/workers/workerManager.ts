@@ -48,7 +48,12 @@ export function spawnWorker(
 
       worker.once('message', (message: ResponseWithClips) => {
         logger.debug(`Worker ${workerId} sent message:`, message)
-        resolve(message)
+        if (!message.success) {
+          logger.error(`Worker ${workerId} encountered error:`, message.error)
+          reject(new Error(String(message.error)))
+        } else {
+          resolve(message)
+        }
         cleanUpWorker(workerId)
       })
 

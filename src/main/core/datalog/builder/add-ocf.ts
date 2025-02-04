@@ -1,4 +1,3 @@
-import { dialog } from 'electron'
 //import logger from '../../logger'
 import findFilesByType from '../../../utils/find-files-by-type'
 import processMHL from '../../file-processing/mhl/process-mhl'
@@ -49,7 +48,7 @@ const addOCF = async ({ paths, storedClips }: addOCFProps): Promise<ResponseWith
 
         if (mhlFiles.length === 0) {
           const message = 'No MHL files found in the selected directory.'
-          dialog.showErrorBox('Error', message)
+          console.log(message)
           return
         }
 

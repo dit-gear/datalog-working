@@ -13,10 +13,6 @@ if (!fs.existsSync(logDir)) {
 // Configure Winston Logger
 const logger = winston.createLogger(winstonconfig(logDir))
 
-// Example of using the logger
-logger.info('Application started successfully')
-logger.error('An error occurred: Something went wrong')
-
 // Catch unhandled exceptions and log them
 process.on('uncaughtException', (error) => {
   logger.error('Uncaught Exception:', error)
