@@ -10,7 +10,7 @@ interface LoadingDialogProps {
   open: boolean
 }
 
-const LoadingDialog = ({ open }) => {
+const LoadingDialog = ({ open }: LoadingDialogProps) => {
   return (
     <>
       <AlertDialog open={open}>

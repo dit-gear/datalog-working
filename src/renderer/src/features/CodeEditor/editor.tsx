@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useState, useEffect, useRef, useCallback } from 'react'
+import { forwardRef, useImperativeHandle, useEffect, useRef, useCallback } from 'react'
 import * as monaco from 'monaco-editor'
 import { Monaco, Editor as MonacoEditor, OnMount, loader } from '@monaco-editor/react'
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
@@ -35,12 +35,6 @@ interface EditorProps {
   resetDirty: () => void
   onEditorReady: () => void
   options: [formatOnSave: boolean, autoCloseTags: boolean]
-}
-
-interface Preview {
-  id: string
-  type: 'email' | 'pdf'
-  code: string
 }
 
 interface FileTrackingInfo {
@@ -113,7 +107,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     previewWorkerRef.current = previewWorker
 
     previewWorker.onmessage = (e): void => {
-      const { id, type, code, error } = e.data
+      const { type, code, error } = e.data
       if (code) {
         console.log('from worker:', type, code, error)
         const previewEvent = new CustomEvent('preview-update', { detail: { type, code } })

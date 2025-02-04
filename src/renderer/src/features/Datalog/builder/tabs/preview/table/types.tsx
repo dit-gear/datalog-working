@@ -1,4 +1,3 @@
-import z from 'zod'
 export type EditingCellType = {
   rowIndex: number
   colId: string
@@ -48,25 +47,3 @@ export interface MergedClip {
   // Additional fields from custom, appended at the top level
   [key: string]: valueTypes
 } */
-
-const stringZod = z
-  .object({
-    path: z.string(),
-    edit: z.boolean(),
-    value: z.string()
-  })
-  .default({ path: '', edit: false, value: '' })
-const numberZod = z.object({
-  path: z.string(),
-  edit: z.boolean(),
-  value: z.number()
-})
-const arrayZod = z.object({
-  path: z.string(),
-  edit: z.boolean(),
-  value: z.array(z.string())
-})
-
-const MergedClipZod = z.object({
-  clip: stringZod
-})

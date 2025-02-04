@@ -1,14 +1,13 @@
-import { useState, useEffect, Dispatch, SetStateAction } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@components/ui/button'
 import { Loader2 } from 'lucide-react'
 import { useForm, FormProvider, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@components/ui/form'
 import { removeEmptyFields, removePrefixFields } from '@renderer/utils/form'
-import { ProjectSettingsType, ProjectType, TemplateDirectoryFile } from '@shared/projectTypes'
+import { ProjectSettingsType, TemplateDirectoryFile } from '@shared/projectTypes'
 import { formSchemaType, formSchema, Scope } from './types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
-import { ScrollArea } from '@components/ui/scroll-area'
 import GeneralTab from './GeneralTab'
 import PathsTab from './Paths/PathsTab'
 import ParsingTab from './Parsing/ParsingTab'
@@ -19,7 +18,6 @@ import { useNavigate } from 'react-router-dom'
 interface SettingsDialogProps {
   defaults: ProjectSettingsType
   templates: TemplateDirectoryFile[]
-  //setProject: Dispatch<SetStateAction<ProjectType | undefined>>
 }
 
 const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {

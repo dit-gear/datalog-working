@@ -1,15 +1,12 @@
 import * as eslint from 'eslint-linter-browserify'
-import parserTypescript from 'prettier/plugins/typescript'
 //import parserEstreePlugin from 'prettier/plugins/estree'
 //import eslintConfigPrettier from 'eslint-config-prettier'
-import tsParser from '@typescript-eslint/parser'
-import tsPlugin from '@typescript-eslint/eslint-plugin'
 
 self.onmessage = async (event: MessageEvent) => {
   console.log('liner-worker called')
   const code = event.data as string
   const linter = new eslint.Linter()
-  const specialRule = 0
+  //const specialRule = 0
   const confiq: eslint.Linter.Config = {
     languageOptions: {
       parserOptions: {

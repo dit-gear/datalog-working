@@ -1,6 +1,5 @@
 import { InitialEditorData } from '@shared/shared-types'
-//import { ClipDynamicZod } from '@shared/datalogTypes'
-import { z } from 'zod'
+/*import { ClipDynamicZod } from '@shared/datalogTypes'
 
 const getRandomOption = (...options: string[]): string => {
   const randomIndex = Math.floor(Math.random() * options.length)

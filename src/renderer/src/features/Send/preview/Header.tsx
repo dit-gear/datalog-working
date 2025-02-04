@@ -8,26 +8,6 @@ export const Header = () => {
   const { data, projectTemplates, defaultSelectedEmail } = useDataContext()
   const previewWorkerRef = useRef<Worker | null>(null)
 
-  /*const codeStore = useRef<Map<string, string>>(new Map())
-
-  const loadDefaultsInStore = async () => {
-    const toStore = new Set<string>()
-    if (defaultSelectedEmail?.react) {
-      const email = getReactTemplate(defaultSelectedEmail.react, projectTemplates, 'email')
-      email && toStore.add(email.path)
-    }
-    if (defaultSelectedEmail?.attachments) {
-      const pdfobjects = getPdfAttachments(projectPdfs, defaultSelectedEmail.attachments)
-      const pdfs = pdfobjects
-        .map((item) => item.react)
-        .filter((r): r is string => Boolean(r))
-        .map((react) => getReactTemplate(react, projectTemplates, 'pdf'))
-      pdfs.filter((pdf) => !!pdf).forEach((pdf) => toStore.add(pdf.path))
-    }
-    const files = await fetchMultipleFileContent([...toStore])
-    Object.entries(files).forEach(([path, content]) => codeStore.current.set(path, content))
-  }*/
-
   useEffect(() => {
     const previewWorker = new Worker(new URL('@workers/preview-worker.ts', import.meta.url), {
       type: 'module'
@@ -35,7 +15,7 @@ export const Header = () => {
     previewWorkerRef.current = previewWorker
 
     previewWorker.onmessage = (e): void => {
-      const { id, type, code, error } = e.data
+      const { type, code, error } = e.data
       if (code) {
         console.log('from worker:', type, code, error)
         const previewEvent = new CustomEvent('preview-update', { detail: { type, code } })

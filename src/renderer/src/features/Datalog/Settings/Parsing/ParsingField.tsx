@@ -24,16 +24,9 @@ import { FieldArrayWithId, UseFieldArrayRemove, useFormContext, useWatch } from 
 import { formSchemaType } from '../types'
 import {
   fieldType,
-  Field,
   primitiveTypesZod,
   specialTypesZod,
   additionalParsing,
-  StringFieldType,
-  ListOfStringsFieldType,
-  KeyValueObjFieldType,
-  ListOfFieldArraysFieldType,
-  ListOfMappedObjectsFieldType,
-  DurationFieldType,
   delimiters
 } from '@shared/projectTypes'
 import SubfieldArray from './SubfieldArray'

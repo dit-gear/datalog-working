@@ -3,7 +3,7 @@ import { CardContent } from '@components/ui/card'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { formSchemaType } from '../types'
-import { useFieldArray, useWatch, useFormContext } from 'react-hook-form'
+import { useWatch, useFormContext } from 'react-hook-form'
 import { Pencil } from 'lucide-react'
 import { FieldArray } from './FieldArray'
 interface PathsTabProps {
@@ -12,25 +12,8 @@ interface PathsTabProps {
 
 const Paths = ({ scope }: PathsTabProps): ReactElement => {
   const { control, setValue, register } = useFormContext<formSchemaType>()
-  const { fields, append, remove } = useFieldArray({
-    control,
-    // @ts-ignore (issue with react-hook-form and ts)
-    name: `${scope}_default_ocf_paths`
-  })
 
   const watch = useWatch({ control, name: `${scope}_default_proxy_path` })
-
-  const handleAddOcfPath = async (): Promise<void> => {
-    try {
-      const res = await window.mainApi.getFolderPath()
-      if (res.success) {
-        // @ts-ignore
-        append(res.data)
-      } else console.log(res.error)
-    } catch (error) {
-      console.error(error)
-    }
-  }
 
   const handleAddProxiesPath = async (): Promise<void> => {
     try {

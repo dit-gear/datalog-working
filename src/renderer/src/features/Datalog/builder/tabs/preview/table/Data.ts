@@ -1,12 +1,5 @@
-import {
-  OcfClipType,
-  SoundClipType,
-  ProxyClipType,
-  CustomType,
-  OcfClipZod
-} from '@shared/datalogTypes'
+import { OcfClipType, SoundClipType, ProxyClipType, CustomType } from '@shared/datalogTypes'
 import { CameraMetadataZod } from '@shared/datalogTypes'
-import { ProjectRootType } from '@shared/projectTypes'
 import { rangesOverlap, timecodeToSeconds } from '@shared/utils/format-timecode'
 import z from 'zod'
 

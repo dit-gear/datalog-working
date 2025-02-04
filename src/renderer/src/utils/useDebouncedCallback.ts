@@ -8,7 +8,7 @@ import { useRef, useCallback, useEffect } from 'react'
  * @returns A debounced version of the callback.
  */
 function useDebouncedCallback<T extends (...args: any[]) => any>(callback: T, delay: number): T {
-  const timeoutRef = useRef<number | undefined>()
+  const timeoutRef = useRef<number | undefined>(undefined)
 
   const debouncedFunction = useCallback(
     ((...args: any[]) => {

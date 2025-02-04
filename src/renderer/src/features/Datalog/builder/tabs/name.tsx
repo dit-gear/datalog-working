@@ -13,12 +13,7 @@ interface Nameprops {
 }
 
 export const Name = ({ project }: Nameprops) => {
-  const {
-    control,
-    formState: { errors },
-    setValue,
-    register
-  } = useFormContext()
+  const { control, setValue } = useFormContext()
 
   const [folderEdit, setFolderEdit] = useState<boolean>(false)
 
