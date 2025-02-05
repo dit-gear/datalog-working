@@ -1,11 +1,14 @@
 import { secondsToTimecode } from '@shared/utils/format-timecode'
 import ffmpeg from 'fluent-ffmpeg'
+import ffprobePath from '../../../../../resources/ffprobe?asset&asarUnpack'
 import z from 'zod'
 
 type soundMetadataType = {
   tc_start?: string
   tc_end?: string
 }
+
+ffmpeg.setFfprobePath(ffprobePath)
 
 const metadataSchema = z
   .object({

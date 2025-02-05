@@ -142,7 +142,7 @@ type Datalog = {
     /**
      * Gets the reels as an array of strings.
      *
-     * You can optionally group reels by passing `{group=true}`
+     * You can optionally group reels by passing `{rangeMerging=true}`
      *
      * @param {ReelsOptions} [options] - Optional settings for formatting reels.
      * @param {boolean} [options.rangeMerging=false] - Whether to group consecutive reels.

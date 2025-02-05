@@ -1,9 +1,15 @@
 import ffmpeg from 'fluent-ffmpeg'
+import ffprobePath from '../../../../../resources/ffprobe?asset&asarUnpack'
 
 type proxyMetadataType = {
   codec?: string
   resolution?: string
 }
+
+// Construct the path to the ffprobe binary in the assets folder
+
+// Set the ffprobe path for fluent-ffmpeg
+ffmpeg.setFfprobePath(ffprobePath)
 
 export const getProxyMetadata = async (filepath: string): Promise<proxyMetadataType> => {
   try {
