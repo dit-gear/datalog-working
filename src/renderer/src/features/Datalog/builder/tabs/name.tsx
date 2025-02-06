@@ -32,8 +32,8 @@ export const Name = ({ project }: Nameprops) => {
   }, [daywatch, datewatch, unitwatch])
 
   return (
-    <div className="mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0">
-      <div className="flex gap-10 mb-10">
+    <div className="space-y-16">
+      <div className="flex flex-col gap-1 mt-8">
         <FormField
           control={control}
           name="day"
@@ -43,8 +43,8 @@ export const Name = ({ project }: Nameprops) => {
             required: 'Day is required' // Optional: add required validation
           }}
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Day</FormLabel>
+            <FormItem className="flex items-center">
+              <FormLabel className="w-24 text-base">Day</FormLabel>
               <FormControl>
                 <Input
                   type="text"
@@ -73,8 +73,8 @@ export const Name = ({ project }: Nameprops) => {
           control={control}
           name="date"
           render={({ field }) => (
-            <FormItem className="flex flex-col justify-between pt-1">
-              <FormLabel>Date</FormLabel>
+            <FormItem className="flex items-center">
+              <FormLabel className="w-24 text-base">Date</FormLabel>
               <FormControl>
                 <DatePicker field={field} />
               </FormControl>
@@ -86,10 +86,10 @@ export const Name = ({ project }: Nameprops) => {
           control={control}
           name="unit"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Unit</FormLabel>
+            <FormItem className="flex items-center">
+              <FormLabel className="w-24 text-base">Unit</FormLabel>
               <FormControl>
-                <Input type="text" className="w-32" {...field} />
+                <Input type="text" className="w-60" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -100,11 +100,11 @@ export const Name = ({ project }: Nameprops) => {
         control={control}
         name="id"
         render={({ field }) => (
-          <FormItem className="flex flex-col gap-1.5">
-            <FormLabel>Log Name</FormLabel>
+          <FormItem className="flex items-center">
+            <FormLabel className="w-24 text-base">Log Name</FormLabel>
             <div className="flex gap-2 w-full max-w-sm">
               <FormControl>
-                <Input id="id" type="text" disabled={!folderEdit} className="" {...field} />
+                <Input id="id" type="text" disabled={!folderEdit} {...field} />
               </FormControl>
               <Button
                 variant="secondary"
@@ -133,3 +133,96 @@ export const Name = ({ project }: Nameprops) => {
 }
 
 export default Name
+
+//flex gap-8 items-center"
+
+/*    <div className="space-y-16">
+      <div>
+      <FormField
+        control={control}
+        name="day"
+        rules={{
+          max: { value: 999, message: 'The day must be less than or equal to 999' },
+          min: { value: 1, message: 'The day must be greater than or equal to 1' },
+          required: 'Day is required' // Optional: add required validation
+        }}
+        render={({ field }) => (
+          <FormItem className="flex items-center">
+            <FormLabel className="w-24 flex-shrink-0 text-base">Day</FormLabel>
+            <FormControl>
+              <Input
+                type="text"
+                className="w-16"
+                {...field}
+                onKeyDown={(e) => {
+                  const allowedKeys = ['Backspace', 'ArrowLeft', 'ArrowRight', 'Delete', 'Tab', '.']
+                  if (!/^\d$/.test(e.key) && !allowedKeys.includes(e.key)) {
+                    e.preventDefault()
+                  }
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name="date"
+        render={({ field }) => (
+          <FormItem className="flex items-center">
+            <FormLabel className="w-24 flex-shrink-0 text-base">Date</FormLabel>
+            <FormControl>
+              <DatePicker field={field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name="unit"
+        render={({ field }) => (
+          <FormItem className="flex items-center">
+            <FormLabel className="w-24 flex-shrink-0 text-base">Unit</FormLabel>
+            <FormControl>
+              <Input type="text" className="w-60" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={control}
+        name="id"
+        render={({ field }) => (
+          <FormItem className="flex items-center">
+            <FormLabel className="w-24 flex-shrink-0 text-base">Log Name</FormLabel>
+            <div className="flex gap-2 w-full max-w-sm">
+              <FormControl>
+                <Input id="id" type="text" disabled={!folderEdit} {...field} />
+              </FormControl>
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => {
+                  setFolderEdit((prev) => {
+                    const newValue = !prev
+                    if (newValue) {
+                      setTimeout(() => {
+                        document.getElementById('id')?.focus()
+                      }, 0)
+                    }
+                    return newValue
+                  })
+                }}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </div>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div> */

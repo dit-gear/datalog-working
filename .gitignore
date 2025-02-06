@@ -1,10 +1,11 @@
 node_modules
 dist
 out
+resources/ffprobe
+resources/ffprobe-intel
 .DS_Store
 *.log*
 .vscode
 build
 *.local
 *.local.d.ts
-resources
