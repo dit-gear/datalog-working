@@ -3,7 +3,7 @@ import EmailTab from './EmailTab'
 import AttachmentsTabs from './AttachmentsTabs'
 import { getReactTemplate } from '@shared/utils/getReactTemplate'
 import { fetchFileContent } from '../utils/fetchFileContent'
-import { useDataContext } from '../dataContext'
+import { useData } from '../utils/useData'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 interface TabsProps {
@@ -12,7 +12,8 @@ interface TabsProps {
 
 const Tabs = ({ sendToWorker }: TabsProps) => {
   const [active, setActive] = useState<string>('email')
-  const { projectTemplates } = useDataContext()
+  const { data } = useData()
+  const projectTemplates = data?.project.templatesDir ?? []
   const { getValues } = useFormContext()
 
   const attatchments = useWatch({ name: 'attachments' })
@@ -21,7 +22,12 @@ const Tabs = ({ sendToWorker }: TabsProps) => {
   useEffect(() => {
     if (active !== 'email' && !attatchments.includes(active)) {
       const email = getValues('react')
-      loadAndSendToWorker(email, 'email')
+      if (email) {
+        loadAndSendToWorker(email, 'email')
+      } else {
+        const def = projectTemplates?.filter((item) => item.type === 'email')[0]
+        loadAndSendToWorker(def.name, 'email')
+      }
     }
   }, [attatchments])
 
@@ -35,6 +41,7 @@ const Tabs = ({ sendToWorker }: TabsProps) => {
   }, [message])
 
   const loadAndSendToWorker = useCallback(async (id: string, type: 'email' | 'pdf') => {
+    if (id === active) return
     try {
       const res = getReactTemplate(id, projectTemplates, type)
       if (!res) throw new Error('Could not find template')

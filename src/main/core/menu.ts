@@ -40,7 +40,7 @@ const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): M
           click: (): void => createSendWindow(email)
         })) || [{ label: 'No Emails Available', enabled: false }]),
         { type: 'separator' },
-        { id: 'sendWindow', label: 'Open Send Window', click: (): void => createSendWindow() }
+        { id: 'sendWindow', label: 'Open Send Window', click: (): void => createSendWindow(null) }
       ],
       enabled: Boolean(activeProject)
     }, // Will open Send window

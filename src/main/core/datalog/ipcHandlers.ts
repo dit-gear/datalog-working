@@ -111,7 +111,7 @@ export function setupDatalogIpcHandlers(): void {
   })
 
   ipcMain.on('open-send-window', (_, selection: DatalogType | DatalogType[]) => {
-    createSendWindow(undefined, selection)
+    createSendWindow(null, selection)
   })
 
   ipcMain.handle('get-project', (): ProjectType => {

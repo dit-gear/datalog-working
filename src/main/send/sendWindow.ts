@@ -15,7 +15,7 @@ export const getSendWindow = (windowId: number): BrowserWindow | undefined => {
 }
 
 export function createSendWindow(
-  selectedEmail?: emailType,
+  selectedEmail: emailType | null,
   selection?: DatalogType | DatalogType[]
 ): void {
   const sendWindow = new BrowserWindow({

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { emailType, pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
 import { DataObjectType } from './types'
 import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
+import { useQuery } from '@tanstack/react-query'
 
 type DataContextType = {
   data?: DataObjectType
@@ -67,10 +68,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   )
 }
 
-export const useDataContext = () => {
+/*export const useDataContext = () => {
   const context = useContext(DataContext)
   if (!context) {
     throw new Error('useDataContext must be used within a DataProvider')
   }
   return context
-}
+}*/

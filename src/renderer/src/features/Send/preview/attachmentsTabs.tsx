@@ -1,7 +1,7 @@
 import { useWatch } from 'react-hook-form'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
-import { useDataContext } from '../dataContext'
-import { useFileName } from '../utils/useTags'
+import { useStringWithTags } from '../utils/useTags'
+import { useData } from '../utils/useData'
 
 interface AttachmentsTabsProps {
   active: string
@@ -9,10 +9,11 @@ interface AttachmentsTabsProps {
 }
 
 const AttachmentsTabs = ({ active, onTabClick }: AttachmentsTabsProps) => {
-  const { projectPdfs } = useDataContext()
+  const { data } = useData()
+  const projectPdfs = data?.project.pdfs ?? []
   const attachments = useWatch({ name: 'attachments' })
 
-  if (!attachments || !projectPdfs) {
+  if (!attachments || !projectPdfs.length) {
     return null
   }
 
@@ -20,9 +21,9 @@ const AttachmentsTabs = ({ active, onTabClick }: AttachmentsTabsProps) => {
 
   return (
     <>
-      {pdfAttachments.map((item) => {
+      {pdfAttachments?.map((item) => {
         const isValid = typeof item.react === 'string'
-        const name = useFileName(item.output_name_pattern, item.name)
+        const name = useStringWithTags(data!, item.output_name_pattern, item.name)
         return (
           <button
             key={item.id}

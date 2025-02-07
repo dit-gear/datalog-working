@@ -1,17 +1,28 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Send from './send'
 import { Select, SelectContent, SelectItem, SelectValue } from '@components/ui/select'
 import { SelectTrigger } from '@components/SelectIconTrigger'
+import { useData } from './utils/useData'
 import { emailType } from '@shared/projectTypes'
-import { useDataContext } from './dataContext'
 
 const SendSelector = () => {
-  const { projectEmails, defaultSelectedEmail } = useDataContext()
+  const { data, isLoading, isError } = useData()
+  const projectEmails = data?.project.emails ?? []
   const [selectedEmail, setSelectedEmail] = useState<emailType | null>(null)
 
   useEffect(() => {
-    if (defaultSelectedEmail) setSelectedEmail(defaultSelectedEmail)
-  }, [defaultSelectedEmail])
+    if (data) {
+      setSelectedEmail(data.selectedEmail)
+      window.sendApi.showWindow()
+    }
+  }, [isLoading])
+
+  if (isLoading || !data) return null
+
+  if (isError) {
+    window.sendApi.showWindow()
+    throw new Error('Error fetching initial data')
+  }
 
   const handleSelectChange = (value: string) => {
     if (value === 'none') {
@@ -42,11 +53,13 @@ const SendSelector = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">None</SelectItem>
-            {projectEmails.map((email, index) => (
-              <SelectItem key={index} value={email.name}>
-                {email.name}
-              </SelectItem>
-            ))}
+            {projectEmails
+              ?.filter((email) => email.enabled)
+              .map((email, index) => (
+                <SelectItem key={index} value={email.name}>
+                  {email.name}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
       </div>

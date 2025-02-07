@@ -1,11 +1,13 @@
 import { useEffect, useRef, useCallback } from 'react'
-import { useDataContext } from '../dataContext'
+import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
+import { useData } from '../utils/useData'
 import { getReactTemplate } from '@shared/utils/getReactTemplate'
 import { fetchFileContent } from '../utils/fetchFileContent'
 import Tabs from './Tabs'
 
 export const Header = () => {
-  const { data, projectTemplates, defaultSelectedEmail } = useDataContext()
+  //const { data } = useDataContext()
+  const { data } = useData()
   const previewWorkerRef = useRef<Worker | null>(null)
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export const Header = () => {
           dataObject: {
             project: data.project,
             selection: data.selection,
-            all: data.all
+            all: data.datalogs
           }
         }
 
@@ -57,7 +59,7 @@ export const Header = () => {
     [data]
   )
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (defaultSelectedEmail?.react && projectTemplates && data) {
       const template = getReactTemplate(defaultSelectedEmail.react, projectTemplates, 'email')
       if (template) {
@@ -66,7 +68,7 @@ export const Header = () => {
         })
       }
     }
-  }, [defaultSelectedEmail, projectTemplates, data, sendToWorker])
+  }, [projectTemplates, data, sendToWorker])*/
 
   return <Tabs sendToWorker={sendToWorker} />
 }

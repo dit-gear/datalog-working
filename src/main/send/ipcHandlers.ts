@@ -15,7 +15,11 @@ export function setupSendIpcHandlers(): void {
       const datalogs = Array.from(datalogStore().values())
       if (!project) throw Error
       const windowId = event.sender.id
-      const { selectedEmail, selection } = sendWindowDataMap.get(windowId) || {}
+      const windowData = sendWindowDataMap.get(windowId)
+      if (!windowData) {
+        throw new Error(`No window data found for window id: ${windowId}`)
+      }
+      const { selectedEmail, selection } = windowData
 
       return { selectedEmail, project, selection, datalogs }
     } catch (error) {

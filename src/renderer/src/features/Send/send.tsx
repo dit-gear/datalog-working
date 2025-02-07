@@ -10,29 +10,36 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@component
 import { emailType } from '@shared/projectTypes'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
 import { mapPdfTypesToOptions } from '@renderer/utils/mapPdfTypes'
-import { useDataContext } from './dataContext'
 import { Previews } from './preview/previews'
 import { Loader2, Send as Sendicon, Check } from 'lucide-react'
 import { Toaster } from '@components/ui/toaster'
 import { useToast } from '@components/lib/hooks/use-toast'
-import { useTags } from './utils/useTags'
+import { useTags, useStringWithTags } from './utils/useTags'
+import { useData } from './utils/useData'
 
 interface SendProps {
   defaults: emailType | null
 }
 
 const Send = ({ defaults }: SendProps) => {
-  const { projectPdfs } = useDataContext()
-  const tags = useTags()
+  const { data } = useData()
+  const projectPdfs = data?.project.pdfs ?? []
+  const tags = useTags(data!)
   const [sentSuccess, setSendSuccess] = useState<boolean>(false)
   const { toast } = useToast()
   const form = useForm<emailType>({
     defaultValues: {
       recipients: defaults?.recipients ?? [],
-      subject: defaults?.subject ?? '',
+      subject:
+        data && defaults?.subject
+          ? useStringWithTags(data, defaults.subject, defaults.subject)
+          : '',
       attachments: defaults?.attachments ?? [],
-      message: defaults?.message ?? '',
-      react: defaults?.react ?? ''
+      message:
+        data && defaults?.message
+          ? useStringWithTags(data, defaults.message, defaults.message)
+          : '',
+      react: defaults?.react
     },
     mode: 'onSubmit'
     //resolver: zodResolver(emailZodObj) // maybe omit name, sender from validation.
@@ -148,25 +155,7 @@ const Send = ({ defaults }: SendProps) => {
             <Previews />
           </ResizablePanel>
         </ResizablePanelGroup>
-        <div className="fixed bottom-0 left-0 w-full flex justify-between gap-4 p-4 border-t">
-          <div className="">
-            <p className="text-xs text-blue-400">Message from today's sponsor:</p>
-            <span className="text-sm">
-              {
-                [
-                  'Tech.store: Raid X20 just dropped. Amazing speeds of 2500MB/s!',
-                  'GadgetHub: 30% off all label printers today!',
-                  'SpeedyMart: Free shipping on orders over $500!'
-                ][Math.floor(Math.random() * 3)]
-              }
-              <Button
-                variant="link"
-                className="h-auto  py-0 pl-1 text-xs font-normal text-blue-400 underline"
-              >
-                {['Read more', 'Visit store', 'Press release', ''][Math.floor(Math.random() * 3)]}
-              </Button>
-            </span>
-          </div>
+        <div className="fixed bottom-0 w-full justify-end flex p-4 border-t">
           <div className="flex gap-4">
             <Button variant="ghost" onClick={() => window.sendApi.closeSendWindow()}>
               {isSubmitSuccessful && sentSuccess ? 'Close window' : 'Cancel'}

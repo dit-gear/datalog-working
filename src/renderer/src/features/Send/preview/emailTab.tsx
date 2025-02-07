@@ -1,7 +1,7 @@
 import { FormField, FormItem, FormControl } from '@components/ui/form'
 import { Select, SelectContent, SelectItem } from '@components/ui/select'
 import { SelectTrigger } from '@components/SelectIconTrigger'
-import { useDataContext } from '../dataContext'
+import { useData } from '../utils/useData'
 import { useFormContext } from 'react-hook-form'
 
 interface EmailTabProps {
@@ -9,7 +9,8 @@ interface EmailTabProps {
   onTabClick: (id: string, type: 'email') => void
 }
 const EmailTab = ({ active, onTabClick }: EmailTabProps) => {
-  const { projectTemplates } = useDataContext()
+  const { data } = useData()
+  const projectTemplates = data?.project.templatesDir ?? []
   const { control, getValues } = useFormContext()
 
   return (

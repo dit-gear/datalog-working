@@ -10,7 +10,11 @@ import { DatalogDynamicType, DatalogType } from '@shared/datalogTypes'
 const datalogStore = new Map<string, DatalogDynamicType>()
 export const sendWindowDataMap = new Map<
   number,
-  { window: BrowserWindow; selectedEmail?: emailType; selection?: DatalogType | DatalogType[] }
+  {
+    window: BrowserWindow
+    selectedEmail: emailType | null
+    selection?: DatalogType | DatalogType[]
+  }
 >()
 
 export const datalogs = (): Map<string, DatalogDynamicType> => datalogStore

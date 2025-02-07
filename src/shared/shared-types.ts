@@ -58,7 +58,7 @@ export type InitialEditorData = {
 }
 
 export type InitialSendData = {
-  selectedEmail?: emailType
+  selectedEmail: emailType | null
   project: ProjectRootType
   selection?: DatalogDynamicType | DatalogDynamicType[]
   datalogs: DatalogDynamicType[]

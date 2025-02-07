@@ -85,13 +85,13 @@ const tags = (log: DatalogType, projectName: string): Tags => {
 
 interface getFileNameProps {
   selection: DatalogType | DatalogType[] | undefined
-  outputName: string
+  template: string
   fallbackName: string
   projectName: string
 }
-export const getFileName = ({
+export const replaceTagsMultiple = ({
   selection,
-  outputName,
+  template,
   fallbackName,
   projectName
 }: getFileNameProps): string => {
@@ -100,11 +100,11 @@ export const getFileName = ({
   if (Array.isArray(selection) && selection.length > 1) {
     const { first, last } = getFirstAndLastDatalogs(selection)
 
-    const firstName = replaceTags(outputName, tags(first, projectName))
-    const lastName = replaceTags(outputName, tags(last, projectName))
+    const firstName = replaceTags(template, tags(first, projectName))
+    const lastName = replaceTags(template, tags(last, projectName))
     return `${firstName}-${lastName}`
   } else {
     const logs = Array.isArray(selection) ? selection[0] : selection
-    return replaceTags(outputName, tags(logs, projectName))
+    return replaceTags(template, tags(logs, projectName))
   }
 }
