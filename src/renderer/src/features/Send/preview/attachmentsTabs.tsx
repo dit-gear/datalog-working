@@ -23,7 +23,7 @@ const AttachmentsTabs = ({ active, onTabClick }: AttachmentsTabsProps) => {
     <>
       {pdfAttachments?.map((item) => {
         const isValid = typeof item.react === 'string'
-        const name = useStringWithTags(data!, item.output_name, item.name)
+        const name = useStringWithTags(data!, item.output_name, item.label)
         return (
           <button
             key={item.id}

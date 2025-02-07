@@ -75,7 +75,7 @@ export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
             filename: replaceTagsMultiple({
               selection,
               template: att.output_name,
-              fallbackName: att.name,
+              fallbackName: att.label,
               projectName: appState.activeProject!.project_name!
             })
           })

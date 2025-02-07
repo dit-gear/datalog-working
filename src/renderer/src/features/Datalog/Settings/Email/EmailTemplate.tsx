@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Input } from '@components/ui/input'
 import { FormField, FormItem, FormControl, FormLabel, FormMessage, Form } from '@components/ui/form'
 import { pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
@@ -50,9 +50,9 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
   pdfs
 }) => {
   const [open, setOpen] = useState<boolean>(false)
+  const editRef = useRef<{ id: string; index: number } | null>(null)
   const defaultValues = {
-    name: '',
-    sender: '',
+    label: '',
     recipients: [],
     subject: '',
     message: '',
@@ -65,12 +65,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
     resolver: zodResolver(emailWithoutIDZod)
   })
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors }
-  } = form
+  const { control, handleSubmit, reset } = form
 
   let currentIndex = 0 // Initialize the index counter
 
@@ -79,12 +74,15 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
   const onSubmit: SubmitHandler<emailWithoutIDType> = (data): void => {
     if (emailEdit !== null) {
       update(emailEdit.index, { id: emailEdit.email.id, ...data })
-    } else append({ id: nanoid(5), ...data })
+    } else {
+      append({ id: nanoid(5), ...data })
+    }
     onOpenChange(false)
   }
   useEffect(() => {
     if (emailEdit) {
-      reset(emailEdit.email)
+      const { id, ...rest } = emailEdit.email
+      reset(rest)
       setOpen(true)
     }
   }, [emailEdit])
@@ -105,7 +103,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
       <DialogContent className="border p-8">
         <DialogHeader>
           <DialogTitle>
-            {emailEdit ? `Edit ${emailEdit.email.name}` : 'New Email Template'}
+            {emailEdit ? `Edit ${emailEdit.email.label}` : 'New Email Template'}
           </DialogTitle>
           <DialogDescription>
             {`${emailEdit ? 'Edit the' : 'Create a new'} Email template that can be used from the UI`}
@@ -114,7 +112,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
         <Form {...form}>
           <FormField
             control={control}
-            name={`name`}
+            name={`label`}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Name / Label</FormLabel>
@@ -134,11 +132,6 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
                 <FormControl>
                   <MultiSelectTextInput {...field} dataIndex={assignIndex()} />
                 </FormControl>
-                {Array.isArray(errors.recipients) &&
-                  errors.recipients.length > 0 &&
-                  errors.recipients.map((error, index) => (
-                    <FormMessage key={index}>{error.message}</FormMessage>
-                  ))}
               </FormItem>
             )}
           />
@@ -179,7 +172,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
                       field.onChange(updatedAttachments) // Update the form state with pdfType objects
                     }}
                     options={pdfs.map((pdf) => {
-                      const option = { label: pdf.name, value: pdf.id }
+                      const option = { label: pdf.label, value: pdf.id }
                       return option
                     })}
                   />

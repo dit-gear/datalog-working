@@ -139,10 +139,12 @@ const Send = ({ defaults }: SendProps) => {
 
                           field.onChange(updatedAttachments)
                         }}
-                        options={projectPdfs.map((pdf) => {
-                          const option = { label: pdf.name, value: pdf.id }
-                          return option
-                        })}
+                        options={projectPdfs
+                          ?.filter((pdf) => pdf.enabled)
+                          .map((pdf) => {
+                            const option = { label: pdf.label, value: pdf.id }
+                            return option
+                          })}
                       />
                     </FormControl>
                     <FormMessage />

@@ -1,8 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react'
-import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 import { useData } from '../utils/useData'
-import { getReactTemplate } from '@shared/utils/getReactTemplate'
-import { fetchFileContent } from '../utils/fetchFileContent'
 import Tabs from './Tabs'
 
 export const Header = () => {
@@ -58,17 +55,6 @@ export const Header = () => {
     },
     [data]
   )
-
-  /* useEffect(() => {
-    if (defaultSelectedEmail?.react && projectTemplates && data) {
-      const template = getReactTemplate(defaultSelectedEmail.react, projectTemplates, 'email')
-      if (template) {
-        fetchFileContent(template.path).then((content) => {
-          sendToWorker(content, 'email', '')
-        })
-      }
-    }
-  }, [projectTemplates, data, sendToWorker])*/
 
   return <Tabs sendToWorker={sendToWorker} />
 }

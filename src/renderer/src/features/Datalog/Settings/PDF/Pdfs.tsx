@@ -45,7 +45,7 @@ const Pdfs: React.FC<PdfProps> = ({ scope, templates }) => {
           <Accordion type="single" collapsible>
             {fields.map((pdf, index) => (
               <AccordionItem key={index} value={`pdf-${index}`}>
-                <AccordionTrigger>{pdf.name}</AccordionTrigger>
+                <AccordionTrigger>{pdf.label}</AccordionTrigger>
                 <div className="-mt-12 mr-8 flex justify-end">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

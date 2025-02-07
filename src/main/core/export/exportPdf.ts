@@ -39,7 +39,7 @@ export const exportPdf = async ({ pdf, selection }: exportPdfProps) => {
   try {
     // Open file dialog to get the save location
     const { filePath } = await dialog.showSaveDialog({
-      title: `Save ${pdf.name}`,
+      title: `Save ${pdf.label}`,
       defaultPath: outputName, // Default name for the file
       filters: [
         { name: 'PDF Files', extensions: ['pdf'] },

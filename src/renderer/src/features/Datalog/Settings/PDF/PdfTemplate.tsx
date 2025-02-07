@@ -45,7 +45,7 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
   const [open, setOpen] = useState<boolean>(false)
 
   const defaultValues = {
-    name: '',
+    label: '',
     output_name: '<log>.pdf',
     react: '',
     enabled: true
@@ -93,7 +93,7 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
       </DialogTrigger>
       <DialogContent className="border p-8">
         <DialogHeader>
-          <DialogTitle>{emailEdit ? `Edit ${emailEdit.pdf.name}` : 'New PDF'}</DialogTitle>
+          <DialogTitle>{emailEdit ? `Edit ${emailEdit.pdf.label}` : 'New PDF'}</DialogTitle>
           <DialogDescription>
             {`${emailEdit ? 'Edit the' : 'Create a new'} Pdf preset that can be used from the UI`}
           </DialogDescription>
@@ -101,10 +101,10 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
         <Form {...form}>
           <FormField
             control={control}
-            name={`name`}
+            name={`label`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name / Label</FormLabel>
+                <FormLabel>Label</FormLabel>
                 <FormControl>
                   <Input {...field} data-index={assignIndex()} />
                 </FormControl>

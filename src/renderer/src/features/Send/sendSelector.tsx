@@ -57,13 +57,13 @@ const SendSelector = () => {
               ?.filter((email) => email.enabled)
               .map((email, index) => (
                 <SelectItem key={index} value={email.id}>
-                  {email.name}
+                  {email.label}
                 </SelectItem>
               ))}
           </SelectContent>
         </Select>
       </div>
-      <Send key={selectedEmail ? selectedEmail.name : 'none'} defaults={selectedEmail} />
+      <Send key={selectedEmail ? selectedEmail.label : 'none'} defaults={selectedEmail} />
     </div>
   )
 }

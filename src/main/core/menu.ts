@@ -34,11 +34,13 @@ const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): M
     {
       label: 'Send',
       submenu: [
-        ...(activeProject?.emails?.map((email, index) => ({
-          id: index.toString(),
-          label: email.name,
-          click: (): void => createSendWindow(email)
-        })) || [{ label: 'No Emails Available', enabled: false }]),
+        ...(activeProject?.emails
+          ?.filter((email) => email.enabled)
+          .map((email, index) => ({
+            id: index.toString(),
+            label: email.label,
+            click: (): void => createSendWindow(email)
+          })) || [{ label: 'No Emails Available', enabled: false }]),
         { type: 'separator' },
         { id: 'sendWindow', label: 'Open Send Window', click: (): void => createSendWindow(null) }
       ],
@@ -46,11 +48,13 @@ const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): M
     }, // Will open Send window
     {
       label: 'Export',
-      submenu: activeProject?.pdfs?.map((pdf) => ({
-        id: pdf.id,
-        label: pdf.name,
-        click: () => exportPdf({ pdf })
-      })) || [{ label: 'No PDFs Available', enabled: false }],
+      submenu: activeProject?.pdfs
+        ?.filter((pdf) => pdf.enabled)
+        .map((pdf) => ({
+          id: pdf.id,
+          label: pdf.label,
+          click: () => exportPdf({ pdf })
+        })) || [{ label: 'No PDFs Available', enabled: false }],
       enabled: Boolean(activeProject)
     },
     { type: 'separator' },

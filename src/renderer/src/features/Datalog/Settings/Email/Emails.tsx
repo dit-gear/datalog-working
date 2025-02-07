@@ -40,7 +40,8 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
   const { control } = useFormContext<formSchemaType>()
   const { fields, append, remove, update } = useFieldArray({
     control,
-    name: `${scope}_emails`
+    name: `${scope}_emails`,
+    keyName: 'fieldId'
   })
 
   const [emailEdit, setEmailEdit] = useState<emailEditType | null>(null)
@@ -57,7 +58,7 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
           <Accordion type="single" collapsible>
             {fields.map((email, index) => (
               <AccordionItem key={index} value={`email-${index}`}>
-                <AccordionTrigger>{email.name}</AccordionTrigger>
+                <AccordionTrigger>{email.label}</AccordionTrigger>
                 <div className="-mt-12 mr-8 flex justify-end">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

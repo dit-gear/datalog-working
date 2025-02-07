@@ -180,7 +180,7 @@ const additionalParsing = z.object({
 
 export const pdfZodObj = z.object({
   id: z.string().length(5),
-  name: z.string().nonempty('Name / label is required'),
+  label: z.string().nonempty('Label is required'),
   output_name: z
     .string()
     .nonempty('Output name is required')
@@ -206,7 +206,7 @@ export const emailApiZodObj = z.object({
 
 export const emailZodObj = z.object({
   id: z.string().length(5),
-  name: z.string().min(1, 'Template name are required'),
+  label: z.string().nonempty('Label is required'),
   recipients: z
     .array(z.string().email({ message: 'Must be a vaild email' }))
     .min(1, { message: 'Must contain at least one recipient' }),
