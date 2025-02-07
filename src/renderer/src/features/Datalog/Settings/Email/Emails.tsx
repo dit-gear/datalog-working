@@ -21,6 +21,7 @@ import { Button } from '@components/ui/button'
 import EmailTemplate from './EmailTemplate'
 import ApiKeyDialog from './ApiKeyDialog'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
+import { Check } from 'lucide-react'
 
 interface EmailProps {
   scope: 'project' | 'global'
@@ -73,8 +74,6 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
                   </DropdownMenu>
                 </div>
                 <AccordionContent className="grid grid grid-cols-2 gap-x-4 gap-y-2">
-                  <p>From:</p>
-                  <p>{email.sender}</p>
                   <p>To:</p>
                   <p>{email.recipients?.join(', ')}</p>
                   <p>Subject:</p>
@@ -93,7 +92,7 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
                   <p>React template:</p>
                   <p>{email.react}</p>
                   <p>Enabled:</p>
-                  <p>{email.enabled && '✔'}</p>
+                  <Check className="size-5" />
                 </AccordionContent>
               </AccordionItem>
             ))}

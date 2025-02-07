@@ -8,9 +8,9 @@ interface Option {
 
 export function mapPdfTypesToOptions(pdfs: pdfType[], tags?: Tags): Option[] {
   return pdfs.map((pdf) => {
-    const name = tags ? replaceTags(pdf.output_name_pattern, tags) : pdf.output_name_pattern
+    const name = tags ? replaceTags(pdf.output_name, tags) : pdf.output_name
     return {
-      label: `${pdf.name} (${name}.pdf)`,
+      label: `${pdf.name} (${name})`,
       value: pdf.id
     }
   })

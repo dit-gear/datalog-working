@@ -8,5 +8,5 @@ export type pdfEditType = {
   pdf: pdfType
 }
 
-const pdfWithoutID = pdfZodObj.omit({ id: true })
-export type pdfWitoutIDType = z.infer<typeof pdfWithoutID>
+export const pdfWithoutIDZod = pdfZodObj.omit({ id: true })
+export type pdfWitoutIDType = z.infer<typeof pdfWithoutIDZod>

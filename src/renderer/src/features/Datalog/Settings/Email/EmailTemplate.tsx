@@ -12,8 +12,7 @@ import {
 } from '@components/ui/select'
 import { Textarea } from '@components/ui/textarea'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { emailType, emailEditType } from './types'
-import { emailZodObj } from '@shared/projectTypes'
+import { emailType, emailEditType, emailWithoutIDZod, emailWithoutIDType } from './types'
 import {
   Dialog,
   DialogTrigger,
@@ -30,6 +29,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Switch } from '@components/ui/switch'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
 import { mapPdfTypesToOptions } from '@renderer/utils/mapPdfTypes'
+import { nanoid } from 'nanoid/non-secure'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@components/ui/tooltip'
 
 interface EmailTemplateProps {
   append: (email: emailType) => void
@@ -55,13 +56,13 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
     recipients: [],
     subject: '',
     message: '',
-    react: 'none',
+    react: '',
     enabled: true
   }
-  const form = useForm<emailType>({
+  const form = useForm<emailWithoutIDType>({
     defaultValues: defaultValues,
     mode: 'onSubmit',
-    resolver: zodResolver(emailZodObj)
+    resolver: zodResolver(emailWithoutIDZod)
   })
 
   const {
@@ -75,10 +76,10 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
 
   const assignIndex = (): number => currentIndex++
 
-  const onSubmit: SubmitHandler<emailType> = (data): void => {
+  const onSubmit: SubmitHandler<emailWithoutIDType> = (data): void => {
     if (emailEdit !== null) {
-      update(emailEdit.index, data)
-    } else append(data)
+      update(emailEdit.index, { id: emailEdit.email.id, ...data })
+    } else append({ id: nanoid(5), ...data })
     onOpenChange(false)
   }
   useEffect(() => {
@@ -99,11 +100,9 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button type="button" variant="secondary">
-          Add Email
-        </Button>
+        <Button type="button">Add Email</Button>
       </DialogTrigger>
-      <DialogContent className="border p-4">
+      <DialogContent className="border p-8">
         <DialogHeader>
           <DialogTitle>
             {emailEdit ? `Edit ${emailEdit.email.name}` : 'New Email Template'}
@@ -118,20 +117,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
             name={`name`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Template name</FormLabel>
-                <FormControl>
-                  <Input {...field} data-index={assignIndex()} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`sender`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>From:</FormLabel>
+                <FormLabel>Name / Label</FormLabel>
                 <FormControl>
                   <Input {...field} data-index={assignIndex()} />
                 </FormControl>
@@ -220,7 +206,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
             name={`react`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>React</FormLabel>
+                <FormLabel>React Email Template</FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger>
@@ -228,7 +214,6 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="none">none</SelectItem>
                         {templates
                           .filter((template) => template.type === 'email')
                           .map((template) => (
@@ -248,16 +233,28 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
             control={control}
             name={`enabled`}
             render={({ field }) => (
-              <FormItem className="flex items-center self-center gap-16">
-                <FormLabel className="mt-2">Enabled?</FormLabel>
+              <FormItem className="flex bg-zinc-900 px-4 pt-2 pb-4 rounded-md justify-between">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger className="mt-2">
+                      <FormLabel>Enabled</FormLabel>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Toggle enabled/disbled from the menu and options.
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    data-index={assignIndex()}
+                  />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
-          <DialogFooter>
+          <DialogFooter className="mt-4">
             <Button type="button" onClick={handleSubmit(onSubmit)}>
               Save
             </Button>

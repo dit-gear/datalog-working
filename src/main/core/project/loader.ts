@@ -29,9 +29,11 @@ const parseSettingsFile = async <T>(filePath: string, schema: ZodType<T>): Promi
       return parse.data
     } else {
       logger.error(parse.error)
+      throw new Error(`Invalid project settings in ${filePath}: ${parse.error}`)
     }
   } else {
     logger.warn('No file to parse')
+    throw new Error('Settings file does not exist')
   }
 
   return null
@@ -144,7 +146,7 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
     return { success: true, data }
   } catch (error) {
     const errorMessage = (error as Error).message
-    dialog.showErrorBox('Error', errorMessage)
+    dialog.showErrorBox('Error loading project, please check the project config:', errorMessage)
     logger.error(errorMessage)
     return {
       success: false,

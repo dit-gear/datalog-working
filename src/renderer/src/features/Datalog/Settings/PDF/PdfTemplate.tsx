@@ -11,8 +11,7 @@ import {
   SelectValue
 } from '@components/ui/select'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { pdfType, pdfEditType, pdfWitoutIDType } from './types'
-import { pdfZodObj } from '@shared/projectTypes'
+import { pdfType, pdfEditType, pdfWithoutIDZod, pdfWitoutIDType } from './types'
 import {
   Dialog,
   DialogTrigger,
@@ -26,6 +25,7 @@ import { Button } from '@components/ui/button'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Switch } from '@components/ui/switch'
 import { nanoid } from 'nanoid/non-secure'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@components/ui/tooltip'
 
 interface PdfTemplateProps {
   append: (email: pdfType) => void
@@ -46,14 +46,14 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
 
   const defaultValues = {
     name: '',
-    output_name_pattern: '',
-    react: 'none',
+    output_name: '<log>.pdf',
+    react: '',
     enabled: true
   }
   const form = useForm<pdfWitoutIDType>({
     defaultValues: defaultValues,
     mode: 'onSubmit',
-    resolver: zodResolver(pdfZodObj.omit({ id: true }))
+    resolver: zodResolver(pdfWithoutIDZod)
   })
 
   const { control, handleSubmit, reset } = form
@@ -63,7 +63,6 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
   const assignIndex = (): number => currentIndex++
 
   const onSubmit: SubmitHandler<pdfWitoutIDType> = (data): void => {
-    console.log('emailedit:', emailEdit?.pdf.id)
     if (emailEdit !== null) {
       update(emailEdit.index, { id: emailEdit.pdf.id, ...data })
     } else {
@@ -90,15 +89,13 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button type="button" variant="secondary">
-          Add Pdf
-        </Button>
+        <Button type="button">Add Pdf</Button>
       </DialogTrigger>
-      <DialogContent className="border p-4">
+      <DialogContent className="border p-8">
         <DialogHeader>
-          <DialogTitle>{emailEdit ? `Edit ${emailEdit.pdf.name}` : 'New PDF Template'}</DialogTitle>
+          <DialogTitle>{emailEdit ? `Edit ${emailEdit.pdf.name}` : 'New PDF'}</DialogTitle>
           <DialogDescription>
-            {`${emailEdit ? 'Edit the' : 'Create a new'} Pdf template that can be used from the UI`}
+            {`${emailEdit ? 'Edit the' : 'Create a new'} Pdf preset that can be used from the UI`}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -107,7 +104,7 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
             name={`name`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Template name</FormLabel>
+                <FormLabel>Name / Label</FormLabel>
                 <FormControl>
                   <Input {...field} data-index={assignIndex()} />
                 </FormControl>
@@ -117,10 +114,10 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
           />
           <FormField
             control={control}
-            name={`output_name_pattern`}
+            name={`output_name`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Output Name Pattern:</FormLabel>
+                <FormLabel>Output Name</FormLabel>
                 <FormControl>
                   <Input {...field} data-index={assignIndex()} />
                 </FormControl>
@@ -134,15 +131,14 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
             name={`react`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>React Email Template</FormLabel>
+                <FormLabel>React Pdf Template</FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="none">none</SelectItem>
                         {templates
                           .filter((template) => template.type === 'pdf')
                           .map((template) => (
@@ -162,8 +158,17 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
             control={control}
             name={`enabled`}
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Enabled</FormLabel>
+              <FormItem className="flex bg-zinc-900 px-4 pt-2 pb-4 rounded-md justify-between">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger className="mt-2">
+                      <FormLabel>Enabled</FormLabel>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Toggle enabled/disbled from the menu and options.
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <FormControl>
                   <Switch
                     checked={field.value}
@@ -171,7 +176,6 @@ const PdfTemplate: React.FC<PdfTemplateProps> = ({
                     data-index={assignIndex()}
                   />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />

@@ -32,9 +32,10 @@ export const formSchema = z
     new_email_api: emailApiZodObj.optional()
   })
   .superRefine((data, ctx) => {
-    const { project_logid_template, global_logid_template } = data
+    const projectId = data.project_logid_template?.trim() || ''
+    const globalId = data.global_logid_template?.trim() || ''
 
-    if (!project_logid_template && !global_logid_template) {
+    if (!projectId && !globalId) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'Set folder template in project or global. Both cannot be empty.',

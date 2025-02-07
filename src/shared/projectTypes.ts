@@ -180,9 +180,16 @@ const additionalParsing = z.object({
 
 export const pdfZodObj = z.object({
   id: z.string().length(5),
-  name: z.string().min(1, 'Template name are required'),
-  output_name_pattern: z.string().min(1),
-  react: z.string().optional(),
+  name: z.string().nonempty('Name / label is required'),
+  output_name: z
+    .string()
+    .nonempty('Output name is required')
+    .endsWith('.pdf', 'Output name must end with .pdf')
+    .regex(
+      /^[a-zA-Z0-9<>_-]+\.pdf$/,
+      'Output name must end with .pdf and contain only allowed characters before it.'
+    ),
+  react: z.string().nonempty('Selecting a template is required'),
   enabled: z.boolean()
 })
 
@@ -198,8 +205,8 @@ export const emailApiZodObj = z.object({
 })
 
 export const emailZodObj = z.object({
+  id: z.string().length(5),
   name: z.string().min(1, 'Template name are required'),
-  sender: z.string().email(),
   recipients: z
     .array(z.string().email({ message: 'Must be a vaild email' }))
     .min(1, { message: 'Must contain at least one recipient' }),

@@ -56,7 +56,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
 
   const form = useForm<formSchemaType>({
     defaultValues: defaultValues(defaults),
-    mode: 'onBlur',
+    mode: 'all',
     resolver: zodResolver(formSchema)
   })
   const {
@@ -123,7 +123,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
                     Metadata Fields
                   </TabsTrigger>
                   <TabsTrigger className="w-full justify-start" value="email">
-                    Email
+                    Presets
                   </TabsTrigger>
                   <TabsTrigger className="w-full justify-start" value="pdf">
                     PDF
@@ -131,19 +131,19 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
                 </TabsList>
               </nav>
 
-              <TabsContent value="general">
+              <TabsContent value="general" tabIndex={-1}>
                 <GeneralTab scope={scope} />
               </TabsContent>
-              <TabsContent value="paths">
+              <TabsContent value="paths" tabIndex={-1}>
                 <PathsTab scope={scope} />
               </TabsContent>
-              <TabsContent value="parsing" className="mt-0 pt-2">
+              <TabsContent value="parsing" className="mt-0 pt-2" tabIndex={-1}>
                 <ParsingTab scope={scope} />
               </TabsContent>
-              <TabsContent value="email">
+              <TabsContent value="email" tabIndex={-1}>
                 <EmailTab scope={scope} templates={templates} />
               </TabsContent>
-              <TabsContent value="pdf">
+              <TabsContent value="pdf" tabIndex={-1}>
                 <PdfTab scope={scope} templates={templates} />
               </TabsContent>
 

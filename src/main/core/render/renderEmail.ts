@@ -8,7 +8,7 @@ import { getPdfAttachments } from '@shared/utils/getAttachments'
 import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 import { WorkerRequest } from './types'
 import logger from '../logger'
-import { getFileName } from '@shared/utils/formatDynamicString'
+import { replaceTagsMultiple } from '@shared/utils/formatDynamicString'
 
 interface renderEmailProps {
   email: emailType
@@ -37,7 +37,7 @@ export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
           await fs.access(emailpath.path)
           const code = await fs.readFile(emailpath.path, 'utf8')
           const req: WorkerRequest = {
-            id: email.name,
+            id: email.id,
             code,
             type: emailpath.type,
             message: email.message,
@@ -72,9 +72,9 @@ export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
           const renderedPdf = await pdfWorker.render(reqpdf)
           attachmentsToSend.push({
             content: renderedPdf.code,
-            filename: getFileName({
+            filename: replaceTagsMultiple({
               selection,
-              outputName: att.output_name_pattern,
+              template: att.output_name,
               fallbackName: att.name,
               projectName: appState.activeProject!.project_name!
             })

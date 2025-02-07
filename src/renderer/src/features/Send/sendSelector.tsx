@@ -25,10 +25,10 @@ const SendSelector = () => {
   }
 
   const handleSelectChange = (value: string) => {
-    if (value === 'none') {
+    if (!value || value === 'none') {
       setSelectedEmail(null)
     } else {
-      const email = projectEmails.find((email) => email.name === value)
+      const email = projectEmails.find((email) => email.id === value)
       if (email) {
         setSelectedEmail(email)
       }
@@ -42,12 +42,12 @@ const SendSelector = () => {
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
         <Select
-          value={selectedEmail === null ? 'none' : selectedEmail.name}
+          value={!selectedEmail ? 'none' : selectedEmail.id}
           onValueChange={handleSelectChange}
         >
           <SelectTrigger>
             <span>Preset: </span>
-            <span className={selectedEmail === null ? 'text-muted-foreground' : ''}>
+            <span className={!selectedEmail ? 'text-muted-foreground' : ''}>
               <SelectValue />
             </span>
           </SelectTrigger>
@@ -56,7 +56,7 @@ const SendSelector = () => {
             {projectEmails
               ?.filter((email) => email.enabled)
               .map((email, index) => (
-                <SelectItem key={index} value={email.name}>
+                <SelectItem key={index} value={email.id}>
                   {email.name}
                 </SelectItem>
               ))}

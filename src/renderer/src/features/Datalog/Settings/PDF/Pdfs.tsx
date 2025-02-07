@@ -20,6 +20,7 @@ import { MoreHorizontal } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import PdfTemplate from './PdfTemplate'
 import { getFileName } from '@renderer/utils/formatString'
+import { Check } from 'lucide-react'
 
 interface PdfProps {
   scope: 'project' | 'global'
@@ -62,11 +63,11 @@ const Pdfs: React.FC<PdfProps> = ({ scope, templates }) => {
                 </div>
                 <AccordionContent className="grid grid grid-cols-2 gap-x-4 gap-y-2">
                   <p>Output Name:</p>
-                  <p>{pdf.output_name_pattern}</p>
+                  <p>{pdf.output_name}</p>
                   <p>React template:</p>
                   <p>{pdf.react ? getFileName(pdf.react) : pdf.react}</p>
                   <p>Show in menu:</p>
-                  <p className="text-white">{pdf.enabled && '✔'}</p>
+                  <Check className="size-5" />
                 </AccordionContent>
               </AccordionItem>
             ))}

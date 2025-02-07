@@ -24,6 +24,7 @@ interface SendProps {
 const Send = ({ defaults }: SendProps) => {
   const { data } = useData()
   const projectPdfs = data?.project.pdfs ?? []
+  const projectTemplates = data?.project?.templatesDir?.filter((val) => val.type === 'email') ?? []
   const tags = useTags(data!)
   const [sentSuccess, setSendSuccess] = useState<boolean>(false)
   const { toast } = useToast()
@@ -39,7 +40,7 @@ const Send = ({ defaults }: SendProps) => {
         data && defaults?.message
           ? useStringWithTags(data, defaults.message, defaults.message)
           : '',
-      react: defaults?.react
+      react: defaults?.react ?? projectTemplates[0].name
     },
     mode: 'onSubmit'
     //resolver: zodResolver(emailZodObj) // maybe omit name, sender from validation.

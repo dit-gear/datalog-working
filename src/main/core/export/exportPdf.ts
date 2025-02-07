@@ -32,7 +32,7 @@ export const exportPdf = async ({ pdf, selection }: exportPdfProps) => {
     log: log.id
   }
 
-  const outputName = replaceTags(pdf.output_name_pattern, tags)
+  const outputName = replaceTags(pdf.output_name, tags)
 
   app.focus()
 
