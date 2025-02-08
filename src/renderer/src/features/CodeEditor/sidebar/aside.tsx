@@ -5,7 +5,8 @@ import {
   SidebarContent,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem
+  SidebarMenuItem,
+  SidebarRail
 } from '@components/ui/sidebar'
 import Group from './group'
 import { TemplateDirectoryFile } from '@shared/projectTypes'
@@ -25,49 +26,8 @@ const Aside = () => {
     window.editorApi.onDirChanged(handleDirectoryChanged)
   }, [])
 
-  /*const modeRef = useRef<NewTemplateDialogHandle>(null)
-  const FileDirectory = (): JSX.Element => {
-    const { dir, loading } = useInitialDir()
-
-    if (loading) {
-      return <p>Loading...</p>
-    }
-    return (
-      <>
-        <EditorDirectory directoryContent={dir} type="email" />
-        <EditorDirectory directoryContent={dir} type="pdf" />
-      </>
-    )
-  }
-
-  const handleTabChange = (value: string): void => {
-    if (modeRef.current) {
-      modeRef.current.setMode(value as 'email' | 'pdf')
-    }
-  }
-
   return (
-    <aside className="min-h-[calc(100vh-36px)]">
-      <Tabs
-        className="min-w-[200px] flex flex-col mt-2 ml-2 gap-2"
-        defaultValue="email"
-        onValueChange={handleTabChange}
-      >
-        <div className="flex ml-3 items-center justify-between">
-          <TabsList className="-ml-2">
-            <TabsTrigger value="email">Emails</TabsTrigger>
-            <TabsTrigger value="pdf">PDFs</TabsTrigger>
-          </TabsList>
-          <NewTemplateDialog ref={modeRef} />
-        </div>
-        <FileDirectory />
-      </Tabs>
-    </aside>
-  )
-}*/
-
-  return (
-    <Sidebar className="min-h-[calc(100vh-36px)]">
+    <Sidebar className="min-h-[calc(100vh-36px)]" collapsible="offcanvas">
       <SidebarHeader className="mt-8" />
       <SidebarContent className="px-2">
         <SidebarMenu>
@@ -81,6 +41,7 @@ const Aside = () => {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
+      <SidebarRail />
     </Sidebar>
   )
 }

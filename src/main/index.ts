@@ -10,6 +10,8 @@ import trayManager from './core/menu'
 // Initialize the application
 app.setName('Datalog')
 
+app.commandLine.appendSwitch('disable-features', 'OverlayScrollbar')
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.whenReady().then(() => {

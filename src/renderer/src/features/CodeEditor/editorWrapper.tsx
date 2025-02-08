@@ -113,19 +113,19 @@ const EditorWrapper = () => {
 
   return (
     <ResizablePanelGroup direction="horizontal" className="min-h-[100vh] w-full -mt-8 border-l">
-      <ResizablePanel className="flex flex-col m-2 gap-2">
+      <ResizablePanel className="flex flex-col">
         <div
-          className="flex items-center justify-between "
+          className="flex items-center justify-between mr-2"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
-          <div className="flex px-2 gap-2 border-b-2">
+          <div className="flex p-2 gap-2 overflow-x-scroll overflow-y-visible sm-scroll">
             {loadedFiles.map((file) => {
               const isActive = file.path === (selectedFile?.path ?? '')
               const isDirty = dirtyPaths.includes(file.path)
               return (
                 <CustomTab
                   key={file.path}
-                  variant="secondary"
+                  variant="outline"
                   isDirty={isDirty}
                   isActive={isActive}
                   size="sm"
@@ -140,14 +140,14 @@ const EditorWrapper = () => {
 
           <div className="flex gap-2">
             <NewMockdataDialog>
-              <Button size="sm" variant="secondary" className="rounded">
+              <Button size="sm" variant="outline" className="rounded">
                 <DatabaseIcon className="h-4 w-4" />
               </Button>
             </NewMockdataDialog>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="secondary" className="rounded">
+                <Button size="sm" variant="outline" className="rounded">
                   <SettingsIcon className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -177,7 +177,7 @@ const EditorWrapper = () => {
       <ResizablePanel className="flex flex-col m-2 gap-2">
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
-            <Button size="sm" variant="secondary" className="rounded text-xs">
+            <Button size="sm" variant="outline" className="rounded text-xs">
               Docs
             </Button>
           </div>

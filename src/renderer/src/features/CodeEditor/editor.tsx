@@ -57,10 +57,20 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     options: [formatOnSave, autoCloseTags]
   } = props
 
+  const autoCloseTagsRef = useRef(autoCloseTags)
+  const formatOnSaveRef = useRef(formatOnSave)
   const { initialData } = useInitialData()
   const data = { project: initialData.activeProject, datalogs: initialData.loadedDatalogs }
 
   const previewWorkerRef = useRef<Worker | null>(null)
+
+  useEffect(() => {
+    autoCloseTagsRef.current = autoCloseTags
+  }, [autoCloseTags])
+
+  useEffect(() => {
+    formatOnSaveRef.current = formatOnSave
+  }, [formatOnSave])
 
   useEffect(() => {
     const handleGlobalSave = (e: KeyboardEvent) => {
@@ -76,29 +86,6 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
       window.removeEventListener('keydown', handleGlobalSave)
     }
   }, [])
-
-  /*
-  const loadNewContent = (p: Preview) => {
-    !isLoading && p.type === 'pdf' && setIsLoading(true)
-
-    if (loadTimerRef.current) {
-      clearTimeout(loadTimerRef.current) // Reset the timer
-    }
-
-    loadTimerRef.current = setTimeout(() => {
-      loadError()
-      setPreviewContent(p)
-    }, 300) // Delay duration
-  }
-
-  const loadError = (error?: string) => {
-    if (errorTimerRef.current) {
-      clearTimeout(errorTimerRef.current) // Reset the timer
-    }
-    errorTimerRef.current = setTimeout(() => {
-      error ? setError(error) : setError(null)
-    }, 1000)
-  } */
 
   useEffect(() => {
     const previewWorker = new Worker(new URL('@workers/preview-worker.ts', import.meta.url), {
@@ -119,10 +106,8 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
       }
     }
 
-    // Clean up the worker when the component unmounts
     return () => {
       previewWorker.terminate()
-      //linterWorker.terminate()
     }
   }, [])
 
@@ -168,12 +153,10 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
       event: monaco.editor.IModelContentChangedEvent
     ) => {
       console.log(model, file, event)
-      if (autoCloseTags) {
-        if (event.changes.length > 0) {
-          const text = event.changes[0].text
-          if (text === '>') {
-            insertClosingTag(model)
-          }
+      if (autoCloseTagsRef.current && event.changes.length > 0) {
+        const text = event.changes[0].text
+        if (text === '>') {
+          insertClosingTag(model)
         }
       }
 
@@ -274,7 +257,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     const changesToSave: ChangedFile[] = []
     const urisToUpdate: string[] = []
 
-    if (formatOnSave) {
+    if (formatOnSaveRef.current) {
       try {
         const model = editorRef.current?.getModel()
         if (!model) throw new Error('No active model')

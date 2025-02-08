@@ -63,9 +63,7 @@ const CustomTab = React.forwardRef<HTMLDivElement, CustomTabProps>(
           <Button
             variant="ghost"
             size="icon"
-            className={cn(
-              `ml-2 h-6 w-6 rounded-md ${isActive && 'hidden group-hover:inline-flex'}`
-            )}
+            className={cn(`ml-2 h-6 w-6 rounded-md ${isDirty && 'hidden group-hover:inline-flex'}`)}
             onClick={(e) => {
               e.stopPropagation()
               action?.onClick()
@@ -77,7 +75,7 @@ const CustomTab = React.forwardRef<HTMLDivElement, CustomTabProps>(
 
         {isActive && (
           <span
-            className="absolute -bottom-0 left-0 right-0 h-0.5 bg-background z-20"
+            className="absolute -bottom-0 left-0 right-0 h-0.5 bg-blue-400 z-20"
             style={{ transform: 'translateY(100%)' }}
           />
         )}
