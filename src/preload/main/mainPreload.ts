@@ -36,7 +36,11 @@ const mainApi = {
   ) => {
     ipcRenderer.removeListener('datalogs-loaded', handler)
   },
-
+  checkDefaultPaths: (paths: {
+    ocf: string[] | null
+    sound: string[] | null
+    proxy: string | null
+  }) => ipcRenderer.invoke('checkPaths', paths),
   getDefaultClips: (paths: {
     ocf: string[] | null
     sound: string[] | null

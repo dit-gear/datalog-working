@@ -3,6 +3,7 @@ import { DatalogType, OcfClipType, ResponseWithClips, SoundClipType } from '@sha
 import { Response } from '@shared/shared-types'
 import { spawnWorker } from './builder/workers/workerManager'
 import addDefaults from './builder/add-defaults'
+import checkPaths from './builder/check-paths'
 import { removeOcf, removeSound } from './builder/remove'
 import updateDatalog from './updater'
 import deleteDatalog from './delete'
@@ -11,18 +12,30 @@ import logger from '../logger'
 import { additionalParsing } from '@shared/projectTypes'
 import { appState, datalogs } from '../app-state/state'
 import { ProjectType } from '@shared/projectTypes'
-//import { showDatalogWindow, getInitialRoute } from '../../datalog/datalogWindow'
 
 export function setupDatalogIpcHandlers(): void {
   ipcMain.handle(
-    'getDefaultClips',
+    'checkPaths',
     async (
       _,
       paths: { ocf: string[] | null; sound: string[] | null; proxy: string | null }
-    ): Promise<ResponseWithClips> => {
-      return await addDefaults(paths)
+    ): Promise<{
+      ocf: { path: string; available: boolean }[] | null
+      sound: { path: string; available: boolean }[] | null
+      proxy: { path: string; available: boolean } | null
+    }> => {
+      return await checkPaths(paths)
     }
-  )
+  ),
+    ipcMain.handle(
+      'getDefaultClips',
+      async (
+        _,
+        paths: { ocf: string[] | null; sound: string[] | null; proxy: string | null }
+      ): Promise<ResponseWithClips> => {
+        return await addDefaults(paths)
+      }
+    )
   ipcMain.handle(
     'getClips',
     async (
@@ -129,7 +142,5 @@ export function setupDatalogIpcHandlers(): void {
 
   ipcMain.handle('get-datalogs', (): DatalogType[] => {
     return Array.from(datalogs().values())
-  }) /*
-  ipcMain.handle('get-route', () => getInitialRoute())
-  ipcMain.once('show-datalog', async () => showDatalogWindow())*/
+  })
 }

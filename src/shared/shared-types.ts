@@ -69,3 +69,20 @@ export type DataObjectType = {
   selection: DatalogDynamicType | DatalogDynamicType[]
   all: DatalogDynamicType[]
 }
+
+export interface DefaultPathsInput {
+  ocf: string[] | null
+  sound: string[] | null
+  proxy: string | null
+}
+
+export interface CheckResult {
+  path: string
+  available: boolean
+}
+
+export interface CheckPathsResult {
+  ocf: CheckResult[] | null
+  sound: CheckResult[] | null
+  proxy: CheckResult | null
+}

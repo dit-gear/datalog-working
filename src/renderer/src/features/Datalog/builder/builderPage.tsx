@@ -11,7 +11,6 @@ function BuilderPage() {
   const { data: logs, isLoading: datalogsLoading } = useDatalogs()
 
   const selectedLog = logs.find((log) => log.id === logId)
-  console.log(selectedLog, logId)
 
   if (projectsLoading || datalogsLoading || !project?.data) {
     return null

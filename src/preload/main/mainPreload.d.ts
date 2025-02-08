@@ -5,7 +5,8 @@ import {
   CreateNewProjectResult,
   Response,
   ResponseWithString,
-  OpenModalTypes
+  OpenModalTypes,
+  CheckPathsResult
 } from '@shared/shared-types'
 import { DatalogType, OcfClipType, ResponseWithClips, SoundClipType } from '@shared/datalogTypes'
 import { TemplateDirectoryFile, pdfType } from '@shared/projectTypes'
@@ -27,6 +28,11 @@ declare global {
       deleteDatalog: (datalog: DatalogType) => Promise<Response>
       onDatalogsLoaded: (callback: (_, datalogs: DatalogType[]) => void) => void
       offDatalogsLoaded: (handler: (_, datalogs: DatalogType[]) => void) => void
+      checkDefaultPaths: (paths: {
+        ocf: string[] | null
+        sound: string[] | null
+        proxy: string | null
+      }) => Promise<CheckPathsResult>
       getDefaultClips: (paths: {
         ocf: string[] | null
         sound: string[] | null

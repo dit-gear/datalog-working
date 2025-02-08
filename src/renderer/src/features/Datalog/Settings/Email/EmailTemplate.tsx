@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Input } from '@components/ui/input'
 import { FormField, FormItem, FormControl, FormLabel, FormMessage, Form } from '@components/ui/form'
 import { pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
@@ -50,7 +50,6 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
   pdfs
 }) => {
   const [open, setOpen] = useState<boolean>(false)
-  const editRef = useRef<{ id: string; index: number } | null>(null)
   const defaultValues = {
     label: '',
     recipients: [],

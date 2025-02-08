@@ -147,9 +147,9 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
                 <PdfTab scope={scope} templates={templates} />
               </TabsContent>
 
-              <div className="fixed left-0 right-0 bottom-0 w-full flex justify-end gap-10 px-6 py-4">
-                <Button variant="ghost" onClick={() => navigate('/')}>
-                  Close
+              <div className="fixed right-0 bottom-0  bg-background flex justify-end rounded-tl-lg gap-10 px-6 py-4">
+                <Button variant="ghost" type="button" onClick={() => navigate('/')}>
+                  Cancel
                 </Button>
                 <Button form="settings" type="submit" disabled={isSubmitting || isSubmitSuccessful}>
                   {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <></>}
