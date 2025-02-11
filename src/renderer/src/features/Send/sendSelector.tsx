@@ -38,14 +38,14 @@ const SendSelector = () => {
   return (
     <div className="h-dvh border-t flex flex-col">
       <div
-        className="absolute ml-20 overflow-visible z-20"
+        className="absolute left-20 top-2 z-20"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
         <Select
           value={!selectedEmail ? 'none' : selectedEmail.id}
           onValueChange={handleSelectChange}
         >
-          <SelectTrigger>
+          <SelectTrigger className="text-xs">
             <span>Preset: </span>
             <span className={!selectedEmail ? 'text-muted-foreground' : ''}>
               <SelectValue />

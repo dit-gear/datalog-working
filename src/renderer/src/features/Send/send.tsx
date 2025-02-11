@@ -68,10 +68,10 @@ const Send = ({ defaults }: SendProps) => {
   }
 
   return (
-    <div className="h-dvh border-t flex flex-col">
+    <div className="h-dvh flex flex-col">
       <Form {...form}>
         <ResizablePanelGroup className="flex-grow pb-20" direction="horizontal">
-          <ResizablePanel className="px-8 mt-4" defaultSize={40} maxSize={75}>
+          <ResizablePanel className="px-8 mt-12" defaultSize={40} maxSize={75}>
             <div className="flex flex-col flex-grow gap-4 h-full pb-4">
               <FormField
                 control={control}

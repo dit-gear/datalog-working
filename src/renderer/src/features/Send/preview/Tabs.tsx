@@ -23,10 +23,10 @@ const Tabs = ({ sendToWorker }: TabsProps) => {
     if (active !== 'email' && !attatchments.includes(active)) {
       const email = getValues('react')
       if (email) {
-        loadAndSendToWorker(email, 'email')
+        loadAndSendToWorker('email', email, 'email')
       } else {
         const def = projectTemplates?.filter((item) => item.type === 'email')[0]
-        loadAndSendToWorker(def.name, 'email')
+        loadAndSendToWorker('email', def.name, 'email')
       }
     }
   }, [attatchments])
@@ -34,27 +34,29 @@ const Tabs = ({ sendToWorker }: TabsProps) => {
   useEffect(() => {
     const handler = setTimeout(() => {
       const email = getValues('react')
-      loadAndSendToWorker(email, 'email')
+      loadAndSendToWorker('email', email, 'email')
     }, 400) // debounce delay in ms
 
     return () => clearTimeout(handler)
   }, [message])
 
-  const loadAndSendToWorker = useCallback(async (id: string, type: 'email' | 'pdf') => {
-    if (id === active) return
-    try {
-      const res = getReactTemplate(id, projectTemplates, type)
-      if (!res) throw new Error('Could not find template')
-      const content = await fetchFileContent(res.path)
-      setActive(type === 'email' ? type : id)
-      sendToWorker(content, type, getValues('message'))
-    } catch (err: any) {}
-  }, [])
+  const loadAndSendToWorker = useCallback(
+    async (id: string, reactId: string, type: 'email' | 'pdf') => {
+      try {
+        const res = getReactTemplate(reactId, projectTemplates, type)
+        if (!res) throw new Error('Could not find template')
+        const content = await fetchFileContent(res.path)
+        setActive(id)
+        sendToWorker(content, type, getValues('message'))
+      } catch (err: any) {}
+    },
+    []
+  )
 
   return (
     <div className="flex">
       <div
-        className="flex mt-2 pb-2 z-40 gap-2 overflow-x-scroll overflow-y-visible sm-scroll"
+        className="flex mt-2 pb-1 z-40 gap-2 overflow-x-scroll overflow-y-visible sm-scroll"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
         <EmailTab active={active === 'email'} onTabClick={loadAndSendToWorker} />

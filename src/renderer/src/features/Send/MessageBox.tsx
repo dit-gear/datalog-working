@@ -2,7 +2,7 @@ import { Button } from '@components/ui/button'
 
 const MessageBox = () => {
   return (
-    <div className="fixed bottom-0 left-0 p-4 border-t z-30">
+    <div className="fixed bottom-0 left-0 p-4 border-t">
       <p className="text-xs text-blue-400">Message from today's sponsor:</p>
       <span className="text-sm">
         {

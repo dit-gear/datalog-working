@@ -6,7 +6,7 @@ import { CustomTab } from '@components/CustomTab'
 
 interface AttachmentsTabsProps {
   active: string
-  onTabClick: (id: string, type: 'pdf') => void
+  onTabClick: (id: string, reactId: string, type: 'pdf') => void
 }
 
 const AttachmentsTabs = ({ active, onTabClick }: AttachmentsTabsProps) => {
@@ -31,8 +31,8 @@ const AttachmentsTabs = ({ active, onTabClick }: AttachmentsTabsProps) => {
               variant="outline"
               size="sm"
               label={name}
-              isActive={active === item.react}
-              onClick={isValid ? () => onTabClick(item.react!, 'pdf') : undefined}
+              isActive={active === item.id}
+              onClick={isValid ? () => onTabClick(item.id, item.react!, 'pdf') : undefined}
             />
           </div>
         )

@@ -7,7 +7,7 @@ import { CustomTab } from '@components/CustomTab'
 
 interface EmailTabProps {
   active: boolean
-  onTabClick: (id: string, type: 'email') => void
+  onTabClick: (id: string, reactId: string, type: 'email') => void
 }
 const EmailTab = ({ active, onTabClick }: EmailTabProps) => {
   const { data } = useData()
@@ -21,7 +21,7 @@ const EmailTab = ({ active, onTabClick }: EmailTabProps) => {
       isActive={active}
       size="sm"
       label="Email"
-      onClick={() => onTabClick(getValues('react'), 'email')}
+      onClick={() => onTabClick('email', getValues('react'), 'email')}
     >
       <span
         className="flex items-center gap-4 z-40"
@@ -36,10 +36,10 @@ const EmailTab = ({ active, onTabClick }: EmailTabProps) => {
                 <Select
                   defaultValue={field.value}
                   onValueChange={(value) => {
-                    field.onChange(value), onTabClick(value, 'email')
+                    field.onChange(value), onTabClick('email', value, 'email')
                   }}
                 >
-                  <SelectTrigger className="border-none" />
+                  <SelectTrigger className={`border-none ${!active && 'hidden'}`} />
                   <SelectContent>
                     {projectTemplates
                       .filter((template) => template.type === 'email')
