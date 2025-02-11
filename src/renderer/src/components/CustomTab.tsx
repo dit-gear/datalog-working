@@ -33,10 +33,11 @@ export interface CustomTabProps
   action?: { onClick: () => void }
   isActive?: boolean
   isDirty?: boolean
+  label: string
 }
 
 const CustomTab = React.forwardRef<HTMLDivElement, CustomTabProps>(
-  ({ className, variant, size, action, isActive, isDirty, children, ...props }, ref) => {
+  ({ className, variant, size, action, isActive, isDirty, label, children, ...props }, ref) => {
     return (
       <div
         ref={ref}
@@ -55,8 +56,9 @@ const CustomTab = React.forwardRef<HTMLDivElement, CustomTabProps>(
             'transition-colors rounded-md px-2 py-1'
           )}
           disabled={isActive}
+          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
-          <span className="truncate">{children}</span>
+          <span className="truncate text-xs">{label}</span>
         </button>
         {isDirty && <Dot className={`h-8 w-8 ${isActive && 'group-hover:hidden'}`} />}
         {action && (
@@ -72,7 +74,7 @@ const CustomTab = React.forwardRef<HTMLDivElement, CustomTabProps>(
             <XIcon className="h-4 w-4" />
           </Button>
         )}
-
+        {children}
         {isActive && (
           <span
             className="absolute -bottom-0 left-0 right-0 h-0.5 bg-blue-400 z-20"
@@ -86,24 +88,3 @@ const CustomTab = React.forwardRef<HTMLDivElement, CustomTabProps>(
 CustomTab.displayName = 'CustomTab'
 
 export { CustomTab, customTabVariants }
-
-/*
- <button
-        ref={ref}
-        className={cn(
-          customTabVariants({ variant, size }),
-          isActive && 'text-accent-foreground hover:bg-transparent',
-          'relative',
-          className
-        )}
-        disabled={isActive}
-        {...props}
-      >
-        <span className="flex items-center gap-2">
-          {Icon && <Icon className="h-4 w-4" />}
-          <span className="truncate">{children}</span>
-        </span>
-        {action && <span className="ml-2 flex h-4 w-4 items-center justify-center">{action}</span>}
-        {isActive && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-background" />}
-      </button>
-      */

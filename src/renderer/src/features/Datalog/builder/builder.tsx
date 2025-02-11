@@ -105,7 +105,7 @@ const Builder = ({ project, previousEntries, selected }: BuilderdialogProps) => 
     <div className="relative mx-auto max-w-screen-2xl px-4">
       <Form {...form}>
         <Tabs defaultValue="name" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="col-span-6">
+          <div className="sticky top-0 right-0 pt-8 z-40 col-span-6 bg-background">
             <div className="mx-auto">
               <StatsPanel />
             </div>
@@ -118,7 +118,7 @@ const Builder = ({ project, previousEntries, selected }: BuilderdialogProps) => 
             </div>
           </div>
           <TabsContent value="name" asChild tabIndex={-1}>
-            <div className="lg:col-start-2 col-span-3 mb-32">
+            <div className="lg:col-start-2 col-span-3 mb-32 ">
               <Name project={project} />
             </div>
           </TabsContent>
@@ -127,13 +127,13 @@ const Builder = ({ project, previousEntries, selected }: BuilderdialogProps) => 
               <Import project={project} />
             </div>
           </TabsContent>
-          <TabsContent value="clips" className="h-full" asChild tabIndex={-1}>
-            <div className="col-span-6 mb-32 overflow-scroll">
+          <TabsContent value="clips" asChild tabIndex={-1}>
+            <div className="col-span-6 mb-16 flex-1 overflow-scroll ">
               <Preview />
             </div>
           </TabsContent>
         </Tabs>
-        <div className="fixed right-0 bottom-0 flex justify-end gap-10 px-6 py-4 rounded-tl-lg bg-zinc-950">
+        <div className="fixed right-2 bottom-0 flex justify-end gap-10 px-6 py-4 rounded-tl-lg bg-zinc-950">
           <Button variant="ghost" onClick={() => navigate('/')}>
             Cancel
           </Button>

@@ -3,6 +3,7 @@ import { useProject } from '../hooks/useProject'
 import { useDatalogs } from '../hooks/useDatalogs'
 import Builder from './builder'
 import { Button } from '@components/ui/button'
+import CloseButton from '@components/CloseButton'
 
 function BuilderPage() {
   const navigate = useNavigate()
@@ -17,13 +18,13 @@ function BuilderPage() {
   }
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between mb-4">
-        <h2>{logId ? `Edit Shooting Day: ${logId}` : 'New Shooting Day'}</h2>
-        <Button variant="ghost" onClick={() => navigate('/')}>
-          Back
-        </Button>
+    <div className="">
+      <div className="flex justify-center items-center mt-4 mb-1">
+        <h2 className="text-1xl font-semibold leading-none tracking-tight">
+          {logId ? `Editing: ${logId}` : 'New Shooting Day'}
+        </h2>
       </div>
+      <CloseButton onClick={() => navigate('/')} />
       <Builder project={project.data} previousEntries={logs} selected={selectedLog} />
     </div>
   )

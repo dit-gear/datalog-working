@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useProject } from '../hooks/useProject'
-import { Button } from '@components/ui/button'
+import CloseButton from '@components/CloseButton'
 import Settings from './Settings'
 
 function SettingsPage() {
@@ -18,12 +18,11 @@ function SettingsPage() {
 
   return (
     <div className="px-4">
-      <div className="flex justify-between ml-28">
-        <h1 className="-ml-1 text-3xl font-semibold leading-none tracking-tight">Settings</h1>
-        <Button variant="ghost" onClick={() => navigate('/')}>
-          Back
-        </Button>
+      <div className="mx-auto w-[90vw] gap-2 container grid md:grid-cols-[220px_minmax(0,1fr)] mt-4 mb-2">
+        <h1 className="ml-1 text-3xl font-semibold leading-none tracking-tight">Settings</h1>
+        <div></div>
       </div>
+      <CloseButton onClick={() => navigate('/')} />
       <Settings defaults={project.data.settings} templates={project.data.templatesDir} />
     </div>
   )

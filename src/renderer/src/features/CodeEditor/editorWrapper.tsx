@@ -109,7 +109,7 @@ const EditorWrapper = () => {
 
   if (loadedFiles.length === 0) {
     return (
-      <div className="border-l -mt-[36px] w-full flex flex-col gap-2 justify-center items-center">
+      <div className="h-dvh border-l w-full flex flex-col gap-2 justify-center items-center">
         <FileQuestion size={32} />
         <span>No loaded file</span>
       </div>
@@ -122,13 +122,13 @@ const EditorWrapper = () => {
   // If user has never clicked a tab, choose the first file by default
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="w-full -mt-8 border-l">
+    <ResizablePanelGroup direction="horizontal" className="w-full border-l">
       <ResizablePanel className="flex flex-col">
-        <div
-          className="flex items-center justify-between mr-2"
-          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-        >
-          <div className="flex p-2 gap-2 overflow-x-scroll overflow-y-visible sm-scroll">
+        <div className="flex items-center justify-between mr-2">
+          <div
+            className="flex p-2 z-40 gap-2 overflow-x-scroll overflow-y-visible sm-scroll"
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          >
             {loadedFiles.map((file) => {
               const isActive = file.path === (selectedFile?.path ?? '')
               const isDirty = dirtyPaths.includes(file.path)
@@ -139,25 +139,34 @@ const EditorWrapper = () => {
                   isDirty={isDirty}
                   isActive={isActive}
                   size="sm"
+                  label={file.name}
                   onClick={() => handleTabClick(file.path)}
                   {...(isActive && { action: { onClick: () => handleCloseTab(file) } })}
-                >
-                  <span className="text-xs">{file.name}</span>
-                </CustomTab>
+                />
               )
             })}
           </div>
 
           <div className="flex gap-2">
             <NewMockdataDialog mockdata={mockdata} setMockdata={setMockdata}>
-              <Button size="sm" variant="outline" className="rounded">
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded z-40"
+                style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+              >
                 <DatabaseIcon className="h-4 w-4" />
               </Button>
             </NewMockdataDialog>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="outline" className="rounded">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded"
+                  style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+                >
                   <SettingsIcon className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -186,14 +195,19 @@ const EditorWrapper = () => {
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel className="flex flex-col m-2 gap-2">
-        <div
-          className="relative flex items-center w-full"
-          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-        >
-          <Button size="sm" variant="outline" className="rounded text-xs">
+        <div className="relative flex items-center w-full">
+          <Button
+            size="sm"
+            variant="outline"
+            className="z-40 rounded text-xs"
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          >
             Docs
           </Button>
-          <div className="absolute left-1/2 transform -translate-x-1/2">
+          <div
+            className="absolute left-1/2 transform -translate-x-1/2 z-40"
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          >
             <ToggleGroup
               type="single"
               variant="outline"
@@ -205,14 +219,16 @@ const EditorWrapper = () => {
               <ToggleGroupItem
                 value="single"
                 aria-label="Toggle single log selection"
-                className="rounded-r-none border-r-0"
+                className="z-40 rounded-r-none border-r-0"
+                style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
               >
                 <FileCheck className="pointer-events-none" />
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="multi"
                 aria-label="Toggle multiple log selection"
-                className="rounded-l-none border-l-0"
+                className="z-40 rounded-l-none border-l-0"
+                style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
               >
                 <Files className="pointer-events-none" />
               </ToggleGroupItem>

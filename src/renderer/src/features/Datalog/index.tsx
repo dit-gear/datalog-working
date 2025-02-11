@@ -29,21 +29,40 @@ const queryClient = new QueryClient()
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <div
-      className="flex-none"
-      style={{ height: '36px', WebkitAppRegion: 'drag' } as React.CSSProperties}
-    ></div>
-    <div
-      style={{
-        height: 'calc(100vh - 36px)',
-        overflowY: 'auto'
-      }}
-    >
-      <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <AppRouter />
-        </QueryClientProvider>
-      </ErrorBoundary>
+    <div style={{ position: 'relative', height: '100vh' }}>
+      {/* Draggable header */}
+      <div
+        style={
+          {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: '5px', // leave room for the scrollbar
+            height: '36px',
+            WebkitAppRegion: 'drag',
+            zIndex: 10
+          } as React.CSSProperties
+        }
+      >
+        {/* Header content if any */}
+      </div>
+      {/* Scrollable container that spans full height */}
+      <div
+        style={
+          {
+            height: '100%',
+            overflowY: 'scroll',
+            scrollbarGutter: 'stable'
+            //paddingTop: '36px' // offset content so it doesn't hide behind header
+          } as React.CSSProperties
+        }
+      >
+        <ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <AppRouter />
+          </QueryClientProvider>
+        </ErrorBoundary>
+      </div>
     </div>
   </React.StrictMode>
 )

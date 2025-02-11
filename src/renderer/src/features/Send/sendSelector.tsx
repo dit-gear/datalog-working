@@ -36,9 +36,9 @@ const SendSelector = () => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-36px)] border-t flex flex-col">
+    <div className="h-dvh border-t flex flex-col">
       <div
-        className="absolute ml-20 -mt-8 overflow-visible z-20"
+        className="absolute ml-20 overflow-visible z-20"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
         <Select

@@ -10,12 +10,13 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@component
 import { emailType } from '@shared/projectTypes'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
 import { mapPdfTypesToOptions } from '@renderer/utils/mapPdfTypes'
-import { Previews } from './preview/previews'
 import { Loader2, Send as Sendicon, Check } from 'lucide-react'
 import { Toaster } from '@components/ui/toaster'
 import { useToast } from '@components/lib/hooks/use-toast'
 import { useTags, useStringWithTags } from './utils/useTags'
 import { useData } from './utils/useData'
+import Preview from '@components/Preview'
+import { Header } from './preview/Header'
 
 interface SendProps {
   defaults: emailType | null
@@ -67,7 +68,7 @@ const Send = ({ defaults }: SendProps) => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-36px)] border-t flex flex-col">
+    <div className="h-dvh border-t flex flex-col">
       <Form {...form}>
         <ResizablePanelGroup className="flex-grow pb-20" direction="horizontal">
           <ResizablePanel className="px-8 mt-4" defaultSize={40} maxSize={75}>
@@ -154,8 +155,9 @@ const Send = ({ defaults }: SendProps) => {
             </div>
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel className="mx-8 overflow-visible" defaultSize={60} maxSize={75}>
-            <Previews />
+          <ResizablePanel className="ml-8 mr-4" defaultSize={60} maxSize={75}>
+            <Header />
+            <Preview />
           </ResizablePanel>
         </ResizablePanelGroup>
         <div className="fixed bottom-0 w-full justify-end flex p-4 border-t">
@@ -183,7 +185,6 @@ const Send = ({ defaults }: SendProps) => {
                   Send
                 </>
               )}
-              {/*isSubmitting ? 'Please wait' : isSubmitSuccessful ? 'Sent successfully' : 'Send'*/}
             </Button>
           </div>
         </div>

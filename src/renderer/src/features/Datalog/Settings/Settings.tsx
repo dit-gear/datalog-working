@@ -101,53 +101,55 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
         <Form {...form}>
           <form id="settings" onSubmit={handleSubmit(onSubmit)}>
             <Tabs
-              className="mx-auto w-[90vw] gap-2 container grid md:grid-cols-[220px_minmax(0,1fr)] overflow-y-auto"
+              className="mx-auto w-[90vw] gap-2 container grid md:grid-cols-[220px_minmax(0,1fr)]"
               defaultValue="general"
               orientation="vertical"
             >
-              <nav className="w-full shrink-0 md:sticky md:block">
-                <Tabs value={scope} onValueChange={(v) => setScope(v as Scope)}>
-                  <TabsList className="grid grid-cols-2 mt-2">
-                    <TabsTrigger value="project">This Project</TabsTrigger>
-                    <TabsTrigger value="global">Global</TabsTrigger>
+              <div className="h-full">
+                <nav className="w-full sticky z-30 top-8">
+                  <Tabs value={scope} onValueChange={(v) => setScope(v as Scope)}>
+                    <TabsList className="grid grid-cols-2 mt-2">
+                      <TabsTrigger value="project">This Project</TabsTrigger>
+                      <TabsTrigger value="global">Global</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <TabsList className="flex flex-col justify-between items-start h-auto mt-2">
+                    <TabsTrigger className="w-full justify-start" value="general">
+                      General
+                    </TabsTrigger>
+                    <TabsTrigger className="w-full justify-start" value="paths">
+                      Default Paths
+                    </TabsTrigger>
+                    <TabsTrigger className="w-full justify-start" value="parsing">
+                      Metadata Fields
+                    </TabsTrigger>
+                    <TabsTrigger className="w-full justify-start" value="email">
+                      Presets
+                    </TabsTrigger>
+                    <TabsTrigger className="w-full justify-start" value="pdf">
+                      PDF
+                    </TabsTrigger>
                   </TabsList>
-                </Tabs>
-                <TabsList className="flex flex-col justify-between items-start h-auto mt-2">
-                  <TabsTrigger className="w-full justify-start" value="general">
-                    General
-                  </TabsTrigger>
-                  <TabsTrigger className="w-full justify-start" value="paths">
-                    Default Paths
-                  </TabsTrigger>
-                  <TabsTrigger className="w-full justify-start" value="parsing">
-                    Metadata Fields
-                  </TabsTrigger>
-                  <TabsTrigger className="w-full justify-start" value="email">
-                    Presets
-                  </TabsTrigger>
-                  <TabsTrigger className="w-full justify-start" value="pdf">
-                    PDF
-                  </TabsTrigger>
-                </TabsList>
-              </nav>
-
-              <TabsContent value="general" tabIndex={-1}>
-                <GeneralTab scope={scope} />
-              </TabsContent>
-              <TabsContent value="paths" tabIndex={-1}>
-                <PathsTab scope={scope} />
-              </TabsContent>
-              <TabsContent value="parsing" className="mt-0 pt-2" tabIndex={-1}>
-                <ParsingTab scope={scope} />
-              </TabsContent>
-              <TabsContent value="email" tabIndex={-1}>
-                <EmailTab scope={scope} templates={templates} />
-              </TabsContent>
-              <TabsContent value="pdf" tabIndex={-1}>
-                <PdfTab scope={scope} templates={templates} />
-              </TabsContent>
-
-              <div className="fixed right-0 bottom-0  bg-background flex justify-end rounded-tl-lg gap-10 px-6 py-4">
+                </nav>
+              </div>
+              <div className="mb-20">
+                <TabsContent value="general" tabIndex={-1}>
+                  <GeneralTab scope={scope} />
+                </TabsContent>
+                <TabsContent value="paths" tabIndex={-1}>
+                  <PathsTab scope={scope} />
+                </TabsContent>
+                <TabsContent value="parsing" className="mt-0 pt-2" tabIndex={-1}>
+                  <ParsingTab scope={scope} />
+                </TabsContent>
+                <TabsContent value="email" tabIndex={-1}>
+                  <EmailTab scope={scope} templates={templates} />
+                </TabsContent>
+                <TabsContent value="pdf" tabIndex={-1}>
+                  <PdfTab scope={scope} templates={templates} />
+                </TabsContent>
+              </div>
+              <div className="fixed right-2 bottom-0  bg-background flex justify-end rounded-tl-lg gap-10 px-6 py-4">
                 <Button variant="ghost" type="button" onClick={() => navigate('/')}>
                   Cancel
                 </Button>

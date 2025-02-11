@@ -52,12 +52,14 @@ const Tabs = ({ sendToWorker }: TabsProps) => {
   }, [])
 
   return (
-    <div
-      className="bg-dark absolute h-8 p-0 -mt-8 overflow-visible z-20 flex gap-1"
-      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-    >
-      <EmailTab active={active === 'email'} onTabClick={loadAndSendToWorker} />
-      <AttachmentsTabs active={active} onTabClick={loadAndSendToWorker} />
+    <div className="flex">
+      <div
+        className="flex mt-2 pb-2 z-40 gap-2 overflow-x-scroll overflow-y-visible sm-scroll"
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+      >
+        <EmailTab active={active === 'email'} onTabClick={loadAndSendToWorker} />
+        <AttachmentsTabs active={active} onTabClick={loadAndSendToWorker} />
+      </div>
     </div>
   )
 }

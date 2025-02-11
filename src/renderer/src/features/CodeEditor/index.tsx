@@ -9,21 +9,32 @@ import ErrorBoundary from '@renderer/utils/ErrorBoundary'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <div style={{ height: '36px', WebkitAppRegion: 'drag' } as React.CSSProperties}></div>
-    <ErrorBoundary>
+    <div className="relative h-dvh">
       <div
-        className="flex flex-row gap-2"
-        style={{
-          height: 'calc(100vh - 36px)'
-        }}
-      >
-        <DataProvider>
-          <SidebarProvider className="min-h-[calc(100vh-36px)]">
-            <Aside />
-            <EditorWrapper />
-          </SidebarProvider>
-        </DataProvider>
-      </div>
-    </ErrorBoundary>
+        style={
+          {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: '5px', // leave room for the scrollbar
+            height: '36px',
+            WebkitAppRegion: 'drag',
+            zIndex: 10
+          } as React.CSSProperties
+        }
+      ></div>
+      <ErrorBoundary>
+        <div className="h-dvh">
+          <DataProvider>
+            <SidebarProvider>
+              <Aside />
+              <div className="h-dvh w-full">
+                <EditorWrapper />
+              </div>
+            </SidebarProvider>
+          </DataProvider>
+        </div>
+      </ErrorBoundary>
+    </div>
   </React.StrictMode>
 )

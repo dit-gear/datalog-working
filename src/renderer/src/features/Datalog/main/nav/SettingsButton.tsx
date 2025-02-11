@@ -8,7 +8,7 @@ const SettingsButton = () => {
   const navigate = useNavigate()
   return (
     <Button
-      variant="secondary"
+      variant="outline"
       size="icon"
       onClick={() => navigate('/settings')}
       disabled={!project?.data}

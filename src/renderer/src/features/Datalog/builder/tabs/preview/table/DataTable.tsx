@@ -119,7 +119,7 @@ const DataTable = memo(({ columns, data }: DataTableProps) => {
             {headerGroup.headers.map((header) => (
               <TableHead
                 key={header.id}
-                className="first:sticky first:left-0 first:z-30 first:bg-zinc-950 capitalize"
+                className="sticky top-0 z-20 bg-background first:sticky first:left-0 first:z-20 first:bg-background capitalize"
               >
                 {header.isPlaceholder
                   ? null
@@ -136,7 +136,7 @@ const DataTable = memo(({ columns, data }: DataTableProps) => {
               {row.getVisibleCells().map((cell) => (
                 <TableCell
                   key={cell.id}
-                  className="first:sticky first:left-0 first:z-30 first:bg-zinc-950 first:shadow-[inset_-1px_0_0_0_hsl(240_3.7%_15.9%)]" //border
+                  className="first:sticky first:left-0 first:z-10 first:bg-background first:shadow-[inset_-1px_0_0_0_hsl(240_3.7%_15.9%)]" //border
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
