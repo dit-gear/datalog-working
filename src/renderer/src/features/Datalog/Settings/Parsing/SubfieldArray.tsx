@@ -57,7 +57,7 @@ const SubfieldArray: React.FC<SubfieldArrayProps> = ({ type, scope, parentIndex 
                 name={`${scope}_custom_fields.fields.${parentIndex}.subfields.${index}.value_key`}
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Value Key</FormLabel>
+                    <FormLabel>Key</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>

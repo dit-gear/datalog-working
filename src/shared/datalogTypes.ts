@@ -196,9 +196,9 @@ const buildCustomFieldsSchema = (project: ProjectRootType) => {
 
   if (project.custom_fields?.fields) {
     for (const field of project.custom_fields.fields) {
-      if (field.type === 'duration') {
+      /*if (field.type === 'duration') {
         continue
-      }
+      }*/
       const zodSchema = mapTypeToZod(field)
 
       if (zodSchema) {
@@ -209,11 +209,6 @@ const buildCustomFieldsSchema = (project: ProjectRootType) => {
 
   return customFields
 }
-
-/*export const ClipDynamicZod = (project: ProjectRootType): z.ZodObject<any> => {
-  const zodSchema = ClipZod.extend(buildAdditionalFieldsSchema(project))
-  return zodSchema
-}*/
 
 export const CustomFieldsZod = (project: ProjectRootType): z.ZodObject<any> => {
   const zodSchema = Custom.extend(buildCustomFieldsSchema(project))
@@ -234,58 +229,5 @@ const ClipZod = OcfClipBaseZod.merge(CameraMetadataZod).extend({
 export const ClipDynamicZod = (project: ProjectRootType) => {
   return ClipZod.merge(CustomFieldsZod(project))
 }
-
-/*export const DatalogDynamicZod = <T extends Record<string, any>>(
-  project: ProjectRootType | undefined,
-  { transformDurationToReadable, transformDurationToMs }: DatalogDynamicZodOptions = {}
-): z.ZodObject<z.ZodRawShape & T> => {
-  let datalogBase = datalogZod as z.ZodObject<any>
-
-  const getTransformedClipSchema = () => {
-    let transformedClipZod = project ? ClipDynamicZod(project) : (ClipZod as z.ZodObject<any>)
-    if (transformDurationToReadable) {
-      transformedClipZod = transformedClipZod.omit({ Duration: true }).extend({
-        duration: z
-          .number()
-          .transform((val) => msToReadable(val))
-          .optional()
-      })
-    } else if (transformDurationToMs) {
-      transformedClipZod = transformedClipZod.omit({ Duration: true }).extend({
-        duration: z
-          .string()
-          .transform((val) => readableToMs(val))
-          .optional()
-      })
-    }
-    return transformedClipZod
-  }
-
-  // Apply duration transformations
-  if (transformDurationToReadable) {
-    datalogBase = datalogBase.omit({ Duration: true }).extend({
-      duration: z
-        .number()
-        .transform((val) => msToReadable(val))
-        .optional()
-    })
-  } else if (transformDurationToMs) {
-    datalogBase = datalogBase.omit({ Duration: true }).extend({
-      duration: z
-        .string()
-        .transform((val) => readableToMs(val))
-        .optional()
-    })
-  }
-
-  if (project) {
-    const ClipSchema = getTransformedClipSchema()
-    datalogBase = datalogBase.omit({ Clips: true }).extend({
-      clips: z.array(ClipSchema).optional()
-    })
-  }
-
-  return datalogBase as z.ZodObject<z.ZodRawShape & T>
-}*/
 
 export type DatalogDynamicType = DatalogType

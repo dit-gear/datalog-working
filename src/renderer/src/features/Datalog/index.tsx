@@ -33,7 +33,12 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       className="flex-none"
       style={{ height: '36px', WebkitAppRegion: 'drag' } as React.CSSProperties}
     ></div>
-    <div style={{ height: 'calc(100vh - 36px)', overflowY: 'auto' }}>
+    <div
+      style={{
+        height: 'calc(100vh - 36px)',
+        overflowY: 'auto'
+      }}
+    >
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <AppRouter />

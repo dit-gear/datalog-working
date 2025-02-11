@@ -3,7 +3,7 @@ import Editor, { EditorHandle } from './editor'
 import { FileQuestion } from 'lucide-react'
 import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from '@components/ui/resizable'
 import { Button } from '@components/ui/button'
-import { DatabaseIcon, SettingsIcon } from 'lucide-react'
+import { DatabaseIcon, SettingsIcon, Files, FileCheck } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,9 @@ import Preview from '../../components/Preview'
 import { CustomTab } from '@components/CustomTab'
 import { LoadedFile } from '@shared/shared-types'
 import { handleApiResponse } from '@renderer/utils/handleApiResponse'
-import { NewMockdataDialog } from './newMockdataDialog'
+import { NewMockdataDialog, mockDataType } from './newMockdataDialog'
+import { useInitialData } from './dataContext'
+import { ToggleGroup, ToggleGroupItem } from '@components/ui/toggle-group'
 
 const EditorWrapper = () => {
   const [isLoading, setLoading] = useState<boolean>(true)
@@ -24,6 +26,14 @@ const EditorWrapper = () => {
   const [activePath, setActivePath] = useState<string | null>(null)
   const [dirtyPaths, setDirtyPaths] = useState<string[]>([])
 
+  const { initialData, generatedDatalogs } = useInitialData()
+
+  const [mockdata, setMockdata] = useState<mockDataType>({
+    message: 'Hello world!',
+    source: initialData.loadedDatalogs.length ? 'logs' : 'generated',
+    datalogs: initialData.loadedDatalogs.length ? initialData.loadedDatalogs : generatedDatalogs
+  })
+  const [selection, setSelection] = useState<'single' | 'multi'>('single')
   const [formatOnSave, setFormatOnSave] = useState<boolean>(true)
   const [autoCloseTags, setAutoCloseTags] = useState<boolean>(true)
 
@@ -112,7 +122,7 @@ const EditorWrapper = () => {
   // If user has never clicked a tab, choose the first file by default
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="min-h-[100vh] w-full -mt-8 border-l">
+    <ResizablePanelGroup direction="horizontal" className="w-full -mt-8 border-l">
       <ResizablePanel className="flex flex-col">
         <div
           className="flex items-center justify-between mr-2"
@@ -139,7 +149,7 @@ const EditorWrapper = () => {
           </div>
 
           <div className="flex gap-2">
-            <NewMockdataDialog>
+            <NewMockdataDialog mockdata={mockdata} setMockdata={setMockdata}>
               <Button size="sm" variant="outline" className="rounded">
                 <DatabaseIcon className="h-4 w-4" />
               </Button>
@@ -170,16 +180,43 @@ const EditorWrapper = () => {
           onDirty={handleDirty}
           resetDirty={resetDirty}
           onEditorReady={() => setLoading(false)}
+          data={[mockdata, selection]}
           options={[formatOnSave, autoCloseTags]}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel className="flex flex-col m-2 gap-2">
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" className="rounded text-xs">
-              Docs
-            </Button>
+        <div
+          className="relative flex items-center w-full"
+          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        >
+          <Button size="sm" variant="outline" className="rounded text-xs">
+            Docs
+          </Button>
+          <div className="absolute left-1/2 transform -translate-x-1/2">
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              className="gap-0 h-4 w-4"
+              value={selection}
+              onValueChange={(v) => v && setSelection(v as 'single' | 'multi')}
+            >
+              <ToggleGroupItem
+                value="single"
+                aria-label="Toggle single log selection"
+                className="rounded-r-none border-r-0"
+              >
+                <FileCheck className="pointer-events-none" />
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="multi"
+                aria-label="Toggle multiple log selection"
+                className="rounded-l-none border-l-0"
+              >
+                <Files className="pointer-events-none" />
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
         </div>
         <Preview />

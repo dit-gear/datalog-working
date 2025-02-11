@@ -171,7 +171,7 @@ export class Datalog {
        *
        * @example
        * ```
-       * const durationReadable = dataObject.ocf.durationReadable();
+       * const durationReadable = dataObject.ocf.duration();
        * console.log(durationReadable); // Output: "1h, 30m, 45s"
        * ```
        */
@@ -269,6 +269,10 @@ export class DataObject {
   // Getter for the project name
   public get projectName(): string {
     return this.project.project_name
+  }
+
+  public get customInfo(): Record<string, string>[] | undefined {
+    return this.project.custom_info
   }
 
   // Getter for the selected datalog (merged if multiple)

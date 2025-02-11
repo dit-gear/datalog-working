@@ -38,8 +38,8 @@ const ParsingWrapper: React.FC<ParsingWrapperProps> = ({ scope }) => {
           <div>
             <div className="flex gap-10 justify-between py-4 pl-4 pr-5 text-sm leading-6">
               <FormItem className="w-full">
-                <FormLabel>Value Key</FormLabel>
-                <Input placeholder="Clip" disabled={true} />
+                <FormLabel>Key</FormLabel>
+                <Input placeholder="clip" disabled={true} />
               </FormItem>
               <FormField
                 control={control}

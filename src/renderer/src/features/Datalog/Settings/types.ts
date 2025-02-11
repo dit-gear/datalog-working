@@ -35,6 +35,8 @@ export const formSchema = z
     const projectId = data.project_logid_template?.trim() || ''
     const globalId = data.global_logid_template?.trim() || ''
 
+    const fields = data.project_custom_fields?.fields
+
     if (!projectId && !globalId) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -45,6 +47,22 @@ export const formSchema = z
         code: z.ZodIssueCode.custom,
         message: 'Set folder template in project or global. Both cannot be empty.',
         path: ['global_logid_template']
+      })
+    }
+
+    if (fields) {
+      const seen = new Set<string>()
+      fields.forEach((field, index) => {
+        const key = field.value_key.toLowerCase()
+        if (seen.has(key)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Duplicate key, must be unique',
+            path: ['project_custom_fields', 'fields', index, 'value_key']
+          })
+        } else {
+          seen.add(key)
+        }
       })
     }
   })

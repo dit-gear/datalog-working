@@ -1,8 +1,11 @@
 import { useState, useEffect, ReactNode, createContext, useContext } from 'react'
 import { InitialEditorData } from '@shared/shared-types'
+import { generateMockDatalog } from './utils/generateMockData'
+import { DatalogDynamicType } from '@shared/datalogTypes'
 
 type DataContextType = {
   initialData: InitialEditorData
+  generatedDatalogs: DatalogDynamicType[]
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined)
@@ -39,8 +42,13 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   if (!initialData) {
     return <div>No data found</div>
   }
+  const generatedDatalogs = generateMockDatalog(initialData.activeProject)
 
-  return <DataContext.Provider value={{ initialData }}>{children}</DataContext.Provider>
+  return (
+    <DataContext.Provider value={{ initialData, generatedDatalogs }}>
+      {children}
+    </DataContext.Provider>
+  )
 }
 
 export const useInitialData = () => {

@@ -12,7 +12,8 @@ import { LoadedFile, ChangedFile } from '@shared/shared-types'
 import { loadTypeDefinitions } from './utils/typeDefinitions'
 import { useInitialData } from './dataContext'
 import { formatter } from '@renderer/utils/prettierFormatter'
-import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
+import { getLatestDatalog, getLatestTwoDatalogs } from '@shared/utils/getLatestDatalog'
+import { mockDataType } from './newMockdataDialog'
 import useDebouncedCallback from '@renderer/utils/useDebouncedCallback'
 
 //type Monaco = typeof monaco
@@ -34,6 +35,7 @@ interface EditorProps {
   onDirty: (path: string, dirty: boolean) => void
   resetDirty: () => void
   onEditorReady: () => void
+  data: [mockdata: mockDataType, selection: 'single' | 'multi']
   options: [formatOnSave: boolean, autoCloseTags: boolean]
 }
 
@@ -54,13 +56,18 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     onEditorReady,
     onDirty,
     resetDirty,
+    data: [mockdata, selection],
     options: [formatOnSave, autoCloseTags]
   } = props
 
   const autoCloseTagsRef = useRef(autoCloseTags)
   const formatOnSaveRef = useRef(formatOnSave)
+
+  const selectionRef = useRef(selection)
+  const mockDataRef = useRef(mockdata)
+
   const { initialData } = useInitialData()
-  const data = { project: initialData.activeProject, datalogs: initialData.loadedDatalogs }
+  const data = { project: initialData.activeProject }
 
   const previewWorkerRef = useRef<Worker | null>(null)
 
@@ -71,6 +78,32 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
   useEffect(() => {
     formatOnSaveRef.current = formatOnSave
   }, [formatOnSave])
+
+  useEffect(() => {
+    selectionRef.current = selection
+    const model = editorRef.current?.getModel()
+    if (!model) {
+      return
+    }
+    const file = fileTrackers.get(model.uri.toString())
+    if (!file) {
+      return
+    }
+    debouncedSendMessageToWorker(model, file)
+  }, [selection])
+
+  useEffect(() => {
+    mockDataRef.current = mockdata
+    const model = editorRef.current?.getModel()
+    if (!model) {
+      return
+    }
+    const file = fileTrackers.get(model.uri.toString())
+    if (!file) {
+      return
+    }
+    debouncedSendMessageToWorker(model, file)
+  }, [mockdata])
 
   useEffect(() => {
     const handleGlobalSave = (e: KeyboardEvent) => {
@@ -120,10 +153,14 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
         const request = {
           code: model.getValue(),
           type: file.type,
+          message: mockDataRef.current.message,
           dataObject: {
             project: data.project,
-            selection: getLatestDatalog(data.datalogs, data.project),
-            all: data.datalogs
+            selection:
+              selectionRef.current === 'single'
+                ? getLatestDatalog(mockDataRef.current.datalogs, data.project)
+                : getLatestTwoDatalogs(mockDataRef.current.datalogs),
+            all: mockDataRef.current.datalogs
           }
         }
         previewWorkerRef.current.postMessage(request)

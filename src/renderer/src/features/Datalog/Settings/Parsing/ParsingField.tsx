@@ -53,11 +53,12 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
     label: type.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()) // Format the label
   }))
 
-  const specialDropdownItems = specialTypesZod.options.map((type) => ({
+  /*const specialDropdownItems = specialTypesZod.options.map((type) => ({
     value: type,
     label: type.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()),
     disabled: activeType !== type && fields?.some((field, i) => i !== index && field.type === type)
-  }))
+  }))*/
+  let specialDropdownItems
 
   const delimiterLabels: { [key: string]: string } = {
     ',': 'Comma',
@@ -151,7 +152,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
         })
         break
 
-      case 'duration':
+      /*case 'duration':
         setShowRegex(false)
         setValue(
           `${scope}_custom_fields.fields.${index}`,
@@ -163,7 +164,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
           },
           { shouldValidate: true }
         )
-        break
+        break*/
 
       default:
         console.warn('Unknown type:', type)
@@ -179,30 +180,21 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
         </p>
       </div>
       <div className="flex gap-10 justify-between py-4 pl-4 pr-5 text-sm leading-6">
-        {activeType === 'duration' ? (
-          <FormItem className="w-full">
-            <FormLabel>Value Key</FormLabel>
-            <FormControl>
-              <Input disabled placeholder="Duration" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        ) : (
-          <FormField
-            control={control}
-            name={`${scope}_custom_fields.fields.${index}.value_key`}
-            //disabled={specialDropdownItems.some((item) => item.value === activeType)}
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Value Key</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={control}
+          name={`${scope}_custom_fields.fields.${index}.value_key`}
+          //disabled={specialDropdownItems.some((item) => item.value === activeType)}
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel>Key</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={control}
           name={`${scope}_custom_fields.fields.${index}.column`}
@@ -252,7 +244,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
                               <DropdownMenuSeparator />
                               <DropdownMenuGroup>
                                 <DropdownMenuLabel>Special Types</DropdownMenuLabel>
-                                {specialDropdownItems.map((item) => (
+                                {specialDropdownItems?.map((item) => (
                                   <DropdownMenuRadioItem
                                     value={item.value}
                                     disabled={item.disabled}
@@ -390,7 +382,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
           </DropdownMenu>
         </div>
       </div>
-      {activeType === 'duration' ? <DurationFields scope={scope} index={index} /> : null}
+      {/*activeType === 'duration' ? <DurationFields scope={scope} index={index} /> : null*/}
       {showRegex ? (
         <FormField
           control={control}

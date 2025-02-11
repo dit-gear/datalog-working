@@ -19,3 +19,18 @@ export function getLatestDatalog(
   }
   return latestEntries
 }
+
+export function getLatestTwoDatalogs(datalogs: DatalogType[]): DatalogType[] {
+  if (!datalogs.length) return []
+
+  const maxDay = Math.max(...datalogs.map((log) => log.day))
+  const latestLog = datalogs.find((log) => log.day === maxDay)!
+
+  const previousLogs = datalogs.filter((log) => log.day < maxDay)
+  if (!previousLogs.length) return [latestLog]
+
+  const secondMaxDay = Math.max(...previousLogs.map((log) => log.day))
+  const secondLog = datalogs.find((log) => log.day === secondMaxDay)!
+
+  return [latestLog, secondLog]
+}

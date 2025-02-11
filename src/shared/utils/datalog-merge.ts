@@ -37,18 +37,12 @@ export const mergeDatalogs = (datalogs: DatalogType | DatalogType[]): DatalogTyp
   const merged: DatalogType = {
     id: `${first.id} - ${last.id}`,
     day: mergeNumbers(first.day, last.day),
-    date: `${first.date} - ${last.date}`,
-    unit: datalogs.map((item) => item.unit).join(', '),
+    date: `${first.date}${first.date !== last.date ? ` - ${last.date}` : ''}`,
+    unit: [...new Set(datalogs.map((item) => item.unit))].join(', '),
     ocf: {},
     proxy: {},
     sound: {}
   } as DatalogType
-
-  // Merge Dates
-  const dates = datalogs.map((d) => d.date)
-  const minDate = dates.reduce((a, b) => (a < b ? a : b))
-  const maxDate = dates.reduce((a, b) => (a > b ? a : b))
-  merged.date = minDate === maxDate ? minDate : `${minDate} - ${maxDate}`
 
   // --- OCF ---
   if (propertyIsSetOnAny(datalogs, (d) => d.ocf?.files)) {

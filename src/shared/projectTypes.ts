@@ -106,14 +106,14 @@ const field = z
     listOfStringsField,
     keyValueObjField,
     listOfFieldArraysField,
-    listOfMappedObjectsField,
-    durationField
+    listOfMappedObjectsField
+    //durationField
   ])
   .superRefine((data, ctx) => {
     if (data.type === 'string' && data.regex) {
       validateRegex(data.regex, ['regex'], ctx)
     }
-    if (data.type === 'duration') {
+    /*if (data.type === 'duration') {
       if (data.unit === 'tc' || (data.unit === 'frames' && (!data.fps || data.fps.length < 1))) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -121,7 +121,7 @@ const field = z
           path: ['fps']
         })
       }
-    }
+    }*/
     if (data.type === 'list_of_mapped_objects' && data.subfields) {
       const seenSubfieldNames = new Set<string>()
       data.subfields.forEach((subfield, subfieldIndex) => {
