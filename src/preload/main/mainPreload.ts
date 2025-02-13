@@ -85,7 +85,9 @@ const sharedApi = {
   // Send overwrite response
   sendOverwriteResponse: (shouldOverwrite: boolean) => {
     ipcRenderer.send('overwrite-response', shouldOverwrite)
-  }
+  },
+
+  getAppVersion: (): Promise<string> => ipcRenderer.invoke('app-version')
 }
 
 if (process.contextIsolated) {

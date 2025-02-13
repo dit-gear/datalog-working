@@ -20,7 +20,7 @@ export function createEditorWindow(): void {
     height: 1000,
     minWidth: 580,
     minHeight: 650,
-    backgroundColor: '#090909',
+    backgroundColor: 'rgb(9,9,11)',
     autoHideMenuBar: true,
     frame: false,
     show: false,
@@ -43,10 +43,4 @@ export function createEditorWindow(): void {
   editorWindow.on('closed', () => {
     editorWindow = null
   })
-
-  //editorWindow.webContents.once('did-finish-load', () => {})
-
-  /*editorWindow.on('ready-to-show', () => {
-    editorWindow?.show()
-  })*/
 }

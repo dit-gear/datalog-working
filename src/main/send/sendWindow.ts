@@ -24,7 +24,7 @@ export function createSendWindow(
     minWidth: 580,
     minHeight: 650,
     show: false,
-    backgroundColor: '#090909',
+    backgroundColor: 'rgb(9,9,11)',
     autoHideMenuBar: true,
     minimizable: false,
     maximizable: false,

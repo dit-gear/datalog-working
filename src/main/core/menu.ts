@@ -1,4 +1,4 @@
-import { Menu, app, Tray } from 'electron'
+import { Menu, app, Tray, dialog } from 'electron'
 import { getDatalogWindow } from '../datalog/datalogWindow'
 import { ProjectRootType, ProjectInRootMenuItem } from '@shared/projectTypes'
 import { appState } from './app-state/state'
@@ -9,6 +9,7 @@ import { createSendWindow } from '../send/sendWindow'
 import { exportPdf } from './export/exportPdf'
 import trayIcon from '../../../resources/trayIcon.png?asset'
 import logger from './logger'
+import { createAboutWindow } from '../about/aboutWindow'
 
 interface buildContextMenuProps {
   projects: ProjectInRootMenuItem[] | null
@@ -97,7 +98,10 @@ const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): M
     }, // Opens main window and open settings modal.
     { type: 'separator' },
     { label: 'Help', submenu: [{ label: 'Docs' } /*{ label: 'Discord' }*/] },
-    { label: 'About' },
+    {
+      label: 'About',
+      click: () => createAboutWindow()
+    },
     { type: 'separator' },
     /*{ label: 'Log in', enabled: false },*/
     {

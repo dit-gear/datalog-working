@@ -47,7 +47,8 @@ export default defineConfig({
         input: {
           mainWindow: resolve(__dirname, 'src/renderer/index.html'),
           editorWindow: resolve(__dirname, 'src/renderer/editor.html'),
-          sendWindow: resolve(__dirname, 'src/renderer/send.html')
+          sendWindow: resolve(__dirname, 'src/renderer/send.html'),
+          aboutWindow: resolve(__dirname, 'src/renderer/about.html')
         }
       }
     }

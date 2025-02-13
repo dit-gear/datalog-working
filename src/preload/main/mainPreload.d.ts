@@ -59,6 +59,7 @@ declare global {
     sharedApi: {
       onShowOverwriteConfirmation: (callback: (filePath: string) => void) => void
       sendOverwriteResponse: (shouldOverwrite: boolean) => void
+      getAppVersion: () => Promise<string>
     }
   }
 }
