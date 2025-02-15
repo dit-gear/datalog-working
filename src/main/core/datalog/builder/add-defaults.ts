@@ -14,7 +14,7 @@ const addDefaults = async (paths: {
   try {
     const promises: Promise<void>[] = []
     // OCF worker
-    if (paths.ocf) {
+    if (paths.ocf?.length) {
       const { promise } = spawnWorker('addOCFWorker', {
         paths: paths.ocf,
         storedClips: []
@@ -27,7 +27,7 @@ const addDefaults = async (paths: {
     }
 
     // Sound worker
-    if (paths.sound) {
+    if (paths.sound?.length) {
       const { promise } = spawnWorker('addSoundWorker', {
         paths: paths.sound,
         storedClips: []
@@ -42,18 +42,18 @@ const addDefaults = async (paths: {
     if (promises.length > 0) await Promise.all(promises)
 
     //@ts-ignore
-    if (!ocfResult?.success) {
+    if (paths.ocf?.length && !ocfResult?.success) {
       //@ts-ignore
       throw new Error(ocfResult?.error ?? 'OCF error')
     }
     // Safely check Sound (if used)
     //@ts-ignore
-    if (!soundResult?.success) {
+    if (paths.sound?.length && !soundResult?.success) {
       //@ts-ignore
       throw new Error(soundResult?.error ?? 'Sound error')
     }
-
-    if (paths.proxy && ocfResult.success) {
+    //@ts-ignore
+    if (paths.proxy && ocfResult?.success) {
       const { promise } = spawnWorker('addProxyWorker', {
         paths: paths.proxy,
         storedClips: ocfResult?.clips?.ocf ?? []

@@ -67,7 +67,11 @@ const DataTable = memo(({ columns, data }: DataTableProps) => {
 
         // If cell is not marked editable, just render its value
         if (!value.edit) {
-          return <span className="whitespace-nowrap">{value.value}</span>
+          return (
+            <span className="whitespace-nowrap">
+              {Array.isArray(value.value) ? value.value.join(', ') : value.value}
+            </span>
+          )
         }
 
         // If currently editing this cell, show <FormCell>

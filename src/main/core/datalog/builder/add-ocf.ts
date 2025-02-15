@@ -1,4 +1,3 @@
-//import logger from '../../logger'
 import findFilesByType from '../../../utils/find-files-by-type'
 import processMHL from '../../file-processing/mhl/process-mhl'
 import processALE from '../../file-processing/camera/process-ale'
@@ -60,6 +59,14 @@ const addOCF = async ({ paths, storedClips }: addOCFProps): Promise<ResponseWith
 
           if (existingClip) {
             // If the clip already exists, merge the Copies
+            /*existingClip.copies = [
+              ...existingClip.copies,
+              ...newClip.copies.filter(
+                (copy) =>
+                  !existingClip.copies.some((existingCopy) => existingCopy.volume === copy.volume)
+              )
+            ]
+            store.set(existingClip.clip, existingClip)*/
             existingClip.copies = [
               ...existingClip.copies,
               ...newClip.copies.filter(
@@ -70,12 +77,13 @@ const addOCF = async ({ paths, storedClips }: addOCFProps): Promise<ResponseWith
             store.set(existingClip.clip, existingClip)
           } else {
             // If the clip doesn't exist, add it to the list of new clips
-            newClips.push(newClip)
+            //newClips.push(newClip)
+            store.set(newClip.clip, newClip)
           }
         })
       })
     )
-
+    /*
     let cameraMetadata: CameraMetadataType[] = []
     if (newClips.length > 0) {
       const path = paths[0]
@@ -90,16 +98,27 @@ const addOCF = async ({ paths, storedClips }: addOCFProps): Promise<ResponseWith
 
     mergedWithMetadata.map((item) => {
       store.set(item.clip, item)
+    })*/
+
+    // Always fetch metadata from the first path (if available)
+    let cameraMetadata: CameraMetadataType[] = []
+    if (paths.length > 0) {
+      cameraMetadata = await ParseCameraMetadata(paths[0])
+    }
+
+    // Merge metadata into every clip in the store
+    store.forEach((clip, key) => {
+      const cameraMetadataItem = cameraMetadata.find((camera) => camera.clip === key)
+      if (cameraMetadataItem) {
+        store.set(key, { ...cameraMetadataItem, ...clip })
+      }
     })
 
     return { success: true, clips: { ocf: Array.from(store.values()) } }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred.'
-    //logger.error(`Error parsing OCF: ${message}`)
     return { success: false, error: message }
   }
 }
 
 export default addOCF
-
-// Remove logger and everything that can't be run in worker!

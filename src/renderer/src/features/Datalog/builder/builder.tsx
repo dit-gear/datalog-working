@@ -141,7 +141,7 @@ const Builder = ({ project, previousEntries, selected }: BuilderdialogProps) => 
             {selected ? 'Update' : 'Submit'}
           </Button>
         </div>
-        <DefaultsDialog project={project} tags={tags} disabled={!!selected} />
+        <DefaultsDialog project={project} tags={tags} />
       </Form>
       <FileExistDialog />
     </div>

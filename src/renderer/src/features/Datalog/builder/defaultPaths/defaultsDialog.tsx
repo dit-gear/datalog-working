@@ -19,7 +19,6 @@ import { useAccessablePaths } from './useAccessablePaths'
 interface DefaultsDialogProps {
   project: ProjectRootType
   tags: any
-  disabled: boolean
 }
 
 function hasDefaultPaths(project: ProjectRootType): boolean {
@@ -42,8 +41,8 @@ function getAvailablePaths(data: CheckPathsResult): DefaultPathsInput {
   }
 }
 
-const DefaultsDialog = ({ project, tags, disabled }: DefaultsDialogProps) => {
-  const [open, setOpen] = useState<boolean>(!disabled && hasDefaultPaths(project))
+const DefaultsDialog = ({ project, tags }: DefaultsDialogProps) => {
+  const [open, setOpen] = useState<boolean>(hasDefaultPaths(project))
   const [loadingOpen, setLoadingOpen] = useState<boolean>(false)
   const { setValue } = useFormContext()
   const Paths = (() => {
