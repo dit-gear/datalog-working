@@ -30,7 +30,7 @@ export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
   const pdfWorker = createRenderWorker()
 
   try {
-    const emailTask = async (): Promise<string | undefined> => {
+    const emailTask = async (): Promise<{ code: string; plainText?: string } | undefined> => {
       if (email.react) {
         const emailpath = getReactTemplate(email.react, templatesDir, 'email')
         if (emailpath) {
@@ -44,8 +44,8 @@ export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
             dataObject
           }
           const renderedEmail = await emailWorker.render(req)
-          const emailcode = renderedEmail.code
-          return emailcode
+          //const emailcode = renderedEmail.code
+          return renderedEmail
         }
       }
       return

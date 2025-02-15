@@ -4,6 +4,7 @@ import React from 'react'
 //import { render } from '@react-email/render'
 import { transform } from 'sucrase'
 import { WorkerRequest } from './types'
+import { removeImports } from '@shared/utils/removeImports'
 
 parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
   const { code, type, message, dataObject, id } = event
@@ -11,13 +12,13 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
   let pdf
   let render
 
-  const cleanedCode = code.replace(/^\s*import\s.*?;$/gm, '')
-
   try {
     // Import shared data class.
     const { DataObject } = await import('@shared/datalogClass')
 
     if (type === 'email') {
+      ;({ render } = await import('@react-email/render'))
+
       // Dynamically import individual email components.
       const {
         Html,
@@ -83,8 +84,10 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
     // Create the data object.
     const data = new DataObject(dataObject.project, dataObject.selection, dataObject.all)
 
+    const codeWithoutImports = await removeImports(code)
+
     // Transpile user code.
-    const transpiledCode = transform(cleanedCode, {
+    const transpiledCode = transform(codeWithoutImports, {
       transforms: ['typescript', 'jsx', 'imports'],
       preserveDynamicImport: true
     }).code
@@ -129,7 +132,10 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
       const renderedContent = await render(React.createElement(Component), {
         plainText: false
       })
-      parentPort?.postMessage({ id, code: renderedContent })
+      const renderedContentPlainText = await render(React.createElement(Component), {
+        plainText: true
+      })
+      parentPort?.postMessage({ id, code: renderedContent, plainText: renderedContentPlainText })
     } else if (type === 'pdf') {
       const pdfDocument = await render(React.createElement(Component))
       parentPort?.postMessage({ id, code: pdfDocument })

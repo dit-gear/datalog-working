@@ -4,7 +4,7 @@ import { pdf } from '@react-pdf/renderer'
 import { render } from '@react-email/render'
 import { DatalogDynamicType } from '@shared/datalogTypes'
 import { ProjectRootType } from '@shared/projectTypes'
-import { removeImports } from './utils/removeImports'
+import { removeImports } from '../../../shared/utils/removeImports'
 
 type dataobjectType = {
   project: ProjectRootType

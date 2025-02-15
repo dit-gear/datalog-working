@@ -5,7 +5,7 @@ import renderWorkerPath from './renderWorker?modulePath'
 export function createRenderWorker() {
   let worker: Worker | null = null
 
-  function render({ id, code, type, dataObject }): Promise<{ code: string }> {
+  function render({ id, code, type, dataObject }): Promise<{ code: string; plainText?: string }> {
     if (!worker) {
       worker = new Worker(renderWorkerPath)
     }
