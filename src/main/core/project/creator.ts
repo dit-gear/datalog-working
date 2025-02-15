@@ -9,16 +9,18 @@ import { appState } from '../app-state/state'
 import logger from '../logger'
 import { unloadProject } from './unload'
 
-async function createTemplateFolder(basePath: string): Promise<void> {
+async function createFolders(basePath: string): Promise<void> {
+  const logPath = path.join(basePath, 'logs')
   const emailPath = path.join(basePath, 'templates', 'email')
   const pdfPath = path.join(basePath, 'templates', 'pdf')
 
   try {
     await Promise.all([
+      fs.mkdirSync(logPath, { recursive: true }),
       fs.mkdirSync(emailPath, { recursive: true }),
       fs.mkdirSync(pdfPath, { recursive: true })
     ])
-    logger.debug(`Folders created successfully at ${emailPath} and ${pdfPath}`)
+    logger.debug(`Folders created successfully at ${basePath}`)
   } catch (error) {
     logger.error('Failed to create template folder structure')
   }
@@ -44,7 +46,7 @@ async function createProject(projectName: string): Promise<CreateNewProjectResul
 
   try {
     fs.mkdirSync(newProjectPath)
-    createTemplateFolder(newProjectPath)
+    createFolders(newProjectPath)
     fs.writeFileSync(filepath, yaml, 'utf8')
 
     updateState({ newActiveProject: newProjectPath })

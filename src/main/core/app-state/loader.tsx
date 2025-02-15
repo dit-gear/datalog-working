@@ -65,11 +65,10 @@ export async function loadState(): Promise<ProjectType> {
   logger.debug('loadState started')
   await loadConfig()
   if (appState.activeProjectPath) {
+    await loadProjectsInRootPath()
+    await initRootWatcher()
     const loadActiveProject = await loadProject(appState.activeProjectPath)
     if (loadActiveProject.success) {
-      await loadProjectsInRootPath()
-      await initRootWatcher()
-      await initProjectWatchers()
       logger.info('Project loaded successfully')
       return {
         rootPath: appState.rootPath,
@@ -78,8 +77,7 @@ export async function loadState(): Promise<ProjectType> {
       }
     }
   }
-  await loadProjectsInRootPath()
-  await initRootWatcher()
+
   logger.info('No project to load, returning root path')
   return { rootPath: appState.rootPath }
 }

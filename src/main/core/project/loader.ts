@@ -18,6 +18,7 @@ import { ZodType } from 'zod'
 import trayManager from '../menu'
 import { updateProjectFolder } from './updater'
 import { ensureDirectoryExists } from '../../utils/crud'
+import { initProjectWatchers } from '../app-state/watchers/projectWatchers/manager'
 
 const parseSettingsFile = async <T>(filePath: string, schema: ZodType<T>): Promise<T | null> => {
   if (fs.existsSync(filePath)) {
@@ -142,6 +143,7 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
     }
     appState.activeProject = data
     trayManager.createOrUpdateTray()
+    await initProjectWatchers()
     logger.debug(`${data.project_name} loaded`)
     return { success: true, data }
   } catch (error) {
