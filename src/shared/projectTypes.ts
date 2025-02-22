@@ -193,16 +193,50 @@ export const pdfZodObj = z.object({
   enabled: z.boolean()
 })
 
-const emailSettings = z.object({
-  service_provider: z.string(),
-  api_key_encrypted: z.string()
+export const emailProvidersZod = z.enum(['custom', 'postmark', 'resend', 'sendgrid'])
+
+const disallowedRegex =
+  /^(?!(host|content-length|connection|transfer-encoding|upgrade|content-type)$).+/i
+
+const headersZod = z.object({
+  header: z
+    .string()
+    .nonempty({ message: 'Header key is required.' })
+    .regex(disallowedRegex, { message: 'This header is not allowed.' }),
+  value: z.string().nonempty({ message: 'a value is required.' })
 })
 
-export const emailApiZodObj = z.object({
-  provider: z.enum(['resend', 'sendgrid']),
-  api_key: z.string(),
-  api_secret: z.string().min(5, { message: 'Must be 5 or more characters long' })
+const customEndpoint = z.object({
+  provider: emailProvidersZod.extract(['custom']),
+  sender: z.string(),
+  url: z.string().url(),
+  headers: z.array(headersZod)
 })
+
+const postmarkZod = z.object({
+  provider: emailProvidersZod.extract(['postmark']),
+  sender: z.string(),
+  api_key: z.string()
+})
+
+const resendZod = z.object({
+  provider: emailProvidersZod.extract(['resend']),
+  sender: z.string(),
+  api_key: z.string()
+})
+const sendgridZod = z.object({
+  provider: emailProvidersZod.extract(['sendgrid']),
+  sender: z.string(),
+  url: z.string().url(),
+  api_key: z.string()
+})
+
+export const emailApiZodObj = z.discriminatedUnion('provider', [
+  customEndpoint,
+  postmarkZod,
+  resendZod,
+  sendgridZod
+])
 
 export const emailZodObj = z.object({
   id: z.string().length(5),
@@ -237,10 +271,9 @@ export const GlobalSchemaZod = z.object({
   default_ocf_paths: z.array(z.string()).optional(),
   default_sound_paths: z.array(z.string()).optional(),
   default_proxy_path: z.string().optional(),
-  parse_camera_metadata: z.boolean().default(true).optional(),
   custom_fields: additionalParsing.optional(),
   emails: z.array(emailZodObj).optional(),
-  email_api: emailSettings.optional(),
+  //email_api: emailSettings.optional(),
   pdfs: z.array(pdfZodObj).optional()
 })
 

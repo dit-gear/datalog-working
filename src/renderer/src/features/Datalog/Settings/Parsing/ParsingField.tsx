@@ -179,7 +179,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
           {activeType.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
         </p>
       </div>
-      <div className="flex gap-10 justify-between py-4 pl-4 pr-5 text-sm leading-6">
+      <div className="flex gap-10 justify-between mt-2 mb-4 text-sm leading-6">
         <FormField
           control={control}
           name={`${scope}_custom_fields.fields.${index}.value_key`}
@@ -388,7 +388,7 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
           control={control}
           name={`${scope}_custom_fields.fields.${index}.regex`}
           render={({ field }) => (
-            <FormItem className="w-64 m-4">
+            <FormItem className="w-64 my-4">
               <FormLabel className="">Value Extraction Regex (Optional)</FormLabel>
               <FormControl>
                 <Input {...field} />

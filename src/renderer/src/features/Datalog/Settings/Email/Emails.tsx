@@ -19,9 +19,11 @@ import {
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import EmailTemplate from './EmailTemplate'
-import ApiKeyDialog from './ApiKeyDialog'
+import ApiKeyDialog from './EmailAPI/ApiKeyDialog'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
-import { Check } from 'lucide-react'
+import { Check, X } from 'lucide-react'
+import { Input } from '@components/ui/input'
+import FormRow from '@components/FormRow'
 
 interface EmailProps {
   scope: 'project' | 'global'
@@ -48,17 +50,25 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
 
   return (
     <CardContent key={`Email?_${scope}`}>
-      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-        <dt className="text-sm font-medium leading-6 text-white">Email API</dt>
-        <dd className="mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0">
+      <FormRow
+        label="My Email address"
+        description="Should at least include your email. Check with your provider for supported format."
+      >
+        <div>
+          <Input className="w-96" placeholder="John Doe <john.doe@example.com>" />
+        </div>
+      </FormRow>
+      <FormRow label="Email API" description="Provider for sending emails">
+        <div>
           <ApiKeyDialog />
-        </dd>
-        <dt className="text-sm font-medium leading-6 text-white">Emails</dt>
-        <dd className="mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 flex flex-col gap-2">
-          <Accordion type="single" collapsible>
+        </div>
+      </FormRow>
+      <FormRow label="Email Presets">
+        <dd className="mt-1 text-sm leading-6 sm:mt-0 flex flex-col gap-2">
+          <Accordion type="single" collapsible className={fields.length ? 'border rounded-md' : ''}>
             {fields.map((email, index) => (
-              <AccordionItem key={index} value={`email-${index}`}>
-                <AccordionTrigger>{email.label}</AccordionTrigger>
+              <AccordionItem key={index} value={`email-${index}`} className="py-4 px-8">
+                <AccordionTrigger className="text-base">{email.label}</AccordionTrigger>
                 <div className="-mt-12 mr-8 flex justify-end">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -74,7 +84,7 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <AccordionContent className="grid grid grid-cols-2 gap-x-4 gap-y-2">
+                <AccordionContent className="grid grid grid-cols-2 px-4 gap-x-4 gap-y-2">
                   <p>To:</p>
                   <p>{email.recipients?.join(', ')}</p>
                   <p>Subject:</p>
@@ -93,7 +103,11 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
                   <p>React template:</p>
                   <p>{email.react}</p>
                   <p>Enabled:</p>
-                  <Check className="size-5" />
+                  {email.enabled ? (
+                    <Check className="size-5 text-green-500" />
+                  ) : (
+                    <X className="size-5 text-red-500" />
+                  )}
                 </AccordionContent>
               </AccordionItem>
             ))}
@@ -107,9 +121,18 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
             pdfs={pdfs}
           />
         </dd>
-      </div>
+      </FormRow>
     </CardContent>
   )
 }
 
 export default Emails
+
+/*   <dt className="text-sm font-medium leading-6 text-white">Email API</dt>
+        <dd className="mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0">
+          <ApiKeyDialog />
+        </dd>
+        <dt className="text-sm font-medium leading-6 text-white">FROM Address</dt>
+        <dd className="mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0">
+          <Input />
+        </dd>*/

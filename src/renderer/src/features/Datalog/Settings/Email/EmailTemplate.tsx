@@ -31,6 +31,7 @@ import { getPdfAttachments } from '@shared/utils/getAttachments'
 import { mapPdfTypesToOptions } from '@renderer/utils/mapPdfTypes'
 import { nanoid } from 'nanoid/non-secure'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@components/ui/tooltip'
+import { Plus } from 'lucide-react'
 
 interface EmailTemplateProps {
   append: (email: emailType) => void
@@ -96,9 +97,14 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button type="button">Add Email</Button>
-      </DialogTrigger>
+      <div>
+        <DialogTrigger asChild>
+          <Button type="button">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Preset
+          </Button>
+        </DialogTrigger>
+      </div>
       <DialogContent className="border p-8">
         <DialogHeader>
           <DialogTitle>

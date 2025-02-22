@@ -20,7 +20,8 @@ import { MoreHorizontal } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import PdfTemplate from './PdfTemplate'
 import { getFileName } from '@renderer/utils/formatString'
-import { Check } from 'lucide-react'
+import { Check, X } from 'lucide-react'
+import FormRow from '@components/FormRow'
 
 interface PdfProps {
   scope: 'project' | 'global'
@@ -39,12 +40,11 @@ const Pdfs: React.FC<PdfProps> = ({ scope, templates }) => {
 
   return (
     <CardContent key={`Pdf_${scope}`}>
-      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-        <dt className="text-sm font-medium leading-6 text-white">PDFs</dt>
-        <dd className="mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 flex flex-col gap-2">
-          <Accordion type="single" collapsible>
+      <FormRow label="PDF Presets">
+        <dd className="mt-1 text-sm leading-6 sm:mt-0 flex flex-col gap-2">
+          <Accordion type="single" collapsible className={fields.length ? 'border rounded-md' : ''}>
             {fields.map((pdf, index) => (
-              <AccordionItem key={index} value={`pdf-${index}`}>
+              <AccordionItem key={index} value={`pdf-${index}`} className="py-4 px-8">
                 <AccordionTrigger>{pdf.label}</AccordionTrigger>
                 <div className="-mt-12 mr-8 flex justify-end">
                   <DropdownMenu>
@@ -61,13 +61,17 @@ const Pdfs: React.FC<PdfProps> = ({ scope, templates }) => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <AccordionContent className="grid grid grid-cols-2 gap-x-4 gap-y-2">
+                <AccordionContent className="grid grid grid-cols-2 px-4 gap-x-4 gap-y-2">
                   <p>Output Name:</p>
                   <p>{pdf.output_name}</p>
                   <p>React template:</p>
                   <p>{pdf.react ? getFileName(pdf.react) : pdf.react}</p>
-                  <p>Show in menu:</p>
-                  <Check className="size-5" />
+                  <p>Enabled:</p>
+                  {pdf.enabled ? (
+                    <Check className="size-5 text-green-500" />
+                  ) : (
+                    <X className="size-5 text-red-500" />
+                  )}
                 </AccordionContent>
               </AccordionItem>
             ))}
@@ -80,7 +84,7 @@ const Pdfs: React.FC<PdfProps> = ({ scope, templates }) => {
             templates={templates}
           />
         </dd>
-      </div>
+      </FormRow>
     </CardContent>
   )
 }

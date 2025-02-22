@@ -8,7 +8,7 @@ import { removeEmptyFields, removePrefixFields } from '@renderer/utils/form'
 import { ProjectSettingsType, TemplateDirectoryFile } from '@shared/projectTypes'
 import { formSchemaType, formSchema, Scope } from './types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
-import GeneralTab from './GeneralTab'
+import GeneralTab from './General/GeneralTab'
 import PathsTab from './Paths/PathsTab'
 import ParsingTab from './Parsing/ParsingTab'
 import EmailTab from './Email/EmailTab'
@@ -35,20 +35,18 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
     project_default_ocf_paths: defaults.project?.default_ocf_paths ?? [],
     project_default_sound_paths: defaults.project.default_sound_paths ?? [],
     project_default_proxy_path: defaults.project?.default_proxy_path ?? '',
-    project_parse_camera_metadata: defaults.project?.parse_camera_metadata ?? true,
     project_custom_fields: defaults.project?.custom_fields ?? undefined,
     project_emails: defaults.project?.emails ?? [],
-    project_email_api: defaults.project?.email_api ?? undefined,
+    project_email_api: undefined,
     project_pdfs: defaults.project?.pdfs ?? [],
     global_logid_template: defaults.global?.logid_template ?? '',
     global_unit: defaults.global?.unit ?? '',
     global_default_ocf_paths: defaults.global?.default_ocf_paths ?? [],
     global_default_sound_paths: defaults.global?.default_sound_paths ?? [],
     global_default_proxy_path: defaults.global?.default_proxy_path ?? '',
-    global_parse_camera_metadata: defaults.global?.parse_camera_metadata ?? true,
     global_custom_fields: defaults.global?.custom_fields ?? undefined,
     global_emails: defaults.global?.emails ?? [],
-    global_email_api: defaults.global?.email_api ?? undefined,
+    global_email_api: undefined,
     global_pdfs: defaults.global?.pdfs ?? [],
     project_enable_parsing: !!defaults.project?.custom_fields,
     global_enable_parsing: !!defaults.global?.custom_fields
@@ -89,12 +87,6 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
     }
   }
 
-  /*useEffect(() => {
-    if (!open) {
-      reset(defaultValues(defaults))
-    }
-  }, [open])*/
-
   return (
     <div className="relative">
       <FormProvider {...form}>
@@ -124,7 +116,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
                       Metadata Fields
                     </TabsTrigger>
                     <TabsTrigger className="w-full justify-start" value="email">
-                      Presets
+                      Email
                     </TabsTrigger>
                     <TabsTrigger className="w-full justify-start" value="pdf">
                       PDF

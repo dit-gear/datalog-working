@@ -3,6 +3,7 @@ import { Pencil } from 'lucide-react'
 import { FormField, FormItem, FormControl } from '@components/ui/form'
 import { Input } from '@components/ui/input'
 import { useFieldArray, useFormContext } from 'react-hook-form'
+import { Plus } from 'lucide-react'
 
 interface FieldArrayProps {
   scope: 'project' | 'global'
@@ -26,9 +27,9 @@ export const FieldArray = ({ scope, type }: FieldArrayProps) => {
       console.error(error)
     }
   }
-
+  //sm:col-span-2 sm:mt-0
   return (
-    <dd className="mt-1 text-sm leading-6 text-gray-400 sm:col-span-2 sm:mt-0 flex flex-col gap-3">
+    <dd className="mt-1 text-sm leading-6 text-gray-400 flex flex-col gap-3">
       <ul
         key={`${scope}_ul`}
         role="list"
@@ -61,7 +62,7 @@ export const FieldArray = ({ scope, type }: FieldArrayProps) => {
                 />
               </div>
             </div>
-            <div className="ml-4 flex-shrink-0 flex items-center">
+            <div className="ml-4 flex-shrink-0 flex items-center gap-2">
               <Button
                 type="button"
                 variant="ghost"
@@ -84,6 +85,7 @@ export const FieldArray = ({ scope, type }: FieldArrayProps) => {
       </ul>
       <div className="flex items-center space-x-2">
         <Button type="button" onClick={handleAddPath}>
+          <Plus className="mr-2 h-4 w-4" />
           Add Path
         </Button>
       </div>

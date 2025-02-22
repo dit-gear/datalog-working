@@ -12,6 +12,7 @@ import {
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
 import { useEffect } from 'react'
+import { Plus } from 'lucide-react'
 
 interface SubfieldArrayProps {
   type: fieldType
@@ -46,7 +47,7 @@ const SubfieldArray: React.FC<SubfieldArrayProps> = ({ type, scope, parentIndex 
   if (type === 'list_of_mapped_objects') {
     return (
       <>
-        <div className="divide-y divide-white/10 rounded-md border border-white/20 mb-2 mx-4">
+        <div className="divide-y divide-white/10 rounded-md border border-white/20 my-4">
           {fields.map((field, index) => (
             <div
               key={field.id}
@@ -86,10 +87,11 @@ const SubfieldArray: React.FC<SubfieldArrayProps> = ({ type, scope, parentIndex 
             </div>
           ))}
         </div>
-        <div className="flex mx-4 mb-5">
+        <div className="flex mb-5">
           <FormMessage>{subfieldErrors?.message}</FormMessage>
-          <Button className="ml-auto" onClick={() => append({ value_key: '' })}>
-            Add Key
+          <Button type="button" className="mr-auto" onClick={() => append({ value_key: '' })}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Object Key
           </Button>
         </div>
       </>

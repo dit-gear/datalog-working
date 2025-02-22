@@ -19,7 +19,7 @@ export const Section = ({ type, label, disabled, handleAddClips, children }: Sec
   if (type === 'ocf' || type === 'sound') {
     return (
       <div key={type}>
-        <Label htmlFor="sound-copies" className="text-base">
+        <Label htmlFor={`${type}-copies`} className="text-base">
           {label}
         </Label>
         <p className="text-muted-foreground text-sm">{`${clips && clips.length > 0 ? clips.length : 'No'} clips added`}</p>
