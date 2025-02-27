@@ -2,9 +2,10 @@ import { ipcMain } from 'electron'
 import { createNewProject } from './creator'
 import { updateProject } from './updater'
 import { CreateNewProjectResult, UpdateProjectResult, ProjectToUpdate } from '@shared/projectTypes'
-import { ResponseWithString } from '@shared/shared-types'
+import { ResponseWithString, Response } from '@shared/shared-types'
 import logger from '../logger'
 import { dialog } from 'electron'
+import { checkObjectInKeychainExists, deleteObjectInKeychain } from 'src/main/utils/keychain'
 
 export function setuProjectIpcHandlers(): void {
   ipcMain.handle(
@@ -36,4 +37,18 @@ export function setuProjectIpcHandlers(): void {
       return { success: false, error: message }
     }
   })
+  ipcMain.handle('remove-emailApiConfig', async (): Promise<Response> => {
+    try {
+      await deleteObjectInKeychain('email_api')
+      return { success: true }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'error'
+      logger.error(msg)
+      return { success: false, error: msg }
+    }
+  })
+  ipcMain.handle(
+    'check-emailApiConfig',
+    async (): Promise<boolean> => await checkObjectInKeychainExists('email_api')
+  )
 }

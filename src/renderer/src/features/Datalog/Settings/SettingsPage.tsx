@@ -6,7 +6,7 @@ import Settings from './Settings'
 function SettingsPage() {
   const navigate = useNavigate()
   const { data: project, isLoading } = useProject()
-
+  const emailApiExist =  window.sharedApi.checkEmailApiConfigExists()
   if (isLoading) {
     return null
   }

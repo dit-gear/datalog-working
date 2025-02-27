@@ -24,6 +24,8 @@ import { getPdfAttachments } from '@shared/utils/getAttachments'
 import { Check, X } from 'lucide-react'
 import { Input } from '@components/ui/input'
 import FormRow from '@components/FormRow'
+import { FormField, FormItem, FormControl } from '@components/ui/form'
+import RemoveApiButton from './EmailAPI/RemoveApi'
 
 interface EmailProps {
   scope: 'project' | 'global'
@@ -50,17 +52,25 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
 
   return (
     <CardContent key={`Email?_${scope}`}>
-      <FormRow
-        label="My Email address"
-        description="Should at least include your email. Check with your provider for supported format."
-      >
-        <div>
-          <Input className="w-96" placeholder="John Doe <john.doe@example.com>" />
-        </div>
-      </FormRow>
-      <FormRow label="Email API" description="Provider for sending emails">
-        <div>
+      <FormField
+        key={`${scope}_email_sender`}
+        control={control}
+        name={`${scope}_email_sender`}
+        render={({ field }) => (
+          <FormItem>
+            <FormRow name={field.name} label="Sender Email" descriptionTag={'API: "from": string'}>
+              <FormControl>
+                <Input {...field} className="max-w-80" />
+              </FormControl>
+            </FormRow>
+          </FormItem>
+        )}
+      />
+
+      <FormRow label="Email API Config" description="Email Provider API or custom API endpoint">
+        <div className="flex gap-2">
           <ApiKeyDialog />
+          <RemoveApiButton />
         </div>
       </FormRow>
       <FormRow label="Email Presets">

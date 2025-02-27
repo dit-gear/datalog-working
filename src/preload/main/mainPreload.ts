@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { DatalogType, OcfClipType, SoundClipType } from '@shared/datalogTypes'
 import { pdfType, ProjectType } from '@shared/projectTypes'
+import { checkObjectInKeychainExists } from 'src/main/utils/keychain'
 
 // Custom APIs for renderer
 const mainApi = {
@@ -87,7 +88,9 @@ const sharedApi = {
     ipcRenderer.send('overwrite-response', shouldOverwrite)
   },
 
-  getAppVersion: (): Promise<string> => ipcRenderer.invoke('app-version')
+  getAppVersion: (): Promise<string> => ipcRenderer.invoke('app-version'),
+
+  checkEmailApiConfigExists: (): Promise<boolean> => ipcRenderer.invoke('check-emailApiConfig')
 }
 
 if (process.contextIsolated) {

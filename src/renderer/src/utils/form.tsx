@@ -1,3 +1,11 @@
+/**
+ * Recursively removes properties with empty values (null, undefined, empty strings, empty arrays, or empty objects)
+ * from the given object. Properties whose keys are listed in `keysToRemove` are excluded entirely.
+ *
+ * @param {Record<string, any>} data - The object to clean.
+ * @param {string[]} [keysToRemove=[]] - An array of keys to remove from the result.
+ * @returns {Record<string, any>} A new object with empty fields removed and specified keys excluded.
+ */
 export const removeEmptyFields = (
   data: Record<string, any>,
   keysToRemove: string[] = []

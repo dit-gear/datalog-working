@@ -20,22 +20,13 @@ import {
 } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormControl,
-  FormLabel,
-  FormMessage,
-  FormDescription
-} from '@components/ui/form'
+import { Form, FormField, FormItem, FormControl, FormLabel, FormMessage } from '@components/ui/form'
 import { Card, CardHeader, CardTitle, CardDescription } from '@components/ui/card'
 import { useFormContext, useForm, SubmitHandler } from 'react-hook-form'
 import { emailApiType, emailApiZodObj, emailProvidersZod } from '@shared/projectTypes'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { formSchemaType } from '../../types'
 import Headers from './Headers'
-import { Info } from 'lucide-react'
 import z from 'zod'
 
 const infoText = (provider: z.infer<typeof emailProvidersZod>): string => {
@@ -58,13 +49,15 @@ const ApiKeyDialog: React.FC = () => {
   const { setValue: setMasterValue } = useFormContext<formSchemaType>()
 
   const defaultValues = {
-    api_key: '',
-    api_secret: ''
+    provider: undefined,
+    api_key: undefined,
+    url: undefined,
+    headers: [{ header: '', value: '' }]
   }
 
   const form = useForm<emailApiType>({
     defaultValues: defaultValues,
-    mode: 'onBlur',
+    mode: 'all',
     resolver: zodResolver(emailApiZodObj)
   })
 
@@ -72,6 +65,7 @@ const ApiKeyDialog: React.FC = () => {
   const provider = watch('provider')
 
   const onSubmit: SubmitHandler<emailApiType> = (data): void => {
+    console.log(data)
     setMasterValue('new_email_api', data)
     onOpenChange(false)
   }
@@ -91,7 +85,9 @@ const ApiKeyDialog: React.FC = () => {
       <DialogContent className="p-8">
         <DialogHeader>
           <DialogTitle>Set Email API</DialogTitle>
-          <DialogDescription>Select your email provider or a custom API endpoint</DialogDescription>
+          <DialogDescription>
+            Select your email provider or a custom API endpoint.
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <FormField
@@ -134,16 +130,7 @@ const ApiKeyDialog: React.FC = () => {
                 <CardTitle className="capitalize">{provider}</CardTitle>
                 <CardDescription>{infoText(provider)}</CardDescription>
               </CardHeader>
-              {/*<div className="rounded-md bg-blue-950 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <Info aria-hidden="true" className="h-5 w-5 text-blue-200" />
-                  </div>
-                  <div className="ml-3 flex-1 md:flex md:justify-between">
-                    <p className="text-sm text-blue-200">{infoText(provider)}</p>
-                  </div>
-                </div>
-              </div>*/}
+
               {(provider === 'custom' || provider === 'sendgrid') && (
                 <FormField
                   key={'url'}
@@ -178,29 +165,14 @@ const ApiKeyDialog: React.FC = () => {
               ) : (
                 <Headers control={control} />
               )}
-              {/*<div className="p-4 rounded-md bg-zinc-900">
-            <FormField
-              key={'sender'}
-              control={control}
-              name={'sender'}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>From-address</FormLabel>
-                  <FormControl>
-                    <Input type="email" {...field} />
-                  </FormControl>
-                  <FormDescription>Set the sender email</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>*/}
             </Card>
           )}
 
           <DialogFooter className="flex mt-4 gap-2">
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline" type="button">
+                Cancel
+              </Button>
             </DialogClose>
             <Button type="button" onClick={handleSubmit(onSubmit)}>
               Set

@@ -7,6 +7,7 @@ import { loadProject } from './loader'
 import { updateState } from '../app-state/updater'
 import logger from '../logger'
 import { getDatalogWindow } from '../../datalog/datalogWindow'
+import { writeObjectToKeychain, deleteObjectInKeychain } from '../../utils/keychain'
 
 const getFileName = (filePath: string): string => {
   return filePath.split('/').pop() || filePath
@@ -82,7 +83,11 @@ export const updateProject = async ({
   update_settings,
   update_email_api
 }: ProjectToUpdate): Promise<UpdateProjectResult> => {
-  console.log(update_email_api) // add this later, this removes build error
+  if (update_email_api) {
+    console.log(update_email_api)
+    //const jsonData = JSON.stringify(update_email_api)
+    //await writeObjectToKeychain('email_api', jsonData)
+  }
   try {
     const projectYaml = YAML.stringify(update_settings.project)
     const globalYaml = YAML.stringify(update_settings.global)

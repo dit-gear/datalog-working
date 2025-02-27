@@ -14,8 +14,8 @@ const PdfTab = ({ scope, templates }: PdfTabProps): ReactElement => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>PDF</CardTitle>
-        <CardDescription>Settings for PDF Exports and Presets</CardDescription>
+        <CardTitle>Files and Exports</CardTitle>
+        <CardDescription>PDF Settings and Presets</CardDescription>
       </CardHeader>
       {scope === 'project' ? (
         <Pdfs key="project" scope="project" templates={templates} />

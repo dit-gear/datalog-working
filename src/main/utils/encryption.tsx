@@ -18,3 +18,4 @@ export function decryptData(encryptedObj): any {
   decrypted += decipher.final('utf8')
   return JSON.parse(decrypted)
 }
+crypto.randomUUID()

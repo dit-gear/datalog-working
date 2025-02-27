@@ -208,25 +208,21 @@ const headersZod = z.object({
 
 const customEndpoint = z.object({
   provider: emailProvidersZod.extract(['custom']),
-  sender: z.string(),
   url: z.string().url(),
   headers: z.array(headersZod)
 })
 
 const postmarkZod = z.object({
   provider: emailProvidersZod.extract(['postmark']),
-  sender: z.string(),
   api_key: z.string()
 })
 
 const resendZod = z.object({
   provider: emailProvidersZod.extract(['resend']),
-  sender: z.string(),
   api_key: z.string()
 })
 const sendgridZod = z.object({
   provider: emailProvidersZod.extract(['sendgrid']),
-  sender: z.string(),
   url: z.string().url(),
   api_key: z.string()
 })
@@ -273,11 +269,12 @@ export const GlobalSchemaZod = z.object({
   default_proxy_path: z.string().optional(),
   custom_fields: additionalParsing.optional(),
   emails: z.array(emailZodObj).optional(),
-  //email_api: emailSettings.optional(),
+  email_sender: z.string().optional(),
   pdfs: z.array(pdfZodObj).optional()
 })
 
 export const ProjectSchemaZod = z.object({
+  //project_id: z.string().uuid(),
   project_name: z
     .string()
     .min(1, { message: 'The project name must contain at least 1 character' })
@@ -367,7 +364,7 @@ export type ProjectInRootMenuItem = {
 
 export type ProjectToUpdate = {
   update_settings: ProjectSettingsType
-  update_email_api: emailApiType
+  update_email_api: emailApiType | null
 }
 
 export type UpdateProjectResult = {

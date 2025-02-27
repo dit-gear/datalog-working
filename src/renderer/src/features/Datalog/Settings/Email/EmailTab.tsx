@@ -14,7 +14,7 @@ const EmailTab = ({ scope, templates }: EmailTabProps): ReactElement => {
     <Card>
       <CardHeader>
         <CardTitle>Email</CardTitle>
-        <CardDescription>Project settings</CardDescription>
+        <CardDescription>Email Settings and presets</CardDescription>
       </CardHeader>
       {scope === 'project' ? (
         <Emails key="project" scope="project" templates={templates} />

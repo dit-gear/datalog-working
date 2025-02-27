@@ -37,7 +37,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
     project_default_proxy_path: defaults.project?.default_proxy_path ?? '',
     project_custom_fields: defaults.project?.custom_fields ?? undefined,
     project_emails: defaults.project?.emails ?? [],
-    project_email_api: undefined,
+    project_email_sender: defaults.project?.email_sender ?? '',
     project_pdfs: defaults.project?.pdfs ?? [],
     global_logid_template: defaults.global?.logid_template ?? '',
     global_unit: defaults.global?.unit ?? '',
@@ -46,10 +46,11 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
     global_default_proxy_path: defaults.global?.default_proxy_path ?? '',
     global_custom_fields: defaults.global?.custom_fields ?? undefined,
     global_emails: defaults.global?.emails ?? [],
-    global_email_api: undefined,
+    global_email_sender: defaults.global?.email_sender ?? '',
     global_pdfs: defaults.global?.pdfs ?? [],
     project_enable_parsing: !!defaults.project?.custom_fields,
-    global_enable_parsing: !!defaults.global?.custom_fields
+    global_enable_parsing: !!defaults.global?.custom_fields,
+    email_api_exist: window.sharedApi.checkEmailApiConfigExists()
   })
 
   const form = useForm<formSchemaType>({
@@ -59,26 +60,24 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
   })
   const {
     handleSubmit,
-    formState: { isSubmitting, isSubmitSuccessful, errors },
+    formState: { isSubmitting, isSubmitSuccessful },
     reset
   } = form
 
-  console.log(errors)
-
   const onSubmit: SubmitHandler<formSchemaType> = async (data) => {
     const cleanedData = removeEmptyFields(data, [
+      'new_email_api',
       'project_enable_parsing',
       'global_enable_parsing'
     ]) as formSchemaType
     const projectfields = removePrefixFields(cleanedData, 'project')
     const globalfields = removePrefixFields(cleanedData, 'global')
-    const update_email_api = {}
+    const update_email_api = data.new_email_api ?? undefined
     const update_settings = { project: projectfields, global: globalfields } as ProjectSettingsType
 
     try {
       const result = await window.mainApi.updateProject({ update_settings, update_email_api })
       if (result.success) {
-        //setProject(result.project)
         console.log('project should be set with:', result.project)
         navigate('/')
       }
@@ -119,7 +118,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
                       Email
                     </TabsTrigger>
                     <TabsTrigger className="w-full justify-start" value="pdf">
-                      PDF
+                      Files and Exports
                     </TabsTrigger>
                   </TabsList>
                 </nav>
