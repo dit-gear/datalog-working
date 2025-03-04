@@ -6,12 +6,12 @@ import { useProject } from '../../hooks/useProject'
 
 const Table = () => {
   const navigate = useNavigate()
-  const { data: logs } = useDatalogs()
-  const { data: project } = useProject()
+  const { data: logs, isLoading: isDatalogsLoading } = useDatalogs()
+  const { data: project, isLoading: isProjectLoading } = useProject()
 
-  if (!project?.data) return null
+  if (!project?.data || isDatalogsLoading || isProjectLoading) return null
 
-  if (!logs.length)
+  if (!logs.length && !isDatalogsLoading)
     return (
       <EmptyStateCard
         title="No Logs Loaded"
