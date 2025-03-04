@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: datalog
+productName: Datalog
 directories:
   buildResources: build
 files:
@@ -34,7 +34,7 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: datalog.email
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}

@@ -4,8 +4,6 @@ import {
   SidebarHeader,
   SidebarContent,
   SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarRail
 } from '@components/ui/sidebar'
 import Group from './group'
@@ -33,12 +31,6 @@ const Aside = () => {
         <SidebarMenu>
           <Group type="email" files={files} />
           <Group type="pdf" files={files} />
-          <SidebarMenuItem key="moackData.json">
-            <SidebarMenuButton size="sm">
-              <div className="w-4" />
-              <span>mockData.json</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
       <SidebarRail />
