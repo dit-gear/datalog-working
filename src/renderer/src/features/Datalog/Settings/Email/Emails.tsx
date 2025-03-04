@@ -19,13 +19,12 @@ import {
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import EmailTemplate from './EmailTemplate'
-import ApiKeyDialog from './EmailAPI/ApiKeyDialog'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
 import { Check, X } from 'lucide-react'
 import { Input } from '@components/ui/input'
 import FormRow from '@components/FormRow'
 import { FormField, FormItem, FormControl } from '@components/ui/form'
-import RemoveApiButton from './EmailAPI/RemoveApi'
+import EmailApi from './EmailAPI/EmailApi'
 
 interface EmailProps {
   scope: 'project' | 'global'
@@ -67,12 +66,7 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
         )}
       />
 
-      <FormRow label="Email API Config" description="Email Provider API or custom API endpoint">
-        <div className="flex gap-2">
-          <ApiKeyDialog />
-          <RemoveApiButton />
-        </div>
-      </FormRow>
+      <EmailApi />
       <FormRow label="Email Presets">
         <dd className="mt-1 text-sm leading-6 sm:mt-0 flex flex-col gap-2">
           <Accordion type="single" collapsible className={fields.length ? 'border rounded-md' : ''}>

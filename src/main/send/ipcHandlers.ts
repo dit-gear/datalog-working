@@ -6,7 +6,7 @@ import { emailType } from '@shared/projectTypes'
 import { appState, datalogs as datalogStore, sendWindowDataMap } from '../core/app-state/state'
 import { getSendWindow } from './sendWindow'
 import { renderEmail } from '../core/render/renderEmail'
-import { emailprovider } from '../core/send-email'
+import { sendEmail } from '../core/send-email'
 
 export function setupSendIpcHandlers(): void {
   ipcMain.handle('initial-send-data', async (event): Promise<InitialSendData> => {
@@ -77,9 +77,8 @@ export function setupSendIpcHandlers(): void {
       try {
         const rendered = await renderEmail({ email, windowId })
         if (rendered) {
-          await emailprovider({ email, rendered })
+          await sendEmail({ email, rendered })
         }
-
         return { success: true }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'

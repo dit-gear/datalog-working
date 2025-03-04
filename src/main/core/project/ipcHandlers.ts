@@ -5,7 +5,7 @@ import { CreateNewProjectResult, UpdateProjectResult, ProjectToUpdate } from '@s
 import { ResponseWithString, Response } from '@shared/shared-types'
 import logger from '../logger'
 import { dialog } from 'electron'
-import { checkObjectInKeychainExists, deleteObjectInKeychain } from 'src/main/utils/keychain'
+import { checkObjectInKeychainExists, deleteObjectInKeychain } from '../../utils/keychain'
 
 export function setuProjectIpcHandlers(): void {
   ipcMain.handle(

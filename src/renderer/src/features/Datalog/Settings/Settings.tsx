@@ -17,18 +17,19 @@ import { useNavigate } from 'react-router-dom'
 
 interface SettingsDialogProps {
   defaults: ProjectSettingsType
+  email_api_exists: boolean
   templates: TemplateDirectoryFile[]
 }
 
-const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
+const Settings: React.FC<SettingsDialogProps> = ({ defaults, email_api_exists, templates }) => {
   const navigate = useNavigate()
   const [scope, setScope] = useState<Scope>('project')
 
   useEffect(() => {
-    reset(defaultValues(defaults))
+    reset(defaultValues(defaults, email_api_exists))
   }, [defaults])
 
-  const defaultValues = (defaults: ProjectSettingsType) => ({
+  const defaultValues = (defaults: ProjectSettingsType, email_api_exists) => ({
     project_project_name: defaults.project?.project_name ?? '',
     project_logid_template: defaults.project?.logid_template ?? '',
     project_unit: defaults.project?.unit ?? '',
@@ -50,11 +51,11 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
     global_pdfs: defaults.global?.pdfs ?? [],
     project_enable_parsing: !!defaults.project?.custom_fields,
     global_enable_parsing: !!defaults.global?.custom_fields,
-    email_api_exist: window.sharedApi.checkEmailApiConfigExists()
+    email_api_exist: email_api_exists
   })
 
   const form = useForm<formSchemaType>({
-    defaultValues: defaultValues(defaults),
+    defaultValues: defaultValues(defaults, email_api_exists),
     mode: 'all',
     resolver: zodResolver(formSchema)
   })
@@ -66,6 +67,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, templates }) => {
 
   const onSubmit: SubmitHandler<formSchemaType> = async (data) => {
     const cleanedData = removeEmptyFields(data, [
+      'email_api_exist',
       'new_email_api',
       'project_enable_parsing',
       'global_enable_parsing'

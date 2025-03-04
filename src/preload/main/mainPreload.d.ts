@@ -61,6 +61,7 @@ declare global {
       sendOverwriteResponse: (shouldOverwrite: boolean) => void
       getAppVersion: () => Promise<string>
       checkEmailApiConfigExists: () => Promise<boolean>
+      removeEmailApiConfig: () => Promise<Response>
     }
   }
 }

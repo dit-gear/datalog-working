@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { InitialSendData, Response } from '@shared/shared-types'
 import { safeInvoke } from '@shared/utils/ipcUtils'
 import { emailType } from '@shared/projectTypes'
+import { sharedApi } from '../main/mainPreload'
 
 const sendApi = {
   fetchInitialData: (): Promise<InitialSendData> =>
@@ -21,6 +22,7 @@ const sendApi = {
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('sendApi', sendApi)
+    contextBridge.exposeInMainWorld('sharedApi', sharedApi)
   } catch (error) {
     console.error(error)
   }

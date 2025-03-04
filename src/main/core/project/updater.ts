@@ -83,12 +83,16 @@ export const updateProject = async ({
   update_settings,
   update_email_api
 }: ProjectToUpdate): Promise<UpdateProjectResult> => {
-  if (update_email_api) {
-    console.log(update_email_api)
-    //const jsonData = JSON.stringify(update_email_api)
-    //await writeObjectToKeychain('email_api', jsonData)
-  }
   try {
+    if (update_email_api) {
+      const jsonData = JSON.stringify(update_email_api)
+      try {
+        await writeObjectToKeychain('email_api', jsonData)
+        logger.debug('email api config updated')
+      } catch (error) {
+        logger.error('email api config update failed')
+      }
+    }
     const projectYaml = YAML.stringify(update_settings.project)
     const globalYaml = YAML.stringify(update_settings.global)
 

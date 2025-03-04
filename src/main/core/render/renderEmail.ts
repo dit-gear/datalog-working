@@ -15,7 +15,19 @@ interface renderEmailProps {
   windowId: number
 }
 
-export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
+export const renderEmail = async ({
+  email,
+  windowId
+}: renderEmailProps): Promise<{
+  emailcode: {
+    code: string
+    plainText?: string
+  }
+  attachmentsToSend: {
+    content: string
+    filename: string
+  }[]
+}> => {
   const project = appState.activeProject
   if (!project) throw new Error('No project')
   const datalogs = Array.from(datalogStore().values())
@@ -84,11 +96,12 @@ export const renderEmail = async ({ email, windowId }: renderEmailProps) => {
       return attachmentsToSend
     }
     const [emailcode, attachmentsToSend] = await Promise.all([emailTask(), pdfTask()])
+    if (!emailcode) throw new Error('No email rendered')
     return { emailcode, attachmentsToSend }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown error'
     logger.error(`Error in renderEmail: ${message}`)
-    return
+    throw new Error(`Error in renderEmail: ${message}`)
   } finally {
     emailWorker.terminate()
     pdfWorker.terminate()

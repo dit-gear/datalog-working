@@ -1,10 +1,17 @@
 import { useState } from 'react'
 import { Button } from '@components/ui/button'
 import ConfirmDialog from '@components/ConfirmDialog'
+import { useFormContext } from 'react-hook-form'
 
 const RemoveApiButton = () => {
   const [open, setOpen] = useState<boolean>(false)
-  const handleConfirm = () => {}
+  const { setValue } = useFormContext()
+  const handleConfirm = async () => {
+    const res = await window.sharedApi.removeEmailApiConfig()
+    if (res.success) {
+      setValue('email_api_exist', false)
+    }
+  }
   return (
     <>
       <Button type="button" variant="outline" onClick={() => setOpen(true)}>

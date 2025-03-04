@@ -76,7 +76,7 @@ const mainApi = {
     ipcRenderer.send('pdf-to-export', pdf, selection)
 }
 
-const sharedApi = {
+export const sharedApi = {
   onShowOverwriteConfirmation: (callback: (file: string) => void) => {
     ipcRenderer.on('show-overwrite-confirmation', (_, file: string) => {
       callback(file)
@@ -90,7 +90,8 @@ const sharedApi = {
 
   getAppVersion: (): Promise<string> => ipcRenderer.invoke('app-version'),
 
-  checkEmailApiConfigExists: (): Promise<boolean> => ipcRenderer.invoke('check-emailApiConfig')
+  checkEmailApiConfigExists: (): Promise<boolean> => ipcRenderer.invoke('check-emailApiConfig'),
+  removeEmailApiConfig: (): Promise<Response> => ipcRenderer.invoke('remove-emailApiConfig')
 }
 
 if (process.contextIsolated) {
