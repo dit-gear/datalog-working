@@ -1,6 +1,6 @@
 import { secondsToTimecode } from '@shared/utils/format-timecode'
 import ffmpeg from 'fluent-ffmpeg'
-import ffprobePath from '../../../../../resources/ffprobe-intel?asset&asarUnpack'
+import ffprobePath from '../../../../../resources/ffprobe?asset&asarUnpack'
 import z from 'zod'
 
 type soundMetadataType = {

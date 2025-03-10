@@ -13,7 +13,6 @@ interface addSoundProps {
 const addSound = async ({ paths, storedClips }: addSoundProps): Promise<ResponseWithClips> => {
   try {
     const store = new Map<string, SoundClipType>(storedClips.map((clip) => [clip.clip, clip]))
-    let newClips: SoundClipType[] = []
 
     await Promise.all(
       paths.map(async (path) => {
@@ -25,11 +24,19 @@ const addSound = async ({ paths, storedClips }: addSoundProps): Promise<Response
           return
         }
 
+        const wavFiles = await findFilesByType(path, 'wav')
+
+        if (wavFiles.length === 0) {
+          const message = 'No audio files found in the selected directory.'
+          console.log(message)
+          return
+        }
+
         const mhlData = await processMHL(mhlFiles, path, 'sound')
-        console.log('mhl', mhlData)
+
         // Handle Copies merging
-        mhlData.forEach((newClip) => {
-          let existingClip = store.get(newClip.clip)
+        for (const newClip of mhlData) {
+          const existingClip = store.get(newClip.clip)
 
           if (existingClip) {
             // If the clip already exists, merge the Copies
@@ -42,50 +49,35 @@ const addSound = async ({ paths, storedClips }: addSoundProps): Promise<Response
             ]
             store.set(existingClip.clip, existingClip)
           } else {
-            // If the clip doesn't exist, add it to the list of new clips
-            newClips.push(newClip)
+            const filePath = wavFiles.find(
+              (file) => pathnode.basename(file, pathnode.extname(file)) === `${newClip.clip}`
+            )
+            if (!filePath) {
+              console.error(`No matching .wav file found for clip "${newClip.clip}"`)
+              continue
+            }
+
+            try {
+              fs.statSync(filePath)
+            } catch (error) {
+              console.error(`File not found: ${filePath}, skipping. Error: ${error}`)
+              continue
+            }
+            try {
+              const { tc_start, tc_end } = await getAudioMetadata(filePath)
+              store.set(newClip.clip, {
+                ...newClip,
+                ...(tc_start ? { tc_start } : {}),
+                ...(tc_end ? { tc_end } : {})
+              })
+            } catch (error) {
+              console.error(`Error reading metadata for ${filePath}: ${error}`)
+              continue
+            }
           }
-        })
+        }
       })
     )
-
-    const files: SoundClipType[] = []
-    for (const clip of newClips) {
-      const wavFiles = await findFilesByType(paths[0], 'wav')
-      const filePath = wavFiles.find(
-        (file) => pathnode.basename(file, pathnode.extname(file)) === `${clip.clip}`
-      )
-      if (!filePath) {
-        console.error(`No matching .wav file found for clip "${clip.clip}"`)
-        continue
-      }
-
-      try {
-        fs.statSync(filePath)
-      } catch (error) {
-        console.error(`File not found: ${filePath}, skipping. Error: ${error}`)
-        continue
-      }
-
-      try {
-        const { tc_start, tc_end } = await getAudioMetadata(filePath)
-        const { clip: clipclip, ...rest } = clip
-        files.push({
-          clip: `${clipclip}.wav`,
-          ...rest,
-          ...(tc_start ? { tc_start } : {}),
-          ...(tc_end ? { tc_end } : {})
-        })
-      } catch (error) {
-        console.error(`Error reading metadata for ${filePath}: ${error}`)
-        continue
-      }
-    }
-
-    files.forEach((item) => {
-      store.set(item.clip, item)
-    })
-
     return { success: true, clips: { sound: Array.from(store.values()) } }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred.'

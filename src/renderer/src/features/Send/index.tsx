@@ -28,7 +28,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <ErrorBoundary>
           <QueryClientProvider client={queryClient}>
             <SendSelector />
-            <MessageBox />
+            {/*<MessageBox />*/}
           </QueryClientProvider>
         </ErrorBoundary>
       </div>

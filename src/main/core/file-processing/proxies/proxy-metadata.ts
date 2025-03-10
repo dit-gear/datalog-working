@@ -1,5 +1,5 @@
 import ffmpeg from 'fluent-ffmpeg'
-import ffprobePath from '../../../../../resources/ffprobe-intel?asset&asarUnpack'
+import ffprobePath from '../../../../../resources/ffprobe?asset&asarUnpack'
 
 type proxyMetadataType = {
   codec?: string
