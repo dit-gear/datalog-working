@@ -164,7 +164,7 @@ const EditorWrapper = () => {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="rounded"
+                  className="rounded z-40"
                   style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
                 >
                   <SettingsIcon className="h-4 w-4" />

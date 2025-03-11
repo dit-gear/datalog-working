@@ -59,14 +59,7 @@ const addOCF = async ({ paths, storedClips }: addOCFProps): Promise<ResponseWith
 
           if (existingClip) {
             // If the clip already exists, merge the Copies
-            /*existingClip.copies = [
-              ...existingClip.copies,
-              ...newClip.copies.filter(
-                (copy) =>
-                  !existingClip.copies.some((existingCopy) => existingCopy.volume === copy.volume)
-              )
-            ]
-            store.set(existingClip.clip, existingClip)*/
+
             existingClip.copies = [
               ...existingClip.copies,
               ...newClip.copies.filter(
