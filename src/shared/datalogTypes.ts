@@ -226,8 +226,9 @@ const ClipZod = OcfClipBaseZod.merge(CameraMetadataZod).extend({
   proxy: ProxyClipZod.omit({ clip: true })
 })
 
+// for definitions
 export const ClipDynamicZod = (project: ProjectRootType) => {
-  return ClipZod.merge(CustomFieldsZod(project))
+  return ClipZod.merge(CustomFieldsZod(project)).omit({ size: true, duration: true, proxy: true })
 }
 
 export type DatalogDynamicType = DatalogType

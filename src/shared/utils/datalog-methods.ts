@@ -78,6 +78,38 @@ export function getSize<T extends FormatOutput>(
   const size = data?.size != null ? data.size : sumClipSizes(data?.clips)
   return options ? formatBytes(size, options) : size
 }
+// because "Typescript" 🌈🤪
+export function getDurationFormatted(duration: string | undefined, format: 'tc'): string
+export function getDurationFormatted(duration: string | undefined, format: 'seconds'): number
+export function getDurationFormatted(
+  duration: string | undefined,
+  format: 'frames',
+  fps: number | undefined
+): number
+export function getDurationFormatted(duration: string | undefined, format: 'hms'): DurationType
+export function getDurationFormatted(duration: string | undefined, format: 'hms-string'): string
+export function getDurationFormatted(
+  duration: string | undefined,
+  format: 'tc' | 'seconds' | 'frames' | 'hms' | 'hms-string',
+  fps?: number
+): string | number | DurationType {
+  if (!duration) duration = '00:00:00:00'
+  switch (format) {
+    case 'seconds':
+      return timecodeToSeconds(duration)
+    case 'frames':
+      if (!fps) return 0
+      return timecodeToFrames(duration, fps)
+    case 'hms':
+      return formatDuration(duration)
+    case 'hms-string': {
+      return formatDuration(duration, { asString: true })
+    }
+    case 'tc':
+    default:
+      return duration
+  }
+}
 
 export function getDuration(
   data: Pick<OcfType, 'duration' | 'clips'> | undefined,

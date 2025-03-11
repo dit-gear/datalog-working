@@ -27,6 +27,25 @@ function transformAstString(astString) {
   return renamedString.trim() // Remove any extra spaces at the ends
 }
 
+const clipMethods = `
+  size(options?: { type: FormatBytesTypes }): string;
+  sizeAsNumber(options?: { type: FormatBytesTypes }): number;
+  sizeAsTuple(options?: { type: FormatBytesTypes }): [number, string];
+  duration(): string;
+  durationTC(): string;
+  durationObject(): DurationType;
+  durationAsSeconds(): number;
+  durationAsFrames(): number;
+  readonly proxy: {
+    size(options?: { type: FormatBytesTypes }): string;
+    sizeAsNumber(options?: { type: FormatBytesTypes }): number;
+    sizeAsTuple(options?: { type: FormatBytesTypes }): [number, string];
+    codec?: string;
+    format?: string;
+    resolution?: string
+  };
+`
+
 const generatedynamicAST = (identifier: string, schema: ZodTypeAny): string => {
   const { node } = zodToTs(schema, identifier)
   const typeAlias = createTypeAlias(node, identifier)
@@ -41,6 +60,8 @@ export const createDataDefinition = (project: ProjectRootType) => {
 
   const ClipDynamicSchema = ClipDynamicZod(project)
   const ClipAST = generatedynamicAST('Clip', ClipDynamicSchema)
+  const ClipASTwMethods = ClipAST.replace(/(\}\s*;)$/, `${clipMethods}\n$1`)
+  console.log('clipAST:', ClipASTwMethods)
 
   const OcfClipTypeAST = generatedynamicAST('OcfClipType', OcfClipZod)
   const ProxyClipTypeAST = generatedynamicAST('ProxyClipType', ProxyClipZod)
@@ -50,7 +71,7 @@ export const createDataDefinition = (project: ProjectRootType) => {
 
   const combinedTypeDefs = `
 
-  ${ClipAST}
+  ${ClipASTwMethods}
 
   ${OcfClipTypeAST}
   ${ProxyClipTypeAST}

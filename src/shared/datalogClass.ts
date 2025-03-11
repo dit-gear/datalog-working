@@ -1,9 +1,9 @@
-import { mergeClips } from './utils/datalog-clips'
+import { mergeClips, MergedClip, MergedProxy } from './utils/datalog-clips'
 import { DatalogType, CopyType, OcfType, SoundType, ProxyType } from './datalogTypes'
 import { ProjectRootType } from './projectTypes'
 import { DurationType } from '@shared/shared-types'
 import { ReelsOptions } from './utils/format-reel'
-import { FormatBytesTypes } from './utils/format-bytes'
+import { FormatBytesTypes, formatBytes } from './utils/format-bytes'
 import { mergeDatalogs } from './utils/datalog-merge'
 import {
   getReels,
@@ -13,15 +13,92 @@ import {
   getCopies,
   getTotalSize,
   getTotalDuration,
-  getTotalFiles
+  getTotalFiles,
+  getDurationFormatted
 } from './utils/datalog-methods'
 
+class Clip implements Omit<MergedClip, 'size' | 'duration'> {
+  public clip!: string
+  public copies?: Array<{ volume: string; hash: string | null }>
+  public tc_start?: string
+  public tc_end?: string
+  public camera_model?: string
+  public camera_id?: string
+  public reel?: string
+  public fps?: number
+  public sensor_fps?: string
+  public lens?: string
+  public resolution?: string
+  public codec?: string
+  public gamma?: string
+  public wb?: string
+  public tint?: string
+  public lut?: string
+  public sound?: string[];
+  [key: string]: unknown
+
+  private _rawSize?: number
+  private _rawDuration?: string
+  private _rawProxy?: MergedProxy
+
+  // Copy all properties from the merged clip directly onto the instance
+  constructor(data: MergedClip) {
+    const { size, duration, proxy, ...rest } = data
+    Object.assign(this, rest)
+    this._rawSize = size
+    this._rawDuration = duration
+    this._rawProxy = proxy
+  }
+
+  size(options?: { type: FormatBytesTypes }): string {
+    return formatBytes(this._rawSize ?? 0, { output: 'string', type: options?.type })
+  }
+  sizeAsNumber(options?: { type: FormatBytesTypes }): number {
+    return formatBytes(this._rawSize ?? 0, { output: 'number', type: options?.type })
+  }
+  sizeAsTuple(options?: { type: FormatBytesTypes }): [number, string] {
+    return formatBytes(this._rawSize ?? 0, { output: 'tuple', type: options?.type })
+  }
+  duration(): string {
+    return getDurationFormatted(this._rawDuration, 'hms-string')
+  }
+  durationTC(): string {
+    return getDurationFormatted(this._rawDuration, 'tc')
+  }
+  durationObject(): DurationType {
+    return getDurationFormatted(this._rawDuration, 'hms')
+  }
+  durationAsSeconds(): number {
+    return getDurationFormatted(this._rawDuration, 'seconds')
+  }
+  durationAsFrames(): number {
+    return getDurationFormatted(this._rawDuration, 'frames', this.fps)
+  }
+  public get proxy() {
+    // If _rawProxy is missing or its size isn't a number, default to 0
+    const rawSize =
+      this._rawProxy && typeof this._rawProxy.size === 'number' ? this._rawProxy.size : 0
+    return {
+      ...this._rawProxy,
+      size(options?: { type: FormatBytesTypes }): string {
+        return formatBytes(rawSize ?? 0, { output: 'string', type: options?.type })
+      },
+      sizeAsNumber(options?: { type: FormatBytesTypes }): number {
+        return formatBytes(rawSize ?? 0, { output: 'number', type: options?.type })
+      },
+      sizeAsTuple(options?: { type: FormatBytesTypes }): [number, string] {
+        return formatBytes(rawSize ?? 0, { output: 'tuple', type: options?.type })
+      }
+    }
+  }
+}
+
 export class Datalog {
-  public readonly clips: any[]
+  public readonly clips: Clip[]
   private raw: DatalogType
 
   constructor(data: DatalogType) {
-    this.clips = mergeClips(data)
+    this.clips = mergeClips(data)?.map((clip) => new Clip(clip))
     this.raw = data
   }
   /** The unique identifier for this datalog. */
