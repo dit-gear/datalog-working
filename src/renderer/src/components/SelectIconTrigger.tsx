@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as SelectPrimitive from '@radix-ui/react-select'
-import { Settings, ChevronDown, Replace } from 'lucide-react'
+import { Replace } from 'lucide-react'
 import { cn } from '@components/lib/utils'
 
 const SelectTrigger = React.forwardRef<
@@ -24,5 +24,3 @@ const SelectTrigger = React.forwardRef<
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
 
 export { SelectTrigger }
-
-// <Settings className="h-4 w-4" />

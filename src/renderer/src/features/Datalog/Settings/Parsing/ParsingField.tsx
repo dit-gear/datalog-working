@@ -18,17 +18,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuGroup
 } from '@components/ui/dropdown-menu'
-import DurationFields from './DurationFields'
 import { MoreHorizontal } from 'lucide-react'
 import { FieldArrayWithId, UseFieldArrayRemove, useFormContext, useWatch } from 'react-hook-form'
 import { formSchemaType } from '../types'
-import {
-  fieldType,
-  primitiveTypesZod,
-  specialTypesZod,
-  additionalParsing,
-  delimiters
-} from '@shared/projectTypes'
+import { fieldType, primitiveTypesZod, additionalParsing, delimiters } from '@shared/projectTypes'
 import SubfieldArray from './SubfieldArray'
 
 interface ParsingFieldProps {
@@ -45,8 +38,6 @@ const ParsingField: React.FC<ParsingFieldProps> = ({ scope, field, index, remove
     name: `${scope}_custom_fields.fields.${index}.type`
   })
   const [showRegex, setShowRegex] = useState('regex' in field)
-
-  const fields = useWatch({ control, name: `${scope}_custom_fields.fields` })
 
   const primitiveDropdownItems = primitiveTypesZod.options.map((type) => ({
     value: type,

@@ -10,7 +10,7 @@ export function mapPdfTypesToOptions(pdfs: pdfType[], tags?: Tags): Option[] {
   return pdfs.map((pdf) => {
     const name = tags ? replaceTags(pdf.output_name, tags) : pdf.output_name
     return {
-      label: `${pdf.name} (${name})`,
+      label: `${pdf.label} (${name})`,
       value: pdf.id
     }
   })

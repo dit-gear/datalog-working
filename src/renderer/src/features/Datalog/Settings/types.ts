@@ -1,4 +1,4 @@
-import { boolean, z } from 'zod'
+import { z } from 'zod'
 import { ProjectSchemaZod, GlobalSchemaZod, emailApiZodObj } from '@shared/projectTypes'
 
 export type Scope = 'project' | 'global'

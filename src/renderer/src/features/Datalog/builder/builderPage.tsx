@@ -2,7 +2,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useProject } from '../hooks/useProject'
 import { useDatalogs } from '../hooks/useDatalogs'
 import Builder from './builder'
-import { Button } from '@components/ui/button'
 import CloseButton from '@components/CloseButton'
 
 function BuilderPage() {
