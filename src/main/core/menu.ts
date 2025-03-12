@@ -1,4 +1,4 @@
-import { Menu, app, Tray, dialog } from 'electron'
+import { Menu, app, Tray } from 'electron'
 import { getDatalogWindow } from '../datalog/datalogWindow'
 import { ProjectRootType, ProjectInRootMenuItem } from '@shared/projectTypes'
 import { appState } from './app-state/state'

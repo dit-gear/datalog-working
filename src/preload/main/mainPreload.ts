@@ -1,7 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { DatalogType, OcfClipType, SoundClipType } from '@shared/datalogTypes'
 import { pdfType, ProjectType } from '@shared/projectTypes'
-import { checkObjectInKeychainExists } from 'src/main/utils/keychain'
 
 // Custom APIs for renderer
 const mainApi = {

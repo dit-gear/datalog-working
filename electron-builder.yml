@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: com.ditgear.datalog
 productName: Datalog
 directories:
   buildResources: build
@@ -12,6 +12,7 @@ files:
 asarUnpack:
   - node_modules/fluent-ffmpeg
   - resources/**
+electronLanguages: en_US
 win:
   executableName: datalog
 nsis:
@@ -26,7 +27,7 @@ mac:
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
+  gatekeeperAssess: false
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
@@ -39,8 +40,3 @@ linux:
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
-#publish:
-#  provider: generic
-#  url: https://example.com/auto-updates
-#electronDownload:
-#  mirror: https://npmmirror.com/mirrors/electron/

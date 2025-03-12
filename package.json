@@ -2,7 +2,8 @@
   "name": "datalog",
   "version": "0.1.0",
   "private": true,
-  "description": "An Electron application with React and TypeScript",
+  "description": "Reporting utility for media professionals",
+  "author": "DIT Gear AB",
   "main": "./out/main/index.js",
   "scripts": {
     "format": "prettier --write .",
@@ -15,10 +16,8 @@
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
-    "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
-    "build:mac-intel": "electron-vite build && electron-builder --mac --x64",
-    "build:linux": "electron-vite build && electron-builder --linux"
+    "build:mac-intel": "electron-vite build && electron-builder --mac --x64"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",

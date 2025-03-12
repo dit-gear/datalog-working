@@ -1,12 +1,7 @@
 import findFilesByType from '../../../utils/find-files-by-type'
 import processMHL from '../../file-processing/mhl/process-mhl'
 import processALE from '../../file-processing/camera/process-ale'
-import type {
-  CameraMetadataType,
-  OcfClipBaseType,
-  OcfClipType,
-  ResponseWithClips
-} from '@shared/datalogTypes'
+import type { CameraMetadataType, OcfClipType, ResponseWithClips } from '@shared/datalogTypes'
 
 const ParseCameraMetadata = async (filePath: string): Promise<CameraMetadataType[]> => {
   const [aleFiles, xmlFiles] = await Promise.all([
@@ -39,7 +34,7 @@ const addOCF = async ({ paths, storedClips }: addOCFProps): Promise<ResponseWith
     // We'll accumulate new clips and metadata before updating state
     const store = new Map<string, OcfClipType>(storedClips.map((clip) => [clip.clip, clip]))
 
-    let newClips: OcfClipBaseType[] = []
+    // let newClips: OcfClipBaseType[] = []
 
     await Promise.all(
       paths.map(async (path) => {

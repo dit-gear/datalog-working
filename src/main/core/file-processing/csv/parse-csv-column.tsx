@@ -4,12 +4,11 @@ import type {
   ListOfStringsFieldType,
   KeyValueObjFieldType,
   ListOfFieldArraysFieldType,
-  ListOfMappedObjectsFieldType,
-  DurationFieldType
+  ListOfMappedObjectsFieldType
 } from '@shared/projectTypes'
 import { parseString } from './parse-string'
-import { parseNumber } from './parse-number'
-import { timecodeToTime } from '../utils/convertTimecode'
+//import { parseNumber } from './parse-number'
+//import { timecodeToTime } from '../utils/convertTimecode'
 
 /*
 
@@ -223,7 +222,7 @@ function parseListOfMappedObjects(
   return dataRow[value_key] as Record<string, string>[]
 }
 
-function parseDuration(field: DurationFieldType, row: Row, dataRow: DataRow): number {
+/*function parseDuration(field: DurationFieldType, row: Row, dataRow: DataRow): number {
   const { column, unit, fps } = field
   const value = row[column] ?? ''
   const valueAsNumber = parseNumber(value)
@@ -259,7 +258,7 @@ function parseDuration(field: DurationFieldType, row: Row, dataRow: DataRow): nu
   }
 
   return (dataRow.Duration = durationInSeconds)
-}
+}*/
 
 type returnType =
   | string
@@ -290,7 +289,7 @@ export function parseField(
       const test = parseListOfMappedObjects(field, row, dataRow)
       console.log('listofmappedobjects parsed: ', test)
       return test
-    case 'duration':
-      return parseDuration(field, row, dataRow)
+    /*case 'duration':
+      return parseDuration(field, row, dataRow)*/
   }
 }

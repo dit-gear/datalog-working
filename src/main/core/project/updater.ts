@@ -7,7 +7,7 @@ import { loadProject } from './loader'
 import { updateState } from '../app-state/updater'
 import logger from '../logger'
 import { getDatalogWindow } from '../../datalog/datalogWindow'
-import { writeObjectToKeychain, deleteObjectInKeychain } from '../../utils/keychain'
+import { writeObjectToKeychain } from '../../utils/keychain'
 
 const getFileName = (filePath: string): string => {
   return filePath.split('/').pop() || filePath

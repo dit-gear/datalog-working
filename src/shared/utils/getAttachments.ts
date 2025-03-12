@@ -23,5 +23,5 @@ export function getPdfAttachments(
     .filter(Boolean) as pdfType[]
 
   // Return either the PDF objects or their names
-  return getNamesOnly ? matchedPdfs.map((pdf) => pdf.name) : matchedPdfs
+  return getNamesOnly ? matchedPdfs.map((pdf) => pdf.id) : matchedPdfs
 }

@@ -2,10 +2,12 @@ node_modules
 dist
 out
 resources/ffprobe
-resources/ffprobe-intel
 .DS_Store
 *.log*
 .vscode
 build
 *.local
 *.local.d.ts
+package-mac-signed.sh
+*.p12
+ffprobe
