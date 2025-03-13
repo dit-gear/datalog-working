@@ -16,8 +16,9 @@
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
-    "build:mac": "electron-vite build && electron-builder --mac",
-    "build:mac-intel": "electron-vite build && electron-builder --mac --x64"
+    "build:mac": "electron-vite build && electron-builder --mac --publish never",
+    "build:mac-intel": "electron-vite build && electron-builder --mac --x64 --publish never",
+    "build:mac-unsigned": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-vite build && electron-builder --mac -c.mac.identity=null --publish never"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
@@ -94,7 +95,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.19",
     "electron": "^34.0.0",
-    "electron-builder": "^25.0.5",
+    "electron-builder": "^25.1.8",
     "electron-vite": "^3.0.0-beta.0",
     "eslint": "^9.9.1",
     "eslint-plugin-react": "^7.33.2",
