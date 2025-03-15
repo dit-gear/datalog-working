@@ -1,5 +1,12 @@
 import { mergeClips, MergedClip, MergedProxy } from './utils/datalog-clips'
-import { DatalogType, CopyType, OcfType, SoundType, ProxyType } from './datalogTypes'
+import {
+  DatalogType,
+  CopyType,
+  OcfType,
+  SoundType,
+  ProxyType,
+  DatalogTypeMerged
+} from './datalogTypes'
 import { ProjectRootType } from './projectTypes'
 import { DurationType } from '@shared/shared-types'
 import { ReelsOptions } from './utils/format-reel'
@@ -95,9 +102,9 @@ class Clip implements Omit<MergedClip, 'size' | 'duration'> {
 
 export class Datalog {
   public readonly clips: Clip[]
-  private raw: DatalogType
+  private raw: DatalogType | DatalogTypeMerged
 
-  constructor(data: DatalogType) {
+  constructor(data: DatalogType | DatalogTypeMerged) {
     this.clips = mergeClips(data)?.map((clip) => new Clip(clip))
     this.raw = data
   }
@@ -107,13 +114,14 @@ export class Datalog {
   }
   /** The day associated with this datalog. */
   public get day(): string {
-    return this.raw.day.toString()
+    const dayValue = this.raw.day
+    return typeof dayValue === 'number' ? dayValue.toString() : dayValue
   }
   /** The date of this datalog in ISO format. */
   public get date(): string {
     return this.raw.date
   }
-  /**The unit/team associated with this datalog. Example: Main-unit, Second-unit */
+  /**The production unit/team associated with this datalog. Example: Main-unit, Second-unit */
   public get unit(): string {
     return this.raw.unit ?? ''
   }

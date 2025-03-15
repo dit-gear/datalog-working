@@ -1,4 +1,4 @@
-import { DatalogType } from '@shared/datalogTypes'
+import { DatalogType, DatalogTypeMerged } from '@shared/datalogTypes'
 import { Datalog } from '@shared/datalogClass'
 import { getTotalFiles, getTotalSize, getTotalDuration } from '@shared/utils/datalog-methods' // optional if you prefer direct usage
 
@@ -18,13 +18,8 @@ export const getFirstAndLastDatalogs = (
   return { first: sorted[0], last: sorted[sorted.length - 1] }
 }
 
-function mergeNumbers(a, b) {
-  const digits = b.toString().length
-  return a + b / Math.pow(10, digits)
-}
-
-export const mergeDatalogs = (datalogs: DatalogType | DatalogType[]): DatalogType => {
-  if (!Array.isArray(datalogs)) return datalogs
+export const mergeDatalogs = (datalogs: DatalogType[]): DatalogTypeMerged => {
+  //if (!Array.isArray(datalogs)) return datalogs
   const wrapped = datalogs.map((d) => new Datalog(d))
 
   // Simple helper to check if a raw property is “set” on any Datalog
@@ -34,15 +29,15 @@ export const mergeDatalogs = (datalogs: DatalogType | DatalogType[]): DatalogTyp
   const { first, last } = getFirstAndLastDatalogs(datalogs)
 
   // Start with a basic merged object
-  const merged: DatalogType = {
+  const merged: DatalogTypeMerged = {
     id: `${first.id} - ${last.id}`,
-    day: mergeNumbers(first.day, last.day),
+    day: `${first.day}${first.day !== last.day ? ` - ${last.day}` : ''}`,
     date: `${first.date}${first.date !== last.date ? ` - ${last.date}` : ''}`,
     unit: [...new Set(datalogs.map((item) => item.unit))].join(', '),
     ocf: {},
     proxy: {},
     sound: {}
-  } as DatalogType
+  } as DatalogTypeMerged
 
   // --- OCF ---
   if (propertyIsSetOnAny(datalogs, (d) => d.ocf?.files)) {

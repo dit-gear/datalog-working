@@ -66,7 +66,7 @@ const GeneralContent = ({ scope }: GeneralTabProps) => {
           <FormItem>
             <FormRow
               name={field.name}
-              label="Unit / Team"
+              label="Production Unit"
               description="Set the unit for the project."
               descriptionTag={['Optional', 'Tag: <unit>']}
             >

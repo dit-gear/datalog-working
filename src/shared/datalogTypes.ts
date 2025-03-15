@@ -133,7 +133,15 @@ export const datalogZod = z.object({
   custom: z.array(Custom).optional()
 })
 
+export const datalogZodMerged = datalogZod.omit({ day: true }).extend({
+  day: z.coerce.string({
+    required_error: 'Day is required',
+    invalid_type_error: 'Day is required'
+  })
+})
+
 export type DatalogType = z.infer<typeof datalogZod>
+export type DatalogTypeMerged = z.infer<typeof datalogZodMerged>
 
 export type ResponseWithClips =
   | {
