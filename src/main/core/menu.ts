@@ -123,8 +123,10 @@ class TrayManager {
     })
     if (!this.tray) {
       this.tray = new Tray(trayIcon) // Create the tray if it doesn't exist
+      console.log('created new menu')
     }
     this.tray.setContextMenu(contextMenu) // Update the context menu
+    console.log('updated menu')
   }
 
   updateTooltip(tooltip: string) {

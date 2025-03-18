@@ -1,7 +1,6 @@
 import path from 'path'
 import { join } from 'path'
 import fs from 'fs'
-import { dialog } from 'electron'
 import YAML from 'yaml'
 import { LoadProjectDataResult } from './types'
 import findFilesByType from '../../utils/find-files-by-type'
@@ -44,6 +43,7 @@ export const getTemplateDirectories = (
   _projectPath?: string
 ): { dirs: string[]; subdirs: string[]; detailed: TemplateDirectoryFile[] } => {
   const projectPath = _projectPath ?? appState.activeProjectPath
+  console.log('getTemplateDirectories-activeProjectPath: ', projectPath)
   const appPath = appState.appPath
   const dirs = [`${projectPath}/templates/`, `${appPath}/templates/`]
   const subdirs = [
@@ -143,12 +143,13 @@ export const loadProject = async (selectedProjectpath: string): Promise<LoadProj
     }
     appState.activeProject = data
     trayManager.createOrUpdateTray()
+    console.log('loaded tray')
     await initProjectWatchers()
+    console.log('loaded initprojectwatchers')
     logger.debug(`${data.project_name} loaded`)
     return { success: true, data }
   } catch (error) {
     const errorMessage = (error as Error).message
-    dialog.showErrorBox('Error loading project, please check the project config:', errorMessage)
     logger.error(errorMessage)
     return {
       success: false,

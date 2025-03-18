@@ -27,12 +27,18 @@ async function saveStateToFile(data: state): Promise<error | undefined> {
 }
 
 export async function updateState({ newRootPath, newActiveProject }: updateProps): Promise<void> {
-  const rootPath = newRootPath ? newRootPath : appState.rootPath
-  const activeProject = newActiveProject ?? null
-  await saveStateToFile({ rootPath, activeProject })
-  newRootPath && (appState.rootPath = newRootPath)
-  appState.activeProjectPath = activeProject
-  logger.debug(`State updated. Root: ${rootPath} Project: ${activeProject}`)
+  try {
+    const rootPath = newRootPath ? newRootPath : appState.rootPath
+    logger.debug('updatestate-newActiveProject: ', newActiveProject)
+    const activeProject = newActiveProject ?? null
+    logger.debug('updatestate-activeProject: ', activeProject)
+    await saveStateToFile({ rootPath, activeProject })
+    newRootPath && (appState.rootPath = newRootPath)
+    appState.activeProjectPath = activeProject
+    logger.debug(`State updated. Root: ${rootPath} Project: ${activeProject}`)
+  } catch (error) {
+    logger.error('Error in updateState: ', error)
+  }
 }
 
 export const handleRootDirChange = async (): Promise<void> => {

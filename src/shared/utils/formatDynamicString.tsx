@@ -10,7 +10,6 @@ export type Tags = {
   log?: string
 }
 
-//type TagFunction = (state?: number, date?: Date, projectName?: string, unit?: string) => string
 type TagFunction = (tags: Tags) => string
 
 export function formatDate(
@@ -26,9 +25,8 @@ export function formatDate(
   return format(parsedDate, dateFormat)
 }
 
-function formatNumber(day: number = 0, numberFormat: string = '<d>'): string {
-  const length = numberFormat.length - 2
-  return day.toString().padStart(length, '0')
+function formatNumber(day: number = 0, numberFormat: string = 'd'): string {
+  return day.toString().padStart(numberFormat.length, '0')
 }
 
 function returnString(string: string = ''): string {
@@ -54,9 +52,9 @@ function replaceTags(template: string, tags: Tags): string {
     '<mm-dd-yy>': (tag) => formatDate(tag.date, 'MM-dd-yy'),
 
     //Days [1, 01, 001]
-    '<d>': (tag) => formatNumber(tag.day, '<d>'),
-    '<dd>': (tag) => formatNumber(tag.day, '<dd>'),
-    '<ddd>': (tag) => formatNumber(tag.day, '<ddd>'),
+    '<d>': (tag) => formatNumber(tag.day, 'd'),
+    '<dd>': (tag) => formatNumber(tag.day, 'dd'),
+    '<ddd>': (tag) => formatNumber(tag.day, 'ddd'),
 
     //Others
     '<project>': (tag) => returnString(tag.projectName),

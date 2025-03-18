@@ -4,6 +4,7 @@ import DailyRotateFile from 'winston-daily-rotate-file'
 
 const winstonconfig = (logDir: string) => {
   const level = is.dev ? 'debug' : 'info'
+  console.log('Winston running on level: ', level)
   return {
     level: level,
     format: winston.format.combine(

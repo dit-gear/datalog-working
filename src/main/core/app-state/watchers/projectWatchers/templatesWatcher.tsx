@@ -51,7 +51,7 @@ const isValidTemplateFile = (filePath: string, action: 'add' | 'remove'): boolea
 
 export const initTemplateWatcher = async () => {
   const { dirs, subdirs } = getTemplateDirectories()
-
+  console.log('template dirs: ', dirs, subdirs)
   // Ensure directories exist
   await Promise.all(subdirs.map(ensureDirectoryExists))
 
