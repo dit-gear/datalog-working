@@ -6,6 +6,9 @@ import { setupIpcHandlers } from './setupIpcHandlers'
 import { closeAllWatchers } from './core/app-state/watchers/closing'
 import logger from './core/logger'
 import trayManager from './core/menu'
+import { startLocalServer } from './server/apiServer'
+
+let localServer: any
 
 // Initialize the application
 app.setName('Datalog')
@@ -25,6 +28,9 @@ app.whenReady().then(() => {
 
   setupIpcHandlers()
   loadState()
+  startLocalServer().then((server) => {
+    localServer = server
+  })
 })
 
 app.on('window-all-closed', () => {
@@ -54,6 +60,13 @@ app.on('will-quit', async (event) => {
     logger.debug('App is quitting. Performing cleanup...')
     BrowserWindow.getAllWindows().forEach((win) => win.destroy())
     trayManager.destroyTray()
+
+    if (localServer) {
+      localServer.close(() => {
+        logger.debug('Local server closed.')
+      })
+    }
+
     await closeAllWatchers()
     ipcMain.removeAllListeners()
 

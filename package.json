@@ -1,6 +1,6 @@
 {
   "name": "datalog",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Reporting utility for media professionals",
   "author": "DIT Gear AB",
@@ -60,6 +60,7 @@
     "esbuild-wasm": "^0.24.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-linter-browserify": "^9.8.0",
+    "express": "^4.21.2",
     "fast-xml-parser": "^4.3.6",
     "fluent-ffmpeg": "^2.1.3",
     "iconv-lite": "^0.6.3",
