@@ -105,19 +105,19 @@ export async function startLocalServer() {
   })
 
   // Example endpoints.
-  api.get('/ping', (req, res) => res.json({ status: 'ok', port }))
-  api.get('/version', (req, res) => res.json({ version: app.getVersion() }))
-  api.get('/project', (req, res) => {
+  api.get('/ping', (_req, res) => res.json({ status: 'ok', port }))
+  api.get('/version', (_req, res) => res.json({ version: app.getVersion() }))
+  api.get('/project', (_req, res) => {
     const project = { ...appState.activeProject }
     delete project.settings
     delete project.templatesDir
     return res.json(project)
   })
-  api.get('/project-settings', (req, res) =>
+  api.get('/project-settings', (_req, res) =>
     res.json(appState.activeProject?.settings?.project ?? {})
   )
-  api.get('/projects', (req, res) => res.json(appState.projectsInRootPath ?? {}))
-  api.get('/datalogs', (req, res) => res.json({ datalogs: [...datalogs().values()] }))
+  api.get('/projects', (_req, res) => res.json(appState.projectsInRootPath ?? {}))
+  api.get('/datalogs', (_req, res) => res.json({ datalogs: [...datalogs().values()] }))
   api.get('/datalogById', (req, res) => {
     const parseResult = idSchema.safeParse(req.body)
     if (!parseResult.success) {
@@ -127,11 +127,11 @@ export async function startLocalServer() {
     const datalog = datalogs().get(`${appState.activeProjectPath}/logs/${id}.datalog`)
     return res.json(datalog ?? {})
   })
-  api.get('/email-presets', (req, res) => {
+  api.get('/email-presets', (_req, res) => {
     const emails = appState.activeProject?.emails
     return res.json(emails ?? {})
   })
-  api.get('/pdf-presets', (req, res) => {
+  api.get('/pdf-presets', (_req, res) => {
     const pdfs = appState.activeProject?.pdfs
     return res.json(pdfs ?? {})
   })
