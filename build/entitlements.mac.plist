@@ -10,5 +10,13 @@
     <true/>
     <key>com.apple.security.network.client</key>
     <true/>
+    <key>com.apple.security.personal-information</key>
+    <array>
+      <string>kTCCServiceSystemPolicyAllFiles</string>
+    </array>
+       <key>keychain-access-groups</key>
+    <array>
+      <string>$(AppIdentifierPrefix)datalogemail</string>
+    </array>
   </dict>
 </plist>
