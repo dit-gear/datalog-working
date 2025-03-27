@@ -1,7 +1,7 @@
-import * as eslint from 'eslint-linter-browserify'
+//import * as eslint from 'eslint-linter-browserify'
 //import parserEstreePlugin from 'prettier/plugins/estree'
 //import eslintConfigPrettier from 'eslint-config-prettier'
-
+/*
 self.onmessage = async (event: MessageEvent) => {
   console.log('liner-worker called')
   const code = event.data as string
@@ -122,7 +122,7 @@ self.onmessage = async (event: MessageEvent) => {
       'vue/space-in-parens': 'off',
       'vue/space-infix-ops': 'off',
       'vue/space-unary-ops': 'off',
-      'vue/template-curly-spacing': 'off'*/
+      'vue/template-curly-spacing': 'off'
     }
   }
   try {
@@ -133,3 +133,4 @@ self.onmessage = async (event: MessageEvent) => {
     console.error('error: ', error)
   }
 }
+*/

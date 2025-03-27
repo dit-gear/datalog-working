@@ -7,6 +7,7 @@ import { closeAllWatchers } from './core/app-state/watchers/closing'
 import logger from './core/logger'
 import trayManager from './core/menu'
 import { startLocalServer } from './server/apiServer'
+import { getDatalogWindow } from './datalog/datalogWindow'
 
 let localServer: any
 
@@ -31,6 +32,7 @@ app.whenReady().then(() => {
   startLocalServer().then((server) => {
     localServer = server
   })
+  getDatalogWindow({ ensureOpen: true })
 })
 
 app.on('window-all-closed', () => {
