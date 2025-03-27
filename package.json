@@ -18,7 +18,7 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:mac": "electron-vite build && electron-builder --mac --arm64 --publish never",
     "build:mac-intel": "electron-vite build && electron-builder --mac --x64 --publish never",
-    "build:mac-unsigned": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-vite build && electron-builder --mac -c.mac.identity=null --publish never"
+    "build:mac-unsigned": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-vite build && electron-builder --mac --arm64 -c.mac.identity=null --publish never"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",

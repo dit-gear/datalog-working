@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session, ipcMain } from 'electron'
+import { app, BrowserWindow, session, ipcMain, nativeImage, Menu } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/appIconlight.png?asset'
 import { loadState } from './core/app-state/loader'
@@ -7,7 +7,6 @@ import { closeAllWatchers } from './core/app-state/watchers/closing'
 import logger from './core/logger'
 import trayManager from './core/menu'
 import { startLocalServer } from './server/apiServer'
-import { getDatalogWindow } from './datalog/datalogWindow'
 
 let localServer: any
 
@@ -21,7 +20,7 @@ app.commandLine.appendSwitch('disable-features', 'OverlayScrollbar')
 app.whenReady().then(() => {
   session.defaultSession.clearCache()
   electronApp.setAppUserModelId('com.electron')
-  app.dock.setIcon(icon)
+  app.dock.setIcon(nativeImage.createFromPath(icon))
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
@@ -32,7 +31,7 @@ app.whenReady().then(() => {
   startLocalServer().then((server) => {
     localServer = server
   })
-  getDatalogWindow({ ensureOpen: true })
+  trayManager.createOrUpdateTray()
 })
 
 app.on('window-all-closed', () => {

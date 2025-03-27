@@ -39,11 +39,7 @@ export function createSendWindow(
     }
   })
 
-  sendWindowDataMap.set(sendWindow.webContents.id, {
-    window: sendWindow,
-    selectedEmail,
-    selection
-  })
+  sendWindowDataMap.set(sendWindow.webContents.id, { window: sendWindow, selectedEmail, selection })
 
   const windowId = sendWindow.webContents.id
 

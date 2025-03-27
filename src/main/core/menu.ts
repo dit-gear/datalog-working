@@ -1,4 +1,4 @@
-import { Menu, app, Tray } from 'electron'
+import { Menu, app, Tray, nativeImage } from 'electron'
 import { getDatalogWindow } from '../datalog/datalogWindow'
 import { ProjectRootType, ProjectInRootMenuItem } from '@shared/projectTypes'
 import { appState } from './app-state/state'
@@ -7,7 +7,7 @@ import { handleRootDirChange } from './app-state/updater'
 import { createEditorWindow } from '../editor/editorWindow'
 import { createSendWindow } from '../send/sendWindow'
 import { exportPdf } from './export/exportPdf'
-import trayIcon from '../../../resources/trayIcon.png?asset'
+import trayIcon from '../../../resources/tray.png?asset'
 import logger from './logger'
 import { createAboutWindow } from '../about/aboutWindow'
 
@@ -15,7 +15,24 @@ interface buildContextMenuProps {
   projects: ProjectInRootMenuItem[] | null
   activeProject: ProjectRootType | null
 }
-// pass active project!
+
+const baseMenu = (): Menu => {
+  return Menu.buildFromTemplate([
+    {
+      label: 'Datalog',
+      role: 'appMenu',
+      submenu: [
+        { label: 'About', click: () => createAboutWindow() },
+        { type: 'separator' },
+        { label: 'Hide', role: 'hide' },
+        { label: 'Hide Others', role: 'hideOthers' },
+        { type: 'separator' },
+        { label: 'Quit', role: 'quit' }
+      ]
+    }
+  ])
+}
+
 const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): Menu => {
   logger.debug('creating menu...')
 
@@ -51,11 +68,9 @@ const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): M
       label: 'Export',
       submenu: activeProject?.pdfs
         ?.filter((pdf) => pdf.enabled)
-        .map((pdf) => ({
-          id: pdf.id,
-          label: pdf.label,
-          click: () => exportPdf({ pdf })
-        })) || [{ label: 'No PDFs Available', enabled: false }],
+        .map((pdf) => ({ id: pdf.id, label: pdf.label, click: () => exportPdf({ pdf }) })) || [
+        { label: 'No PDFs Available', enabled: false }
+      ],
       enabled: Boolean(activeProject)
     },
     { type: 'separator' },
@@ -81,16 +96,17 @@ const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): M
               }))
             : [{ label: 'No Projects in folder', enabled: false }]
         },
-        {
-          label: 'New Project',
-          click: () => getDatalogWindow({ navigate: 'new-project' })
-        },
+        { label: 'New Project', click: () => getDatalogWindow({ navigate: 'new-project' }) },
         { type: 'separator' },
         { label: 'Change Root Folder', click: (): Promise<void> => handleRootDirChange() }
       ]
     },
 
-    { label: 'Code Editor', click: (): void => createEditorWindow() }, // Opens code editor window.
+    {
+      label: 'Code Editor',
+      click: (): void => createEditorWindow(),
+      enabled: Boolean(activeProject)
+    }, // Opens code editor window.
     {
       label: 'Project Settings',
       click: () => getDatalogWindow({ navigate: 'settings' }),
@@ -98,18 +114,10 @@ const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): M
     }, // Opens main window and open settings modal.
     { type: 'separator' },
     { label: 'Help', submenu: [{ label: 'Docs' } /*{ label: 'Discord' }*/] },
-    {
-      label: 'About',
-      click: () => createAboutWindow()
-    },
+    { label: 'About', click: () => createAboutWindow() },
     { type: 'separator' },
     /*{ label: 'Log in', enabled: false },*/
-    {
-      label: 'Quit',
-      click: (): void => {
-        app.quit()
-      }
-    }
+    { label: 'Quit', role: 'quit' }
   ])
 }
 
@@ -122,7 +130,10 @@ class TrayManager {
       activeProject: appState.activeProject
     })
     if (!this.tray) {
-      this.tray = new Tray(trayIcon) // Create the tray if it doesn't exist
+      Menu.setApplicationMenu(baseMenu())
+      const image = nativeImage.createFromPath(trayIcon)
+      image.setTemplateImage(true)
+      this.tray = new Tray(image) // Create the tray if it doesn't exist
       console.log('created new menu')
     }
     this.tray.setContextMenu(contextMenu) // Update the context menu
