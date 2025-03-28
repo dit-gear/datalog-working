@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session, ipcMain, nativeImage, Menu } from 'electron'
+import { app, BrowserWindow, session, ipcMain, nativeImage } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/appIconlight.png?asset'
 import { loadState } from './core/app-state/loader'
