@@ -19,7 +19,7 @@ const GeneralContent = ({ scope }: GeneralTabProps) => {
               <FormRow
                 name={field.name}
                 label="Project Name"
-                descriptionTag={['Required for Project', `Tag: <project_name>`]}
+                descriptionTag={['Required for Project', `Tag: <project>`]}
               >
                 <FormControl>
                   <Input {...field} className="max-w-80" />
@@ -32,7 +32,7 @@ const GeneralContent = ({ scope }: GeneralTabProps) => {
         <FormRow
           name={'global_projectName'}
           label="Project Name"
-          descriptionTag={['Required for Project', `Tag: <project_name>`]}
+          descriptionTag={['Required for Project', `Tag: <project>`]}
         >
           <FormControl>
             <Input className="max-w-80" placeholder="Not applicable within global scope" disabled />
