@@ -40,7 +40,7 @@ async function createProject(projectName: string): Promise<CreateNewProjectResul
     logger.warn(message)
     return {
       success: false,
-      message: message
+      error: message
     }
   }
 
@@ -55,9 +55,10 @@ async function createProject(projectName: string): Promise<CreateNewProjectResul
       success: true
     }
   } catch (error) {
-    logger.error('Failed to create new project')
-    dialog.showErrorBox('Error', 'Failed to create project')
-    return { success: false }
+    const msg = 'Failed to create new project'
+    logger.error(msg)
+    dialog.showErrorBox('Error', msg)
+    return { success: false, error: msg }
   }
 }
 

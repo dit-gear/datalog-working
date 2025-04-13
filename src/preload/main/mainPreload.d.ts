@@ -24,7 +24,7 @@ declare global {
       offProjectLoaded: (handler: (_, project: ProjectType) => void) => void
       updateProject: (project: ProjectToUpdate) => Promise<UpdateProjectResult>
       getFolderPath: () => Promise<ResponseWithString>
-      updateDatalog: (datalog: DatalogType, isNew: boolean) => Promise<Response>
+      updateDatalog: (datalog: DatalogType, oldDatalog?: DatalogType) => Promise<Response>
       deleteDatalog: (datalog: DatalogType) => Promise<Response>
       onDatalogsLoaded: (callback: (_, datalogs: DatalogType[]) => void) => void
       offDatalogsLoaded: (handler: (_, datalogs: DatalogType[]) => void) => void

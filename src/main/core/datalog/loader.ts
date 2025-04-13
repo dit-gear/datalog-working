@@ -1,4 +1,5 @@
 import fs from 'fs'
+import path from 'path'
 import YAML from 'yaml'
 import logger from '../logger'
 import { DatalogDynamicType } from '@shared/datalogTypes'
@@ -11,8 +12,10 @@ export const loadDatalog = async (filePath: string): Promise<DatalogDynamicType>
   if (!project) throw new Error('No active project found')
   try {
     const datalog = fs.readFileSync(filePath, 'utf8')
+    const { name } = path.parse(filePath)
     const yamlDatalog = YAML.parse(datalog)
-    const parsedDatalog = DatalogDynamicZod(project).parse(yamlDatalog) as DatalogDynamicType
+    const log = { id: name, ...yamlDatalog }
+    const parsedDatalog = DatalogDynamicZod(project).parse(log) as DatalogDynamicType
     return parsedDatalog
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred.'

@@ -21,8 +21,8 @@ const mainApi = {
   createNewProject: (projectName: string) => ipcRenderer.invoke('create-new-project', projectName),
   updateProject: (project) => ipcRenderer.invoke('update-project', project),
   getFolderPath: () => ipcRenderer.invoke('getFolderPath'),
-  updateDatalog: (datalog: DatalogType, isNew: boolean) =>
-    ipcRenderer.invoke('update-datalog', datalog, isNew),
+  updateDatalog: (datalog: DatalogType, oldDatalog?: DatalogType) =>
+    ipcRenderer.invoke('update-datalog', datalog, oldDatalog),
   deleteDatalog: (datalog: DatalogType) => ipcRenderer.invoke('delete-datalog', datalog),
 
   // load datalogs

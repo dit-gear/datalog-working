@@ -219,8 +219,11 @@ const buildCustomFieldsSchema = (project: ProjectRootType) => {
 }
 
 export const CustomFieldsZod = (project: ProjectRootType): z.ZodObject<any> => {
-  const zodSchema = Custom.extend(buildCustomFieldsSchema(project))
-  return zodSchema
+  return z
+    .object({
+      clip: z.string()
+    })
+    .extend(buildCustomFieldsSchema(project))
 }
 
 export const DatalogDynamicZod = (project: ProjectRootType) => {

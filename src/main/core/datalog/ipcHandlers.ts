@@ -114,8 +114,8 @@ export function setupDatalogIpcHandlers(): void {
 
   ipcMain.handle(
     'update-datalog',
-    async (_, datalog: DatalogType, isNew: boolean): Promise<Response> => {
-      return await updateDatalog(datalog, isNew)
+    async (_, datalog: DatalogType, oldDatalog: DatalogType): Promise<Response> => {
+      return await updateDatalog(datalog, oldDatalog)
     }
   )
 

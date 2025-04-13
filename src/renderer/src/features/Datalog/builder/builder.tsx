@@ -82,11 +82,11 @@ const Builder = ({ project, previousEntries, selected }: BuilderdialogProps) => 
 
   const onSubmit: SubmitHandler<datalogFormType> = async (data): Promise<void> => {
     const cleanedData = removeEmptyFields(data) as DatalogType
-    const isNew = !selected
+    const oldDatalog = selected
     try {
-      const res = await window.mainApi.updateDatalog(cleanedData, isNew)
+      const res = await window.mainApi.updateDatalog(cleanedData, oldDatalog)
       if (res.success) {
-        toast({ title: `${data.id} has been ${isNew ? 'saved' : 'updated'}` })
+        toast({ title: `${data.id} has been ${oldDatalog ? 'saved' : 'updated'}` })
         reset()
         navigate('/')
       } else if (res.cancelled) {

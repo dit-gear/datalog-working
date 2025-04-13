@@ -375,6 +375,6 @@ export type UpdateProjectResult = {
 
 export type CreateNewProjectResult = {
   success: boolean
-  message?: string
+  error?: string
   project?: ProjectType
 }
