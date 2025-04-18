@@ -357,7 +357,7 @@ export type ProjectType = {
 }
 
 export type ProjectInRootMenuItem = {
-  project: string
+  label: string
   path: string
   active: boolean
 }
@@ -369,7 +369,7 @@ export type ProjectToUpdate = {
 
 export type UpdateProjectResult = {
   success: boolean
-  message?: string
+  error?: string
   project?: ProjectType
 }
 

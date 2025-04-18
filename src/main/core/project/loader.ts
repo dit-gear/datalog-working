@@ -169,7 +169,7 @@ export const loadProjectsInRootPath = async (): Promise<void> => {
   const projects = yamlFiles.map((filePath): ProjectInRootMenuItem => {
     const folderPath = path.dirname(filePath)
     return {
-      project: path.basename(folderPath), // Folder name
+      label: path.basename(folderPath), // Folder name
       path: folderPath, // Full path to the folder
       active: projectPath ? projectPath === folderPath : false
     }

@@ -94,7 +94,7 @@ export const updateProject = async ({
       }
     }
     const projectYaml = YAML.stringify(update_settings.project)
-    const globalYaml = YAML.stringify(update_settings.global)
+    const globalYaml = update_settings.global ? YAML.stringify(update_settings.global) : null
 
     const newprojectname = update_settings.project.project_name
     const oldprojectname = getFileName(appState.activeProjectPath)
@@ -107,7 +107,9 @@ export const updateProject = async ({
     savingInProgress = true
     try {
       fs.writeFileSync(projectSettingsPath, projectYaml, 'utf8')
-      fs.writeFileSync(globalSettingsPath, globalYaml, 'utf8')
+      if (globalYaml) {
+        fs.writeFileSync(globalSettingsPath, globalYaml, 'utf8')
+      }
       const result = await loadProject(appState.activeProjectPath)
       savingInProgress = false
       if (result.success) {
@@ -120,12 +122,12 @@ export const updateProject = async ({
           }
         }
       } else {
-        return { success: false, message: 'something went wrong' }
+        return { success: false, error: 'something went wrong' }
       }
     } finally {
       savingInProgress = false
     }
   } catch (error) {
-    return { success: false, message: 'something went wrong' }
+    return { success: false, error: 'something went wrong' }
   }
 }

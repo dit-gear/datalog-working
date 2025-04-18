@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express'
+import express, { Request, Response, RequestHandler } from 'express'
 import { dialog, app } from 'electron'
 import net from 'net'
 import { randomUUID } from 'crypto'
@@ -12,6 +12,8 @@ import updateDatalog from '../core/datalog/updater'
 import deleteDatalog from '../core/datalog/delete'
 import { emailType, pdfType, ProjectSchemaZod } from '@shared/projectTypes'
 import { createNewProject } from '../core/project/creator'
+import { handleChangeProject } from '../core/project/manager'
+import { updateProject } from '../core/project/updater'
 
 // In-memory storage for approved apps (e.g. keyed by api name)
 const approvedApps = new Set<string>()
@@ -28,6 +30,10 @@ const sendSchema = z.object({
 const pdfSchema = z.object({
   pdfId: z.string().nonempty(),
   datalogId: z.string().nonempty().or(z.array(z.string()))
+})
+
+const loadProjectSchema = z.object({
+  path: z.string().min(1, 'Project path is required')
 })
 
 // Finds an available port starting from a given port.
@@ -55,13 +61,19 @@ const getSelectedDatalogs = (
   if (typeof selection === 'string') {
     return datalogs().get(`${appState.activeProjectPath}/logs/${selection}.datalog`)
   } else if (Array.isArray(selection)) {
-    const res = selection.map((id) =>
-      datalogs().get(`${appState.activeProjectPath}/logs/${id}.datalog`)
-    )
-    res.length ? res : undefined
+    const items = selection
+      .map((id) => datalogs().get(`${appState.activeProjectPath}/logs/${id}.datalog`))
+      .filter((d): d is DatalogType => d !== undefined)
+    return items.length === selection.length ? items : undefined
   }
   return undefined
 }
+
+const asyncHandler =
+  (fn: RequestHandler): RequestHandler =>
+  (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next)
+  }
 
 // Starts the local server on an available port.
 export async function startLocalServer() {
@@ -138,16 +150,40 @@ export async function startLocalServer() {
     if (!result.success) {
       return res.status(400).json({ error: result.error })
     }
-    const data = result.project?.data
-    return res.status(200).json({ data })
+    let project = {}
+    if (result.project?.data) {
+      const { settings, templatesDir, ...projectData } = result.project.data
+      project = projectData
+    }
+    return res.status(200).json(project)
   })
 
   // Load Project
-  api.post('/project/load/:id', (_req: Request, _res: Response) => {})
+  api.post('/project/load', async (req: Request, res: Response) => {
+    const parseResult = loadProjectSchema.safeParse(req.body)
+    if (!parseResult.success) {
+      return res.status(400).json({ error: parseResult.error.errors })
+    }
+
+    const { path } = parseResult.data
+
+    const projectExists = appState.projectsInRootPath?.some((p) => p.path === path)
+    if (!projectExists) {
+      return res.status(404).json({ error: 'Project path not found' })
+    }
+
+    try {
+      await handleChangeProject(path)
+      return res.status(200).json({ success: true })
+    } catch (error) {
+      logger.error('Error loading project:', error)
+      return res.status(500).json({ error: 'Failed to load project' })
+    }
+  })
 
   // List Projects
   api.get('/projects', (_req: Request, res: Response) =>
-    res.json(appState.projectsInRootPath ?? {})
+    res.json(appState.projectsInRootPath ?? [])
   )
 
   // Get Project Settings
@@ -159,7 +195,25 @@ export async function startLocalServer() {
   })
 
   // Update Project Settings
-  api.patch('/project/config', (_req: Request, _res: Response) => {})
+  api.patch('/project/config', async (req: Request, res: Response) => {
+    const parseResult = ProjectSchemaZod.safeParse(req.body)
+    if (!parseResult.success) {
+      return res.status(400).json({ error: parseResult.error })
+    }
+    try {
+      const result = await updateProject({
+        update_settings: { project: parseResult.data },
+        update_email_api: null
+      })
+      if (!result.success) {
+        return res.status(400).json({ error: result.error })
+      }
+      return res.status(200).json({ success: true })
+    } catch (error) {
+      logger.error('Error updating project settings:', error)
+      return res.status(500).json({ error: 'Failed to update project settings' })
+    }
+  })
 
   // Get datalogs
   api.get('/datalogs', (_req: Request, res: Response) =>
@@ -233,7 +287,7 @@ export async function startLocalServer() {
 
     const updateResponse = await updateDatalog(updatedLog, existing)
     if (!updateResponse.success) {
-      return res.status(400).json({ error: res.error })
+      return res.status(400).json({ error: updateResponse.error })
     }
     return res.status(200).json({ success: true, data: updatedLog })
   })
@@ -298,32 +352,52 @@ export async function startLocalServer() {
   })
 
   // Send Email
-  api.post('/send-email', (req: Request, res: Response) => {
-    const parseResult = sendSchema.safeParse(req.body)
-    if (!parseResult.success) {
-      return res.status(400).json({ error: parseResult.error.errors })
-    }
-    const { emailId, datalogId } = parseResult.data
-    const email = appState.activeProject?.emails?.find((email) => email.id === emailId)
-    const selection = getSelectedDatalogs(datalogId)
-    createSendWindow(email ?? null, selection)
-    return res.status(200).json({ success: true })
-  })
+  api.post(
+    '/send-email',
+    asyncHandler(async (req: Request, res: Response) => {
+      const parseResult = sendSchema.safeParse(req.body)
+      if (!parseResult.success) {
+        return res.status(400).json({ error: parseResult.error.errors })
+      }
+      const { emailId, datalogId } = parseResult.data
+      const email = appState.activeProject?.emails?.find((email) => email.id === emailId)
+      const selection = getSelectedDatalogs(datalogId)
+      try {
+        createSendWindow(email ?? null, selection)
+        return res.status(200).json({ success: true })
+      } catch (error) {
+        logger.error('Error sending email:', error)
+        return res.status(500).json({ error: 'Failed to open send window' })
+      }
+    })
+  )
 
   // Generate PDF
-  api.post('/generate-pdf', (req: Request, res: Response) => {
-    const parseResult = pdfSchema.safeParse(req.body)
-    if (!parseResult.success) {
-      return res.status(400).json({ error: parseResult.error.errors })
-    }
-    const { pdfId, datalogId } = parseResult.data
-    const pdf = appState.activeProject?.pdfs?.find((pdf) => pdf.id === pdfId)
-    if (!pdf) return res.status(404).json('Could not find matching pdf id')
-    const selection = getSelectedDatalogs(datalogId)
-    if (!selection) return res.status(404).json('Could not find datalogs from IDs')
-    exportPdf({ pdf, selection })
-    return res.status(200).json({ success: true })
-  })
+  api.post(
+    '/generate-pdf',
+    asyncHandler(async (req: Request, res: Response) => {
+      const parseResult = pdfSchema.safeParse(req.body)
+      if (!parseResult.success) {
+        return res.status(400).json({ error: parseResult.error.errors })
+      }
+      const { pdfId, datalogId } = parseResult.data
+      const pdf = appState.activeProject?.pdfs?.find((pdf) => pdf.id === pdfId)
+      if (!pdf) {
+        return res.status(404).json({ error: 'Could not find matching pdf id' })
+      }
+      const selection = getSelectedDatalogs(datalogId)
+      if (!selection) {
+        return res.status(404).json({ error: 'Could not find datalogs from IDs' })
+      }
+      try {
+        await exportPdf({ pdf, selection })
+        return res.status(200).json({ success: true })
+      } catch (error) {
+        logger.error('Error generating PDF:', error)
+        return res.status(500).json({ error: 'Failed to generate PDF' })
+      }
+    })
+  )
 
   // Start the server.
   const server = api.listen(port, () => {

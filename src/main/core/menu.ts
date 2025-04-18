@@ -90,7 +90,7 @@ const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): M
           submenu: projects
             ? projects.map((project) => ({
                 id: project.path,
-                label: project.project,
+                label: project.label,
                 enabled: !project.active,
                 click: (): Promise<void> => handleChangeProject(project.path)
               }))
