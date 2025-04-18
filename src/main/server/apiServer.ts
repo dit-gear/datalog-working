@@ -20,15 +20,17 @@ const approvedApps = new Set<string>()
 
 // API Version
 const API_Ver = '0.1.0'
+// Start Port
+const startingPort = 5252
 
 const authSchema = z.object({ appName: z.string().min(1, { message: 'appName is required' }) })
 const idSchema = z.object({ id: z.string().min(1, { message: 'id is required' }) })
 const sendSchema = z.object({
-  emailId: z.string().nonempty().optional(),
+  presetId: z.string().nonempty().optional(),
   datalogId: z.string().nonempty().or(z.array(z.string()))
 })
 const pdfSchema = z.object({
-  pdfId: z.string().nonempty(),
+  presetId: z.string().nonempty(),
   datalogId: z.string().nonempty().or(z.array(z.string()))
 })
 
@@ -37,9 +39,9 @@ const loadProjectSchema = z.object({
 })
 
 // Finds an available port starting from a given port.
-async function findAvailablePort(start: number): Promise<number> {
+async function findAvailablePort(start: number, maxPort = 65535): Promise<number> {
   let port = start
-  while (true) {
+  while (port <= maxPort) {
     const available = await new Promise<boolean>((resolve) => {
       const tester = net
         .createServer()
@@ -53,6 +55,7 @@ async function findAvailablePort(start: number): Promise<number> {
     if (available) return port
     port++
   }
+  throw new Error(`No available ports between ${start} and ${maxPort}`)
 }
 
 const getSelectedDatalogs = (
@@ -77,7 +80,6 @@ const asyncHandler =
 
 // Starts the local server on an available port.
 export async function startLocalServer() {
-  const startingPort = 5252
   const port = await findAvailablePort(startingPort)
   const api = express()
 
@@ -88,15 +90,15 @@ export async function startLocalServer() {
     if (req.path === '/auth') {
       return next()
     }
-    /*const token = req.headers['x-api-token'] as string
+    const token = req.headers['x-api-token'] as string
     if (!token || !approvedApps.has(token)) {
       return res.status(401).json({ error: 'Unauthorized' })
-    }*/
+    }
     next()
   })
 
-  // Auth endpoint to approve an api and generate a session token
-  api.post('/auth', (req: Request, res: Response) => {
+  // Authenticate
+  api.post('/auth', async (req: Request, res: Response) => {
     const parseResult = authSchema.safeParse(req.body)
     if (!parseResult.success) {
       return res.status(400).json({ error: parseResult.error.errors })
@@ -105,13 +107,13 @@ export async function startLocalServer() {
     if (!appName) {
       return res.status(400).json({ error: 'Missing appName' })
     }
-    const approved = dialog.showMessageBoxSync({
+    const { response } = await dialog.showMessageBox({
       type: 'question',
       buttons: ['Approve', 'Deny'],
       title: 'New api Connection',
       message: `Allow ${appName} to access the API?`
     })
-    if (approved !== 0) {
+    if (response !== 0) {
       return res.status(403).json({ error: 'access not approved' })
     }
     const token = randomUUID()
@@ -126,12 +128,12 @@ export async function startLocalServer() {
     res.status(200).json({ status: 'ok', port, active: true })
   )
 
-  // Get App Version
+  // Get Version
   api.get('/version', (_req: Request, res: Response) =>
     res.status(200).json({ version: { app: app.getVersion(), api: API_Ver } })
   )
 
-  // Get project
+  // Get Project
   api.get('/project', (_req: Request, res: Response) => {
     if (!appState.activeProject) {
       return res.status(404).json({ error: 'No project loaded' })
@@ -140,7 +142,7 @@ export async function startLocalServer() {
     return res.status(200).json(projectData)
   })
 
-  // Add new project
+  // Create Project
   api.post('/project/create', async (req: Request, res: Response) => {
     const parseResult = ProjectSchemaZod.pick({ project_name: true }).safeParse(req.body)
     if (!parseResult.success) {
@@ -196,26 +198,31 @@ export async function startLocalServer() {
 
   // Update Project Settings
   api.patch('/project/config', async (req: Request, res: Response) => {
-    const parseResult = ProjectSchemaZod.safeParse(req.body)
+    const parseResult = ProjectSchemaZod.partial().safeParse(req.body)
     if (!parseResult.success) {
       return res.status(400).json({ error: parseResult.error })
     }
+    const project = appState.activeProject
+    if (!project) {
+      return res.status(404).json({ error: 'No project loaded' })
+    }
+    const updatedProject = { ...project.settings.project, ...parseResult.data }
     try {
       const result = await updateProject({
-        update_settings: { project: parseResult.data },
+        update_settings: { project: updatedProject },
         update_email_api: null
       })
       if (!result.success) {
         return res.status(400).json({ error: result.error })
       }
-      return res.status(200).json({ success: true })
+      return res.status(200).json({ success: true, data: result.project?.data?.settings.project })
     } catch (error) {
       logger.error('Error updating project settings:', error)
       return res.status(500).json({ error: 'Failed to update project settings' })
     }
   })
 
-  // Get datalogs
+  // List Datalogs
   api.get('/datalogs', (_req: Request, res: Response) =>
     res.json({ datalogs: [...datalogs().values()] })
   )
@@ -226,7 +233,7 @@ export async function startLocalServer() {
     if (!project) {
       return res.status(404).json({ error: 'No project loaded' })
     }
-    // Validate and parse body
+
     const parseResult = DatalogDynamicZod(project).safeParse(req.body)
     if (!parseResult.success) {
       return res.status(400).json({ error: parseResult.error.errors })
@@ -252,7 +259,6 @@ export async function startLocalServer() {
     }
     const { id } = parseResult.data
     const datalog = datalogs().get(`${appState.activeProjectPath}/logs/${id}.datalog`)
-    console.log(id)
     if (!datalog) {
       return res.status(404).json({ error: 'Requested Datalog not found' })
     }
@@ -305,7 +311,6 @@ export async function startLocalServer() {
       return res.status(404).json({ error: 'No project loaded' })
     }
 
-    // Get existing datalog
     const path = `${appState.activeProjectPath}/logs/${id}.datalog`
     const datalog = datalogs().get(path)
     if (!datalog) {
@@ -319,7 +324,7 @@ export async function startLocalServer() {
     return res.status(200).json({ success: true })
   })
 
-  // Get Email Presets
+  // List Email Presets
   api.get('/email-presets', (req: Request, res: Response) => {
     const emails = appState.activeProject?.emails ?? []
     const { enabled } = req.query
@@ -335,7 +340,7 @@ export async function startLocalServer() {
     return res.json(filteredEmails)
   })
 
-  // Get PDF Presets
+  // List PDF Presets
   api.get('/pdf-presets', (req: Request, res: Response) => {
     const pdfs = appState.activeProject?.pdfs ?? []
     const { enabled } = req.query
@@ -353,14 +358,14 @@ export async function startLocalServer() {
 
   // Send Email
   api.post(
-    '/send-email',
+    '/open-email-window',
     asyncHandler(async (req: Request, res: Response) => {
       const parseResult = sendSchema.safeParse(req.body)
       if (!parseResult.success) {
         return res.status(400).json({ error: parseResult.error.errors })
       }
-      const { emailId, datalogId } = parseResult.data
-      const email = appState.activeProject?.emails?.find((email) => email.id === emailId)
+      const { presetId, datalogId } = parseResult.data
+      const email = appState.activeProject?.emails?.find((email) => email.id === presetId)
       const selection = getSelectedDatalogs(datalogId)
       try {
         createSendWindow(email ?? null, selection)
@@ -380,8 +385,8 @@ export async function startLocalServer() {
       if (!parseResult.success) {
         return res.status(400).json({ error: parseResult.error.errors })
       }
-      const { pdfId, datalogId } = parseResult.data
-      const pdf = appState.activeProject?.pdfs?.find((pdf) => pdf.id === pdfId)
+      const { presetId, datalogId } = parseResult.data
+      const pdf = appState.activeProject?.pdfs?.find((pdf) => pdf.id === presetId)
       if (!pdf) {
         return res.status(404).json({ error: 'Could not find matching pdf id' })
       }
@@ -390,8 +395,11 @@ export async function startLocalServer() {
         return res.status(404).json({ error: 'Could not find datalogs from IDs' })
       }
       try {
-        await exportPdf({ pdf, selection })
-        return res.status(200).json({ success: true })
+        const rendered = await exportPdf({ pdf, selection })
+        if (!rendered?.success) {
+          return res.status(500).json({ error: rendered?.error })
+        }
+        return res.status(200).json({ success: true, data: rendered.data })
       } catch (error) {
         logger.error('Error generating PDF:', error)
         return res.status(500).json({ error: 'Failed to generate PDF' })

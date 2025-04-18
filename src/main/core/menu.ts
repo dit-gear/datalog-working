@@ -68,9 +68,11 @@ const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): M
       label: 'Export',
       submenu: activeProject?.pdfs
         ?.filter((pdf) => pdf.enabled)
-        .map((pdf) => ({ id: pdf.id, label: pdf.label, click: () => exportPdf({ pdf }) })) || [
-        { label: 'No PDFs Available', enabled: false }
-      ],
+        .map((pdf) => ({
+          id: pdf.id,
+          label: pdf.label,
+          click: () => exportPdf({ pdf, hasDialog: true })
+        })) || [{ label: 'No PDFs Available', enabled: false }],
       enabled: Boolean(activeProject)
     },
     { type: 'separator' },

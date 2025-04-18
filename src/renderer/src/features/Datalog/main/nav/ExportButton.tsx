@@ -30,7 +30,6 @@ const ExportButton = () => {
 
   const handleSubmit = async (): Promise<void> => {
     if (selectedPreset) {
-      console.log('clicked')
       window.mainApi.exportPdf(selectedPreset, selection)
       setOpen(false)
     }
