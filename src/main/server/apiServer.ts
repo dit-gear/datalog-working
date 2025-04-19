@@ -3,7 +3,7 @@ import { dialog, app } from 'electron'
 import net from 'net'
 import { randomUUID } from 'crypto'
 import { datalogs, appState } from '../core/app-state/state'
-import z from 'zod'
+import z, { boolean } from 'zod'
 import { createSendWindow } from '../send/sendWindow'
 import { DatalogType, DatalogDynamicZod } from '@shared/datalogTypes'
 import { exportPdf } from '../core/export/exportPdf'
@@ -28,6 +28,9 @@ const idSchema = z.object({ id: z.string().min(1, { message: 'id is required' })
 const sendSchema = z.object({
   presetId: z.string().nonempty().optional(),
   datalogId: z.string().nonempty().or(z.array(z.string()))
+})
+const filteredEnabledSchema = z.object({
+  enabled: z.coerce.boolean().optional()
 })
 const pdfSchema = z.object({
   presetId: z.string().nonempty(),
@@ -71,6 +74,15 @@ const getSelectedDatalogs = (
   }
   return undefined
 }
+const formatErrors = (error) => {
+  return {
+    error: 'Validation Error',
+    details: error.errors.map((err) => ({
+      prop: err.path.join('.'),
+      message: err.message
+    }))
+  }
+}
 
 const asyncHandler =
   (fn: RequestHandler): RequestHandler =>
@@ -101,12 +113,9 @@ export async function startLocalServer() {
   api.post('/auth', async (req: Request, res: Response) => {
     const parseResult = authSchema.safeParse(req.body)
     if (!parseResult.success) {
-      return res.status(400).json({ error: parseResult.error.errors })
+      return res.status(400).json(formatErrors(parseResult.error))
     }
-    const { appName } = req.body
-    if (!appName) {
-      return res.status(400).json({ error: 'Missing appName' })
-    }
+    const { appName } = parseResult.data
     const { response } = await dialog.showMessageBox({
       type: 'question',
       buttons: ['Approve', 'Deny'],
@@ -146,25 +155,25 @@ export async function startLocalServer() {
   api.post('/project/create', async (req: Request, res: Response) => {
     const parseResult = ProjectSchemaZod.pick({ project_name: true }).safeParse(req.body)
     if (!parseResult.success) {
-      return res.status(400).json({ error: parseResult.error.errors })
+      return res.status(400).json(formatErrors(parseResult.error))
     }
     const result = await createNewProject(parseResult.data.project_name)
     if (!result.success) {
-      return res.status(400).json({ error: result.error })
+      return res.status(500).json({ error: 'Error creating project', details: result.error })
     }
     let project = {}
     if (result.project?.data) {
       const { settings, templatesDir, ...projectData } = result.project.data
       project = projectData
     }
-    return res.status(200).json(project)
+    return res.status(201).json(project)
   })
 
   // Load Project
   api.post('/project/load', async (req: Request, res: Response) => {
     const parseResult = loadProjectSchema.safeParse(req.body)
     if (!parseResult.success) {
-      return res.status(400).json({ error: parseResult.error.errors })
+      return res.status(400).json(formatErrors(parseResult.error))
     }
 
     const { path } = parseResult.data
@@ -200,7 +209,7 @@ export async function startLocalServer() {
   api.patch('/project/config', async (req: Request, res: Response) => {
     const parseResult = ProjectSchemaZod.partial().safeParse(req.body)
     if (!parseResult.success) {
-      return res.status(400).json({ error: parseResult.error })
+      return res.status(400).json(formatErrors(parseResult.error))
     }
     const project = appState.activeProject
     if (!project) {
@@ -213,7 +222,9 @@ export async function startLocalServer() {
         update_email_api: null
       })
       if (!result.success) {
-        return res.status(400).json({ error: result.error })
+        return res
+          .status(500)
+          .json({ error: 'Error updating project settings', details: result.error })
       }
       return res.status(200).json({ success: true, data: result.project?.data?.settings.project })
     } catch (error) {
@@ -255,7 +266,7 @@ export async function startLocalServer() {
   api.get('/datalog/:id', (req: Request, res: Response) => {
     const parseResult = idSchema.safeParse(req.params)
     if (!parseResult.success) {
-      return res.status(400).json({ error: parseResult.error.errors })
+      return res.status(400).json(formatErrors(parseResult.error))
     }
     const { id } = parseResult.data
     const datalog = datalogs().get(`${appState.activeProjectPath}/logs/${id}.datalog`)
@@ -269,7 +280,7 @@ export async function startLocalServer() {
   api.patch('/datalog/:id', async (req: Request, res: Response) => {
     const idParse = idSchema.safeParse({ id: req.params.id })
     if (!idParse.success) {
-      return res.status(400).json({ error: idParse.error.errors })
+      return res.status(400).json(formatErrors(idParse.error))
     }
     const id = idParse.data.id
 
@@ -286,14 +297,14 @@ export async function startLocalServer() {
 
     const parseResult = DatalogDynamicZod(project).partial().safeParse(req.body)
     if (!parseResult.success) {
-      return res.status(400).json({ error: parseResult.error.errors })
+      return res.status(400).json(formatErrors(parseResult.error))
     }
 
     const updatedLog = { ...existing, ...parseResult.data } as DatalogType
 
     const updateResponse = await updateDatalog(updatedLog, existing)
     if (!updateResponse.success) {
-      return res.status(400).json({ error: updateResponse.error })
+      return res.status(500).json({ error: updateResponse.error })
     }
     return res.status(200).json({ success: true, data: updatedLog })
   })
@@ -302,7 +313,7 @@ export async function startLocalServer() {
   api.delete('/datalog/:id', async (req: Request, res: Response) => {
     const idParse = idSchema.safeParse({ id: req.params.id })
     if (!idParse.success) {
-      return res.status(400).json({ error: idParse.error.errors })
+      return res.status(400).json(formatErrors(idParse.error))
     }
     const id = idParse.data.id
 
@@ -327,33 +338,34 @@ export async function startLocalServer() {
   // List Email Presets
   api.get('/email-presets', (req: Request, res: Response) => {
     const emails = appState.activeProject?.emails ?? []
-    const { enabled } = req.query
-
-    let filteredEmails = emails
-
-    if (enabled === 'true') {
-      filteredEmails = emails.filter((email: emailType) => email.enabled)
-    } else if (enabled === 'false') {
-      filteredEmails = emails.filter((email: emailType) => !email.enabled)
+    const parseResult = filteredEnabledSchema.safeParse(req.query)
+    if (!parseResult.success) {
+      return res.status(400).json(formatErrors(parseResult.error))
     }
+    const { enabled } = parseResult.data
 
-    return res.json(filteredEmails)
+    const filtered =
+      typeof enabled === 'boolean'
+        ? emails.filter((email: emailType) => email.enabled === enabled)
+        : emails
+
+    return res.json(filtered)
   })
 
   // List PDF Presets
   api.get('/pdf-presets', (req: Request, res: Response) => {
     const pdfs = appState.activeProject?.pdfs ?? []
-    const { enabled } = req.query
 
-    let filteredPdfs = pdfs
-
-    if (enabled === 'true') {
-      filteredPdfs = pdfs.filter((pdf: pdfType) => pdf.enabled)
-    } else if (enabled === 'false') {
-      filteredPdfs = pdfs.filter((pdf: pdfType) => !pdf.enabled)
+    const parseResult = filteredEnabledSchema.safeParse(req.query)
+    if (!parseResult.success) {
+      return res.status(400).json(formatErrors(parseResult.error))
     }
+    const { enabled } = parseResult.data
 
-    return res.json(filteredPdfs)
+    const filtered =
+      typeof enabled === 'boolean' ? pdfs.filter((pdf: pdfType) => pdf.enabled === enabled) : pdfs
+
+    return res.json(filtered)
   })
 
   // Send Email
@@ -397,7 +409,7 @@ export async function startLocalServer() {
       try {
         const rendered = await exportPdf({ pdf, selection })
         if (!rendered?.success) {
-          return res.status(500).json({ error: rendered?.error })
+          return res.status(500).json({ error: 'Failed to generate PDF' })
         }
         return res.status(200).json({ success: true, data: rendered.data })
       } catch (error) {
