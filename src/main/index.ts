@@ -6,9 +6,7 @@ import { setupIpcHandlers } from './setupIpcHandlers'
 import { closeAllWatchers } from './core/app-state/watchers/closing'
 import logger from './core/logger'
 import trayManager from './core/menu'
-import { startLocalServer } from './server/apiServer'
-
-let localServer: any
+import { startLocalServer, stopLocalServer } from './server/apiServer'
 
 // Initialize the application
 app.setName('Datalog')
@@ -28,9 +26,7 @@ app.whenReady().then(() => {
 
   setupIpcHandlers()
   loadState()
-  startLocalServer().then((server) => {
-    localServer = server
-  })
+  startLocalServer()
   trayManager.createOrUpdateTray()
 })
 
@@ -62,10 +58,11 @@ app.on('will-quit', async (event) => {
     BrowserWindow.getAllWindows().forEach((win) => win.destroy())
     trayManager.destroyTray()
 
-    if (localServer) {
-      localServer.close(() => {
-        logger.debug('Local server closed.')
-      })
+    try {
+      await stopLocalServer()
+      logger.debug('Local server closed.')
+    } catch (err) {
+      console.error('Error closing API server:', err)
     }
 
     await closeAllWatchers()

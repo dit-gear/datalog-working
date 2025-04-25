@@ -3,7 +3,7 @@ import { dialog, app } from 'electron'
 import net from 'net'
 import { randomUUID } from 'crypto'
 import { datalogs, appState } from '../core/app-state/state'
-import z, { boolean } from 'zod'
+import z from 'zod'
 import { createSendWindow } from '../send/sendWindow'
 import { DatalogType, DatalogDynamicZod } from '@shared/datalogTypes'
 import { exportPdf } from '../core/export/exportPdf'
@@ -17,6 +17,8 @@ import { updateProject } from '../core/project/updater'
 
 // In-memory storage for approved apps (e.g. keyed by api name)
 const approvedApps = new Set<string>()
+
+let apiServer: import('http').Server | null = null
 
 // API Version
 const API_Ver = '0.1.0'
@@ -90,7 +92,9 @@ const asyncHandler =
     Promise.resolve(fn(req, res, next)).catch(next)
   }
 
-// Starts the local server on an available port.
+/**
+ * Starts the local server on an available port.
+ */
 export async function startLocalServer() {
   const port = await findAvailablePort(startingPort)
   const api = express()
@@ -111,6 +115,9 @@ export async function startLocalServer() {
 
   // Authenticate
   api.post('/auth', async (req: Request, res: Response) => {
+    req.setTimeout(60000, () => {
+      res.status(408).json({ error: 'Authentication request timed out' })
+    })
     const parseResult = authSchema.safeParse(req.body)
     if (!parseResult.success) {
       return res.status(400).json(formatErrors(parseResult.error))
@@ -134,7 +141,7 @@ export async function startLocalServer() {
 
   // Ping server
   api.get('/ping', (_req: Request, res: Response) =>
-    res.status(200).json({ status: 'ok', port, active: true })
+    res.status(200).json({ status: 'ok', active: true })
   )
 
   // Get Version
@@ -344,10 +351,16 @@ export async function startLocalServer() {
     }
     const { enabled } = parseResult.data
 
-    const filtered =
+    const filteredEmails =
       typeof enabled === 'boolean'
         ? emails.filter((email: emailType) => email.enabled === enabled)
         : emails
+
+    const filtered = filteredEmails.map(({ id, label, enabled }) => ({
+      id,
+      label,
+      enabled
+    }))
 
     return res.json(filtered)
   })
@@ -362,8 +375,10 @@ export async function startLocalServer() {
     }
     const { enabled } = parseResult.data
 
-    const filtered =
+    const filteredPdfs =
       typeof enabled === 'boolean' ? pdfs.filter((pdf: pdfType) => pdf.enabled === enabled) : pdfs
+
+    const filtered = filteredPdfs.map(({ id, label, enabled }) => ({ id, label, enabled }))
 
     return res.json(filtered)
   })
@@ -419,10 +434,32 @@ export async function startLocalServer() {
     })
   )
 
-  // Start the server.
-  const server = api.listen(port, () => {
-    logger.info(`API-Server running at http://localhost:${port}`)
+  // Start listening on Unix socket or named pipe
+  apiServer = api.listen(port, () => {
+    logger.info(`API-Server listening on ${port}`)
   })
 
-  return server
+  return apiServer!
+}
+
+/**
+ * Stops the local API server if it's running.
+ */
+export function stopLocalServer(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!apiServer) {
+      resolve()
+      return
+    }
+    apiServer.close((err) => {
+      if (err) {
+        console.error('Error closing API server:', err)
+        reject(err)
+      } else {
+        console.log('API server shut down cleanly.')
+        apiServer = null
+        resolve()
+      }
+    })
+  })
 }
