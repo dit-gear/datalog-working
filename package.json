@@ -1,6 +1,6 @@
 {
   "name": "datalog",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "description": "Reporting utility for media professionals",
   "author": "DIT Gear AB",
@@ -16,9 +16,12 @@
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
-    "build:mac": "electron-vite build && electron-builder --mac --arm64 --publish never",
+    "build:mac": "electron-vite build && electron-builder --mac --arm64 --x64 --publish never",
+    "build:mac-arm64": "electron-vite build && electron-builder --mac --arm64 --publish never",
     "build:mac-intel": "electron-vite build && electron-builder --mac --x64 --publish never",
-    "build:mac-unsigned": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-vite build && electron-builder --mac --arm64 -c.mac.identity=null --publish never"
+    "build:mac-arm64-unsigned": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-vite build && electron-builder --mac --arm64 -c.mac.identity=null --publish never",
+    "build:mac-intel-unsigned": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-vite build && electron-builder --mac --x64 -c.mac.identity=null --publish never",
+    "build:mac-unsigned": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-vite build && electron-builder --mac --arm64 --x64 -c.mac.identity=null --publish never"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",

@@ -1,7 +1,13 @@
 import { secondsToTimecode } from '@shared/utils/format-timecode'
 import ffmpeg from 'fluent-ffmpeg'
-import ffprobePath from '../../../../../resources/ffprobe?asset&asarUnpack'
+import { join } from 'path'
+//import ffprobePath from '../../../../../resources/ffprobe?asset&asarUnpack'
 import z from 'zod'
+
+const ffprobePath =
+  process.env.NODE_ENV === 'development'
+    ? join(__dirname, '../../../../../../resources/ffprobe/ffprobe.dat')
+    : join(process.resourcesPath, 'ffprobe.dat')
 
 type soundMetadataType = {
   tc_start?: string

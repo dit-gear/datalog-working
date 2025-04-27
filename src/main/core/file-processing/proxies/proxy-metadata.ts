@@ -1,5 +1,11 @@
 import ffmpeg from 'fluent-ffmpeg'
-import ffprobePath from '../../../../../resources/ffprobe?asset&asarUnpack'
+import { join } from 'path'
+//import ffprobePath from '../../../../../resources/ffprobe?asset&asarUnpack'
+
+const ffprobePath =
+  process.env.NODE_ENV === 'development'
+    ? join(__dirname, '../../../../../../resources/ffprobe/ffprobe.dat')
+    : join(process.resourcesPath, 'ffprobe.dat')
 
 type proxyMetadataType = {
   codec?: string

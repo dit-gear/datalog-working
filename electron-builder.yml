@@ -13,8 +13,6 @@ asarUnpack:
   - node_modules/fluent-ffmpeg
   - resources/**
 electronLanguages: en_US
-win:
-  executableName: datalog
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -28,15 +26,13 @@ mac:
     NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   gatekeeperAssess: false
-dmg:
-  artifactName: ${name}-${version}.${ext}
-linux:
   target:
-    - AppImage
-    - snap
-    - deb
-  maintainer: datalog.email
-  category: Utility
-appImage:
-  artifactName: ${name}-${version}.${ext}
+    - target: dmg
+      arch:
+        - arm64
+        - x64
+  artifactName: '${name}-${version}-mac-${arch}.${ext}'
+  extraResources:
+    - from: ffprobe/${arch}/ffprobe
+      to: ffprobe
 npmRebuild: false
