@@ -1,5 +1,5 @@
 import { emailType } from '@shared/projectTypes'
-import { DataObjectType } from '@shared/shared-types'
+import { DataObjectType } from '@shared/datalogClass'
 import fs from 'fs/promises'
 import { datalogs as datalogStore, sendWindowDataMap, appState } from '../app-state/state'
 import { getReactTemplate } from '@shared/utils/getReactTemplate'
@@ -35,7 +35,12 @@ export const renderEmail = async ({
   const selection =
     sendWindowDataMap.get(windowId)?.selection ?? getLatestDatalog(datalogs, project)
 
-  const dataObject: DataObjectType = { project, selection, all: datalogs }
+  const dataObject: DataObjectType = {
+    project,
+    message: email.message ?? '',
+    datalog_selection: selection,
+    datalog_all: datalogs
+  }
 
   const templatesDir = project?.templatesDir
   const emailWorker = createRenderWorker()
@@ -52,7 +57,6 @@ export const renderEmail = async ({
             id: email.id,
             code,
             type: emailpath.type,
-            message: email.message,
             dataObject
           }
           const renderedEmail = await emailWorker.render(req)
@@ -78,7 +82,6 @@ export const renderEmail = async ({
             id: att.id,
             code: codepdf,
             type: pdfpath.type,
-            message: email.message,
             dataObject
           }
           const renderedPdf = await pdfWorker.render(reqpdf)

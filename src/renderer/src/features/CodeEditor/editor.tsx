@@ -15,6 +15,7 @@ import { formatter } from '@renderer/utils/prettierFormatter'
 import { getLatestDatalog, getLatestTwoDatalogs } from '@shared/utils/getLatestDatalog'
 import { mockDataType } from './newMockdataDialog'
 import useDebouncedCallback from '@renderer/utils/useDebouncedCallback'
+import { DataObjectType } from '@shared/datalogClass'
 
 //type Monaco = typeof monaco
 
@@ -150,18 +151,19 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
         if (!previewWorkerRef.current) throw new Error('Worker not initialized')
         if (!data) throw new Error('No project data available')
 
+        const dataObject: DataObjectType = {
+          project: data.project,
+          message: mockDataRef.current.message,
+          datalog_selection:
+            selectionRef.current === 'single'
+              ? getLatestDatalog(mockDataRef.current.datalogs, data.project)
+              : getLatestTwoDatalogs(mockDataRef.current.datalogs),
+          datalog_all: mockDataRef.current.datalogs
+        }
         const request = {
           code: model.getValue(),
           type: file.type,
-          message: mockDataRef.current.message,
-          dataObject: {
-            project: data.project,
-            selection:
-              selectionRef.current === 'single'
-                ? getLatestDatalog(mockDataRef.current.datalogs, data.project)
-                : getLatestTwoDatalogs(mockDataRef.current.datalogs),
-            all: mockDataRef.current.datalogs
-          }
+          dataObject
         }
         previewWorkerRef.current.postMessage(request)
       } catch (error) {

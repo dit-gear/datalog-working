@@ -1,9 +1,8 @@
-import { DataObjectType } from '@shared/shared-types'
+import { DataObjectType } from '@shared/datalogClass'
 
 export type WorkerRequest = {
   code: string
   type: 'email' | 'pdf'
-  message?: string
   dataObject: DataObjectType
   id: string
 }

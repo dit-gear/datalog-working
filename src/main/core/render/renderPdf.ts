@@ -1,6 +1,6 @@
 import { pdfType } from '@shared/projectTypes'
 import { DatalogType } from '@shared/datalogTypes'
-import { DataObjectType } from '@shared/shared-types'
+import { DataObjectType } from '@shared/datalogClass'
 import fs from 'fs/promises'
 import { datalogs as datalogStore, appState } from '../app-state/state'
 import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
@@ -20,7 +20,12 @@ export const renderPdf = async ({ pdf, selection }: renderPdfProps): Promise<str
   if (!datalogs) throw new Error('No datalogs')
   if (!selection) selection = getLatestDatalog(datalogs, project)
 
-  const dataObject: DataObjectType = { project, selection, all: datalogs }
+  const dataObject: DataObjectType = {
+    project,
+    message: '',
+    datalog_selection: selection,
+    datalog_all: datalogs
+  }
 
   const templatesDir = project?.templatesDir
   const pdfWorker = createRenderWorker()

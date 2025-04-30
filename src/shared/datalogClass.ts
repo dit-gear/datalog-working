@@ -5,7 +5,8 @@ import {
   OcfType,
   SoundType,
   ProxyType,
-  DatalogTypeMerged
+  DatalogTypeMerged,
+  DatalogDynamicType
 } from './datalogTypes'
 import { ProjectRootType } from './projectTypes'
 import { DurationType } from '@shared/shared-types'
@@ -310,69 +311,76 @@ export class Datalog {
   }
 }
 
+export type DataObjectType = {
+  project: ProjectRootType
+  message: string
+  datalog_selection: DatalogDynamicType | DatalogDynamicType[]
+  datalog_all: DatalogDynamicType[]
+}
+
 export class DataObject {
-  private project: ProjectRootType
-  private datalogOne: Datalog
-  private datalogMulti: Datalog[]
-  private all: Datalog[]
+  private _project: ProjectRootType
+  private _datalog: Datalog
+  private _datalogArray: Datalog[]
+  private _datalogs: Datalog[]
+  private _message: string
 
-  constructor(
-    project: ProjectRootType,
-    datalog_selection: DatalogType | DatalogType[],
-    datalog_all: DatalogType[]
-  ) {
-    const selection = datalog_selection
-    const all = datalog_all
+  constructor(data: DataObjectType) {
+    const { datalog_selection: selection, datalog_all: all } = data
 
-    if (!project) {
+    if (!data.project) {
       throw new Error('Project is required to initialize DataObject.')
     }
 
     if (!all || all.length === 0) {
-      throw new Error("The 'all' array must contain at least one DatalogType.")
+      throw new Error('The datalogs array must contain at least one DatalogType.')
     }
 
     if (!selection || (Array.isArray(selection) && selection.length === 0)) {
       throw new Error('The selection is empty')
     }
 
-    this.project = project
-    //this.selection = selection
-    this.all = all.map((data) => new Datalog(data))
+    this._project = data.project
+    this._datalogs = all.map((data) => new Datalog(data))
+    this._message = data.message
 
     if (Array.isArray(selection)) {
       // Merge the selected datalogs
       const mergedData = mergeDatalogs(selection)
-      this.datalogOne = new Datalog(mergedData)
-      this.datalogMulti = selection.map((data) => new Datalog(data))
+      this._datalog = new Datalog(mergedData)
+      this._datalogArray = selection.map((data) => new Datalog(data))
     } else {
-      this.datalogOne = new Datalog(selection)
-      this.datalogMulti = [new Datalog(selection)]
+      this._datalog = new Datalog(selection)
+      this._datalogArray = [new Datalog(selection)]
     }
   }
 
   // Getter for the project name
   public get projectName(): string {
-    return this.project.project_name
+    return this._project.project_name
   }
 
   public get customInfo(): Record<string, string>[] | undefined {
-    return this.project.custom_info
+    return this._project.custom_info
+  }
+
+  public get message(): string {
+    return this._message
   }
 
   // Getter for the selected datalog (merged if multiple)
   public get datalog(): Datalog {
-    return this.datalogOne
+    return this._datalog
   }
 
   // Getter for the selected datalogs array
   public get datalogArray(): Datalog[] {
-    return this.datalogMulti
+    return this._datalogArray
   }
 
   // Getter for all datalogs
   public get datalogs(): Datalog[] {
-    return this.all
+    return this._datalogs
   }
 
   private createCommonMethods(data, context: 'ocf' | 'proxy' | 'sound') {
@@ -390,7 +398,7 @@ export class DataObject {
   }
 
   public get total() {
-    const all = this.all
+    const all = this._datalogs
 
     const ocf = {
       ...this.createCommonMethods(all, 'ocf'),

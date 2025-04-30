@@ -64,12 +64,6 @@ export type InitialSendData = {
   datalogs: DatalogDynamicType[]
 }
 
-export type DataObjectType = {
-  project: ProjectRootType
-  selection: DatalogDynamicType | DatalogDynamicType[]
-  all: DatalogDynamicType[]
-}
-
 export interface DefaultPathsInput {
   ocf: string[] | null
   sound: string[] | null

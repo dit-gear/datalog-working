@@ -86,7 +86,44 @@ export const createDataDefinition = (project: ProjectRootType) => {
   clips: Clip[];
   // ...
 }
+declare module 'data' {
+  export const projectName: string;
+  export const customInfo: Record<string, string>[] | undefined;
+  export const message: string;
+  export const datalog: Datalog;
+  export const datalogArray: Datalog[];
+  export const datalogs: Datalog[];
+  export const total: {
+    days(): number;
+    ocf: {
+      files(): number;
+      size(): string;
+      sizeAsNumber(): number;
+      sizeAsTuple(): [number, string];
+      duration(): string;
+      durationTC(): string;
+      durationObject(): DurationType;
+    };
+    proxy: {
+      files(): number;
+      size(): string;
+      sizeAsNumber(): number;
+      sizeAsTuple(): [number, string];
+    };
+    sound: {
+      files(): number;
+      size(): string;
+      sizeAsNumber(): number;
+      sizeAsTuple(): [number, string];
+    };
+  };
 
+`
+
+  return combinedTypeDefs
+}
+
+/*
 declare global {
   interface Window {
     data: ProjectData;
@@ -94,7 +131,4 @@ declare global {
 }
 
 declare const data: ProjectData;
-`
-
-  return combinedTypeDefs
-}
+*/

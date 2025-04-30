@@ -7,7 +7,7 @@ import { WorkerRequest } from './types'
 import { removeImports } from '@shared/utils/removeImports'
 
 parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
-  const { code, type, message, dataObject, id } = event
+  const { code, type, dataObject, id } = event
   let components: Record<string, unknown> = {}
   let pdf
   let render
@@ -82,7 +82,9 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
     }
 
     // Create the data object.
-    const data = new DataObject(dataObject.project, dataObject.selection, dataObject.all)
+    const data = new DataObject(dataObject)
+
+    const { projectName, customInfo, message, datalog, datalogArray, datalogs, total } = data
 
     const codeWithoutImports = await removeImports(code)
 
@@ -104,8 +106,13 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
     const sandbox: Record<string, unknown> = {
       React,
       ...components,
-      data,
+      projectName,
+      customInfo,
       message,
+      datalog,
+      datalogArray,
+      datalogs,
+      total,
       // If PDF is needed, inject the preloaded pdf function.
       ...(pdf ? { pdf } : {}),
       // Provide a minimal console.

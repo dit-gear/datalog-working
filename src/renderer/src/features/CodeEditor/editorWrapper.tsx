@@ -29,7 +29,7 @@ const EditorWrapper = () => {
   const { initialData, generatedDatalogs } = useInitialData()
 
   const [mockdata, setMockdata] = useState<mockDataType>({
-    message: 'Hello world!',
+    message: 'Message Placeholder',
     source: initialData.loadedDatalogs.length ? 'logs' : 'generated',
     datalogs: initialData.loadedDatalogs.length ? initialData.loadedDatalogs : generatedDatalogs
   })

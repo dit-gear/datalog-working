@@ -18,6 +18,7 @@ import { Button } from '@components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group'
 import { useInitialData } from './dataContext'
 import { EmailStarter } from '../../templates/EmailStarter'
+import { PDFStarter } from '@renderer/templates/PDFStarter'
 import { ChangedFile } from '@shared/shared-types'
 import { Plus } from 'lucide-react'
 import { SidebarMenuAction } from '@components/ui/sidebar'
@@ -66,7 +67,7 @@ const NewFileDialog = ({ mode }: NewFileDialogProps) => {
     console.log(`${path[values.scope]}/templates/${mode}/${values.filename}.${values.ext}`)
     const File: ChangedFile = {
       path: `${path[values.scope]}/templates/${mode}/${values.filename}.${values.ext}`,
-      content: EmailStarter
+      content: mode === 'email' ? EmailStarter : PDFStarter
     }
     try {
       const res = await window.editorApi.saveNewFile(File)

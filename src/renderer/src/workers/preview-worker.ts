@@ -2,26 +2,19 @@ import React from 'react'
 import { transform } from 'sucrase'
 import { pdf } from '@react-pdf/renderer'
 import { render } from '@react-email/render'
-import { DatalogDynamicType } from '@shared/datalogTypes'
-import { ProjectRootType } from '@shared/projectTypes'
+import { DataObjectType } from '@shared/datalogClass'
 import { removeImports } from '../../../shared/utils/removeImports'
-
-type dataobjectType = {
-  project: ProjectRootType
-  selection: DatalogDynamicType | DatalogDynamicType[]
-  all: DatalogDynamicType[]
-}
+import { insertPoweredBy } from '../../../shared/utils/addPoweredBy'
 
 interface PreviewWorkerRequest {
   code: string
   type: 'email' | 'pdf'
-  message?: string
-  dataObject: dataobjectType
+  dataObject: DataObjectType
   id: number
 }
 
 self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void> => {
-  const { code, type, message, dataObject, id } = event.data
+  const { code, type, dataObject, id } = event.data
   let components: Record<string, unknown> = {}
 
   console.log(dataObject)
@@ -87,11 +80,12 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
         PDFViewer
       }
     }
-    const data = new DataObject(dataObject.project, dataObject.selection, dataObject.all)
+    const data = new DataObject(dataObject)
 
     const codeWithoutImports = await removeImports(code)
+    const formatted = insertPoweredBy(codeWithoutImports, type)
 
-    const transpiledCode = transform(codeWithoutImports, {
+    const transpiledCode = transform(formatted, {
       transforms: ['typescript', 'jsx', 'imports'],
       preserveDynamicImport: true
     }).code
@@ -106,13 +100,29 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
     const Component = new Function(
       'React',
       ...Object.keys(components),
-      'data',
+      'projectName',
+      'customInfo',
       'message',
+      'datalog',
+      'datalogArray',
+      'datalogs',
+      'total',
+      'data',
       wrappedCode
-    )(React, ...Object.values(components), data, message)
+    )(
+      React,
+      ...Object.values(components),
+      data.projectName,
+      data.customInfo,
+      data.message,
+      data.datalog,
+      data.datalogArray,
+      data.datalogs,
+      data.total,
+      data
+    )
 
     if (type === 'email') {
-      //const renderedContent = ReactDOMServer.renderToString(React.createElement(Component))
       const renderedContent = await render(React.createElement(Component), { plainText: false })
       self.postMessage({ id, type, code: renderedContent })
     } else if (type === 'pdf') {
@@ -129,25 +139,3 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
     self.postMessage({ id, error: (error as Error).message })
   }
 }
-
-/*
-USE THIS CODE IN MAIN PROCESS TO RENDER
-
-const script = new vm.Script(event, {
-      filename: 'EmailTest.jsx', // This is useful for stack traces
-      displayErrors: true
-    })
-    const sandbox = {
-      module: {},
-      exports: {},
-      require: require,
-      React: React // Make React available in the script's scope
-    }
-    // Run the script in the new context
-    script.runInNewContext(sandbox)
-
-    // Now, sandbox.module.exports should be your React component
-    const EmailTest = sandbox.module.exports
-
-    const html = renderToString(React.createElement(EmailTest))
-    */
