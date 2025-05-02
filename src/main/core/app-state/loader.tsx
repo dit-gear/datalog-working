@@ -83,11 +83,12 @@ export async function loadState(): Promise<ProjectType> {
 
 async function ensureTemplateFoldersExistSync(): Promise<void> {
   const templates = path.join(appState.appPath, 'templates')
-  console.log(templates)
+
   try {
     ensureDirectoryExists(templates)
     ensureDirectoryExists(path.join(templates, 'email'))
     ensureDirectoryExists(path.join(templates, 'pdf'))
+    ensureDirectoryExists(path.join(templates, 'pdf', 'assets'))
   } catch {
     logger.error('Could not check or create global template folder')
   }

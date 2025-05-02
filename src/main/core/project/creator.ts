@@ -12,7 +12,7 @@ import { unloadProject } from './unload'
 async function createFolders(basePath: string): Promise<void> {
   const logPath = path.join(basePath, 'logs')
   const emailPath = path.join(basePath, 'templates', 'email')
-  const pdfPath = path.join(basePath, 'templates', 'pdf')
+  const pdfPath = path.join(basePath, 'templates', 'pdf', 'assets')
 
   try {
     await Promise.all([
