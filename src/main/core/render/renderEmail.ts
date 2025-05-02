@@ -55,6 +55,7 @@ export const renderEmail = async ({
           const code = await fs.readFile(emailpath.path, 'utf8')
           const req: WorkerRequest = {
             id: email.id,
+            path: emailpath.path,
             code,
             type: emailpath.type,
             dataObject
@@ -80,6 +81,7 @@ export const renderEmail = async ({
           const codepdf = await fs.readFile(pdfpath.path, 'utf8')
           const reqpdf: WorkerRequest = {
             id: att.id,
+            path: pdfpath.path,
             code: codepdf,
             type: pdfpath.type,
             dataObject

@@ -128,9 +128,21 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     previewWorkerRef.current = previewWorker
 
     previewWorker.onmessage = (e): void => {
+      const msg = e.data
+      if (msg.type === 'read-files-base64') {
+        const { id, base, paths } = msg
+        // Fetch base64 for asset files from main via IPC
+        window.sharedApi.readBase64Files(base, paths).then((data) => {
+          previewWorker.postMessage({
+            type: 'read-files-base64-response',
+            id,
+            data
+          })
+        })
+        return
+      }
       const { type, code, error } = e.data
       if (code) {
-        console.log('from worker:', type, code, error)
         const previewEvent = new CustomEvent('preview-update', { detail: { type, code } })
         window.dispatchEvent(previewEvent)
       } else if (error) {
@@ -161,6 +173,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
           datalog_all: mockDataRef.current.datalogs
         }
         const request = {
+          path: file.path,
           code: model.getValue(),
           type: file.type,
           dataObject

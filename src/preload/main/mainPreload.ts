@@ -90,7 +90,9 @@ export const sharedApi = {
   getAppVersion: (): Promise<string> => ipcRenderer.invoke('app-version'),
 
   checkEmailApiConfigExists: (): Promise<boolean> => ipcRenderer.invoke('check-emailApiConfig'),
-  removeEmailApiConfig: (): Promise<Response> => ipcRenderer.invoke('remove-emailApiConfig')
+  removeEmailApiConfig: (): Promise<Response> => ipcRenderer.invoke('remove-emailApiConfig'),
+  readBase64Files: (base: string, paths: string[]) =>
+    ipcRenderer.invoke('read-files-base64', base, paths)
 }
 
 if (process.contextIsolated) {

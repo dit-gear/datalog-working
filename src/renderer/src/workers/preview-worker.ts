@@ -3,10 +3,12 @@ import { transform } from 'sucrase'
 import { pdf } from '@react-pdf/renderer'
 import { render } from '@react-email/render'
 import { DataObjectType } from '@shared/datalogClass'
+import { inlineAssetImports } from '@shared/utils/inlineAssetsImports'
 import { removeImports } from '../../../shared/utils/removeImports'
 import { insertPoweredBy } from '../../../shared/utils/addPoweredBy'
 
 interface PreviewWorkerRequest {
+  path: string
   code: string
   type: 'email' | 'pdf'
   dataObject: DataObjectType
@@ -14,7 +16,7 @@ interface PreviewWorkerRequest {
 }
 
 self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void> => {
-  const { code, type, dataObject, id } = event.data
+  const { path, code, type, dataObject, id } = event.data
   let components: Record<string, unknown> = {}
 
   console.log(dataObject)
@@ -82,7 +84,8 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>): Promise<void
     }
     const data = new DataObject(dataObject)
 
-    const codeWithoutImports = await removeImports(code)
+    const codeWithAssets = await inlineAssetImports(type, path, code)
+    const codeWithoutImports = await removeImports(codeWithAssets)
     const formatted = insertPoweredBy(codeWithoutImports, type)
 
     const transpiledCode = transform(formatted, {

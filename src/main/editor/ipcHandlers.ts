@@ -112,4 +112,13 @@ export function setupEditorIpcHandlers(): void {
   ipcMain.handle('delete-file', async (_event, file: TemplateDirectoryFile) => {
     return moveFileToTrash(file.path)
   })
+  ipcMain.handle('read-files-base64', async (_event, base: string, paths: string[]) => {
+    const result = {}
+    for (const rel of paths) {
+      const abs = path.resolve(base, rel)
+      const buf = await fs.readFile(abs)
+      result[rel] = buf.toString('base64')
+    }
+    return result
+  })
 }

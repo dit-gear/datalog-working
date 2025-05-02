@@ -7,7 +7,7 @@ import { useData } from '../utils/useData'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 interface TabsProps {
-  sendToWorker: (code: string, type: 'email' | 'pdf', message: string) => void
+  sendToWorker: (path: string, code: string, type: 'email' | 'pdf', message: string) => void
 }
 
 const Tabs = ({ sendToWorker }: TabsProps) => {
@@ -47,8 +47,11 @@ const Tabs = ({ sendToWorker }: TabsProps) => {
         if (!res) throw new Error('Could not find template')
         const content = await fetchFileContent(res.path)
         setActive(id)
-        sendToWorker(content, type, getValues('message'))
-      } catch (err: any) {}
+        console.log(res.path)
+        sendToWorker(res.path, content, type, getValues('message'))
+      } catch (err: any) {
+        console.log(err)
+      }
     },
     []
   )

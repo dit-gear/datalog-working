@@ -5,12 +5,18 @@ import renderWorkerPath from './renderWorker?modulePath'
 export function createRenderWorker() {
   let worker: Worker | null = null
 
-  function render({ id, code, type, dataObject }): Promise<{ code: string; plainText?: string }> {
+  function render({
+    id,
+    path,
+    code,
+    type,
+    dataObject
+  }): Promise<{ code: string; plainText?: string }> {
     if (!worker) {
       worker = new Worker(renderWorkerPath)
     }
     return new Promise((resolve, reject) => {
-      worker?.postMessage({ id, code, type, dataObject })
+      worker?.postMessage({ id, path, code, type, dataObject })
 
       worker?.on('message', (result) => resolve(result))
       worker?.on('error', reject)

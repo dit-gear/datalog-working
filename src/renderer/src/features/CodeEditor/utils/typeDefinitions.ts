@@ -134,4 +134,14 @@ export async function loadTypeDefinitions(
     MockDts,
     'file://node_modules/@react-email/components/index.d.ts'
   )
+
+  // Allow image asset imports to be treated as modules exporting URL strings
+  const assetExtensions = ['png', 'jpg', 'jpeg', 'svg', 'gif', 'tff', 'woff'] as const
+  const assetModuleDts = assetExtensions
+    .map((ext) => `declare module '*.${ext}' { const value: string; export default value; }`)
+    .join('\n')
+  monaco.languages.typescript.typescriptDefaults.addExtraLib(
+    assetModuleDts,
+    'file:///src/global-assets.d.ts'
+  )
 }

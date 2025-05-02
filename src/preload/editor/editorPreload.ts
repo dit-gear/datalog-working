@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { TemplateDirectoryFile } from '@shared/projectTypes'
 import { safeInvoke } from '@shared/utils/ipcUtils'
 import { LoadedFile, InitialEditorData, ChangedFile } from '@shared/shared-types'
+import { sharedApi } from '../main/mainPreload'
 
 const editorApi = {
   fetchInitialData: (): Promise<InitialEditorData> =>
@@ -24,6 +25,7 @@ const editorApi = {
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('editorApi', editorApi)
+    contextBridge.exposeInMainWorld('sharedApi', sharedApi)
   } catch (error) {
     console.error(error)
   }

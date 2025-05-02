@@ -37,6 +37,7 @@ export const renderPdf = async ({ pdf, selection }: renderPdfProps): Promise<str
     const code = await fs.readFile(pdfpath.path, 'utf8')
     const req: WorkerRequest = {
       id: pdf.id,
+      path: pdfpath.path,
       code: code,
       type: pdfpath.type,
       dataObject

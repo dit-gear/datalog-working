@@ -7,6 +7,7 @@ import { appState, datalogs as datalogStore, sendWindowDataMap } from '../core/a
 import { getSendWindow } from './sendWindow'
 import { renderEmail } from '../core/render/renderEmail'
 import { sendEmail } from '../core/send-email'
+import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 
 export function setupSendIpcHandlers(): void {
   ipcMain.handle('initial-send-data', async (event): Promise<InitialSendData> => {
@@ -19,8 +20,8 @@ export function setupSendIpcHandlers(): void {
       if (!windowData) {
         throw new Error(`No window data found for window id: ${windowId}`)
       }
-      const { selectedEmail, selection } = windowData
-
+      const { selectedEmail, selection: winSelection } = windowData
+      const selection = winSelection ?? getLatestDatalog(datalogs, project)
       return { selectedEmail, project, selection, datalogs }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'unknown error'

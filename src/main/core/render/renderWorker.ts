@@ -4,10 +4,12 @@ import React from 'react'
 //import { render } from '@react-email/render'
 import { transform } from 'sucrase'
 import { WorkerRequest } from './types'
+import { inlineAssetImports } from '@shared/utils/inlineAssetsImports'
 import { removeImports } from '@shared/utils/removeImports'
+import { insertPoweredBy } from '@shared/utils/addPoweredBy'
 
 parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
-  const { code, type, dataObject, id } = event
+  const { id, path, code, type, dataObject } = event
   let components: Record<string, unknown> = {}
   let pdf
   let render
@@ -86,10 +88,12 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
 
     const { projectName, customInfo, message, datalog, datalogArray, datalogs, total } = data
 
-    const codeWithoutImports = await removeImports(code)
+    const codeWithAssets = await inlineAssetImports(type, path, code)
+    const codeWithoutImports = await removeImports(codeWithAssets)
+    const formatted = insertPoweredBy(codeWithoutImports, type)
 
     // Transpile user code.
-    const transpiledCode = transform(codeWithoutImports, {
+    const transpiledCode = transform(formatted, {
       transforms: ['typescript', 'jsx', 'imports'],
       preserveDynamicImport: true
     }).code

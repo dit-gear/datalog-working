@@ -1,9 +1,9 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useData } from '../utils/useData'
 import Tabs from './Tabs'
+import { DataObjectType } from '@shared/datalogClass'
 
 export const Header = () => {
-  //const { data } = useDataContext()
   const { data } = useData()
   const previewWorkerRef = useRef<Worker | null>(null)
 
@@ -14,9 +14,21 @@ export const Header = () => {
     previewWorkerRef.current = previewWorker
 
     previewWorker.onmessage = (e): void => {
+      const msg = e.data
+      if (msg.type === 'read-files-base64') {
+        const { id, base, paths } = msg
+        // Fetch base64 for asset files from main via IPC
+        window.sharedApi.readBase64Files(base, paths).then((data) => {
+          previewWorker.postMessage({
+            type: 'read-files-base64-response',
+            id,
+            data
+          })
+        })
+        return
+      }
       const { type, code, error } = e.data
       if (code) {
-        console.log('from worker:', type, code, error)
         const previewEvent = new CustomEvent('preview-update', { detail: { type, code } })
         window.dispatchEvent(previewEvent)
       } else if (error) {
@@ -32,20 +44,22 @@ export const Header = () => {
   }, [])
 
   const sendToWorker = useCallback(
-    (code: string, type: 'email' | 'pdf', message: string) => {
+    (path: string, code: string, type: 'email' | 'pdf', message: string) => {
       try {
         if (!previewWorkerRef.current) throw new Error('Worker not initialized')
         if (!data) throw new Error('No project data available')
 
+        const dataObject: DataObjectType = {
+          project: data.project,
+          message: message,
+          datalog_selection: data.selection,
+          datalog_all: data.datalogs
+        }
         const request = {
+          path: path,
           code: code,
           type: type,
-          message: message,
-          dataObject: {
-            project: data.project,
-            selection: data.selection,
-            all: data.datalogs
-          }
+          dataObject
         }
 
         previewWorkerRef.current.postMessage(request)

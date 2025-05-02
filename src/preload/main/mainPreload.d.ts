@@ -62,6 +62,7 @@ declare global {
       getAppVersion: () => Promise<string>
       checkEmailApiConfigExists: () => Promise<boolean>
       removeEmailApiConfig: () => Promise<Response>
+      readBase64Files: (base: string, paths: string[]) => Promise<Record<string, string>>
     }
   }
 }
