@@ -22,7 +22,8 @@ import {
   getTotalSize,
   getTotalDuration,
   getTotalFiles,
-  getDurationFormatted
+  getDurationFormatted,
+  getTotalDateRange
 } from './utils/datalog-methods'
 
 class Clip implements Omit<MergedClip, 'size' | 'duration'> {
@@ -412,6 +413,7 @@ export class DataObject {
 
     return {
       days: (): number => all.length,
+      dateRange: (): [string, string] => getTotalDateRange(all),
       ocf,
       proxy,
       sound

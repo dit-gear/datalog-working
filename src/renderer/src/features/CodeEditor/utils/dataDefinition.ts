@@ -95,6 +95,7 @@ declare module 'data' {
   export const datalogs: Datalog[];
   export const total: {
     days(): number;
+    dateRange(): [string, string];
     ocf: {
       files(): number;
       size(): string;
@@ -122,13 +123,3 @@ declare module 'data' {
 
   return combinedTypeDefs
 }
-
-/*
-declare global {
-  interface Window {
-    data: ProjectData;
-  }
-}
-
-declare const data: ProjectData;
-*/

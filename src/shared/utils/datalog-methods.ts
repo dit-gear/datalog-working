@@ -198,7 +198,6 @@ export function getTotalSize<T extends FormatOutput>(
     proxy: 'proxy',
     sound: 'sound'
   }
-
   const size = data.reduce((sum, log) => {
     const ctx = log[contextMap[context]]
     if (typeof ctx === 'object' && ctx !== null && 'sizeAsNumber' in ctx) {
@@ -222,4 +221,10 @@ export function getTotalDuration(
   if (format === 'hms') return formatDuration(durationTC)
   if (format === 'hms-string') return formatDuration(durationTC, { asString: true })
   return durationTC
+}
+
+export function getTotalDateRange(data: Datalog[]): [string, string] {
+  if (data.length === 0) return ['', '']
+  const sorted = data.slice().sort((a, b) => a.date.localeCompare(b.date))
+  return [sorted[0].date, sorted[sorted.length - 1].date]
 }
