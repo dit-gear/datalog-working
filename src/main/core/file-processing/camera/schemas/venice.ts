@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { framesToTimecode } from '@shared/utils/format-timecode'
 import path from 'path'
-import { CameraMetadataZod } from '@shared/datalogTypes'
+import { CameraMetadataType, CameraMetadataZod } from '@shared/datalogTypes'
 
 /**
  * Converts an 8‑digit string (FFSSMMHH) into "HH:MM:SS:FF".
@@ -12,8 +12,10 @@ import { CameraMetadataZod } from '@shared/datalogTypes'
  *   - code[6..8] = hours
  * @returns timecode string "HH:MM:SS:FF"
  */
-function parseTimecode(code: string): string {
+function parseTimecode(code: string): string | undefined {
+  if (!code) return undefined
   if (!/^\d{8}$/.test(code)) {
+    return undefined
     throw new Error(`Invalid timecode "${code}", must be 8 digits`)
   }
   const frames = code.slice(0, 2)
@@ -33,6 +35,12 @@ function extractCodec(str: string): string {
   return ''
 }
 
+function toNumber(v) {
+  if (typeof v !== 'string') return undefined
+  const n = Number(v)
+  return Number.isFinite(n) ? n : undefined
+}
+
 const XmlSchema = z.object({
   version: z.string(),
   encoding: z.string(),
@@ -48,17 +56,27 @@ const LtcChangeItemSchema = z.object({
 const LtcChangeTableSchema = z
   .object({
     LtcChange: z.array(LtcChangeItemSchema),
-    tcFps: z.coerce.number()
+    tcFps: z.coerce.number().optional()
   })
   .transform((table) => {
-    const inc = table.LtcChange.find((i) => i.status === 'increment')!
-    const end = table.LtcChange.find((i) => i.status === 'end')!
-    if (!inc || !end) return { start: null, end: null, duration: null, fps: table.tcFps }
+    const inc = table.LtcChange.find((i) => i.status === 'increment')
+    const end = table.LtcChange.find((i) => i.status === 'end')
+    const fps = table.tcFps
+
+    if (!inc || !end || !fps) {
+      return {
+        start: undefined,
+        end: undefined,
+        duration: undefined,
+        fps: undefined
+      }
+    }
+
     return {
       start: parseTimecode(inc.value),
       end: parseTimecode(end.value),
-      duration: framesToTimecode(end.frameCount, table.tcFps),
-      fps: table.tcFps
+      duration: framesToTimecode(end.frameCount, fps),
+      fps
     }
   })
 
@@ -141,7 +159,7 @@ export const VeniceMetaSchema = z
     const lensGroup = groups['LensUnitMetadataSet'] || {}
     const sony = groups['SonyF65CameraMetadataSet'] || {}
 
-    const obj = {
+    const obj: Partial<CameraMetadataType> = {
       clip: path.parse(file).name.slice(0, -3),
       tc_start: start,
       tc_end: end,
@@ -149,11 +167,11 @@ export const VeniceMetaSchema = z
       fps,
       camera_model: 'Sony',
       reel: path.basename(file, '.xml').slice(0, 4),
-      sensor_fps: cam['CaptureFrameRate'],
-      ei: cam['ExposureIndexOfPhotoMeter'],
-      wb: cam['WhiteBalance'],
+      sensor_fps: toNumber(cam['CaptureFrameRate']),
+      ei: toNumber(cam['ExposureIndexOfPhotoMeter']),
+      wb: toNumber(cam['WhiteBalance']),
       tint: cam['TintCorrection'],
-      shutter: cam['ShutterSpeed_Angle']?.slice(0, -4),
+      shutter: toNumber(cam['ShutterSpeed_Angle']?.slice(0, -4)),
       lens: lensGroup['LensZoomActualFocalLength'],
       lut: sony['PreCDLTransform']?.slice(4),
       gamma: sony['GammaForLook'],

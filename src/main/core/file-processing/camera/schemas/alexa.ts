@@ -10,7 +10,7 @@ export const alexaAleZod = z
     tracks: z.string().optional(),
     start: z.string().optional(),
     end: z.string().optional(),
-    fps: z.coerce.number(),
+    fps: z.coerce.number().optional(),
     original_video: z.string().optional(),
     audio_format: z.string().optional(),
     audio_sr: z.string().optional(),
@@ -19,14 +19,14 @@ export const alexaAleZod = z
     frame_height: z.string().optional(),
     uuid: z.string().optional(),
     sup_version: z.string().optional(),
-    exposure_index: z.string().optional(),
+    exposure_index: z.coerce.number().optional(),
     gamma: z.string().optional(),
-    white_balance: z.string().optional(),
+    white_balance: z.coerce.number().optional(),
     cc_shift: z.string().optional(),
     look_name: z.string().optional(),
     look_burned_in: z.string().optional(),
-    sensor_fps: z.string().optional(),
-    shutter_angle: z.string().optional(),
+    sensor_fps: z.coerce.number().optional(),
+    shutter_angle: z.coerce.number().optional(),
     manufacturer: z.string().optional(),
     camera_model: z.string().optional(),
     camera_sn: z.string().optional(),
@@ -61,21 +61,28 @@ export const alexaAleZod = z
     image_denoising: z.string().optional()
   })
   .transform((ale) => {
+    const camera_model =
+      ale.manufacturer && ale.camera_model ? `${ale.manufacturer} ${ale.camera_model}` : undefined
+    const resolution =
+      ale.frame_width && ale.frame_height ? `${ale.frame_width}x${ale.frame_height}` : undefined
+    const codec = ale.original_video
+      ? ale.original_video?.replace(/\(.*?\)/g, '').trim()
+      : undefined
+
     const obj: Partial<CameraMetadataType> = {
       clip: ale.name,
       tc_start: ale.start,
       tc_end: ale.end,
       duration: ale.duration,
-      camera_model:
-        ale.manufacturer && ale.camera_model && `${ale.manufacturer} ${ale.camera_model}`,
+      camera_model,
       camera_id: ale.camera_id,
       reel: ale.reel_name,
       fps: ale.fps,
       sensor_fps: ale.sensor_fps,
       shutter: ale.shutter_angle,
       lens: ale.lens_type,
-      resolution: `${ale.frame_width}x${ale.frame_height}`,
-      codec: ale.original_video?.replace(/\(.*?\)/g, '').trim(),
+      resolution,
+      codec,
       gamma: ale.gamma,
       ei: ale.exposure_index,
       wb: ale.white_balance,

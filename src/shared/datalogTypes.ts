@@ -16,14 +16,14 @@ export const CameraMetadataZod = z.object({
   camera_id: z.string().optional(),
   reel: z.string().optional(),
   fps: z.coerce.number().optional(),
-  sensor_fps: z.string().optional(),
+  sensor_fps: z.coerce.number().optional(),
   lens: z.string().optional(),
-  shutter: z.string().optional(),
+  shutter: z.coerce.number().optional(),
   resolution: z.string().optional(),
   codec: z.string().optional(),
   gamma: z.string().optional(),
-  ei: z.string().optional(),
-  wb: z.string().optional(),
+  ei: z.coerce.number().optional(),
+  wb: z.coerce.number().optional(),
   tint: z.string().optional(),
   lut: z.string().optional()
 })

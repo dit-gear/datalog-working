@@ -4,7 +4,6 @@ import fs from 'fs'
 import { VeniceNamespaceSchema, VeniceMetaSchema } from './schemas/venice'
 
 async function processXML(filePaths: string[]): Promise<CameraMetadataType[]> {
-  // Process all XML files in parallel
   const fileResults = await Promise.all(
     filePaths.map(async (filePath) => {
       try {
@@ -28,7 +27,6 @@ async function processXML(filePaths: string[]): Promise<CameraMetadataType[]> {
       }
     })
   )
-  // Filter out any nulls and return typed array
   return fileResults.filter((item): item is CameraMetadataType => item !== null)
 }
 

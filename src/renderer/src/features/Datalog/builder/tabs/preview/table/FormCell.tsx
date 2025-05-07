@@ -25,7 +25,7 @@ const FormCell = ({ rowIndex, column, value, totalRows, handleSave }: FormCellPr
 
   const form = useForm({
     defaultValues: {
-      cell: value.value as string
+      cell: value.value
     }
   })
   const { control, handleSubmit } = form
@@ -59,7 +59,7 @@ const FormCell = ({ rowIndex, column, value, totalRows, handleSave }: FormCellPr
       name="cell"
       control={control}
       render={({ field }) => {
-        const inputWidth = calculateWidth(field.value, 5, 60, 4)
+        const inputWidth = calculateWidth(field.value as string, 5, 60, 4)
 
         return (
           <FormItem className="inline-flex">
@@ -67,6 +67,7 @@ const FormCell = ({ rowIndex, column, value, totalRows, handleSave }: FormCellPr
               <Input
                 {...field}
                 id={`${value.path}.${column.id}`}
+                type={typeof value.value}
                 ref={inputRef}
                 onKeyDown={handleKeyDown}
                 onBlur={handleSubmit((data) => onSubmit(data, null))}
