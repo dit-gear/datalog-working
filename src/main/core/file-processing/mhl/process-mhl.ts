@@ -25,8 +25,6 @@ const AllowedVideoExt = [
 ]
 const AllowedSoundExt = ['.wav']
 
-const sequentialFileTypes = new Set(['.dng', '.arx', '.ari', '.mxf', '.exr', '.r3d', '.braw'])
-
 type ValidationResult =
   | { success: true; data: mhlClassicType; type: 'classic'; error: null }
   | { success: true; data: mhlAscType; type: 'asc'; error: null }
@@ -96,8 +94,7 @@ function isClassicRow(row: classicRow | ascRow): row is classicRow {
 async function processFile(
   filePath: string,
   volume: string,
-  extensions: string[],
-  sequentialFileTypes: Set<string>
+  extensions: string[]
 ): Promise<OcfClipBaseType[]> {
   try {
     const fileData = fs.readFileSync(filePath, 'utf8')
@@ -126,43 +123,68 @@ async function processFile(
       )
     }
 
-    const grouped = filteredFiles.reduce(
-      (acc, row) => {
-        const isClassic = isClassicRow(row)
-        const fileNameWithExtension = isClassic
-          ? row.file.split('/').pop()!
-          : row.path.text.split('/').pop()!
-        const extension = '.' + fileNameWithExtension.split('.').pop()?.toLowerCase()
+    // First, extract raw names and detect numeric suffix patterns
+    type FileInfo = {
+      row: classicRow | ascRow
+      fileNameWithExtension: string
+      extension: string
+      rawName: string
+      prefix: string
+      hasSeq: boolean
+    }
 
-        const fileName = fileNameWithExtension.slice(0, -extension.length)
+    const infos: FileInfo[] = filteredFiles.map((row) => {
+      const isClassic = isClassicRow(row)
+      const fileNameWithExtension = isClassic
+        ? row.file.split('/').pop()!
+        : row.path.text.split('/').pop()!
+      const extension = '.' + fileNameWithExtension.split('.').pop()!.toLowerCase()
+      const rawName = fileNameWithExtension.slice(0, -extension.length)
+      const seqMatch = rawName.match(/^(.*?)[._](\d+)$/)
+      return {
+        row,
+        fileNameWithExtension,
+        extension,
+        rawName,
+        prefix: seqMatch ? seqMatch[1] : rawName,
+        hasSeq: !!seqMatch
+      }
+    })
 
-        let baseClipName = fileName
+    // Group by prefix and identify true sequential groups
+    const prefixGroups = infos.reduce<Record<string, FileInfo[]>>((acc, info) => {
+      acc[info.prefix] = acc[info.prefix] || []
+      acc[info.prefix].push(info)
+      return acc
+    }, {})
 
-        // Check if file type is likely to be sequential and handle formatting.
-        if (sequentialFileTypes.has(extension)) {
-          const match = fileNameWithExtension.match(/^(.*?)(?:[._]\d+)?\.[a-zA-Z0-9]+$/)
-          baseClipName = match ? match[1] : fileName
-        }
-
-        const md5 = isClassic ? row.md5 : row.md5?.text
-        const sha1 = isClassic ? row.sha1 : row.sha1?.text
-        const xxhash64 = isClassic ? row.xxhash64 : row.xxh64?.text
-        const xxhash64be = isClassic ? row.xxhash64be : row.xxh64be?.text
-
-        acc[baseClipName] = acc[baseClipName] || {
-          clip: baseClipName,
-          size: 0,
-          copies: [{ volume: volume, hash: md5 || sha1 || xxhash64 || xxhash64be || null }]
-        }
-
-        // Sum the sizes
-        const size = isClassic ? row.size : row.path.size
-        acc[baseClipName].size += !isNaN(Number(size)) ? Number(size) : 0
-
-        return acc
-      },
-      {} as Record<string, OcfClipBaseType>
+    const sequentialPrefixes = new Set(
+      Object.entries(prefixGroups)
+        .filter(([_, group]) => group.length > 1 && group.every((info) => info.hasSeq))
+        .map(([prefix]) => prefix)
     )
+
+    // Now build grouped clips using prefix for sequential names, rawName otherwise
+    const grouped = infos.reduce<Record<string, OcfClipBaseType>>((acc, info) => {
+      const { row, prefix, rawName } = info
+      const baseClipName = sequentialPrefixes.has(prefix) ? prefix : rawName
+      const isClassic = isClassicRow(row)
+
+      const md5 = isClassic ? row.md5 : row.md5?.text
+      const sha1 = isClassic ? row.sha1 : row.sha1?.text
+      const xxhash64 = isClassic ? row.xxhash64 : row.xxh64?.text
+      const xxhash64be = isClassic ? row.xxhash64be : row.xxh64be?.text
+      const size = isClassic ? row.size : row.path.size
+
+      acc[baseClipName] = acc[baseClipName] || {
+        clip: baseClipName,
+        size: 0,
+        copies: [{ volume: volume, hash: md5 || sha1 || xxhash64 || xxhash64be || null }]
+      }
+      acc[baseClipName].size += !isNaN(Number(size)) ? Number(size) : 0
+
+      return acc
+    }, {})
 
     return Object.values(grouped) as OcfClipBaseType[]
   } catch (err) {
@@ -191,7 +213,7 @@ async function readAndParseMHLFiles(
 
   const results: OcfClipBaseType[][] = await Promise.all(
     filePaths.map(async (filePath) => {
-      const result = await processFile(filePath, volume, extensions, sequentialFileTypes)
+      const result = await processFile(filePath, volume, extensions)
       updateProgress()
       return result
     })

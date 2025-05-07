@@ -14,7 +14,7 @@ type Datalog = {
   /** The unique identifier for this datalog. */
   id: string
   /** The day associated with this datalog. */
-  day: number
+  day: string
   /** The date of this datalog in ISO format. */
   date: string
   /**The unit/team associated with this datalog. Example: Main-unit, Second-unit */

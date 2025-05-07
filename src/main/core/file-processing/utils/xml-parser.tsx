@@ -9,6 +9,7 @@ export async function parseXML(fileData: string): Promise<any> {
     parseNodeValue: false,
     parseTagValue: false,
     parseAttributeValue: false
+    //removeNSPrefix: true
   }
   const XMLparser = new XMLParser(options)
 

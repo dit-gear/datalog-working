@@ -6,6 +6,7 @@ const timecode = z
   .string()
   .refine((val) => isValidTimecodeFormat(val), { message: 'Invalid timecode format' })
 
+// KEEP CAMERA METADATA MINIMAL - EXTEND WITH CUSTOM
 export const CameraMetadataZod = z.object({
   clip: z.string(),
   tc_start: timecode.optional(),
@@ -17,9 +18,11 @@ export const CameraMetadataZod = z.object({
   fps: z.coerce.number().optional(),
   sensor_fps: z.string().optional(),
   lens: z.string().optional(),
+  shutter: z.string().optional(),
   resolution: z.string().optional(),
   codec: z.string().optional(),
   gamma: z.string().optional(),
+  ei: z.string().optional(),
   wb: z.string().optional(),
   tint: z.string().optional(),
   lut: z.string().optional()

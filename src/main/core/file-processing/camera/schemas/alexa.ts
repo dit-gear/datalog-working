@@ -1,3 +1,4 @@
+import { CameraMetadataType, CameraMetadataZod } from '@shared/datalogTypes'
 import { z } from 'zod'
 
 export const alexaAleZod = z
@@ -9,7 +10,7 @@ export const alexaAleZod = z
     tracks: z.string().optional(),
     start: z.string().optional(),
     end: z.string().optional(),
-    fps: z.string().optional(),
+    fps: z.coerce.number(),
     original_video: z.string().optional(),
     audio_format: z.string().optional(),
     audio_sr: z.string().optional(),
@@ -59,6 +60,31 @@ export const alexaAleZod = z
     image_detail: z.string().optional(),
     image_denoising: z.string().optional()
   })
-  .catchall(z.string())
+  .transform((ale) => {
+    const obj: Partial<CameraMetadataType> = {
+      clip: ale.name,
+      tc_start: ale.start,
+      tc_end: ale.end,
+      duration: ale.duration,
+      camera_model:
+        ale.manufacturer && ale.camera_model && `${ale.manufacturer} ${ale.camera_model}`,
+      camera_id: ale.camera_id,
+      reel: ale.reel_name,
+      fps: ale.fps,
+      sensor_fps: ale.sensor_fps,
+      shutter: ale.shutter_angle,
+      lens: ale.lens_type,
+      resolution: `${ale.frame_width}x${ale.frame_height}`,
+      codec: ale.original_video?.replace(/\(.*?\)/g, '').trim(),
+      gamma: ale.gamma,
+      ei: ale.exposure_index,
+      wb: ale.white_balance,
+      tint: ale.cc_shift,
+      lut: ale.look_name
+    }
+
+    return Object.fromEntries(Object.entries(obj).filter(([, v]) => v != null))
+  })
+  .pipe(CameraMetadataZod)
 
 export type alexaAleType = z.infer<typeof alexaAleZod>

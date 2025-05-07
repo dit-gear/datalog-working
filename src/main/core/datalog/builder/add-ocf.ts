@@ -1,6 +1,7 @@
 import findFilesByType from '../../../utils/find-files-by-type'
 import processMHL from '../../file-processing/mhl/process-mhl'
 import processALE from '../../file-processing/camera/process-ale'
+import processXML from '../../file-processing/camera/process-xml'
 import type { CameraMetadataType, OcfClipType, ResponseWithClips } from '@shared/datalogTypes'
 
 const ParseCameraMetadata = async (filePath: string): Promise<CameraMetadataType[]> => {
@@ -18,7 +19,8 @@ const ParseCameraMetadata = async (filePath: string): Promise<CameraMetadataType
   }
 
   if (xmlFiles.length > 0) {
-    //xmlData = await processXML(xmlFiles)
+    xmlData = await processXML(xmlFiles)
+    console.table(xmlData)
   }
   return [...aleData, ...xmlData]
 }
@@ -33,8 +35,6 @@ const addOCF = async ({ paths, storedClips }: addOCFProps): Promise<ResponseWith
   try {
     // We'll accumulate new clips and metadata before updating state
     const store = new Map<string, OcfClipType>(storedClips.map((clip) => [clip.clip, clip]))
-
-    // let newClips: OcfClipBaseType[] = []
 
     await Promise.all(
       paths.map(async (path) => {
@@ -65,7 +65,6 @@ const addOCF = async ({ paths, storedClips }: addOCFProps): Promise<ResponseWith
             store.set(existingClip.clip, existingClip)
           } else {
             // If the clip doesn't exist, add it to the list of new clips
-            //newClips.push(newClip)
             store.set(newClip.clip, newClip)
           }
         })

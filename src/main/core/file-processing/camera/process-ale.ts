@@ -1,7 +1,7 @@
 import Papaparse from 'papaparse'
 import fs from 'fs'
 import { CameraMetadataType, CameraMetadataZod } from '@shared/datalogTypes'
-import { alexaAleZod, alexaAleType } from './types'
+import { alexaAleZod, alexaAleType } from './schemas/alexa'
 
 const NotEmpty = (...sources: (string | undefined)[]): Boolean => {
   return sources.every((source) => !!(source && source.trim() !== ''))
@@ -22,12 +22,14 @@ const mapFields = (item: alexaAleType): CameraMetadataType => {
   if (NotEmpty(item.reel_name)) result.reel = item.reel_name
   if (NotEmpty(item.fps)) result.fps = item.fps
   if (NotEmpty(item.sensor_fps)) result.sensor_fps = item.sensor_fps
+  if (NotEmpty(item.shutter_angle)) result.shutter = item.shutter_angle
   if (NotEmpty(item.lens_type)) result.lens = item.lens_type
   if (NotEmpty(item.frame_width, item.frame_height))
     result.resolution = `${item.frame_width}x${item.frame_height}`
   if (NotEmpty(item.original_video))
     result.codec = item.original_video?.replace(/\(.*?\)/g, '').trim()
   if (NotEmpty(item.gamma)) result.gamma = item.gamma
+  if (NotEmpty(item.exposure_index)) result.ei = item.exposure_index
   if (NotEmpty(item.white_balance)) result.wb = item.white_balance
   if (NotEmpty(item.cc_shift)) result.tint = item.cc_shift
   if (NotEmpty(item.look_name)) result.lut = item.look_name

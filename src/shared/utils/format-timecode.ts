@@ -131,33 +131,6 @@ export function secondsToLargeTimecode(totalSeconds: number): string {
 }
 
 /**
- *    Calculate the duration between two timecodes (HH:MM:SS:FF) and
- *    return that duration as a timecode (HH:MM:SS:FF). The last frame
- *    is excluded in the standard sense (FF goes up to fps-1).
- *
- *    Example:
- *      (17:13:38:23, 17:13:52:09, 25) => "00:00:13:11"
- *
- *    @param startTimecode - Start timecode as "HH:MM:SS:FF"
- *    @param endTimecode   - End timecode as "HH:MM:SS:FF"
- *    @param fps           - Frames per second
- *    @returns             - The duration timecode in "HH:MM:SS:FF"
- */
-/*function getTimecodeDuration(startTimecode: string, endTimecode: string, fps: number): string {
-  const startFrames = timecodeToFrames(startTimecode, fps)
-  const endFrames = timecodeToFrames(endTimecode, fps)
-
-  const durationFrames = endFrames - startFrames
-  if (durationFrames < 0) {
-    // You can decide whether to throw an error or return "00:00:00:00"
-    // if the start is after the end.
-    return '00:00:00:00'
-  }
-
-  return framesToTimecode(durationFrames, fps)
-}*/
-
-/**
  *    Calculate the duration between two timecodes, both given in frames,
  *    and return the result in frames (integer). Same behavior as above,
  *    but purely numeric rather than timecode string.

@@ -23,9 +23,11 @@ export interface MergedClip {
   fps?: number
   sensor_fps?: string
   lens?: string
+  shutter?: string
   resolution?: string
   codec?: string
   gamma?: string
+  ei?: string
   wb?: string
   tint?: string
   lut?: string
