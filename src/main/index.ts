@@ -15,7 +15,7 @@ app.commandLine.appendSwitch('disable-features', 'OverlayScrollbar')
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   session.defaultSession.clearCache()
   electronApp.setAppUserModelId('com.electron')
   app.dock.setIcon(nativeImage.createFromPath(icon))
@@ -25,8 +25,8 @@ app.whenReady().then(() => {
   })
 
   setupIpcHandlers()
-  loadState()
-  startLocalServer()
+  await loadState()
+  await startLocalServer()
   trayManager.createOrUpdateTray()
 })
 

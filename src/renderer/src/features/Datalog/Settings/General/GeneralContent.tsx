@@ -9,7 +9,7 @@ const GeneralContent = ({ scope }: GeneralTabProps) => {
   const { control } = useFormContext<formSchemaType>()
   return (
     <>
-      {scope === 'project' ? (
+      {scope === 'project' && (
         <FormField
           key={`project_project_name`}
           control={control}
@@ -28,16 +28,6 @@ const GeneralContent = ({ scope }: GeneralTabProps) => {
             </FormItem>
           )}
         />
-      ) : (
-        <FormRow
-          name={'global_projectName'}
-          label="Project Name"
-          descriptionTag={['Required for Project', `Tag: <project>`]}
-        >
-          <FormControl>
-            <Input className="max-w-80" placeholder="Not applicable within global scope" disabled />
-          </FormControl>
-        </FormRow>
       )}
       <FormField
         key={`${scope}_logid_template`}

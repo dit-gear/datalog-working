@@ -68,7 +68,8 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
   const mockDataRef = useRef(mockdata)
 
   const { initialData } = useInitialData()
-  const data = { project: initialData.activeProject }
+  const { project } = initialData
+  //const data = { project: initialData.project }
 
   const previewWorkerRef = useRef<Worker | null>(null)
 
@@ -161,14 +162,14 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     (model: monaco.editor.ITextModel, file: FileTrackingInfo): void => {
       try {
         if (!previewWorkerRef.current) throw new Error('Worker not initialized')
-        if (!data) throw new Error('No project data available')
+        if (!project) throw new Error('No project data available')
 
         const dataObject: DataObjectType = {
-          project: data.project,
+          project,
           message: mockDataRef.current.message,
           datalog_selection:
             selectionRef.current === 'single'
-              ? getLatestDatalog(mockDataRef.current.datalogs, data.project)
+              ? getLatestDatalog(mockDataRef.current.datalogs, project)
               : getLatestTwoDatalogs(mockDataRef.current.datalogs),
           datalog_all: mockDataRef.current.datalogs
         }
@@ -183,7 +184,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
         console.error('Error in sendMessageToWorker: ', error)
       }
     },
-    [data]
+    [project]
   )
 
   const checkDirty = useCallback(
@@ -471,7 +472,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     })
 
     // Add our custom global type definitions
-    await loadTypeDefinitions(monaco, data.project)
+    await loadTypeDefinitions(monaco, project)
 
     // Associate a fake file ending with `.tsx` so that TSX features are recognized
     /*const uri = monaco.Uri.parse('file:///main.tsx')

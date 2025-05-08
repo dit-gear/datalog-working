@@ -8,7 +8,7 @@ import { DatalogDynamicZod } from '@shared/datalogTypes'
 import { Notification } from 'electron'
 
 export const loadDatalog = async (filePath: string): Promise<DatalogDynamicType> => {
-  const project = appState.activeProject
+  const project = appState.project
   if (!project) throw new Error('No active project found')
   try {
     const datalog = fs.readFileSync(filePath, 'utf8')

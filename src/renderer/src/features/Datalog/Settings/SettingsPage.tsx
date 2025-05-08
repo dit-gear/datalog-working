@@ -12,7 +12,7 @@ function SettingsPage() {
     return null
   }
 
-  if (!project?.data) {
+  if (!project) {
     navigate('/new-project')
     return null
   }
@@ -25,9 +25,9 @@ function SettingsPage() {
       </div>
       <CloseButton onClick={() => navigate('/')} />
       <Settings
-        defaults={project.data.settings}
+        defaults={project.settings}
         email_api_exists={emailApiExists ?? false}
-        templates={project.data.templatesDir}
+        templates={project.templatesDir}
       />
     </div>
   )

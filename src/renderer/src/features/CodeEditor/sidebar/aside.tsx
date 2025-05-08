@@ -13,7 +13,7 @@ import { useInitialData } from '../dataContext'
 const Aside = () => {
   const { initialData } = useInitialData()
   const [files, setFiles] = useState<TemplateDirectoryFile[]>(
-    initialData.activeProject.templatesDir ?? []
+    initialData.project.templatesDir ?? []
   )
 
   const handleDirectoryChanged = (files: TemplateDirectoryFile[]): void => {

@@ -1,7 +1,6 @@
 import { z } from 'zod'
 
 export const stateZod = z.object({
-  rootPath: z.string(),
   activeProject: z.string().nullable()
 })
 

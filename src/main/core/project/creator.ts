@@ -3,7 +3,7 @@ import path from 'path'
 import fs from 'fs'
 import YAML from 'yaml'
 import { updateState } from '../app-state/updater' // Adjust the import path as necessary
-import { loadProject, loadProjectsInRootPath } from './loader'
+import { loadProject, loadProjects } from './loader'
 import { CreateNewProjectResult } from '@shared/projectTypes' // Adjust path as needed
 import { appState } from '../app-state/state'
 import logger from '../logger'
@@ -27,11 +27,10 @@ async function createFolders(basePath: string): Promise<void> {
 }
 
 async function createProject(projectName: string): Promise<CreateNewProjectResult> {
-  const newProjectPath = path.join(appState.rootPath, projectName)
+  const newProjectPath = path.join(appState.projectsPath, projectName)
   const filepath = path.join(newProjectPath, 'config.yaml')
   const defaultYaml = {
-    project_name: projectName,
-    logid_template: 'D<dd>_<yymmdd>'
+    project_name: projectName
   }
   const yaml = YAML.stringify(defaultYaml)
 
@@ -49,7 +48,7 @@ async function createProject(projectName: string): Promise<CreateNewProjectResul
     createFolders(newProjectPath)
     fs.writeFileSync(filepath, yaml, 'utf8')
 
-    updateState({ newActiveProject: newProjectPath })
+    updateState({ setActiveProject: newProjectPath })
 
     return {
       success: true
@@ -68,14 +67,12 @@ export async function createNewProject(projectName: string): Promise<CreateNewPr
 
   if (result.success) {
     logger.debug('Project created successfully')
-    await loadProjectsInRootPath()
+    await loadProjects()
     const project = await loadProject(appState.activeProjectPath)
-    return {
-      success: true,
-      project: {
-        rootPath: appState.rootPath,
-        projectPath: appState.activeProjectPath,
-        data: project.data
+    if (project.success) {
+      return {
+        success: true,
+        project: project.data
       }
     }
   }

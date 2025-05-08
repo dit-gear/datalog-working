@@ -51,9 +51,11 @@ export type ResponseWithString =
 export type OpenModalTypes = 'new-project' | 'new-shooting-day' | 'project-settings'
 
 export type InitialEditorData = {
-  rootPath: string
-  projectPath: string
-  activeProject: ProjectRootType
+  paths: {
+    localshared: string
+    project: string
+  }
+  project: ProjectRootType
   loadedDatalogs: DatalogDynamicType[]
 }
 

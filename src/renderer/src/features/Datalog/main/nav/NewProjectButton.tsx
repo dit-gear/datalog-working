@@ -5,7 +5,7 @@ import EmptyStateCard from '@components/EmptyStateCard'
 const NewProjectButton = () => {
   const { data: project, isLoading } = useProject()
   const navigate = useNavigate()
-  if (!project?.data && !isLoading) {
+  if (!project && !isLoading) {
     return (
       <EmptyStateCard
         title="No project Loaded"

@@ -149,12 +149,14 @@ export function generateMockDatalog(project: ProjectRootType): DatalogDynamicTyp
         camera_id: '0001',
         reel: common.reel,
         fps: 24,
-        sensor_fps: '24',
+        sensor_fps: 24,
+        shutter: 180,
         lens: '50mm',
         resolution: '3840x2160',
         codec: 'raw',
-        gamma: '800',
-        wb: '5200',
+        gamma: 'log',
+        ei: 800,
+        wb: 5200,
         tint: '0',
         lut: 'monochrome_1'
       }

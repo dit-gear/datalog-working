@@ -22,7 +22,7 @@ function Main() {
         <div className="container flex flex-col mx-auto w-full sm:px-6 lg:px-8 bg-zinc-950">
           <div>
             <h1 className="text-2xl mt-2 font-bold text-white">Datalog.email</h1>
-            <h2 className="min-h-6">{project?.data?.project_name}</h2>
+            <h2 className="min-h-6">{project?.project_name}</h2>
           </div>
           <div className="flex justify-end gap-4">
             <SendButton />

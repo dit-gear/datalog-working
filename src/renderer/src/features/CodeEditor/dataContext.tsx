@@ -42,7 +42,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   if (!initialData) {
     return <div>No data found</div>
   }
-  const generatedDatalogs = generateMockDatalog(initialData.activeProject)
+  const generatedDatalogs = generateMockDatalog(initialData.project)
 
   return (
     <DataContext.Provider value={{ initialData, generatedDatalogs }}>

@@ -1,10 +1,6 @@
 import { app, BrowserWindow } from 'electron'
-import {
-  ProjectRootType,
-  emailType,
-  ProjectInRootMenuItem,
-  ProjectType
-} from '@shared/projectTypes'
+import path from 'path'
+import { ProjectRootType, emailType, ProjectMenuItem, ProjectType } from '@shared/projectTypes'
 import { DatalogDynamicType, DatalogType } from '@shared/datalogTypes'
 
 const datalogStore = new Map<string, DatalogDynamicType>()
@@ -21,11 +17,14 @@ export const datalogs = (): Map<string, DatalogDynamicType> => datalogStore
 
 class AppState {
   private static instance: AppState
-  private _rootPath = ''
-  private _projectsInRootPath: ProjectInRootMenuItem[] | null = null
+  //private _rootPath = ''
+  private _projectsInRootPath: ProjectMenuItem[] | null = null
   private _activeProjectPath: string | null = null
-  private _activeProject: ProjectRootType | null = null
+  private _activeProjectData: ProjectRootType | null = null
   private readonly _appPath: string = app.getPath('userData')
+  private readonly _folderPath: string = path.join(app.getPath('documents'), 'Datalog')
+  private readonly _localsharedPath: string = path.join(this._folderPath, 'LocalShared')
+  private readonly _projectsPath: string = path.join(this._folderPath, 'Projects')
 
   private constructor() {}
 
@@ -36,17 +35,10 @@ class AppState {
     return AppState.instance
   }
 
-  get rootPath(): string {
-    return this._rootPath
-  }
-  set rootPath(path: string) {
-    this._rootPath = path
-  }
-
-  get projectsInRootPath(): ProjectInRootMenuItem[] | null {
+  get projectsInRootPath(): ProjectMenuItem[] | null {
     return this._projectsInRootPath
   }
-  set projectsInRootPath(projects: ProjectInRootMenuItem[] | null) {
+  set projectsInRootPath(projects: ProjectMenuItem[] | null) {
     this._projectsInRootPath = projects
   }
 
@@ -57,23 +49,27 @@ class AppState {
     this._activeProjectPath = path
   }
 
-  get activeProject(): ProjectRootType | null {
-    return this._activeProject
+  get project(): ProjectType {
+    return this._activeProjectData
   }
-  set activeProject(project: ProjectRootType | null) {
-    this._activeProject = project
+  set project(project: ProjectType) {
+    this._activeProjectData = project
   }
 
   get appPath(): string {
     return this._appPath
   }
 
-  get project(): ProjectType {
-    return {
-      rootPath: this._rootPath,
-      ...(this._activeProjectPath && { projectPath: this._activeProjectPath }),
-      ...(this._activeProject && { data: this._activeProject })
-    }
+  get folderPath(): string {
+    return this._folderPath
+  }
+
+  get localSharedPath(): string {
+    return this._localsharedPath
+  }
+
+  get projectsPath(): string {
+    return this._projectsPath
   }
 }
 

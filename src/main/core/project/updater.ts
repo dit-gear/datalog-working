@@ -22,13 +22,13 @@ export const updateProjectNameFromFolderRename = async (projectPath: string) => 
     logger.debug('renamingInProgress is true')
     return
   }
-  let project = appState.activeProject
+  let project = appState.project
   logger.debug(project ? project.toString() : 'no project!')
   if (!project) return
   const newprojectname = path.basename(projectPath)
   project.settings.project.project_name = newprojectname
   const projectYaml = YAML.stringify(project.settings.project)
-  await updateState({ newActiveProject: projectPath })
+  await updateState({ setActiveProject: projectPath })
   try {
     const projectSettingsPath = path.join(appState.activeProjectPath, 'config.yaml')
     fs.writeFileSync(projectSettingsPath, projectYaml, 'utf-8')
@@ -47,15 +47,8 @@ export const updateProjectNameFromFolderRename = async (projectPath: string) => 
 export const updateProjectFromFile = async () => {
   if (savingInProgress || renamingInProgress) return
   await loadProject(appState.activeProjectPath)
-  const rootPath = appState.rootPath
-  const projectPath = appState.activeProjectPath
-  const data = appState.activeProject
+  const loadedProject = appState.project
 
-  const loadedProject: ProjectType = {
-    rootPath,
-    ...(projectPath && { projectPath }),
-    ...(data && { data })
-  }
   const mainWindow = await getDatalogWindow()
   if (mainWindow?.webContents.isLoading()) {
     mainWindow.webContents.once('did-finish-load', () => {
@@ -67,12 +60,12 @@ export const updateProjectFromFile = async () => {
 }
 
 export const updateProjectFolder = async (newprojectname: string) => {
-  const newpath = path.join(appState.rootPath, newprojectname)
+  const newpath = path.join(appState.projectsPath, newprojectname)
   renamingInProgress = true
   try {
     // stop project watchers
     fs.renameSync(appState.activeProjectPath, newpath)
-    await updateState({ newActiveProject: newpath })
+    await updateState({ setActiveProject: newpath })
     //reinitialize project watchers
   } finally {
     renamingInProgress = false
@@ -115,11 +108,7 @@ export const updateProject = async ({
       if (result.success) {
         return {
           success: true,
-          project: {
-            rootPath: appState.rootPath,
-            projectPath: appState.activeProjectPath,
-            data: result.data
-          }
+          project: result.data
         }
       } else {
         return { success: false, error: 'something went wrong' }

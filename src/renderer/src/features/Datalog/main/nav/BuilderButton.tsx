@@ -7,7 +7,7 @@ const BuilderButton = () => {
   const { data: project } = useProject()
   const navigate = useNavigate()
   return (
-    <Button onClick={() => navigate('/builder')} disabled={!project?.data}>
+    <Button onClick={() => navigate('/builder')} disabled={!project}>
       <Plus className="mr-2 h-4 w-4" />
       New Shooting Day
     </Button>

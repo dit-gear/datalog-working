@@ -16,10 +16,12 @@ export const initSettingsWatcher = async () => {
   })
 
   settingsWatcher.on('change', () => {
+    logger.debug('settingsWatcher change detected')
     updateProjectFromFile()
   })
 
   settingsWatcher.on('unlink', () => {
+    logger.debug('settingsWatcher unlink detected')
     forceUnloadActiveproject()
   })
 }

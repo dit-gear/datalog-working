@@ -48,7 +48,8 @@ const FormSchema = z.object({
 
 const NewFileDialog = ({ mode }: NewFileDialogProps) => {
   const { initialData } = useInitialData()
-  const path = { project: initialData.projectPath, global: initialData.rootPath }
+  const { paths } = initialData
+  const path = { project: paths.project, global: paths.localshared }
   const [open, setOpen] = useState<boolean>(false)
   const form = useForm<z.infer<typeof FormSchema>>({
     defaultValues: {
@@ -178,7 +179,7 @@ const NewFileDialog = ({ mode }: NewFileDialogProps) => {
                         <FormControl>
                           <RadioGroupItem value="global" />
                         </FormControl>
-                        <FormLabel className="font-normal">Global</FormLabel>
+                        <FormLabel className="font-normal">Local Shared</FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>

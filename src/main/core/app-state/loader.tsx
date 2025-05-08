@@ -6,18 +6,18 @@ import { decryptData } from '../../utils/encryption'
 import path from 'path'
 import { appState } from './state'
 import logger from '../logger'
-import { ensureDirectoryExists } from '../../utils/crud'
+import { ensureDirectoryExists, fileExists } from '../../utils/crud'
 import { updateState } from './updater'
-import { loadProject, loadProjectsInRootPath } from '../project/loader'
+import { loadProject, loadProjects } from '../project/loader'
 import { initRootWatcher } from './watchers/rootWatcher'
 
 async function loadStateFromFile(filepath: string): Promise<state> {
   logger.debug('loadStateFromFile started')
   try {
     const fileData = await fs.readFile(filepath, 'utf8')
-    const encryptedObj = JSON.parse(fileData)
-    const decrypted = decryptData(encryptedObj)
-    const result = stateZod.safeParse(decrypted)
+    const data = JSON.parse(fileData)
+    //const decrypted = decryptData(encryptedObj)
+    const result = stateZod.safeParse(data)
 
     if (result.success) {
       logger.debug('Successfully loaded state from file')
@@ -35,21 +35,17 @@ async function loadStateFromFile(filepath: string): Promise<state> {
 async function loadConfig(): Promise<void> {
   try {
     logger.debug('loadConfig started')
-    await ensureTemplateFoldersExistSync()
+    await ensureFoldersExists()
     const configPath = path.join(appState.appPath, 'appconfig.json') as string
-    const defaultRootPath = path.join(app.getPath('documents'), 'Datalog')
 
     try {
       const config = await loadStateFromFile(configPath)
-
-      appState.rootPath = config.rootPath
       appState.activeProjectPath = config.activeProject
     } catch (err) {
       try {
         logger.info('Creating new Config file...')
         // Create a default configuration
-        ensureDirectoryExists(defaultRootPath)
-        await updateState({ newRootPath: defaultRootPath })
+        await updateState({ setActiveProject: null })
         logger.info('Created new Config file')
       } catch (error) {
         throw error
@@ -60,35 +56,34 @@ async function loadConfig(): Promise<void> {
   }
 }
 
-export async function loadState(): Promise<ProjectType> {
+export async function loadState(): Promise<void> {
   logger.debug('loadState started')
   await loadConfig()
+  await loadProjects()
+  await initRootWatcher()
   if (appState.activeProjectPath) {
-    await loadProjectsInRootPath()
-    await initRootWatcher()
     const loadActiveProject = await loadProject(appState.activeProjectPath)
     if (loadActiveProject.success) {
       logger.info('Project loaded successfully')
-      return {
-        rootPath: appState.rootPath,
-        projectPath: appState.activeProjectPath,
-        data: loadActiveProject.data
-      }
     }
   }
-
-  logger.info('No project to load, returning root path')
-  return { rootPath: appState.rootPath }
+  logger.info('No project to load')
 }
 
-async function ensureTemplateFoldersExistSync(): Promise<void> {
-  const templates = path.join(appState.appPath, 'templates')
+async function ensureConfigExist(config: string) {
+  const exists = await fileExists(config)
+  if (!exists) fs.writeFile(config, 'utf-8')
+}
 
+async function ensureFoldersExists(): Promise<void> {
+  const templates = path.join(appState.localSharedPath, 'templates')
   try {
-    ensureDirectoryExists(templates)
-    ensureDirectoryExists(path.join(templates, 'email'))
-    ensureDirectoryExists(path.join(templates, 'pdf'))
-    ensureDirectoryExists(path.join(templates, 'pdf', 'assets'))
+    await Promise.all([
+      ensureConfigExist(path.join(appState.localSharedPath, 'config.yaml')),
+      ensureDirectoryExists(appState.projectsPath)
+    ])
+    await ensureDirectoryExists(path.join(templates, 'email'))
+    await ensureDirectoryExists(path.join(templates, 'pdf', 'assets'))
   } catch {
     logger.error('Could not check or create global template folder')
   }

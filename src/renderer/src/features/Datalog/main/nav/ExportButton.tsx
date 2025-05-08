@@ -23,7 +23,7 @@ import { FileDown } from 'lucide-react'
 
 const ExportButton = () => {
   const { data: project } = useProject()
-  const pdfs = project?.data?.pdfs?.filter((pdf) => pdf.enabled) ?? []
+  const pdfs = project?.pdfs?.filter((pdf) => pdf.enabled) ?? []
   const { selection } = useSelectedContext()
   const [open, setOpen] = useState<boolean>(false)
   const [selectedPreset, setSelectedPreset] = useState<pdfType | null>(null)

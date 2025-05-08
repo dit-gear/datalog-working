@@ -12,7 +12,7 @@ export const handleChangeProject = async (selectedProjectPath: string): Promise<
   try {
     await unloadProject()
     await loadProject(selectedProjectPath)
-    await updateState({ newActiveProject: selectedProjectPath })
+    await updateState({ setActiveProject: selectedProjectPath })
     const projectsInRootPath = appState.projectsInRootPath || []
     const updatedProjects = projectsInRootPath?.map((project) => ({
       ...project,

@@ -53,7 +53,7 @@ export function setupDatalogIpcHandlers(): void {
         })
         if (csvdialog.canceled) return { success: false, error: 'User cancelled', cancelled: true }
         paths = csvdialog.filePaths
-        custom_fields = appState.activeProject?.custom_fields
+        custom_fields = appState.project?.custom_fields
       } else {
         const dialogResult = await dialog.showOpenDialog({ properties: ['openDirectory'] })
         if (dialogResult.canceled)
@@ -128,16 +128,7 @@ export function setupDatalogIpcHandlers(): void {
   })
 
   ipcMain.handle('get-project', (): ProjectType => {
-    const rootPath = appState.rootPath
-    const projectPath = appState.activeProjectPath
-    const data = appState.activeProject
-
-    const loadedProject: ProjectType = {
-      rootPath,
-      ...(projectPath && { projectPath }),
-      ...(data && { data })
-    }
-    return loadedProject
+    return appState.project
   })
 
   ipcMain.handle('get-datalogs', (): DatalogType[] => {

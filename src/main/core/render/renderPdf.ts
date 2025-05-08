@@ -14,7 +14,7 @@ interface renderPdfProps {
   selection?: DatalogType | DatalogType[]
 }
 export const renderPdf = async ({ pdf, selection }: renderPdfProps): Promise<string> => {
-  const project = appState.activeProject
+  const project = appState.project
   if (!project) throw new Error('No project')
   const datalogs = Array.from(datalogStore().values())
   if (!datalogs) throw new Error('No datalogs')

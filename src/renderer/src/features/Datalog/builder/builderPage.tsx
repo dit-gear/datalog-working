@@ -12,7 +12,7 @@ function BuilderPage() {
 
   const selectedLog = logs.find((log) => log.id === logId)
 
-  if (projectsLoading || datalogsLoading || !project?.data) {
+  if (projectsLoading || datalogsLoading || !project) {
     return null
   }
 
@@ -24,7 +24,7 @@ function BuilderPage() {
         </h2>
       </div>
       <CloseButton onClick={() => navigate('/')} />
-      <Builder project={project.data} previousEntries={logs} selected={selectedLog} />
+      <Builder project={project} previousEntries={logs} selected={selectedLog} />
     </div>
   )
 }

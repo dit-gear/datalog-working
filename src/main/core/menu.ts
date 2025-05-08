@@ -1,9 +1,8 @@
-import { Menu, Tray, nativeImage } from 'electron'
+import { Menu, Tray, nativeImage, shell } from 'electron'
 import { getDatalogWindow } from '../datalog/datalogWindow'
-import { ProjectRootType, ProjectInRootMenuItem } from '@shared/projectTypes'
+import { ProjectRootType, ProjectMenuItem } from '@shared/projectTypes'
 import { appState } from './app-state/state'
 import { handleChangeProject } from './project/manager'
-import { handleRootDirChange } from './app-state/updater'
 import { createEditorWindow } from '../editor/editorWindow'
 import { createSendWindow } from '../send/sendWindow'
 import { exportPdf } from './export/exportPdf'
@@ -12,7 +11,7 @@ import logger from './logger'
 import { createAboutWindow } from '../about/aboutWindow'
 
 interface buildContextMenuProps {
-  projects: ProjectInRootMenuItem[] | null
+  projects: ProjectMenuItem[] | null
   activeProject: ProjectRootType | null
 }
 
@@ -100,7 +99,7 @@ const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): M
         },
         { label: 'New Project', click: () => getDatalogWindow({ navigate: 'new-project' }) },
         { type: 'separator' },
-        { label: 'Change Root Folder', click: (): Promise<void> => handleRootDirChange() }
+        { label: 'Open Folder', click: async () => await shell.openPath(appState.folderPath) }
       ]
     },
 
@@ -129,7 +128,7 @@ class TrayManager {
   createOrUpdateTray(): void {
     const contextMenu = buildContextMenu({
       projects: appState.projectsInRootPath,
-      activeProject: appState.activeProject
+      activeProject: appState.project
     })
     if (!this.tray) {
       Menu.setApplicationMenu(baseMenu())

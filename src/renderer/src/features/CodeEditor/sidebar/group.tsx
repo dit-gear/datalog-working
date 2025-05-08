@@ -43,34 +43,35 @@ const Group = ({ type, files }: GroupProps) => {
         <NewFileDialog mode={type} />
         <CollapsibleContent>
           <SidebarMenuSub className="pr-0 mr-0">
-            {files && files
-              .filter((file) => file.type === type)
-              .map((file) => (
-                <SidebarMenuSubItem key={file.path}>
-                  <ContextMenu>
-                    <ContextMenuTrigger asChild>
-                      <SidebarMenuButton
-                        className="flex justify-between"
-                        key={file.path}
-                        onClick={() => window.editorApi.requestReadFile(file)}
-                      >
-                        <span className="text-xs font-medium leading-none truncate">
-                          {file.name}
-                        </span>
-                        <span className="line-clamp-2 text-xs leading-snug text-muted-foreground capitalize">
-                          {file.scope}
-                        </span>
-                      </SidebarMenuButton>
-                    </ContextMenuTrigger>
-                    <ContextMenuContent>
-                      <ContextMenuItem>Rename</ContextMenuItem>
-                      <ContextMenuItem>Duplicate</ContextMenuItem>
-                      <ContextMenuSeparator />
-                      <ContextMenuItem onClick={() => handleDelete(file)}>Delete</ContextMenuItem>
-                    </ContextMenuContent>
-                  </ContextMenu>
-                </SidebarMenuSubItem>
-              ))}
+            {files &&
+              files
+                .filter((file) => file.type === type)
+                .map((file) => (
+                  <SidebarMenuSubItem key={file.path}>
+                    <ContextMenu>
+                      <ContextMenuTrigger asChild>
+                        <SidebarMenuButton
+                          className="flex justify-between"
+                          key={file.path}
+                          onClick={() => window.editorApi.requestReadFile(file)}
+                        >
+                          <span className="text-xs font-medium leading-none truncate">
+                            {file.name}
+                          </span>
+                          <span className="line-clamp-2 text-xs leading-snug text-muted-foreground capitalize">
+                            {file.scope}
+                          </span>
+                        </SidebarMenuButton>
+                      </ContextMenuTrigger>
+                      <ContextMenuContent>
+                        <ContextMenuItem>Rename</ContextMenuItem>
+                        <ContextMenuItem>Duplicate</ContextMenuItem>
+                        <ContextMenuSeparator />
+                        <ContextMenuItem onClick={() => handleDelete(file)}>Delete</ContextMenuItem>
+                      </ContextMenuContent>
+                    </ContextMenu>
+                  </SidebarMenuSubItem>
+                ))}
           </SidebarMenuSub>
         </CollapsibleContent>
       </SidebarMenuItem>

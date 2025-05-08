@@ -103,7 +103,7 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, email_api_exists, t
                   <Tabs value={scope} onValueChange={(v) => setScope(v as Scope)}>
                     <TabsList className="grid grid-cols-2 mt-2">
                       <TabsTrigger value="project">This Project</TabsTrigger>
-                      <TabsTrigger value="global">Global</TabsTrigger>
+                      <TabsTrigger value="global">Local Shared</TabsTrigger>
                     </TabsList>
                   </Tabs>
                   <TabsList className="flex flex-col justify-between items-start h-auto mt-2">

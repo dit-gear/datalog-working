@@ -7,12 +7,7 @@ const SettingsButton = () => {
   const { data: project } = useProject()
   const navigate = useNavigate()
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      onClick={() => navigate('/settings')}
-      disabled={!project?.data}
-    >
+    <Button variant="outline" size="icon" onClick={() => navigate('/settings')} disabled={!project}>
       <SettingsIcon className="h-4 w-4" />
     </Button>
   )

@@ -28,7 +28,7 @@ export const renderEmail = async ({
     filename: string
   }[]
 }> => {
-  const project = appState.activeProject
+  const project = appState.project
   if (!project) throw new Error('No project')
   const datalogs = Array.from(datalogStore().values())
   if (!datalogs) throw new Error('no datalogs')
@@ -93,7 +93,7 @@ export const renderEmail = async ({
               selection,
               template: att.output_name,
               fallbackName: att.label,
-              projectName: appState.activeProject!.project_name!
+              projectName: appState.project!.project_name!
             })
           })
         }

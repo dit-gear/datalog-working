@@ -151,10 +151,10 @@ export async function startLocalServer() {
 
   // Get Project
   api.get('/project', (_req: Request, res: Response) => {
-    if (!appState.activeProject) {
+    if (!appState.project) {
       return res.status(404).json({ error: 'No project loaded' })
     }
-    const { settings, templatesDir, ...projectData } = appState.activeProject
+    const { settings, templatesDir, ...projectData } = appState.project
     return res.status(200).json(projectData)
   })
 
@@ -169,8 +169,8 @@ export async function startLocalServer() {
       return res.status(500).json({ error: 'Error creating project', details: result.error })
     }
     let project = {}
-    if (result.project?.data) {
-      const { settings, templatesDir, ...projectData } = result.project.data
+    if (result.project) {
+      const { settings, templatesDir, ...projectData } = result.project
       project = projectData
     }
     return res.status(201).json(project)
@@ -206,10 +206,10 @@ export async function startLocalServer() {
 
   // Get Project Settings
   api.get('/project/config', (_req: Request, res: Response) => {
-    if (!appState.activeProject) {
+    if (!appState.project) {
       return res.status(404).json({ error: 'No project loaded' })
     }
-    return res.json(appState.activeProject?.settings?.project ?? {})
+    return res.json(appState.project?.settings?.project ?? {})
   })
 
   // Update Project Settings
@@ -218,7 +218,7 @@ export async function startLocalServer() {
     if (!parseResult.success) {
       return res.status(400).json(formatErrors(parseResult.error))
     }
-    const project = appState.activeProject
+    const project = appState.project
     if (!project) {
       return res.status(404).json({ error: 'No project loaded' })
     }
@@ -233,7 +233,7 @@ export async function startLocalServer() {
           .status(500)
           .json({ error: 'Error updating project settings', details: result.error })
       }
-      return res.status(200).json({ success: true, data: result.project?.data?.settings.project })
+      return res.status(200).json({ success: true, data: result.project?.settings.project })
     } catch (error) {
       logger.error('Error updating project settings:', error)
       return res.status(500).json({ error: 'Failed to update project settings' })
@@ -247,7 +247,7 @@ export async function startLocalServer() {
 
   // Create Datalog
   api.post('/datalog', async (req: Request, res: Response) => {
-    const project = appState.activeProject
+    const project = appState.project
     if (!project) {
       return res.status(404).json({ error: 'No project loaded' })
     }
@@ -291,7 +291,7 @@ export async function startLocalServer() {
     }
     const id = idParse.data.id
 
-    const project = appState.activeProject
+    const project = appState.project
     if (!project) {
       return res.status(404).json({ error: 'No project loaded' })
     }
@@ -324,7 +324,7 @@ export async function startLocalServer() {
     }
     const id = idParse.data.id
 
-    const project = appState.activeProject
+    const project = appState.project
     if (!project) {
       return res.status(404).json({ error: 'No project loaded' })
     }
@@ -344,7 +344,7 @@ export async function startLocalServer() {
 
   // List Email Presets
   api.get('/email-presets', (req: Request, res: Response) => {
-    const emails = appState.activeProject?.emails ?? []
+    const emails = appState.project?.emails ?? []
     const parseResult = filteredEnabledSchema.safeParse(req.query)
     if (!parseResult.success) {
       return res.status(400).json(formatErrors(parseResult.error))
@@ -367,7 +367,7 @@ export async function startLocalServer() {
 
   // List PDF Presets
   api.get('/pdf-presets', (req: Request, res: Response) => {
-    const pdfs = appState.activeProject?.pdfs ?? []
+    const pdfs = appState.project?.pdfs ?? []
 
     const parseResult = filteredEnabledSchema.safeParse(req.query)
     if (!parseResult.success) {
@@ -392,7 +392,7 @@ export async function startLocalServer() {
         return res.status(400).json({ error: parseResult.error.errors })
       }
       const { presetId, datalogId } = parseResult.data
-      const email = appState.activeProject?.emails?.find((email) => email.id === presetId)
+      const email = appState.project?.emails?.find((email) => email.id === presetId)
       const selection = getSelectedDatalogs(datalogId)
       try {
         createSendWindow(email ?? null, selection)
@@ -413,7 +413,7 @@ export async function startLocalServer() {
         return res.status(400).json({ error: parseResult.error.errors })
       }
       const { presetId, datalogId } = parseResult.data
-      const pdf = appState.activeProject?.pdfs?.find((pdf) => pdf.id === presetId)
+      const pdf = appState.project?.pdfs?.find((pdf) => pdf.id === presetId)
       if (!pdf) {
         return res.status(404).json({ error: 'Could not find matching pdf id' })
       }

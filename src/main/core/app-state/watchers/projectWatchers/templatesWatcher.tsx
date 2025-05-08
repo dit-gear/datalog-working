@@ -92,7 +92,7 @@ export const initTemplateWatcher = async () => {
 
 const updateTemplatesDir = (filePath: string, action: 'add' | 'remove') => {
   if (!isValidTemplateFile(filePath, action)) return
-  const activeProject = appState.activeProject
+  const activeProject = appState.project
   if (!activeProject) return
 
   const { templatesDir } = activeProject
@@ -105,7 +105,7 @@ const updateTemplatesDir = (filePath: string, action: 'add' | 'remove') => {
   } else if (action === 'remove') {
     activeProject.templatesDir = templatesDir.filter((template) => template.path !== filePath)
   }
-  appState.activeProject = activeProject
+  appState.project = activeProject
   const editorWindow = getEditorWindow()
   getDatalogWindow({ update: true })
   if (editorWindow) {

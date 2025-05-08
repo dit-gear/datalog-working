@@ -14,14 +14,16 @@ export function setupEditorIpcHandlers(): void {
   ipcMain.handle('initial-editor-data', async (): Promise<InitialEditorData> => {
     try {
       const loadedDatalogs = Array.from(datalogs().values())
-      const { rootPath, activeProjectPath: projectPath, activeProject } = appState
+      const { activeProjectPath, localSharedPath, project } = appState
 
-      if (!activeProject) throw Error('No active project')
+      if (!project) throw Error('No active project')
 
       const initialData: InitialEditorData = {
-        rootPath,
-        projectPath,
-        activeProject,
+        paths: {
+          localshared: localSharedPath,
+          project: activeProjectPath
+        },
+        project,
         loadedDatalogs
       }
       return initialData

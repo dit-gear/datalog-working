@@ -350,13 +350,9 @@ export type ProjectSchemaType = z.infer<typeof ProjectSchemaZod>
 export type ProjectRootType = z.infer<typeof ProjectRootZod>
 export type ProjectSettingsType = z.infer<typeof ProjectSettingsZod>
 
-export type ProjectType = {
-  rootPath: string
-  projectPath?: string
-  data?: ProjectRootType
-}
+export type ProjectType = ProjectRootType | null
 
-export type ProjectInRootMenuItem = {
+export type ProjectMenuItem = {
   label: string
   path: string
   active: boolean

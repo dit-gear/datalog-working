@@ -9,7 +9,7 @@ const Table = () => {
   const { data: logs, isLoading: isDatalogsLoading } = useDatalogs()
   const { data: project, isLoading: isProjectLoading } = useProject()
 
-  if (!project?.data || isDatalogsLoading || isProjectLoading) return null
+  if (!project || isDatalogsLoading || isProjectLoading) return null
 
   if (!logs.length && !isDatalogsLoading)
     return (

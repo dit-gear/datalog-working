@@ -5,8 +5,8 @@ import logger from '../logger'
 import { closeProjectWatchers } from '../app-state/watchers/projectWatchers/manager'
 
 export const forceUnloadActiveproject = async () => {
-  await Promise.allSettled([closeProjectWatchers(), updateState({})])
-  appState.activeProject = null
+  await Promise.allSettled([closeProjectWatchers(), updateState({ setActiveProject: null })])
+  appState.project = null
   appState.activeProjectPath = null
   datalogs().clear()
 
@@ -27,7 +27,7 @@ export const unloadProject = async (): Promise<void> => {
   try {
     await closeProjectWatchers()
     datalogs().clear()
-    appState.activeProject = null
+    appState.project = null
     appState.activeProjectPath = null
     logger.debug('successfully unloaded project')
   } catch (error) {

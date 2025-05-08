@@ -1,7 +1,7 @@
 import chokidar, { FSWatcher } from 'chokidar'
 import { appState } from '../state'
 import logger from '../../logger'
-import { loadProjectsInRootPath } from '../../project/loader'
+import { loadProjects } from '../../project/loader'
 import { updateProjectNameFromFolderRename } from '../../project/updater'
 import { forceUnloadActiveproject } from '../../project/unload'
 
@@ -14,7 +14,7 @@ export const initRootWatcher = async () => {
   const renamedDirs: Set<{ oldPath: string; newPath: string }> = new Set()
   let pendingUnlink: string | null = null
 
-  rootWatcher = chokidar.watch(appState.rootPath, {
+  rootWatcher = chokidar.watch(appState.projectsPath, {
     ignoreInitial: true,
     depth: 0,
     awaitWriteFinish: true
@@ -75,7 +75,7 @@ export const initRootWatcher = async () => {
       await updateProjectNameFromFolderRename(renamedProject.newPath)
     }
 
-    await loadProjectsInRootPath()
+    await loadProjects()
 
     // Clear tracked changes after processing
     addedDirs.clear()

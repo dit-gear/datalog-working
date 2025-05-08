@@ -12,7 +12,7 @@ import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 export function setupSendIpcHandlers(): void {
   ipcMain.handle('initial-send-data', async (event): Promise<InitialSendData> => {
     try {
-      const project = appState.activeProject
+      const project = appState.project
       const datalogs = Array.from(datalogStore().values())
       if (!project) throw Error
       const windowId = event.sender.id
