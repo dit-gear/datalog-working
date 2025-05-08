@@ -1,4 +1,4 @@
-import { ProjectToUpdate, UpdateProjectResult, ProjectType } from '@shared/projectTypes'
+import { ProjectToUpdate, UpdateProjectResult } from '@shared/projectTypes'
 import YAML from 'yaml'
 import fs from 'fs'
 import path from 'path'
@@ -96,7 +96,7 @@ export const updateProject = async ({
       await updateProjectFolder(newprojectname)
     }
     const projectSettingsPath = path.join(appState.activeProjectPath, 'config.yaml')
-    const globalSettingsPath = path.join(appState.appPath, 'config.yaml')
+    const globalSettingsPath = path.join(appState.localSharedPath, 'config.yaml')
     savingInProgress = true
     try {
       fs.writeFileSync(projectSettingsPath, projectYaml, 'utf8')

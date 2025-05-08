@@ -34,9 +34,8 @@ const NewProjectPage = () => {
       if (result.success && result.project) {
         console.log('Project created successfully')
         navigate('/')
-      } else if (result.message) {
-        form.setError('name', { message: result.message })
       } else {
+        form.setError('name', { message: result.error })
         return
       }
     })

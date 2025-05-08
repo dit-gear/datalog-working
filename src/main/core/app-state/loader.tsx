@@ -1,9 +1,8 @@
-import { app } from 'electron'
+import { safeStorage } from 'electron'
 import fs from 'fs/promises'
 import { stateZod, state } from './types'
-import { ProjectType } from '../../../shared/projectTypes'
-import { decryptData } from '../../utils/encryption'
 import path from 'path'
+import YAML from 'yaml'
 import { appState } from './state'
 import logger from '../logger'
 import { ensureDirectoryExists, fileExists } from '../../utils/crud'
@@ -14,9 +13,9 @@ import { initRootWatcher } from './watchers/rootWatcher'
 async function loadStateFromFile(filepath: string): Promise<state> {
   logger.debug('loadStateFromFile started')
   try {
-    const fileData = await fs.readFile(filepath, 'utf8')
-    const data = JSON.parse(fileData)
-    //const decrypted = decryptData(encryptedObj)
+    const fileData = await fs.readFile(filepath)
+    const decrypted = safeStorage.decryptString(fileData)
+    const data = JSON.parse(decrypted)
     const result = stateZod.safeParse(data)
 
     if (result.success) {
@@ -72,7 +71,11 @@ export async function loadState(): Promise<void> {
 
 async function ensureConfigExist(config: string) {
   const exists = await fileExists(config)
-  if (!exists) fs.writeFile(config, 'utf-8')
+  if (!exists) {
+    const defaultYaml = { logid_template: 'D<dd>_<yymmdd>' }
+    const yaml = YAML.stringify(defaultYaml)
+    await fs.writeFile(config, yaml, 'utf8')
+  }
 }
 
 async function ensureFoldersExists(): Promise<void> {

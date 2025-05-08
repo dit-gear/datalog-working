@@ -28,11 +28,6 @@ async function createFolders(basePath: string): Promise<void> {
 
 async function createProject(projectName: string): Promise<CreateNewProjectResult> {
   const newProjectPath = path.join(appState.projectsPath, projectName)
-  const filepath = path.join(newProjectPath, 'config.yaml')
-  const defaultYaml = {
-    project_name: projectName
-  }
-  const yaml = YAML.stringify(defaultYaml)
 
   if (fs.existsSync(newProjectPath)) {
     const message = 'Project with the same name already exists in directory'
@@ -42,6 +37,14 @@ async function createProject(projectName: string): Promise<CreateNewProjectResul
       error: message
     }
   }
+
+  const filepath = path.join(newProjectPath, 'config.yaml')
+  const defaultYaml = {
+    project_name: projectName
+  }
+  const yaml = YAML.stringify(defaultYaml)
+
+  await unloadProject()
 
   try {
     fs.mkdirSync(newProjectPath)
@@ -62,7 +65,6 @@ async function createProject(projectName: string): Promise<CreateNewProjectResul
 }
 
 export async function createNewProject(projectName: string): Promise<CreateNewProjectResult> {
-  await unloadProject()
   const result = await createProject(projectName)
 
   if (result.success) {

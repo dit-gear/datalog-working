@@ -17,7 +17,6 @@ export const datalogs = (): Map<string, DatalogDynamicType> => datalogStore
 
 class AppState {
   private static instance: AppState
-  //private _rootPath = ''
   private _projectsInRootPath: ProjectMenuItem[] | null = null
   private _activeProjectPath: string | null = null
   private _activeProjectData: ProjectRootType | null = null
