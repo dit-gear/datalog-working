@@ -55,7 +55,11 @@ export const initTemplateWatcher = async () => {
   // Ensure directories exist
   await Promise.all(subdirs.map(ensureDirectoryExists))
 
-  templatesWatcher = chokidar.watch(dirs, { ignoreInitial: true })
+  templatesWatcher = chokidar.watch(dirs, {
+    ignoreInitial: true,
+    ignored: (file, stats): boolean =>
+      !!stats?.isFile() && !(file.endsWith('.tsx') || file.endsWith('.jsx'))
+  })
 
   templatesWatcher.on('ready', () => {
     logger.debug('templatesWatcher started')

@@ -113,8 +113,8 @@ async function onFirstRun() {
   const dest = path.join(appState.localSharedPath, 'templates')
   openOnboardWindow()
   try {
-    //await fs.cp(src, dest, { recursive: true })
-    //await fs.writeFile(marker, '') // create flag file
+    await fs.cp(src, dest, { recursive: true })
+    await fs.writeFile(marker, '') // create flag file
     logger.info('First run - Copied starter templates')
   } catch (err) {
     logger.error('Failed to copy starter templates on first run:', err)
