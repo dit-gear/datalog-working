@@ -1,4 +1,5 @@
 import { safeStorage } from 'electron'
+import { app } from 'electron'
 import fs from 'fs/promises'
 import { stateZod, state } from './types'
 import path from 'path'
@@ -9,6 +10,7 @@ import { ensureDirectoryExists, fileExists } from '../../utils/crud'
 import { updateState } from './updater'
 import { loadProject, loadProjects } from '../project/loader'
 import { initRootWatcher } from './watchers/rootWatcher'
+import { openOnboardWindow } from '../../onboarding/onboardWindow'
 
 async function loadStateFromFile(filepath: string): Promise<state> {
   logger.debug('loadStateFromFile started')
@@ -34,6 +36,7 @@ async function loadStateFromFile(filepath: string): Promise<state> {
 async function loadConfig(): Promise<void> {
   try {
     logger.debug('loadConfig started')
+    await onFirstRun()
     await ensureFoldersExists()
     const configPath = path.join(appState.appPath, 'appconfig.json') as string
 
@@ -89,5 +92,31 @@ async function ensureFoldersExists(): Promise<void> {
     await ensureDirectoryExists(path.join(templates, 'pdf', 'assets'))
   } catch {
     logger.error('Could not check or create global template folder')
+  }
+}
+
+async function onFirstRun() {
+  const marker = path.join(appState.appPath, 'onboarded')
+  if (
+    await fs
+      .access(marker)
+      .then(() => true)
+      .catch(() => false)
+  ) {
+    logger.info('Already onboarded')
+    return
+  }
+  // Determine template source based on environment
+  const src = app.isPackaged
+    ? path.join(process.resourcesPath, 'templates')
+    : path.join(process.cwd(), 'resources', 'templates')
+  const dest = path.join(appState.localSharedPath, 'templates')
+  openOnboardWindow()
+  try {
+    //await fs.cp(src, dest, { recursive: true })
+    //await fs.writeFile(marker, '') // create flag file
+    logger.info('First run - Copied starter templates')
+  } catch (err) {
+    logger.error('Failed to copy starter templates on first run:', err)
   }
 }

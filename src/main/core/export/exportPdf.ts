@@ -16,7 +16,7 @@ interface exportPdfProps {
 
 export const exportPdf = async ({ pdf, selection, hasDialog = false }: exportPdfProps) => {
   if (!selection) {
-    const project = appState.activeProject
+    const project = appState.project
     if (!project) throw new Error('No project')
     const _datalogs = Array.from(datalogs().values())
     if (!_datalogs) throw new Error('No datalogs')
@@ -28,7 +28,7 @@ export const exportPdf = async ({ pdf, selection, hasDialog = false }: exportPdf
   const tags: Tags = {
     day: log.day,
     date: log.date,
-    projectName: appState.activeProject?.project_name,
+    projectName: appState.project?.project_name,
     unit: log.unit,
     log: log.id
   }

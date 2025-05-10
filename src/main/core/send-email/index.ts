@@ -6,7 +6,7 @@ import { appState } from '../app-state/state'
 
 export const sendEmail = async (email: emailToSend) => {
   try {
-    const sender = appState.activeProject?.email_sender
+    const sender = appState.project?.email_sender
     if (!sender) throw new Error('Sender ("from") address has not been defined')
     const apiInfoString = await retrieveObjectFromKeychain('email_api')
     if (!apiInfoString) throw new Error('No Email Config')

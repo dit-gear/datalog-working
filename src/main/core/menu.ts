@@ -43,7 +43,7 @@ const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): M
     },
 
     {
-      label: 'Open Datalog Window',
+      label: 'Open Dashboard',
       click: () => getDatalogWindow({ ensureOpen: true }),
       enabled: Boolean(activeProject)
     }, // Opens main window
