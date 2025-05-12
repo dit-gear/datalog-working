@@ -1,7 +1,10 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
-//import { BarChart2, Users, MessageSquare, Settings } from 'lucide-react'
+import { useState, useCallback, useEffect } from 'react'
+import { Clapperboard, Send, Code, Folder, Rocket } from 'lucide-react'
 import type { CarouselApi } from '@components/ui/carousel'
-import menubar from '../../assets/menubar-1.mp4'
+import menubarImage from '../../assets/onboard/menubar.png'
+import filesImage from '../../assets/onboard/files.png'
+import editorImage from '../../assets/onboard/editor.png'
+import presetsImage from '../../assets/onboard/presets.png'
 
 import { Carousel, CarouselContent, CarouselItem } from '@components/ui/carousel'
 import { Button } from '@components/ui/button'
@@ -10,23 +13,28 @@ import { Button } from '@components/ui/button'
 const features = [
   {
     description: 'Find the app in your menu bar – ready whenever you need it',
-    image: menubar
+    image: menubarImage,
+    icon: Rocket
   },
   {
     description: 'Logs, templates and config are located in your documents folder',
-    image: menubar
+    image: filesImage,
+    icon: Folder
   },
   {
     description: 'Add and edit metadata from your footage effortlessly.',
-    image: menubar
+    image: menubarImage,
+    icon: Clapperboard
   },
   {
     description: ' Build custom templates using React right in the code editor.',
-    image: menubar
+    image: editorImage,
+    icon: Code
   },
   {
     description: ' Create presets to simplify and speed up repetitive tasks.',
-    image: menubar
+    image: presetsImage,
+    icon: Send
   }
 ]
 
@@ -34,37 +42,6 @@ export function OnboardingCarousel() {
   const [api, setApi] = useState<CarouselApi>()
   const [currentSlide, setCurrentSlide] = useState(0)
   const isLastSlide = currentSlide === features.length - 1
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
-
-  useEffect(() => {
-    const observers: IntersectionObserver[] = []
-
-    videoRefs.current.forEach((video) => {
-      if (!video) return
-
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            video.play()
-          } else {
-            video.pause()
-          }
-        },
-        { threshold: 0.5 }
-      )
-
-      observer.observe(video)
-      observers.push(observer)
-    })
-
-    return () => {
-      observers.forEach((observer, i) => {
-        if (videoRefs.current[i]) {
-          observer.unobserve(videoRefs.current[i]!)
-        }
-      })
-    }
-  }, [])
 
   const handleNext = useCallback(() => {
     if (!api) return
@@ -102,23 +79,13 @@ export function OnboardingCarousel() {
             <CarouselItem key={index} data-carousel-item>
               <div className="flex flex-col items-center p-1">
                 <div className="overflow-hidden rounded-lg">
-                  <video
-                    ref={(el) => (videoRefs.current[index] = el)}
-                    src={feature.image}
-                    autoPlay
-                    muted
-                    playsInline
-                    width={540}
-                    height={380}
-                    className="h-[220px] w-full object-cover"
-                    onEnded={(e) => {
-                      e.currentTarget.pause()
-                      e.currentTarget.currentTime = e.currentTarget.duration
-                    }}
-                  />
+                  <img src={feature.image} className=" size-64 w-full object-cover" />
                 </div>
-                <div className="mt-6 mb-8 flex flex-col items-center text-center">
-                  <p className="max-w-md text-foreground">{feature.description}</p>
+                <div className="mt-4 flex flex-col items-center text-center">
+                  <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                    <feature.icon className="h-5 w-5 text-foreground" />
+                  </div>
+                  <p className="mt-2 max-w-md text-foreground">{feature.description}</p>
                 </div>
               </div>
             </CarouselItem>

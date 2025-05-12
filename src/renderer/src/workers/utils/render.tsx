@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import type { PipeableStream, ReactDOMServerReadableStream } from 'react-dom/server'
 
 const decoder = new TextDecoder('utf-8')

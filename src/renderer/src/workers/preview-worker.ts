@@ -1,6 +1,6 @@
 import React from 'react'
 import { transform } from 'sucrase'
-import { pdf, usePDF } from '@react-pdf/renderer'
+import { pdf } from '@react-pdf/renderer'
 import { render } from './utils/render'
 import { PreviewWorkerRequest } from './utils/types'
 import { inlineAssetImports } from '@shared/utils/inlineAssetsImports'

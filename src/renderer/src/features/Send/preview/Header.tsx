@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from 'react'
 import { useData } from '../utils/useData'
 import Tabs from './Tabs'
 import { DataObjectType } from '@shared/datalogClass'
+import { PreviewWorkerRequest } from '@renderer/workers/utils/types'
 
 export const Header = () => {
   const { data } = useData()
@@ -15,7 +16,7 @@ export const Header = () => {
 
     previewWorker.onmessage = (e): void => {
       const msg = e.data
-      if (msg.type === 'read-files-base64') {
+      if (msg.msgtype === 'read-files-base64') {
         const { id, base, paths } = msg
         // Fetch base64 for asset files from main via IPC
         window.sharedApi.readBase64Files(base, paths).then((data) => {
@@ -27,14 +28,9 @@ export const Header = () => {
         })
         return
       }
-      const { type, code, error } = e.data
-      if (code) {
-        const previewEvent = new CustomEvent('preview-update', { detail: { type, code } })
+      if (msg.msgtype === 'preview-update') {
+        const previewEvent = new CustomEvent('preview-update', { detail: msg })
         window.dispatchEvent(previewEvent)
-      } else if (error) {
-        console.log('error from worker')
-        const errorEvent = new CustomEvent('preview-error', { detail: error })
-        window.dispatchEvent(errorEvent)
       }
     }
 
@@ -55,8 +51,8 @@ export const Header = () => {
           datalog_selection: data.selection,
           datalog_all: data.datalogs
         }
-        const request = {
-          path: path,
+        const request: PreviewWorkerRequest = {
+          id: path,
           code: code,
           type: type,
           dataObject
