@@ -91,7 +91,7 @@ async function ensureFoldersExists(): Promise<void> {
     await ensureDirectoryExists(path.join(templates, 'email'))
     await ensureDirectoryExists(path.join(templates, 'pdf', 'assets'))
   } catch {
-    logger.error('Could not check or create global template folder')
+    logger.error('Could not check or create shared template folder')
   }
 }
 
@@ -104,15 +104,17 @@ async function onFirstRun() {
       .catch(() => false)
   ) {
     logger.info('Already onboarded')
+    openOnboardWindow() // Remove this when not testing
     return
   }
   // Determine template source based on environment
   const src = app.isPackaged
-    ? path.join(process.resourcesPath, 'templates')
+    ? path.join(process.resourcesPath, 'app.asar.unpacked', 'resources', 'templates')
     : path.join(process.cwd(), 'resources', 'templates')
   const dest = path.join(appState.localSharedPath, 'templates')
   openOnboardWindow()
   try {
+    await ensureDirectoryExists(dest)
     await fs.cp(src, dest, { recursive: true })
     await fs.writeFile(marker, '') // create flag file
     logger.info('First run - Copied starter templates')

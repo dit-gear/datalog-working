@@ -23,13 +23,13 @@ async function fetchBase64Map(basePath: string, paths: string[]): Promise<Record
   return new Promise((resolve) => {
     function onMessage(e: MessageEvent) {
       const msg = e.data
-      if (msg?.type === 'read-files-base64-response' && msg.id === id) {
+      if (msg?.msgtype === 'read-files-base64-response' && msg.id === id) {
         self.removeEventListener('message', onMessage)
         resolve(msg.data as Record<string, string>)
       }
     }
     self.addEventListener('message', onMessage)
-    self.postMessage({ type: 'read-files-base64', id, base, paths })
+    self.postMessage({ msgtype: 'read-files-base64', id, base, paths })
   })
 }
 

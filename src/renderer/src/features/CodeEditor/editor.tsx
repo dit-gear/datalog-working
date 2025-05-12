@@ -16,6 +16,7 @@ import { getLatestDatalog, getLatestTwoDatalogs } from '@shared/utils/getLatestD
 import { mockDataType } from './newMockdataDialog'
 import useDebouncedCallback from '@renderer/utils/useDebouncedCallback'
 import { DataObjectType } from '@shared/datalogClass'
+import { PreviewWorkerResponse, PreviewWorkerRequest } from '@renderer/workers/utils/types'
 
 //type Monaco = typeof monaco
 
@@ -69,7 +70,6 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
 
   const { initialData } = useInitialData()
   const { project } = initialData
-  //const data = { project: initialData.project }
 
   const previewWorkerRef = useRef<Worker | null>(null)
 
@@ -128,28 +128,23 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     })
     previewWorkerRef.current = previewWorker
 
-    previewWorker.onmessage = (e): void => {
+    previewWorker.onmessage = (e: MessageEvent<PreviewWorkerResponse>): void => {
       const msg = e.data
-      if (msg.type === 'read-files-base64') {
+      if (msg.msgtype === 'read-files-base64') {
         const { id, base, paths } = msg
         // Fetch base64 for asset files from main via IPC
         window.sharedApi.readBase64Files(base, paths).then((data) => {
           previewWorker.postMessage({
-            type: 'read-files-base64-response',
+            msgtype: 'read-files-base64-response',
             id,
             data
           })
         })
         return
       }
-      const { type, code, error } = e.data
-      if (code) {
-        const previewEvent = new CustomEvent('preview-update', { detail: { type, code } })
+      if (msg.msgtype === 'preview-update') {
+        const previewEvent = new CustomEvent('preview-update', { detail: msg })
         window.dispatchEvent(previewEvent)
-      } else if (error) {
-        console.log('error from worker')
-        const errorEvent = new CustomEvent('preview-error', { detail: error })
-        window.dispatchEvent(errorEvent)
       }
     }
 
@@ -164,21 +159,24 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
         if (!previewWorkerRef.current) throw new Error('Worker not initialized')
         if (!project) throw new Error('No project data available')
 
+        // await datalog_selection if issues persists
+        const datalog_selection =
+          selectionRef.current === 'single'
+            ? getLatestDatalog(mockDataRef.current.datalogs, project)
+            : getLatestTwoDatalogs(mockDataRef.current.datalogs)
         const dataObject: DataObjectType = {
           project,
           message: mockDataRef.current.message,
-          datalog_selection:
-            selectionRef.current === 'single'
-              ? getLatestDatalog(mockDataRef.current.datalogs, project)
-              : getLatestTwoDatalogs(mockDataRef.current.datalogs),
+          datalog_selection,
           datalog_all: mockDataRef.current.datalogs
         }
-        const request = {
-          path: file.path,
+        const request: PreviewWorkerRequest = {
+          id: file.path,
           code: model.getValue(),
           type: file.type,
           dataObject
         }
+        window.dispatchEvent(new CustomEvent('preview-load'))
         previewWorkerRef.current.postMessage(request)
       } catch (error) {
         console.error('Error in sendMessageToWorker: ', error)
