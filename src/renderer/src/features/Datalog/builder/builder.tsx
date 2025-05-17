@@ -128,7 +128,7 @@ const Builder = ({ project, previousEntries, selected }: BuilderdialogProps) => 
             </div>
           </TabsContent>
           <TabsContent value="clips" asChild tabIndex={-1}>
-            <div className="col-span-6 mb-16 flex-1 overflow-scroll ">
+            <div className="col-span-6 mb-16 flex-1 overflow-scroll rounded-lg border border-white/10">
               <Preview />
             </div>
           </TabsContent>

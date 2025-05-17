@@ -123,7 +123,7 @@ const DataTable = memo(({ columns, data }: DataTableProps) => {
             {headerGroup.headers.map((header) => (
               <TableHead
                 key={header.id}
-                className="sticky top-0 z-20 bg-background first:sticky first:left-0 first:z-20 first:bg-background capitalize"
+                className="first:sticky first:left-0 z-20 bg-background first:z-20 first:bg-background first:shadow-[inset_-1px_0_0_0_hsl(240_3.7%_15.9%)] capitalize"
               >
                 {header.isPlaceholder
                   ? null
