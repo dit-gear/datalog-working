@@ -64,5 +64,9 @@ declare global {
       removeEmailApiConfig: () => Promise<Response>
       readBase64Files: (base: string, paths: string[]) => Promise<Record<string, string>>
     }
+    electronClipboard: {
+      readText: () => string
+      writeText: (t: string) => void
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, clipboard } from 'electron'
 import { DatalogType, OcfClipType, SoundClipType } from '@shared/datalogTypes'
 import { pdfType, ProjectType } from '@shared/projectTypes'
 
@@ -95,10 +95,16 @@ export const sharedApi = {
     ipcRenderer.invoke('read-files-base64', base, paths)
 }
 
+export const electronClipboard = {
+  readText: () => clipboard.readText(),
+  writeText: (t: string) => clipboard.writeText(t)
+}
+
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('mainApi', mainApi)
     contextBridge.exposeInMainWorld('sharedApi', sharedApi)
+    contextBridge.exposeInMainWorld('electronClipboard', electronClipboard)
   } catch (error) {
     console.error(error)
   }

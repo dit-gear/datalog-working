@@ -29,6 +29,6 @@ export const sendEmail = async (email: emailToSend) => {
     return
   } catch (error) {
     console.error('Error sending email:', error)
-    throw new Error()
+    throw new Error(error instanceof Error ? error.message : 'unknown error')
   }
 }

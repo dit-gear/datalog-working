@@ -22,7 +22,7 @@ const EmailStarter: React.FC = () => {
         <Container style={container}>
           <Heading style={title}>Email Starter</Heading>
           <Section>
-            <Text style={{ textAlign: 'center' }}>{message}</Text>
+            <Text style={{ textAlign: 'center', whiteSpace: 'pre-wrap' }}>{message}</Text>
           </Section>
         </Container>
       </Body>

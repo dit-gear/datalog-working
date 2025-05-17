@@ -30,8 +30,8 @@ export function getProviderOptions(
           html: email.rendered.emailcode.code,
           text: email.rendered.emailcode.plainText,
           attachments: email.rendered.attachmentsToSend?.map((att) => ({
-            filename: att.filename,
-            content: att.content
+            content: att.content,
+            filename: att.filename
           }))
         })
       }
