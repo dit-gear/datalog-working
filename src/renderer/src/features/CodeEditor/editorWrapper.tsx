@@ -1,3 +1,4 @@
+import { shell } from 'electron'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Editor, { EditorHandle } from './editor'
 import { FileQuestion } from 'lucide-react'
@@ -201,6 +202,7 @@ const EditorWrapper = () => {
             variant="outline"
             className="z-40 rounded text-xs"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+            onClick={() => window.sharedApi.openExternal('https://docs.datalog.email')}
           >
             Docs
           </Button>

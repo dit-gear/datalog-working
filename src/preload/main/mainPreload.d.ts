@@ -63,6 +63,7 @@ declare global {
       checkEmailApiConfigExists: () => Promise<boolean>
       removeEmailApiConfig: () => Promise<Response>
       readBase64Files: (base: string, paths: string[]) => Promise<Record<string, string>>
+      openExternal: (url: string) => void
     }
     electronClipboard: {
       readText: () => string

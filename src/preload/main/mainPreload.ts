@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer, clipboard } from 'electron'
+import { contextBridge, ipcRenderer, clipboard, shell } from 'electron'
 import { DatalogType, OcfClipType, SoundClipType } from '@shared/datalogTypes'
 import { pdfType, ProjectType } from '@shared/projectTypes'
 
@@ -92,7 +92,8 @@ export const sharedApi = {
   checkEmailApiConfigExists: (): Promise<boolean> => ipcRenderer.invoke('check-emailApiConfig'),
   removeEmailApiConfig: (): Promise<Response> => ipcRenderer.invoke('remove-emailApiConfig'),
   readBase64Files: (base: string, paths: string[]) =>
-    ipcRenderer.invoke('read-files-base64', base, paths)
+    ipcRenderer.invoke('read-files-base64', base, paths),
+  openExternal: (url: string) => shell.openExternal(url)
 }
 
 export const electronClipboard = {
