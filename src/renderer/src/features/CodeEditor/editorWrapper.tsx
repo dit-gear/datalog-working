@@ -1,4 +1,3 @@
-import { shell } from 'electron'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Editor, { EditorHandle } from './editor'
 import { FileQuestion } from 'lucide-react'

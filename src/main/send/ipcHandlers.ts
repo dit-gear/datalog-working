@@ -21,7 +21,9 @@ export function setupSendIpcHandlers(): void {
         throw new Error(`No window data found for window id: ${windowId}`)
       }
       const { selectedEmail, selection: winSelection } = windowData
-      const selection = winSelection ?? getLatestDatalog(datalogs, project)
+      console.log('winselect:', winSelection)
+      const selection = winSelection ?? (await getLatestDatalog(datalogs, project))
+      console.log('selection:', selection)
       return { selectedEmail, project, selection, datalogs }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'unknown error'

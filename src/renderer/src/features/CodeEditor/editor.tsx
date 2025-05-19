@@ -17,6 +17,7 @@ import { mockDataType } from './newMockdataDialog'
 import useDebouncedCallback from '@renderer/utils/useDebouncedCallback'
 import { DataObjectType } from '@shared/datalogClass'
 import { PreviewWorkerResponse, PreviewWorkerRequest } from '@renderer/workers/utils/types'
+import { DatalogType } from '@shared/datalogTypes'
 
 //type Monaco = typeof monaco
 
@@ -65,7 +66,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
   const autoCloseTagsRef = useRef(autoCloseTags)
   const formatOnSaveRef = useRef(formatOnSave)
 
-  const selectionRef = useRef(selection)
+  const selectionRef = useRef<DatalogType | DatalogType[]>(null)
   const mockDataRef = useRef(mockdata)
 
   const { initialData } = useInitialData()
@@ -82,19 +83,29 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
   }, [formatOnSave])
 
   useEffect(() => {
-    selectionRef.current = selection
-    const model = editorRef.current?.getModel()
-    if (!model) {
-      return
-    }
-    const file = fileTrackers.get(model.uri.toString())
-    if (!file) {
-      return
-    }
-    debouncedSendMessageToWorker(model, file)
-  }, [selection])
+    const fetchAndSendSelection = async () => {
+      mockDataRef.current = mockdata
+      const latestSelection =
+        selection === 'single'
+          ? await getLatestDatalog(mockDataRef.current.datalogs, project)
+          : await getLatestTwoDatalogs(mockDataRef.current.datalogs)
+      selectionRef.current = latestSelection
 
-  useEffect(() => {
+      const model = editorRef.current?.getModel()
+      if (!model) {
+        return
+      }
+      const file = fileTrackers.get(model.uri.toString())
+      if (!file) {
+        return
+      }
+      debouncedSendMessageToWorker(model, file)
+    }
+
+    fetchAndSendSelection()
+  }, [mockdata, selection])
+
+  /*useEffect(() => {
     mockDataRef.current = mockdata
     const model = editorRef.current?.getModel()
     if (!model) {
@@ -105,7 +116,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
       return
     }
     debouncedSendMessageToWorker(model, file)
-  }, [mockdata])
+  }, [mockdata])*/
 
   useEffect(() => {
     const handleGlobalSave = (e: KeyboardEvent) => {
@@ -158,16 +169,12 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
       try {
         if (!previewWorkerRef.current) throw new Error('Worker not initialized')
         if (!project) throw new Error('No project data available')
+        if (!selectionRef.current) return
 
-        // await datalog_selection if issues persists
-        const datalog_selection =
-          selectionRef.current === 'single'
-            ? getLatestDatalog(mockDataRef.current.datalogs, project)
-            : getLatestTwoDatalogs(mockDataRef.current.datalogs)
         const dataObject: DataObjectType = {
           project,
           message: mockDataRef.current.message,
-          datalog_selection,
+          datalog_selection: selectionRef.current,
           datalog_all: mockDataRef.current.datalogs
         }
         const request: PreviewWorkerRequest = {

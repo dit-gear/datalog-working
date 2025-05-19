@@ -56,7 +56,7 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>) => {
         Text
       }
     } else if (type === 'pdf') {
-      const { Document, Page, View, Text, Link, Image, Font, StyleSheet, PDFViewer } = await import(
+      const { Document, Page, View, Text, Link, Image, Font, StyleSheet } = await import(
         '@react-pdf/renderer'
       )
 
@@ -68,8 +68,7 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>) => {
         Link,
         Image,
         Font,
-        StyleSheet,
-        PDFViewer
+        StyleSheet
       }
     }
     const data = new DataObject(dataObject)

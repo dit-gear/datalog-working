@@ -21,7 +21,7 @@ export const Header = () => {
         // Fetch base64 for asset files from main via IPC
         window.sharedApi.readBase64Files(base, paths).then((data) => {
           previewWorker.postMessage({
-            type: 'read-files-base64-response',
+            msgtype: 'read-files-base64-response',
             id,
             data
           })
@@ -57,7 +57,7 @@ export const Header = () => {
           type: type,
           dataObject
         }
-
+        console.log('request sent to worker:', request)
         previewWorkerRef.current.postMessage(request)
       } catch (error) {
         console.error('Error in sendMessageToWorker: ', error)

@@ -1,10 +1,10 @@
 import { DatalogType } from '@shared/datalogTypes'
 import { ProjectRootType } from '@shared/projectTypes'
 
-export function getLatestDatalog(
+export async function getLatestDatalog(
   datalogs: DatalogType[],
   project: ProjectRootType
-): DatalogType | DatalogType[] {
+): Promise<DatalogType | DatalogType[]> {
   if (!datalogs.length) return []
 
   const maxDay = Math.max(...datalogs.map((log) => log.day))
@@ -20,7 +20,7 @@ export function getLatestDatalog(
   return latestEntries
 }
 
-export function getLatestTwoDatalogs(datalogs: DatalogType[]): DatalogType[] {
+export async function getLatestTwoDatalogs(datalogs: DatalogType[]): Promise<DatalogType[]> {
   if (!datalogs.length) return []
 
   const maxDay = Math.max(...datalogs.map((log) => log.day))

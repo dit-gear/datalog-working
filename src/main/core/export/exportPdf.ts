@@ -20,7 +20,7 @@ export const exportPdf = async ({ pdf, selection, hasDialog = false }: exportPdf
     if (!project) throw new Error('No project')
     const _datalogs = Array.from(datalogs().values())
     if (!_datalogs) throw new Error('No datalogs')
-    selection = getLatestDatalog(_datalogs, project)
+    selection = await getLatestDatalog(_datalogs, project)
   }
 
   const log = Array.isArray(selection) ? selection[0] : selection
