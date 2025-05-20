@@ -18,28 +18,28 @@ const features = [
     description: 'Find the app in your menu bar – ready whenever you need it',
     image: menubarImage,
     vid: menubarVideo,
-    icon: Rocket
+    icon: <Rocket className="h-5 w-5 text-foreground" />
   },
   {
     description: 'Project files and configs are located in your documents folder',
     image: filesImage,
     vid: filesVid,
-    icon: Folder
+    icon: <Folder className="h-5 w-5 text-foreground" />
   },
   {
     description: 'Add and edit metadata from your footage effortlessly.',
     image: menubarImage,
-    icon: Clapperboard
+    icon: <Clapperboard className="h-5 w-5 text-foreground" />
   },
   {
     description: ' Build custom templates using React right in the code editor.',
     image: editorImage,
-    icon: Code
+    icon: <Code className="h-5 w-5 text-foreground" />
   },
   {
     description: ' Create presets to simplify and speed up repetitive tasks.',
     image: presetsImage,
-    icon: Send
+    icon: <Send className="h-5 w-5 text-foreground" />
   }
 ]
 
@@ -86,9 +86,7 @@ export function OnboardingCarousel() {
   }, [api])
 
   const handleGetStarted = useCallback(() => {
-    // Handle the "Get Started" action here
-    console.log('Getting started!')
-    // You could redirect to another page or trigger another action
+    window.onboardApi
   }, [])
 
   useEffect(() => {
@@ -147,7 +145,7 @@ export function OnboardingCarousel() {
                   </div>
                   <div className="mt-4 flex flex-col items-center text-center">
                     <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                      <feature.icon className="h-5 w-5 text-foreground" />
+                      {feature.icon}
                     </div>
                     <p className="mt-4 max-w-md text-foreground text-xl font-semibold leading-relaxed text-center px-4">
                       {feature.description}

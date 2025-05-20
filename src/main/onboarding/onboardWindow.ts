@@ -21,7 +21,8 @@ export function openOnboardWindow(): void {
     titleBarStyle: 'hiddenInset',
     resizable: false,
     webPreferences: {
-      contextIsolation: true
+      contextIsolation: true,
+      preload: join(__dirname, '../preload/onboardingPreload.js')
     }
   })
 
@@ -38,4 +39,11 @@ export function openOnboardWindow(): void {
   onboardWindow.on('closed', () => {
     onboardWindow = null
   })
+}
+
+export function closeOnboardWindow(): void {
+  if (onboardWindow) {
+    onboardWindow.close()
+    onboardWindow = null
+  }
 }
