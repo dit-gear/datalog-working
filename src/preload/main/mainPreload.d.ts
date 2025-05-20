@@ -55,6 +55,7 @@ declare global {
       openNewProject: (callback: () => void) => void
       removeOpenNewProject: (callback: () => void) => void
       exportPdf: (pdf: pdfType, selection?: DatalogType[]) => void
+      finishOnboarding: () => void
     }
     sharedApi: {
       onShowOverwriteConfirmation: (callback: (filePath: string) => void) => void

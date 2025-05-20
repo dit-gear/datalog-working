@@ -22,7 +22,7 @@ export function openOnboardWindow(): void {
     resizable: false,
     webPreferences: {
       contextIsolation: true,
-      preload: join(__dirname, '../preload/onboardingPreload.js')
+      preload: join(__dirname, '../preload/mainPreload.js')
     }
   })
 

@@ -24,8 +24,7 @@ export default defineConfig({
         input: {
           mainPreload: resolve(__dirname, 'src/preload/main/mainPreload.ts'),
           editorPreload: resolve(__dirname, 'src/preload/editor/editorPreload.ts'),
-          sendPreload: resolve(__dirname, 'src/preload/send/sendPreload.ts'),
-          onboardingPreload: resolve(__dirname, 'src/preload/onboarding/onboardingPreload.ts')
+          sendPreload: resolve(__dirname, 'src/preload/send/sendPreload.ts')
         }
       }
     }

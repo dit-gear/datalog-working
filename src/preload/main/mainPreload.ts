@@ -72,7 +72,9 @@ const mainApi = {
   },
 
   exportPdf: (pdf: pdfType, selection?: DatalogType[]) =>
-    ipcRenderer.send('pdf-to-export', pdf, selection)
+    ipcRenderer.send('pdf-to-export', pdf, selection),
+
+  finishOnboarding: (): void => ipcRenderer.send('OnboardClose_NewProj')
 }
 
 export const sharedApi = {

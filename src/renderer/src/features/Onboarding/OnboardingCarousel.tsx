@@ -86,7 +86,7 @@ export function OnboardingCarousel() {
   }, [api])
 
   const handleGetStarted = useCallback(() => {
-    window.onboardApi
+    window.mainApi.finishOnboarding()
   }, [])
 
   useEffect(() => {
