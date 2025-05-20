@@ -85,10 +85,6 @@ export function OnboardingCarousel() {
     api.scrollNext()
   }, [api])
 
-  const handleGetStarted = useCallback(() => {
-    window.mainApi.finishOnboarding()
-  }, [])
-
   useEffect(() => {
     if (!api) return
     const handleSelect = () => {
@@ -160,7 +156,7 @@ export function OnboardingCarousel() {
 
       <div className="mt-5 flex flex-col items-center">
         <Button
-          onClick={isLastSlide ? handleGetStarted : handleNext}
+          onClick={isLastSlide ? () => window.mainApi.finishOnboarding() : handleNext}
           className="mb-4"
           size="default"
         >
