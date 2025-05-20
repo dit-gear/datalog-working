@@ -18,7 +18,7 @@ export const renderPdf = async ({ pdf, selection }: renderPdfProps): Promise<str
   if (!project) throw new Error('No project')
   const datalogs = Array.from(datalogStore().values())
   if (!datalogs) throw new Error('No datalogs')
-  if (!selection) selection = getLatestDatalog(datalogs, project)
+  if (!selection) selection = await getLatestDatalog(datalogs, project)
 
   const dataObject: DataObjectType = {
     project,

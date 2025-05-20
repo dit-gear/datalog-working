@@ -33,7 +33,7 @@ export const renderEmail = async ({
   const datalogs = Array.from(datalogStore().values())
   if (!datalogs) throw new Error('no datalogs')
   const selection =
-    sendWindowDataMap.get(windowId)?.selection ?? getLatestDatalog(datalogs, project)
+    sendWindowDataMap.get(windowId)?.selection ?? (await getLatestDatalog(datalogs, project))
 
   const dataObject: DataObjectType = {
     project,
