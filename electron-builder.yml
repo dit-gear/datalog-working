@@ -10,7 +10,6 @@ files:
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
-  - node_modules/fluent-ffmpeg
   - resources/**
 electronLanguages: en_US
 nsis:
@@ -34,5 +33,5 @@ mac:
   artifactName: '${name}-${version}-mac-${arch}.${ext}'
   extraResources:
     - from: ffprobe/${arch}/ffprobe
-      to: ffprobe
+      to: app.asar.unpacked/resources/ffprobe
 npmRebuild: false

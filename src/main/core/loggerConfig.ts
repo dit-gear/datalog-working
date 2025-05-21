@@ -25,7 +25,7 @@ const winstonconfig = (logDir: string) => {
       // Daily file rotation for storing log files
       new DailyRotateFile({
         dirname: logDir, // Directory where logs are stored
-        filename: 'application-%DATE%.log', // File naming pattern
+        filename: 'log-%DATE%.log', // File naming pattern
         datePattern: 'YYYY-MM-DD', // Date pattern for rotation
         maxFiles: '14d', // Keep logs for 14 days
         maxSize: '20m', // Maximum file size before rotation
