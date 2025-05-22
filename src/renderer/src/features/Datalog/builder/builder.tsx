@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom'
 import { datalogFormSchema, datalogFormType } from './utils/schema'
 import { getNextDay } from './utils/getNextDay'
 import { getDefaultId } from './utils/getDefaultId'
+import { Card } from '@components/ui/card'
 
 interface BuilderdialogProps {
   project: ProjectRootType
@@ -110,10 +111,25 @@ const Builder = ({ project, previousEntries, selected }: BuilderdialogProps) => 
               <StatsPanel />
             </div>
             <div className="flex justify-center">
-              <TabsList className="grid grid-cols-3 w-[400px] mt-4">
-                <TabsTrigger value="name">1. Name</TabsTrigger>
-                <TabsTrigger value="import">2. Import</TabsTrigger>
-                <TabsTrigger value="clips">3. Preview</TabsTrigger>
+              <TabsList className="grid grid-cols-3 w-[400px] mt-4 bg-dark">
+                <TabsTrigger
+                  value="name"
+                  className="hover:bg-zinc-900 data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-8 data-[state=active]:decoration-blue-400"
+                >
+                  1. Name
+                </TabsTrigger>
+                <TabsTrigger
+                  value="import"
+                  className="hover:bg-zinc-900 data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-8 data-[state=active]:decoration-blue-400"
+                >
+                  2. Import
+                </TabsTrigger>
+                <TabsTrigger
+                  value="clips"
+                  className="hover:bg-zinc-900 data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-8 data-[state=active]:decoration-blue-400"
+                >
+                  3. Preview
+                </TabsTrigger>
               </TabsList>
             </div>
           </div>
@@ -128,7 +144,7 @@ const Builder = ({ project, previousEntries, selected }: BuilderdialogProps) => 
             </div>
           </TabsContent>
           <TabsContent value="clips" asChild tabIndex={-1}>
-            <div className="col-span-6 mb-16 flex-1 overflow-scroll rounded-lg border border-white/10">
+            <div className="col-span-6 mb-16 flex-1 overflow-scroll rounded-lg border border-white/10 min-h-5/6">
               <Preview />
             </div>
           </TabsContent>

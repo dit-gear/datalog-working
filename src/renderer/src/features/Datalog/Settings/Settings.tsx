@@ -14,6 +14,7 @@ import ParsingTab from './Parsing/ParsingTab'
 import SelfManagedTab from './SelfManaged/SelfManagedlTab'
 import PresetsTab from './Presets/PresetsTab'
 import WarningPresets from './Presets/WarningPresets'
+import WarningSelfManaged from './SelfManaged/WarningSelfManaged'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '@components/ui/card'
 
@@ -106,13 +107,13 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, email_api_exists, t
                       <TabsList className="grid grid-cols-2 bg-dark rounded-none border-b">
                         <TabsTrigger
                           value="project"
-                          className="data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                          className="data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-400"
                         >
                           This Project
                         </TabsTrigger>
                         <TabsTrigger
                           value="global"
-                          className="data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                          className="data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-400"
                         >
                           Local Shared
                         </TabsTrigger>
@@ -120,39 +121,40 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, email_api_exists, t
                     </Tabs>
                     <TabsList className="flex flex-col justify-between items-start h-auto mt-1 bg-card">
                       <TabsTrigger
-                        className="w-full justify-start data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                        className="w-full justify-start data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-400"
                         value="general"
                       >
                         General
                       </TabsTrigger>
                       <TabsTrigger
-                        className="w-full justify-between data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                        className="w-full justify-between data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-400"
                         value="presets"
                       >
                         Presets
                         <WarningPresets templates={templates} />
                       </TabsTrigger>
                       <TabsTrigger
-                        className="w-full justify-start data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                        className="w-full justify-start data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-400"
                         value="paths"
                       >
                         Default Paths
                       </TabsTrigger>
                       <TabsTrigger
-                        className="w-full justify-start data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                        className="w-full justify-start data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-400"
                         value="parsing"
                       >
                         Metadata Fields
                       </TabsTrigger>
                     </TabsList>
                   </Card>
-                  <Card className="mt-2">
+                  <Card className="px-2 mt-2">
                     <TabsList className="flex flex-col justify-between items-start h-auto bg-card">
                       <TabsTrigger
-                        className="w-full justify-start data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                        className="w-full justify-between data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-400"
                         value="selfmanage"
                       >
                         Self managed
+                        <WarningSelfManaged />
                       </TabsTrigger>
                     </TabsList>
                   </Card>
