@@ -27,6 +27,7 @@ interface SendProps {
 const Send = ({ defaults }: SendProps) => {
   const { data } = useData()
   const { data: hasEmailConfig, isLoading, refetch } = useEmailApi()
+  const hasNoSender = !data?.project.email_sender
   const projectPdfs = data?.project.pdfs ?? []
   const projectTemplates = data?.project?.templatesDir?.filter((val) => val.type === 'email') ?? []
   const tags = useTags(data!)
@@ -165,27 +166,39 @@ const Send = ({ defaults }: SendProps) => {
             <Preview />
           </ResizablePanel>
         </ResizablePanelGroup>
+        {hasNoSender && (
+          <div className="absolute bottom-24 z-40 inset-x-8 bg-red-50 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-800 dark:text-red-200 py-4 px-6 rounded-lg shadow-lg flex items-start space-x-3">
+            <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-300 mt-1 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold">No Sender Address Configured</p>
+              <p>Please add a ‘From’ address in Settings before sending emails.</p>
+            </div>
+          </div>
+        )}
         {!hasEmailConfig && (
-          <div className="absolute bottom-20 left-8 right-8 z-40 bg-zinc-950 border-2 border-red-900 text-sm p-4 rounded-lg shadow-2xl flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 flex-1">
-              <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-              <span>
-                <strong>Email API Configuration Missing:</strong> Set up the Email API in Project
-                Settings to enable email functionality.
-              </span>
+          <div className="absolute bottom-24 z-40 inset-x-8 bg-red-50 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-800 dark:text-red-200 py-4 px-6 rounded-lg shadow-lg flex items-start space-x-3">
+            <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-300 mt-1 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold">No Email API Configured</p>
+              <p> Please add a Email API in Settings before sending emails.</p>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <Button type="button" size="sm" onClick={() => refetch()}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Please wait
-                  </>
-                ) : (
-                  <>Refresh</>
-                )}
-              </Button>
-            </div>
+
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => refetch()}
+              variant="secondary"
+              className="mt-1"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Please wait
+                </>
+              ) : (
+                <>Refresh</>
+              )}
+            </Button>
           </div>
         )}
         <div className="fixed bottom-0 w-full justify-end flex p-4 border-t">
@@ -196,7 +209,11 @@ const Send = ({ defaults }: SendProps) => {
             <Button
               onClick={handleSubmit(onSubmit)}
               disabled={
-                isSubmitting || (isSubmitSuccessful && sentSuccess) || isLoading || !hasEmailConfig
+                isSubmitting ||
+                (isSubmitSuccessful && sentSuccess) ||
+                isLoading ||
+                !hasEmailConfig ||
+                hasNoSender
               }
             >
               {isSubmitting ? (

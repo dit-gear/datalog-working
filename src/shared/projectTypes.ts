@@ -303,7 +303,8 @@ const TemplateDirectoryFileZod = z.object({
 export const ProjectRootZod = ProjectSchemaZod.merge(
   z.object({
     settings: ProjectSettingsZod,
-    templatesDir: z.array(TemplateDirectoryFileZod)
+    templatesDir: z.array(TemplateDirectoryFileZod),
+    email_sender: z.string().optional()
   })
 )
 

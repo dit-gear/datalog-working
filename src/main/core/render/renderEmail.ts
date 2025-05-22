@@ -87,8 +87,9 @@ export const renderEmail = async ({
             dataObject
           }
           const renderedPdf = await pdfWorker.render(reqpdf)
+          const pdfBuffer = Buffer.from(renderedPdf.code)
           attachmentsToSend.push({
-            content: renderedPdf.code,
+            content: pdfBuffer.toString('base64'),
             filename: replaceTagsMultiple({
               selection,
               template: att.output_name,
