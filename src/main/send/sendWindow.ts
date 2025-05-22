@@ -49,8 +49,6 @@ export function createSendWindow(
     sendWindow.loadFile(join(__dirname, '../renderer/send.html'))
   }
 
-  sendWindow.webContents.openDevTools({ mode: 'detach' })
-
   sendWindow.on('closed', () => {
     sendWindowDataMap.delete(windowId)
   })

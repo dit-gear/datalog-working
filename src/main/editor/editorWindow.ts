@@ -40,7 +40,7 @@ export function createEditorWindow(): void {
     editorWindow.loadFile(join(__dirname, '../renderer/editor.html'))
   }
 
-  editorWindow.webContents.openDevTools({ mode: 'detach' })
+  //editorWindow.webContents.openDevTools({ mode: 'detach' })
 
   editorWindow.on('closed', () => {
     editorWindow = null

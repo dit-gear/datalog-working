@@ -100,7 +100,7 @@ const DataTable = ({ columns, data }: DataTableProps): React.ReactElement => {
 
   return (
     <Table>
-      <TableHeader>
+      <TableHeader className="sticky top-24 bg-zinc-950">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => (
