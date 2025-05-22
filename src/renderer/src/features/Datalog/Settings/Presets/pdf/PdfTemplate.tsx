@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Input } from '@components/ui/input'
 import { FormField, FormItem, FormControl, FormLabel, FormMessage, Form } from '@components/ui/form'
-import { pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
+import { TemplateDirectoryFile } from '@shared/projectTypes'
 import {
   Select,
   SelectContent,
@@ -10,9 +10,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@components/ui/select'
-import { Textarea } from '@components/ui/textarea'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { emailType, emailEditType, emailWithoutIDZod, emailWithoutIDType } from './types'
+import { pdfType, pdfEditType, pdfWithoutIDZod, pdfWitoutIDType } from '../types'
 import {
   Dialog,
   DialogTrigger,
@@ -22,47 +21,40 @@ import {
   DialogDescription,
   DialogFooter
 } from '@components/ui/dialog'
-import MultiSelectTextInput from '@components/MultiSelectTextInput'
-import MultiSelect from '@components/MultiSelect'
 import { Button } from '@components/ui/button'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Switch } from '@components/ui/switch'
-import { getPdfAttachments } from '@shared/utils/getAttachments'
-import { mapPdfTypesToOptions } from '@renderer/utils/mapPdfTypes'
 import { nanoid } from 'nanoid/non-secure'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@components/ui/tooltip'
 import { Plus } from 'lucide-react'
 
-interface EmailTemplateProps {
-  append: (email: emailType) => void
-  update: (index: number, email: emailType) => void
-  emailEdit: emailEditType | null
-  setEmailEdit: (edit: emailEditType | null) => void
+interface PdfTemplateProps {
+  append: (email: pdfType) => void
+  update: (index: number, email: pdfType) => void
+  emailEdit: pdfEditType | null
+  setEmailEdit: (edit: pdfEditType | null) => void
   templates: TemplateDirectoryFile[]
-  pdfs: pdfType[]
 }
 
-const EmailTemplate: React.FC<EmailTemplateProps> = ({
+const PdfTemplate: React.FC<PdfTemplateProps> = ({
   append,
   update,
   emailEdit,
   setEmailEdit,
-  templates,
-  pdfs
+  templates
 }) => {
   const [open, setOpen] = useState<boolean>(false)
+
   const defaultValues = {
     label: '',
-    recipients: [],
-    subject: '',
-    message: '',
+    output_name: '<log>.pdf',
     react: '',
     enabled: true
   }
-  const form = useForm<emailWithoutIDType>({
+  const form = useForm<pdfWitoutIDType>({
     defaultValues: defaultValues,
     mode: 'onSubmit',
-    resolver: zodResolver(emailWithoutIDZod)
+    resolver: zodResolver(pdfWithoutIDZod)
   })
 
   const { control, handleSubmit, reset } = form
@@ -71,9 +63,9 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
 
   const assignIndex = (): number => currentIndex++
 
-  const onSubmit: SubmitHandler<emailWithoutIDType> = (data): void => {
+  const onSubmit: SubmitHandler<pdfWitoutIDType> = (data): void => {
     if (emailEdit !== null) {
-      update(emailEdit.index, { id: emailEdit.email.id, ...data })
+      update(emailEdit.index, { id: emailEdit.pdf.id, ...data })
     } else {
       append({ id: nanoid(5), ...data })
     }
@@ -81,7 +73,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
   }
   useEffect(() => {
     if (emailEdit) {
-      const { id, ...rest } = emailEdit.email
+      const { id, ...rest } = emailEdit.pdf
       reset(rest)
       setOpen(true)
     }
@@ -107,11 +99,9 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
       </div>
       <DialogContent className="border p-8">
         <DialogHeader>
-          <DialogTitle>
-            {emailEdit ? `Edit ${emailEdit.email.label}` : 'New Email Template'}
-          </DialogTitle>
+          <DialogTitle>{emailEdit ? `Edit ${emailEdit.pdf.label}` : 'New PDF'}</DialogTitle>
           <DialogDescription>
-            {`${emailEdit ? 'Edit the' : 'Create a new'} Email template that can be used from the UI`}
+            {`${emailEdit ? 'Edit the' : 'Create a new'} Pdf preset that can be used from the UI`}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -120,7 +110,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
             name={`label`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name / Label</FormLabel>
+                <FormLabel>Label</FormLabel>
                 <FormControl>
                   <Input {...field} data-index={assignIndex()} />
                 </FormControl>
@@ -130,22 +120,10 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
           />
           <FormField
             control={control}
-            name={`recipients`}
+            name={`output_name`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>To:</FormLabel>
-                <FormControl>
-                  <MultiSelectTextInput {...field} dataIndex={assignIndex()} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`subject`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Subject</FormLabel>
+                <FormLabel>Output Name</FormLabel>
                 <FormControl>
                   <Input {...field} data-index={assignIndex()} />
                 </FormControl>
@@ -153,67 +131,22 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
               </FormItem>
             )}
           />
-          <FormField
-            control={control}
-            name={`attachments`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Attachments</FormLabel>
-                <FormControl>
-                  <MultiSelect
-                    {...field}
-                    dataIndex={assignIndex()}
-                    value={mapPdfTypesToOptions(getPdfAttachments(pdfs, field.value ?? []))}
-                    onChange={(newValues) => {
-                      // Map selected Option objects to pdfType objects
-                      const updatedAttachments = newValues
-                        .map((id) => {
-                          const foundPdf = pdfs.find((pdf) => pdf.id === id)
-                          console.log('Selected ID -> pdf:', id, foundPdf) // Debug mapping
-                          return foundPdf?.id
-                        })
-                        .filter(Boolean) // Remove any undefined entries
 
-                      field.onChange(updatedAttachments) // Update the form state with pdfType objects
-                    }}
-                    options={pdfs.map((pdf) => {
-                      const option = { label: pdf.label, value: pdf.id }
-                      return option
-                    })}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`message`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Message</FormLabel>
-                <FormControl>
-                  <Textarea {...field} data-index={assignIndex()} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={control}
             name={`react`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>React Email Template</FormLabel>
+                <FormLabel>React Pdf Template</FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
                         {templates
-                          .filter((template) => template.type === 'email')
+                          .filter((template) => template.type === 'pdf')
                           .map((template) => (
                             <SelectItem key={template.path} value={template.name}>
                               {template.name}
@@ -252,7 +185,7 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
               </FormItem>
             )}
           />
-          <DialogFooter className="mt-4">
+          <DialogFooter>
             <Button type="button" onClick={handleSubmit(onSubmit)}>
               Save
             </Button>
@@ -263,4 +196,4 @@ const EmailTemplate: React.FC<EmailTemplateProps> = ({
   )
 }
 
-export default EmailTemplate
+export default PdfTemplate

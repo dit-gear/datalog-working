@@ -285,7 +285,7 @@ export const ProjectSchemaZod = z.object({
     .refine((name) => !reservedNames.includes(name), {
       message: 'The project name cannot be a reserved name'
     }),
-  ...GlobalSchemaZod.shape
+  ...GlobalSchemaZod.omit({ email_sender: true }).shape
 })
 
 const ProjectSettingsZod = z.object({

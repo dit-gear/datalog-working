@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { CardContent } from '@components/ui/card'
 import { useFormContext, useFieldArray, useWatch } from 'react-hook-form'
-import { formSchemaType } from '../types'
-import { emailEditType } from './types'
+import { formSchemaType } from '../../types'
+import { emailEditType } from '../types'
 import { pdfType, TemplateDirectoryFile } from '@shared/projectTypes'
 import {
   Accordion,
@@ -20,11 +20,9 @@ import { MoreHorizontal } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import EmailTemplate from './EmailTemplate'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
-import { Check, X } from 'lucide-react'
-import { Input } from '@components/ui/input'
+import { Check, X, AlertTriangle } from 'lucide-react'
 import FormRow from '@components/FormRow'
-import { FormField, FormItem, FormControl } from '@components/ui/form'
-import EmailApi from './EmailAPI/EmailApi'
+import WarningTooltip from '@components/WarningTooltip'
 
 interface EmailProps {
   scope: 'project' | 'global'
@@ -51,28 +49,20 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
 
   return (
     <CardContent key={`Email?_${scope}`}>
-      <FormField
-        key={`${scope}_email_sender`}
-        control={control}
-        name={`${scope}_email_sender`}
-        render={({ field }) => (
-          <FormItem>
-            <FormRow name={field.name} label="Sender Email" descriptionTag={'API: "from": string'}>
-              <FormControl>
-                <Input {...field} className="max-w-80" />
-              </FormControl>
-            </FormRow>
-          </FormItem>
-        )}
-      />
-
-      <EmailApi />
       <FormRow label="Email Presets">
         <dd className="mt-1 text-sm leading-6 sm:mt-0 flex flex-col gap-2">
           <Accordion type="single" collapsible className={fields.length ? 'border rounded-md' : ''}>
             {fields.map((email, index) => (
               <AccordionItem key={index} value={`email-${index}`} className="py-4 px-8">
-                <AccordionTrigger className="text-base">{email.label}</AccordionTrigger>
+                <AccordionTrigger className="text-base">
+                  <span className="flex gap-2 items-center">
+                    {email.label}
+                    {!templates.find((t) => t.name === email.react && t.type === 'email') && (
+                      <WarningTooltip text="Template file no longer exists." />
+                    )}
+                  </span>
+                </AccordionTrigger>
+
                 <div className="-mt-12 mr-8 flex justify-end">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -105,7 +95,16 @@ const Emails: React.FC<EmailProps> = ({ scope, templates }) => {
                       : ''}
                   </p>
                   <p>React template:</p>
-                  <p>{email.react}</p>
+                  <p className="flex items-center gap-1">
+                    {templates.find((t) => t.name === email.react && t.type === 'email') ? (
+                      email.react
+                    ) : (
+                      <>
+                        <p className="text-red-800">{email.react}</p>{' '}
+                        <WarningTooltip text="Template file no longer exists." />
+                      </>
+                    )}
+                  </p>
                   <p>Enabled:</p>
                   {email.enabled ? (
                     <Check className="size-5 text-green-500" />

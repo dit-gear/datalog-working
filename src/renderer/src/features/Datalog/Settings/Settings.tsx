@@ -11,9 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import GeneralTab from './General/GeneralTab'
 import PathsTab from './Paths/PathsTab'
 import ParsingTab from './Parsing/ParsingTab'
-import EmailTab from './Email/EmailTab'
-import PdfTab from './PDF/PdfTab'
+import SelfManagedTab from './SelfManaged/SelfManagedlTab'
+import PresetsTab from './Presets/PresetsTab'
+import WarningPresets from './Presets/WarningPresets'
 import { useNavigate } from 'react-router-dom'
+import { Card } from '@components/ui/card'
 
 interface SettingsDialogProps {
   defaults: ProjectSettingsType
@@ -38,7 +40,6 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, email_api_exists, t
     project_default_proxy_path: defaults.project?.default_proxy_path ?? '',
     project_custom_fields: defaults.project?.custom_fields ?? undefined,
     project_emails: defaults.project?.emails ?? [],
-    project_email_sender: defaults.project?.email_sender ?? '',
     project_pdfs: defaults.project?.pdfs ?? [],
     global_logid_template: defaults.global?.logid_template ?? '',
     global_unit: defaults.global?.unit ?? '',
@@ -47,10 +48,10 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, email_api_exists, t
     global_default_proxy_path: defaults.global?.default_proxy_path ?? '',
     global_custom_fields: defaults.global?.custom_fields ?? undefined,
     global_emails: defaults.global?.emails ?? [],
-    global_email_sender: defaults.global?.email_sender ?? '',
     global_pdfs: defaults.global?.pdfs ?? [],
     project_enable_parsing: !!defaults.project?.custom_fields,
     global_enable_parsing: !!defaults.global?.custom_fields,
+    global_email_sender: defaults.global?.email_sender ?? '',
     email_api_exist: email_api_exists
   })
 
@@ -100,29 +101,61 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, email_api_exists, t
             >
               <div className="h-full">
                 <nav className="w-full sticky z-30 top-8">
-                  <Tabs value={scope} onValueChange={(v) => setScope(v as Scope)}>
-                    <TabsList className="grid grid-cols-2 mt-2">
-                      <TabsTrigger value="project">This Project</TabsTrigger>
-                      <TabsTrigger value="global">Local Shared</TabsTrigger>
+                  <Card className="p-2 mt-2">
+                    <Tabs value={scope} onValueChange={(v) => setScope(v as Scope)}>
+                      <TabsList className="grid grid-cols-2 bg-dark rounded-none border-b">
+                        <TabsTrigger
+                          value="project"
+                          className="data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                        >
+                          This Project
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="global"
+                          className="data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                        >
+                          Local Shared
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                    <TabsList className="flex flex-col justify-between items-start h-auto mt-1 bg-card">
+                      <TabsTrigger
+                        className="w-full justify-start data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                        value="general"
+                      >
+                        General
+                      </TabsTrigger>
+                      <TabsTrigger
+                        className="w-full justify-between data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                        value="presets"
+                      >
+                        Presets
+                        <WarningPresets templates={templates} />
+                      </TabsTrigger>
+                      <TabsTrigger
+                        className="w-full justify-start data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                        value="paths"
+                      >
+                        Default Paths
+                      </TabsTrigger>
+                      <TabsTrigger
+                        className="w-full justify-start data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                        value="parsing"
+                      >
+                        Metadata Fields
+                      </TabsTrigger>
                     </TabsList>
-                  </Tabs>
-                  <TabsList className="flex flex-col justify-between items-start h-auto mt-2">
-                    <TabsTrigger className="w-full justify-start" value="general">
-                      General
-                    </TabsTrigger>
-                    <TabsTrigger className="w-full justify-start" value="paths">
-                      Default Paths
-                    </TabsTrigger>
-                    <TabsTrigger className="w-full justify-start" value="parsing">
-                      Metadata Fields
-                    </TabsTrigger>
-                    <TabsTrigger className="w-full justify-start" value="email">
-                      Email
-                    </TabsTrigger>
-                    <TabsTrigger className="w-full justify-start" value="pdf">
-                      Files and Exports
-                    </TabsTrigger>
-                  </TabsList>
+                  </Card>
+                  <Card className="mt-2">
+                    <TabsList className="flex flex-col justify-between items-start h-auto bg-card">
+                      <TabsTrigger
+                        className="w-full justify-start data-[state=active]:underline data-[state=active]:decoration-2 data-[state=active]:underline-offset-4 data-[state=active]:decoration-blue-500"
+                        value="selfmanage"
+                      >
+                        Self managed
+                      </TabsTrigger>
+                    </TabsList>
+                  </Card>
                 </nav>
               </div>
               <div className="mb-20">
@@ -135,11 +168,11 @@ const Settings: React.FC<SettingsDialogProps> = ({ defaults, email_api_exists, t
                 <TabsContent value="parsing" className="mt-0 pt-2" tabIndex={-1}>
                   <ParsingTab scope={scope} />
                 </TabsContent>
-                <TabsContent value="email" tabIndex={-1}>
-                  <EmailTab scope={scope} templates={templates} />
+                <TabsContent value="presets" tabIndex={-1}>
+                  <PresetsTab scope={scope} templates={templates} />
                 </TabsContent>
-                <TabsContent value="pdf" tabIndex={-1}>
-                  <PdfTab scope={scope} templates={templates} />
+                <TabsContent value="selfmanage" tabIndex={-1}>
+                  <SelfManagedTab />
                 </TabsContent>
               </div>
               <div className="fixed right-2 bottom-0  bg-background flex justify-end rounded-tl-lg gap-10 px-6 py-4">

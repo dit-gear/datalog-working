@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { CardContent } from '@components/ui/card'
 import { useFormContext, useFieldArray } from 'react-hook-form'
-import { formSchemaType } from '../types'
-import { pdfEditType } from './types'
+import { formSchemaType } from '../../types'
+import { pdfEditType } from '../types'
 import { TemplateDirectoryFile } from '@shared/projectTypes'
 import {
   Accordion,
@@ -22,6 +22,7 @@ import PdfTemplate from './PdfTemplate'
 import { getFileName } from '@renderer/utils/formatString'
 import { Check, X } from 'lucide-react'
 import FormRow from '@components/FormRow'
+import WarningTooltip from '@components/WarningTooltip'
 
 interface PdfProps {
   scope: 'project' | 'global'
@@ -45,7 +46,14 @@ const Pdfs: React.FC<PdfProps> = ({ scope, templates }) => {
           <Accordion type="single" collapsible className={fields.length ? 'border rounded-md' : ''}>
             {fields.map((pdf, index) => (
               <AccordionItem key={index} value={`pdf-${index}`} className="py-4 px-8">
-                <AccordionTrigger>{pdf.label}</AccordionTrigger>
+                <AccordionTrigger>
+                  <span className="flex gap-2 items-center">
+                    {pdf.label}
+                    {!templates.find((t) => t.name === pdf.react && t.type === 'pdf') && (
+                      <WarningTooltip text="Template file no longer exists." />
+                    )}
+                  </span>
+                </AccordionTrigger>
                 <div className="-mt-12 mr-8 flex justify-end">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -65,7 +73,16 @@ const Pdfs: React.FC<PdfProps> = ({ scope, templates }) => {
                   <p>Output Name:</p>
                   <p>{pdf.output_name}</p>
                   <p>React template:</p>
-                  <p>{pdf.react ? getFileName(pdf.react) : pdf.react}</p>
+                  <span className="flex items-center gap-1">
+                    {templates.find((t) => t.name === pdf.react && t.type === 'pdf') ? (
+                      pdf.react
+                    ) : (
+                      <>
+                        <p className="text-red-800">{pdf.react}</p>{' '}
+                        <WarningTooltip text="Template file no longer exists." />
+                      </>
+                    )}
+                  </span>
                   <p>Enabled:</p>
                   {pdf.enabled ? (
                     <Check className="size-5 text-green-500" />

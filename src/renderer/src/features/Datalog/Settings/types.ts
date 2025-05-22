@@ -13,7 +13,6 @@ export const formSchema = z
     project_default_proxy_path: ProjectSchemaZod.shape.default_proxy_path,
     project_custom_fields: ProjectSchemaZod.shape.custom_fields,
     project_emails: ProjectSchemaZod.shape.emails,
-    project_email_sender: ProjectSchemaZod.shape.email_sender,
     project_pdfs: ProjectSchemaZod.shape.pdfs,
     global_logid_template: GlobalSchemaZod.shape.logid_template,
     global_unit: GlobalSchemaZod.shape.unit,
