@@ -32,6 +32,14 @@ export const DurationStat = ({ value }: DurationStatProps) => {
             <span className="text-sm text-gray-400">min</span>
           </>
         ) : null}
+        {!display?.hours && display?.seconds ? (
+          <>
+            <span className="text-4xl font-semibold tracking-tight text-white">
+              {display.seconds}
+            </span>
+            <span className="text-sm text-gray-400">sec</span>
+          </>
+        ) : null}
       </>
     </Stat>
   )
