@@ -18,7 +18,6 @@ import { useNavigate } from 'react-router-dom'
 import { datalogFormSchema, datalogFormType } from './utils/schema'
 import { getNextDay } from './utils/getNextDay'
 import { getDefaultId } from './utils/getDefaultId'
-import { Card } from '@components/ui/card'
 
 interface BuilderdialogProps {
   project: ProjectRootType

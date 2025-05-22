@@ -20,7 +20,7 @@ import { MoreHorizontal } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import EmailTemplate from './EmailTemplate'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
-import { Check, X, AlertTriangle } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import FormRow from '@components/FormRow'
 import WarningTooltip from '@components/WarningTooltip'
 

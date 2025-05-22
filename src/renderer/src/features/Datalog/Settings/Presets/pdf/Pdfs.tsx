@@ -19,7 +19,6 @@ import {
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import PdfTemplate from './PdfTemplate'
-import { getFileName } from '@renderer/utils/formatString'
 import { Check, X } from 'lucide-react'
 import FormRow from '@components/FormRow'
 import WarningTooltip from '@components/WarningTooltip'

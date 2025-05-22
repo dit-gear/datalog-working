@@ -10,7 +10,7 @@ import { useIpcNavigation } from '../hooks/useIpcNavigation'
 import { useProject } from '../hooks/useProject'
 import { useIpcListeners } from '../hooks/useIpcListeners'
 import AppIcon from '../../../assets/appIconlight.png'
-import MessageBox from '@components/MessageBox'
+//import MessageBox from '@components/MessageBox'
 
 function Main() {
   useIpcNavigation()
