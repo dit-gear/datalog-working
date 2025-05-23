@@ -42,8 +42,12 @@ export const renderPdf = async ({ pdf, selection }: renderPdfProps): Promise<str
       type: pdfpath.type,
       dataObject
     }
-    const renderedPdf = await pdfWorker.render(req)
-    return renderedPdf.code
+    const result = await pdfWorker.render(req)
+    if (result.error) {
+      // Propagate worker error message
+      throw new Error(`PDF render failed: ${result.error}`)
+    }
+    return result.code
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown error'
     logger.error(`Error in renderPdf: ${message}`)

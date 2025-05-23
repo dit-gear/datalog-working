@@ -11,7 +11,7 @@ export function createRenderWorker() {
     code,
     type,
     dataObject
-  }): Promise<{ code: string; plainText?: string }> {
+  }): Promise<{ code: string; plainText?: string; error?: string }> {
     if (!worker) {
       worker = new Worker(renderWorkerPath)
     }
