@@ -61,6 +61,9 @@ export const renderEmail = async ({
             dataObject
           }
           const renderedEmail = await emailWorker.render(req)
+          if (renderedEmail.error) {
+            throw new Error(`Email render failed: ${renderedEmail.error}`)
+          }
           //const emailcode = renderedEmail.code
           return renderedEmail
         }
@@ -87,6 +90,9 @@ export const renderEmail = async ({
             dataObject
           }
           const renderedPdf = await pdfWorker.render(reqpdf)
+          if (renderedPdf.error) {
+            throw new Error(`PDF render failed: ${renderedPdf.error}`)
+          }
           const pdfBuffer = Buffer.from(renderedPdf.code)
           attachmentsToSend.push({
             content: pdfBuffer.toString('base64'),
