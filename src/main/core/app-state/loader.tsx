@@ -68,8 +68,9 @@ export async function loadState(): Promise<void> {
     if (loadActiveProject.success) {
       logger.info('Project loaded successfully')
     }
+  } else {
+    logger.info('No project to load')
   }
-  logger.info('No project to load')
 }
 
 async function ensureConfigExist(config: string) {
