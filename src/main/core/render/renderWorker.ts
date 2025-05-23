@@ -1,40 +1,6 @@
 import { parentPort } from 'worker_threads'
 import { createContext, Script } from 'vm'
 import React from 'react'
-import {
-  pdf as _pdf,
-  renderToBuffer as _renderToBuffer,
-  Document as PdfDocument,
-  Page as PdfPage,
-  View as PdfView,
-  Text as PdfText,
-  Link as PdfLink,
-  Image as PdfImage,
-  Font as PdfFont,
-  StyleSheet as PdfStyleSheet
-} from '@react-pdf/renderer'
-//import { render } from '@react-email/render'
-import { render as emailRender } from '@react-email/render'
-import {
-  Html,
-  Head,
-  Body,
-  Button,
-  Container,
-  CodeBlock,
-  CodeInline,
-  Column,
-  Row,
-  Font as EmailFont,
-  Heading,
-  Hr,
-  Img,
-  Link as EmailLink,
-  Markdown,
-  Section,
-  Preview,
-  Text as EmailText
-} from '@react-email/components'
 import { transform } from 'sucrase'
 import { WorkerRequest } from './types'
 import { inlineAssetImports } from '@shared/utils/inlineAssetsImports'
@@ -52,8 +18,30 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
     const { DataObject } = await import('@shared/datalogClass')
 
     if (type === 'email') {
-      // Use statically imported react-email modules.
-      render = emailRender
+      ;({ render } = await import('@react-email/render'))
+
+      // Dynamically import individual email components.
+      const {
+        Html,
+        Head,
+        Body,
+        Button,
+        Container,
+        CodeBlock,
+        CodeInline,
+        Column,
+        Row,
+        Font,
+        Heading,
+        Hr,
+        Img,
+        Link,
+        Markdown,
+        Section,
+        Preview,
+        Text
+      } = await import('@react-email/components')
+
       components = {
         Html,
         Head,
@@ -64,29 +52,33 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
         CodeInline,
         Column,
         Row,
-        Font: EmailFont,
+        Font,
         Heading,
         Hr,
         Img,
-        Link: EmailLink,
+        Link,
         Markdown,
         Section,
         Preview,
-        Text: EmailText
+        Text
       }
     } else if (type === 'pdf') {
-      // Use statically imported react-pdf modules.
-      pdf = _pdf
-      render = _renderToBuffer
+      // Preload the PDF module and destructure its components.
+      const pdfModule = await import('@react-pdf/renderer')
+      pdf = pdfModule.pdf // Preloaded pdf rendering function
+      render = pdfModule.renderToBuffer
+
+      const { Document, Page, View, Text, Link, Image, Font, StyleSheet } = pdfModule
+
       components = {
-        Document: PdfDocument,
-        Page: PdfPage,
-        View: PdfView,
-        Text: PdfText,
-        Link: PdfLink,
-        Image: PdfImage,
-        Font: PdfFont,
-        StyleSheet: PdfStyleSheet
+        Document,
+        Page,
+        View,
+        Text,
+        Link,
+        Image,
+        Font,
+        StyleSheet
       }
     }
 

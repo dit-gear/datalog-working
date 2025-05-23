@@ -4,11 +4,19 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [externalizeDepsPlugin({ exclude: ['@react-pdf/renderer', '@react-email/render'] })],
     resolve: {
       alias: {
         '@shared': resolve('src/shared'),
         '@main': resolve('src/main')
+      }
+    },
+    build: {
+      rollupOptions: {
+        input: {
+          index: resolve('src/main/index.ts'),
+          renderWorker: resolve('src/main/core/render/renderWorker.ts')
+        }
       }
     }
   },

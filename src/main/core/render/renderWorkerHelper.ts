@@ -1,4 +1,3 @@
-// renderWorkerHelper.ts
 import { Worker } from 'worker_threads'
 import renderWorkerPath from './renderWorker?modulePath'
 
