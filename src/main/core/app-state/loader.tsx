@@ -105,7 +105,6 @@ async function onFirstRun() {
       .catch(() => false)
   ) {
     logger.info('Already onboarded')
-    openOnboardWindow() // Remove this when not testing
     return
   }
   // Determine template source based on environment

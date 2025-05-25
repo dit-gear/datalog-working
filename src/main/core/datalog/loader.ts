@@ -5,7 +5,8 @@ import logger from '../logger'
 import { DatalogDynamicType } from '@shared/datalogTypes'
 import { appState } from '../app-state/state'
 import { DatalogDynamicZod } from '@shared/datalogTypes'
-import { Notification } from 'electron'
+import { nativeImage, Notification } from 'electron'
+import erroricon from '../../../../resources/error_icon.png?asset'
 
 export const loadDatalog = async (filePath: string): Promise<DatalogDynamicType> => {
   const project = appState.project
@@ -22,7 +23,8 @@ export const loadDatalog = async (filePath: string): Promise<DatalogDynamicType>
     logger.error(`Error loading datalog at ${filePath}: ${message}`)
     const notification = new Notification({
       title: `Error loading datalog at ${filePath}`,
-      body: message
+      body: message,
+      icon: nativeImage.createFromPath(erroricon)
     })
     notification.show()
     throw new Error(message)

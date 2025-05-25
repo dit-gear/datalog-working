@@ -1,5 +1,5 @@
 // ipcHandlers.ts
-import { ipcMain } from 'electron'
+import { ipcMain, Notification, nativeImage } from 'electron'
 import fs from 'fs/promises'
 import { InitialSendData, Response } from '@shared/shared-types'
 import { emailType } from '@shared/projectTypes'
@@ -8,6 +8,8 @@ import { getSendWindow } from './sendWindow'
 import { renderEmail } from '../core/render/renderEmail'
 import { sendEmail } from '../core/send-email'
 import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
+import successicon from '../../../resources/success_icon.png?asset'
+import erroricon from '../../../resources/error_icon.png?asset'
 
 export function setupSendIpcHandlers(): void {
   ipcMain.handle('initial-send-data', async (event): Promise<InitialSendData> => {
@@ -80,9 +82,21 @@ export function setupSendIpcHandlers(): void {
         if (rendered) {
           await sendEmail({ email, rendered })
         }
+        const successotification = new Notification({
+          title: 'Email Sent',
+          body: `"${email.subject}" sent successfully to ${email.recipients.length} recipient`,
+          icon: nativeImage.createFromPath(successicon)
+        })
+        successotification.show()
         return { success: true }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        const errornotification = new Notification({
+          title: 'Email could not be sent',
+          body: errorMessage,
+          icon: nativeImage.createFromPath(erroricon)
+        })
+        errornotification.show()
         return { success: false, error: errorMessage }
       }
     }

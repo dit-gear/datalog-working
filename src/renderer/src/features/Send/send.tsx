@@ -64,6 +64,7 @@ const Send = ({ defaults }: SendProps) => {
       const res = await window.sendApi.sendEmail(data)
       if (res.success) {
         setSendSuccess(true)
+        window.sendApi.closeSendWindow()
       } else throw new Error(res.error)
     } catch (error) {
       const errormessage =

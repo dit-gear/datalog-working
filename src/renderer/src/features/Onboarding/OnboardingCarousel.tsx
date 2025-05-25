@@ -1,12 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Clapperboard, Send, Code, Folder, Rocket } from 'lucide-react'
 import type { CarouselApi } from '@components/ui/carousel'
-import menubarImage from '../../assets/onboard/menubar.png'
-import menubarVideo from '../../assets/onboard/statusbar.mov'
-import filesImage from '../../assets/onboard/files.png'
-import filesVid from '../../assets/onboard/folders.mov'
+import menubarVideo from '../../assets/onboard/menubar.mp4'
+import foldersImage from '../../assets/onboard/folders.png'
+import metadataVideo from '../../assets/onboard/metadata.mp4'
 import editorImage from '../../assets/onboard/editor.png'
-import presetsImage from '../../assets/onboard/presets.png'
+import presetsvideo from '../../assets/onboard/presets.mp4'
 
 import { Carousel, CarouselContent, CarouselItem } from '@components/ui/carousel'
 import { Button } from '@components/ui/button'
@@ -15,30 +14,28 @@ import { Button } from '@components/ui/button'
 const features = [
   {},
   {
-    description: 'Find the app in your menu bar – ready whenever you need it',
-    image: menubarImage,
+    description: 'Find the app in your menu bar – ready whenever you need it!',
     vid: menubarVideo,
     icon: <Rocket className="h-5 w-5 text-foreground" />
   },
   {
-    description: 'Project files and configs are located in your documents folder',
-    image: filesImage,
-    vid: filesVid,
+    description: 'File based configuration - everything is located in your documents folder!',
+    image: foldersImage,
     icon: <Folder className="h-5 w-5 text-foreground" />
   },
   {
-    description: 'Add and edit metadata from your footage effortlessly.',
-    image: menubarImage,
+    description: 'Ingest and edit metadata from your footage effortlessly!',
+    vid: metadataVideo,
     icon: <Clapperboard className="h-5 w-5 text-foreground" />
   },
   {
-    description: ' Build custom templates using React right in the code editor.',
+    description: 'Create your own email and pdf templates using React!',
     image: editorImage,
     icon: <Code className="h-5 w-5 text-foreground" />
   },
   {
-    description: ' Create presets to simplify and speed up repetitive tasks.',
-    image: presetsImage,
+    description: 'Distribute your reports in seconds with presets!',
+    vid: presetsvideo,
     icon: <Send className="h-5 w-5 text-foreground" />
   }
 ]
@@ -109,9 +106,30 @@ export function OnboardingCarousel() {
           {features.map((feature, index) => (
             <CarouselItem key={index} data-carousel-item>
               {index === 0 ? (
-                <div className="mb-6 text-center">
+                <div className="flex flex-col mb-6 items-center">
+                  <svg
+                    width="200"
+                    height="200"
+                    viewBox="0 0 200 200"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="100" cy="100" r="30" fill="#60a5fa">
+                      <animate
+                        attributeName="r"
+                        values="30;40;30"
+                        dur="1.5s"
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="fill"
+                        values="#60a5fa;#2563eb;#60a5fa"
+                        dur="8s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                  </svg>
                   <h1 className="mb-4 text-3xl font-extrabold tracking-normal text-center text-foreground">
-                    Get Started
+                    Get Started with datalog.email
                   </h1>
                   <p className="mt-2 text-base text-muted-foreground text-center px-6">
                     Let's walk you through the key features to get you started
@@ -177,3 +195,20 @@ export function OnboardingCarousel() {
     </div>
   )
 }
+
+/*
+   <video
+                        ref={(el) => {
+                          videoRefs.current[index] = el
+                        }}
+                        src={feature.vid}
+                        autoPlay
+                        muted
+                        playsInline
+                        //className="max-h-56 w-full object-cover mx-auto"
+                        onEnded={(e) => {
+                          e.currentTarget.pause()
+                          e.currentTarget.currentTime = e.currentTarget.duration
+                        }}
+                      />
+*/

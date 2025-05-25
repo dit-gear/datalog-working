@@ -9,6 +9,7 @@ import { exportPdf } from './export/exportPdf'
 import trayIcon from '../../../resources/tray.png?asset'
 import logger from './logger'
 import { createAboutWindow } from '../about/aboutWindow'
+import { openOnboardWindow } from '../onboarding/onboardWindow'
 
 interface buildContextMenuProps {
   projects: ProjectMenuItem[] | null
@@ -114,7 +115,13 @@ const buildContextMenu = ({ projects, activeProject }: buildContextMenuProps): M
       enabled: Boolean(activeProject)
     }, // Opens main window and open settings modal.
     { type: 'separator' },
-    { label: 'Help', submenu: [{ label: 'Docs' } /*{ label: 'Discord' }*/] },
+    {
+      label: 'Help',
+      submenu: [
+        { label: 'Docs' },
+        { label: 'Onboarding', click: () => openOnboardWindow() } /*{ label: 'Discord' }*/
+      ]
+    },
     { label: 'About', click: () => createAboutWindow() },
     { type: 'separator' },
     /*{ label: 'Log in', enabled: false },*/

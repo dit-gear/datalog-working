@@ -1,4 +1,4 @@
-import { dialog, Notification, app } from 'electron'
+import { dialog, Notification, app, nativeImage } from 'electron'
 import fs from 'fs/promises'
 import { renderPdf } from '../render/renderPdf'
 import { pdfType } from '@shared/projectTypes'
@@ -7,6 +7,8 @@ import logger from '../logger'
 import replaceTags, { Tags } from '@shared/utils/formatDynamicString'
 import { appState, datalogs } from '../app-state/state'
 import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
+import successicon from '../../../../resources/success_icon.png?asset'
+import erroricon from '../../../../resources/error_icon.png?asset'
 
 interface exportPdfProps {
   pdf: pdfType
@@ -63,7 +65,8 @@ export const exportPdf = async ({ pdf, selection, hasDialog = false }: exportPdf
 
       const successotification = new Notification({
         title: 'Export Complete',
-        body: 'Your PDF export was successful!'
+        body: 'Your PDF export was successful!',
+        icon: nativeImage.createFromPath(successicon)
       })
       successotification.show()
       return { success: true }
@@ -88,7 +91,8 @@ export const exportPdf = async ({ pdf, selection, hasDialog = false }: exportPdf
     if (hasDialog) {
       const errornotification = new Notification({
         title: 'Export Failed',
-        body: errorMessage
+        body: errorMessage,
+        icon: nativeImage.createFromPath(erroricon)
       })
       errornotification.show()
     }
