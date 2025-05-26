@@ -82,3 +82,11 @@ export interface CheckPathsResult {
   sound: CheckResult[] | null
   proxy: CheckResult | null
 }
+
+export type SponsorMessageType = {
+  slotId: string
+  sponsor: string
+  text: string
+  ctalabel: string | null
+  ctalink: string | null
+} | null

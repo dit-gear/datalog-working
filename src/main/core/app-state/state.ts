@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'path'
+import crypto from 'crypto'
 import { ProjectRootType, emailType, ProjectMenuItem, ProjectType } from '@shared/projectTypes'
 import { DatalogDynamicType, DatalogType } from '@shared/datalogTypes'
 
@@ -24,6 +25,7 @@ class AppState {
   private readonly _folderPath: string = path.join(app.getPath('documents'), 'Datalog')
   private readonly _localsharedPath: string = path.join(this._folderPath, 'LocalShared')
   private readonly _projectsPath: string = path.join(this._folderPath, 'Projects')
+  private readonly _sessionId: string = crypto.randomUUID()
 
   private constructor() {}
 
@@ -69,6 +71,9 @@ class AppState {
 
   get projectsPath(): string {
     return this._projectsPath
+  }
+  get sessionId(): string {
+    return this._sessionId
   }
 }
 
