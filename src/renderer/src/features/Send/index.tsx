@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import SendSelector from './sendSelector'
 import ErrorBoundary from '@renderer/utils/ErrorBoundary'
+import { OnlineStatusProvider } from '@renderer/utils/OnlineStatus'
 //import MessageBox from './MessageBox'
 
 const queryClient = new QueryClient()
@@ -27,8 +28,10 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       <div className="h-dvh">
         <ErrorBoundary>
           <QueryClientProvider client={queryClient}>
-            <SendSelector />
-            {/*<MessageBox />*/}
+            <OnlineStatusProvider>
+              <SendSelector />
+              {/*<MessageBox />*/}
+            </OnlineStatusProvider>
           </QueryClientProvider>
         </ErrorBoundary>
       </div>

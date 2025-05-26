@@ -11,7 +11,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@component
 import { emailType, emailZodObj } from '@shared/projectTypes'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
 import { mapPdfTypesToOptions } from '@renderer/utils/mapPdfTypes'
-import { Loader2, Send as Sendicon, Check, AlertCircle } from 'lucide-react'
+import { Loader2, Send as Sendicon, Check, AlertCircle, WifiOff } from 'lucide-react'
 import { Toaster } from '@components/ui/toaster'
 import { useToast } from '@components/lib/hooks/use-toast'
 import { useTags, useStringWithTags } from './utils/useTags'
@@ -19,6 +19,7 @@ import { useData } from './utils/useData'
 import Preview from '@components/Preview'
 import { Header } from './preview/Header'
 import { useEmailApi } from '@renderer/utils/useCheckEmailAPI'
+import { useOnlineStatus } from '@renderer/utils/OnlineStatus'
 
 interface SendProps {
   defaults: emailType | null
@@ -31,6 +32,7 @@ const Send = ({ defaults }: SendProps) => {
   const projectPdfs = data?.project.pdfs ?? []
   const projectTemplates = data?.project?.templatesDir?.filter((val) => val.type === 'email') ?? []
   const tags = useTags(data!)
+  const isOnline = useOnlineStatus()
   const [sentSuccess, setSendSuccess] = useState<boolean>(false)
   const { toast } = useToast()
   const form = useForm<emailType>({
@@ -167,6 +169,14 @@ const Send = ({ defaults }: SendProps) => {
             <Preview />
           </ResizablePanel>
         </ResizablePanelGroup>
+        {!isOnline && (
+          <div className="absolute bottom-24 z-40 inset-x-8 bg-red-50 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-800 dark:text-red-200 py-4 px-6 rounded-lg shadow-lg flex items-start space-x-3">
+            <WifiOff className="h-6 w-6 text-red-600 dark:text-red-300 mt-1 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold">You're offline</p>
+            </div>
+          </div>
+        )}
         {hasNoSender && (
           <div className="absolute bottom-24 z-40 inset-x-8 bg-red-50 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-800 dark:text-red-200 py-4 px-6 rounded-lg shadow-lg flex items-start space-x-3">
             <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-300 mt-1 flex-shrink-0" />
@@ -214,7 +224,8 @@ const Send = ({ defaults }: SendProps) => {
                 (isSubmitSuccessful && sentSuccess) ||
                 isLoading ||
                 !hasEmailConfig ||
-                hasNoSender
+                hasNoSender ||
+                !isOnline
               }
             >
               {isSubmitting ? (
