@@ -51,7 +51,7 @@ const fallbackHtml = (msg: string) => {
 
 export const Preview = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const loadingTimeoutRef = useRef<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const currentFileRef = useRef<string | null>(null)

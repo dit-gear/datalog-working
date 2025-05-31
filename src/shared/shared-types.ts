@@ -1,5 +1,6 @@
 import { TemplateDirectoryFile, ProjectRootType, emailType } from './projectTypes'
 import { DatalogDynamicType } from './datalogTypes'
+import { z } from 'zod'
 
 export type DurationType = {
   hours: number
@@ -83,10 +84,29 @@ export interface CheckPathsResult {
   proxy: CheckResult | null
 }
 
-export type SponsorMessageType = {
-  slotId: string
-  sponsor: string
-  text: string
-  ctalabel: string | null
-  ctalink: string | null
-} | null
+const CtaSchema = z.object({
+  label: z.string(),
+  link: z.string()
+})
+const ContentSchema = z
+  .object({
+    header: z.string(),
+    sponsor: z.string().nullable(),
+    text: z.string(),
+    cta: CtaSchema.nullable()
+  })
+  .nullable()
+
+export const SponsorMessageSchema = z.object({
+  slotId: z.string(),
+  content: ContentSchema
+})
+
+export type SponsorMessageContentType = z.infer<typeof ContentSchema>
+export type SponsorMessageType = z.infer<typeof SponsorMessageSchema>
+
+export type SponsorMessageResponseType = {
+  sessionId: string
+  adCache: SponsorMessageType | null
+  cachedViews: { slotId: string; views: number }[]
+}

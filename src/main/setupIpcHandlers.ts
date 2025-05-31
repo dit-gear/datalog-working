@@ -5,6 +5,7 @@ import { setupEditorIpcHandlers } from './editor/ipcHandlers'
 import { setupSendIpcHandlers } from './send/ipcHandlers'
 import { setupAboutIpcHandlers } from './about/ipcHandlers'
 import { setupOnboardingIpcHandlers } from './onboarding/ipcHandlers'
+import { setupSponsorHandlers } from './sponsor/ipcHandlers'
 
 export function setupIpcHandlers(): void {
   setuProjectIpcHandlers()
@@ -14,4 +15,5 @@ export function setupIpcHandlers(): void {
   setupSendIpcHandlers()
   setupAboutIpcHandlers()
   setupOnboardingIpcHandlers()
+  setupSponsorHandlers()
 }

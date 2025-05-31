@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer, clipboard, shell } from 'electron'
 import { DatalogType, OcfClipType, SoundClipType } from '@shared/datalogTypes'
 import { pdfType, ProjectType } from '@shared/projectTypes'
+import { SponsorMessageResponseType, SponsorMessageType } from '@shared/shared-types'
 
 // Custom APIs for renderer
 const mainApi = {
@@ -95,7 +96,11 @@ export const sharedApi = {
   removeEmailApiConfig: (): Promise<Response> => ipcRenderer.invoke('remove-emailApiConfig'),
   readBase64Files: (base: string, paths: string[]) =>
     ipcRenderer.invoke('read-files-base64', base, paths),
-  openExternal: (url: string) => shell.openExternal(url)
+  openExternal: (url: string) => shell.openExternal(url),
+  getAd: (): Promise<SponsorMessageResponseType> => ipcRenderer.invoke('get-ad'),
+  updateAd: (ad: SponsorMessageType) => ipcRenderer.send('update-ad', ad),
+  incrementViews: (slotId: string) => ipcRenderer.send('incrementViews', slotId),
+  clearCachedViews: () => ipcRenderer.send('clearViews')
 }
 
 export const electronClipboard = {

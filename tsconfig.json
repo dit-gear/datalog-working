@@ -4,5 +4,6 @@
   "compilerOptions": {
     "strict": true,
     "types": ["electron-vite/node"]
-  }
+  },
+  "include": ["env.local.d.ts"]
 }

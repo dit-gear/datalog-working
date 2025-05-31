@@ -186,7 +186,7 @@ const Send = ({ defaults }: SendProps) => {
             </div>
           </div>
         )}
-        {!hasEmailConfig && (
+        {!hasEmailConfig && !isLoading && (
           <div className="absolute bottom-24 z-40 inset-x-8 bg-red-50 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-800 dark:text-red-200 py-4 px-6 rounded-lg shadow-lg flex items-start space-x-3">
             <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-300 mt-1 flex-shrink-0" />
             <div className="flex-1">

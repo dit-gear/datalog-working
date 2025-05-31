@@ -7,15 +7,20 @@ import {
   incrementCachedViewCount,
   clearCachedViews
 } from './state'
-import { SponsorMessageType } from '@shared/shared-types'
+import { SponsorMessageResponseType, SponsorMessageType } from '@shared/shared-types'
 
 export function setupSponsorHandlers(): void {
-  ipcMain.handle('get-ad', async () => ({
-    sessionId: appState.sessionId,
-    adCache: getSponsorMessageCache(),
-    cachedViews: getCachedViews()
-  }))
-  ipcMain.on('incrementViews', (_, sessionId: string) => incrementCachedViewCount(sessionId))
+  ipcMain.handle(
+    'get-ad',
+    async (): Promise<SponsorMessageResponseType> => ({
+      sessionId: appState.sessionId,
+      adCache: getSponsorMessageCache(),
+      cachedViews: getCachedViews()
+    })
+  )
+  ipcMain.on('incrementViews', (_, slotId: string) => incrementCachedViewCount(slotId))
   ipcMain.on('clearViews', () => clearCachedViews())
-  ipcMain.on('update-ad', (_, data: SponsorMessageType) => setSponsorMessageCache(data))
+  ipcMain.on('update-ad', (_, data: SponsorMessageType) => {
+    console.log('setting sponsor msg:', data), setSponsorMessageCache(data)
+  })
 }
