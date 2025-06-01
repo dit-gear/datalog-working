@@ -8,7 +8,8 @@ import {
   OpenModalTypes,
   CheckPathsResult,
   SponsorMessageResponseType,
-  SponsorMessageType
+  SponsorMessageType,
+  SponsorMessageContentType
 } from '@shared/shared-types'
 import { DatalogType, OcfClipType, ResponseWithClips, SoundClipType } from '@shared/datalogTypes'
 import { TemplateDirectoryFile, pdfType } from '@shared/projectTypes'
@@ -67,10 +68,11 @@ declare global {
       removeEmailApiConfig: () => Promise<Response>
       readBase64Files: (base: string, paths: string[]) => Promise<Record<string, string>>
       openExternal: (url: string) => void
-      getAd: () => Promise<SponsorMessageResponseType>
-      updateAd: (ad: SponsorMessageType) => void
-      incrementViews: (slotId: string) => void
-      clearCachedViews: () => void
+      handleSponsoredMessage: (
+        isOnline: boolean,
+        hasMessage: boolean
+      ) => Promise<SponsorMessageContentType>
+      recordMessageClick: (isOnline: boolean) => void
     }
     electronClipboard: {
       readText: () => string

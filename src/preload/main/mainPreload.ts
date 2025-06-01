@@ -97,10 +97,9 @@ export const sharedApi = {
   readBase64Files: (base: string, paths: string[]) =>
     ipcRenderer.invoke('read-files-base64', base, paths),
   openExternal: (url: string) => shell.openExternal(url),
-  getAd: (): Promise<SponsorMessageResponseType> => ipcRenderer.invoke('get-ad'),
-  updateAd: (ad: SponsorMessageType) => ipcRenderer.send('update-ad', ad),
-  incrementViews: (slotId: string) => ipcRenderer.send('incrementViews', slotId),
-  clearCachedViews: () => ipcRenderer.send('clearViews')
+  handleSponsoredMessage: (isOnline: boolean, hasMessage: boolean) =>
+    ipcRenderer.invoke('handle-sponsored-message', isOnline, hasMessage),
+  recordMessageClick: (isOnline: boolean) => ipcRenderer.send('recordMessageClick', isOnline)
 }
 
 export const electronClipboard = {
