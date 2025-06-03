@@ -26,6 +26,35 @@ const MessageBox = ({ fullWidth }: MessageBoxProps) => {
     loadSponsorMessage()
   }, [isOnline])
 
+  useEffect(() => {
+    const getMsUntilNext8AMUTC = () => {
+      const now = new Date()
+      const nextTrigger = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 8, 0, 0, 0)
+      )
+      if (now.getTime() >= nextTrigger.getTime()) {
+        nextTrigger.setUTCDate(nextTrigger.getUTCDate() + 1)
+      }
+      return nextTrigger.getTime() - now.getTime()
+    }
+
+    let timeoutId: ReturnType<typeof setTimeout>
+
+    const schedule = () => {
+      const delay = getMsUntilNext8AMUTC()
+      timeoutId = setTimeout(() => {
+        loadSponsorMessage()
+        schedule()
+      }, delay)
+    }
+
+    schedule()
+
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [])
+
   if (!message) return null
 
   return (
