@@ -34,10 +34,10 @@ export function setupSponsorHandlers(): void {
   ipcMain.handle(
     'handle-sponsored-message',
     async (_, isOnline: boolean, hasMessage: boolean): Promise<SponsorMessageContentType> => {
-      /*if (import.meta.env.DEV) {
+      if (import.meta.env.DEV) {
         console.log('messages are disabled in DEV')
         return null
-      }*/
+      }
       const messageCache = getSponsorMessageCache()
       if (!isOnline) {
         if (messageCache) {

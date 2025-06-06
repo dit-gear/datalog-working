@@ -11,7 +11,7 @@ export function insertPoweredBy(html: string, type: DocumentType): string {
     fontSize: '12px',
     textAlign: 'center',
     marginTop: '60px'
-  }}>Powered by datalog.email</Text>`
+  }}>Powered by daytalog</Text>`
 
   // regex to match the closing body tag (any casing)
   const closingBodyRe = /<\/body>/i

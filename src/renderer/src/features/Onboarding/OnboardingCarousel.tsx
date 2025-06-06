@@ -129,7 +129,7 @@ export function OnboardingCarousel() {
                     </circle>
                   </svg>
                   <h1 className="mb-4 text-3xl font-extrabold tracking-normal text-center text-foreground">
-                    Get Started with datalog.email
+                    Get Started with daytalog
                   </h1>
                   <p className="mt-2 text-base text-muted-foreground text-center px-6">
                     Let's walk you through the key features to get you started

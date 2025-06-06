@@ -315,7 +315,7 @@ export class Datalog {
 export type DataObjectType = {
   project: ProjectRootType
   message: string
-  datalog_selection: DatalogDynamicType | DatalogDynamicType[]
+  datalog_selection: DatalogDynamicType | DatalogDynamicType[] // change to datalog id 'D01_250601' ['D01_250601']
   datalog_all: DatalogDynamicType[]
 }
 
@@ -370,17 +370,17 @@ export class DataObject {
   }
 
   // Getter for the selected datalog (merged if multiple)
-  public get datalog(): Datalog {
+  public get log(): Datalog {
     return this._datalog
   }
 
   // Getter for the selected datalogs array
-  public get datalogArray(): Datalog[] {
+  public get logs(): Datalog[] {
     return this._datalogArray
   }
 
   // Getter for all datalogs
-  public get datalogs(): Datalog[] {
+  public get logAll(): Datalog[] {
     return this._datalogs
   }
 

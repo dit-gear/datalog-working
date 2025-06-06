@@ -18,8 +18,10 @@ const MessageBox = ({ fullWidth }: MessageBoxProps) => {
   }
 
   const loadSponsorMessage = async () => {
-    const res = await window.sharedApi.handleSponsoredMessage(isOnline, !!message)
-    setMessage(res)
+    if (!import.meta.env.DEV) {
+      const res = await window.sharedApi.handleSponsoredMessage(isOnline, !!message)
+      setMessage(res)
+    }
   }
 
   useEffect(() => {

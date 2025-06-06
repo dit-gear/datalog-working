@@ -28,7 +28,7 @@ function Main() {
               <div className="flex gap-1 items-center">
                 <img src={AppIcon} className="size-20" />
                 <div>
-                  <h1 className="text-2xl font-bold text-white">Datalog.email</h1>
+                  <h1 className="text-2xl font-bold text-white">Daytalog</h1>
                   <h2>{project?.project_name}</h2>
                 </div>
               </div>

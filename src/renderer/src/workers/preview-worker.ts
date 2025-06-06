@@ -71,7 +71,7 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>) => {
         StyleSheet
       }
     }
-    const data = new DataObject(dataObject)
+    const daytalog = new DataObject(dataObject)
 
     const codeWithAssets = await inlineAssetImports(type, id, code)
     const codeWithoutImports = await removeImports(codeWithAssets)
@@ -95,23 +95,23 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>) => {
       'projectName',
       'customInfo',
       'message',
-      'datalog',
-      'datalogArray',
-      'datalogs',
+      'log',
+      'logs',
+      'logAll',
       'total',
-      'data',
+      'daytalog',
       wrappedCode
     )(
       React,
       ...Object.values(components),
-      data.projectName,
-      data.customInfo,
-      data.message,
-      data.datalog,
-      data.datalogArray,
-      data.datalogs,
-      data.total,
-      data
+      daytalog.projectName,
+      daytalog.customInfo,
+      daytalog.message,
+      daytalog.log,
+      daytalog.logs,
+      daytalog.logAll,
+      daytalog.total,
+      daytalog
     )
 
     console.log('id:', id)

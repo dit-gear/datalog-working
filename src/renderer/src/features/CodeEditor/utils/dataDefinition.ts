@@ -86,13 +86,13 @@ export const createDataDefinition = (project: ProjectRootType) => {
   clips: Clip[];
   // ...
 }
-declare module 'data' {
+declare module 'daytalog' {
   export const projectName: string;
   export const customInfo: Record<string, string>[] | undefined;
   export const message: string;
-  export const datalog: Datalog;
-  export const datalogArray: Datalog[];
-  export const datalogs: Datalog[];
+  export const log: Datalog; //dayta 
+  export const logs: Datalog[]; //daytas
+  export const logAll: Datalog[]; //daytalog
   export const total: {
     days(): number;
     dateRange(): [string, string];
