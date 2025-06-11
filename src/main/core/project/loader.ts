@@ -34,8 +34,6 @@ const parseSettingsFile = async <T>(filePath: string, schema: ZodType<T>): Promi
     logger.warn('No file to parse')
     throw new Error('Settings file does not exist')
   }
-
-  return null
 }
 
 export const getTemplateDirectories = (
