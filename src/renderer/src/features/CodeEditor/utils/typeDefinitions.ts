@@ -17,8 +17,10 @@ import LinkDts from '../../../../../../node_modules/@react-email/link/dist/index
 import MarkdownDts from '../../../../../../node_modules/@react-email/markdown/dist/index.d.ts?raw'
 import RowDts from '../../../../../../node_modules/@react-email/row/dist/index.d.ts?raw'
 import ComponentsDts from '..//../../../../../node_modules/@react-email/components/dist/index.d.ts?raw'
+import DaytalogTypes from '../../../../../../node_modules/daytalog/dist/index.d.ts?raw'
 import MockDts from './reactEmaildec.d.ts?raw'
-import { createDataDefinition } from './dataDefinition'
+//import { createDataDefinition } from './dataDefinition'
+import { createTypeDefinition } from 'daytalog'
 import { ProjectRootType } from '@shared/projectTypes'
 
 // React-email module had to be declared seperately in MockDts. For react-pdf we can import everything.
@@ -38,8 +40,22 @@ export async function loadTypeDefinitions(
     import: 'default',
     eager: true
   })
+  /*const daytalogTypeDefs = import.meta.glob(
+    '../../../../../../node_modules/daytalog/dist/index.d.ts',
+    { query: '?raw', import: 'default', eager: true }
+  )
+  console.log(daytalogTypeDefs)*/
 
-  const dataDts = createDataDefinition(project)
+  const { Clip, OcfClip, ProxyClip, SoundClip } = createTypeDefinition(project)
+  const merged = [
+    DaytalogTypes.replace(/\/\/# sourceMappingURL=.*$/, '')
+      .replace(/clips:\s*OcfClipType;?/g, `clips: ${OcfClip}`)
+      .replace(/clips:\s*ProxyClipType;?/g, `clips: ${ProxyClip}`)
+      .replace(/clips:\s*SoundClipType;?/g, `clips: ${SoundClip}`),
+    Clip
+  ].join('\n\n')
+
+  console.log(merged)
 
   const dtsModules = { ...reactTypeDefs, ...reactPdfTypeDefs }
 
@@ -51,8 +67,8 @@ export async function loadTypeDefinitions(
     monaco.languages.typescript.typescriptDefaults.addExtraLib(dtsContent, uri)
   }
   monaco.languages.typescript.typescriptDefaults.addExtraLib(
-    dataDts,
-    'file:///node_modules/@types/global.d.ts'
+    merged,
+    'file:///node_modules/daytalog/index.d.ts'
   )
   monaco.languages.typescript.typescriptDefaults.addExtraLib(
     HtmlDts,

@@ -1,4 +1,5 @@
 import z from 'zod'
+import { GlobalSchemaZod, ProjectSchemaZod } from 'daytalog'
 
 const fieldType = z.enum([
   'string',
@@ -178,7 +179,7 @@ const additionalParsing = z.object({
     .optional()
 })
 
-export const pdfZodObj = z.object({
+/*export const pdfZodObj = z.object({
   id: z.string().length(5),
   label: z.string().nonempty('Label is required'),
   output_name: z
@@ -191,7 +192,7 @@ export const pdfZodObj = z.object({
     ),
   react: z.string().nonempty('Selecting a template is required'),
   enabled: z.boolean()
-})
+})*/
 
 export const emailProvidersZod = z.enum(['custom', 'postmark', 'resend', 'sendgrid'])
 
@@ -234,7 +235,7 @@ export const emailApiZodObj = z.discriminatedUnion('provider', [
   sendgridZod
 ])
 
-export const emailZodObj = z.object({
+/*export const emailZodObj = z.object({
   id: z.string().length(5),
   label: z.string().nonempty('Label is required'),
   recipients: z
@@ -245,9 +246,9 @@ export const emailZodObj = z.object({
   message: z.string().optional(),
   react: z.string().optional(),
   enabled: z.boolean()
-})
+})*/
 
-export const GlobalSchemaZod = z.object({
+/*export const GlobalSchemaZod = z.object({
   logid_template: z
     .string()
     .regex(/^[a-zA-Z0-9<>_-]*$/, {
@@ -270,10 +271,11 @@ export const GlobalSchemaZod = z.object({
   custom_fields: additionalParsing.optional(),
   emails: z.array(emailZodObj).optional(),
   email_sender: z.string().optional(),
-  pdfs: z.array(pdfZodObj).optional()
-})
+  pdfs: z.array(pdfZodObj).optional(),
+  version: z.number().int()
+})*/
 
-export const ProjectSchemaZod = z.object({
+/*export const ProjectSchemaZod = z.object({
   //project_id: z.string().uuid(),
   project_name: z
     .string()
@@ -286,7 +288,7 @@ export const ProjectSchemaZod = z.object({
       message: 'The project name cannot be a reserved name'
     }),
   ...GlobalSchemaZod.omit({ email_sender: true }).shape
-})
+})*/
 
 const ProjectSettingsZod = z.object({
   project: ProjectSchemaZod,
@@ -344,8 +346,6 @@ export type subFieldsType = z.infer<typeof subfields>
 export type Field = z.infer<typeof field>
 export type additionalParsing = z.infer<typeof additionalParsing>
 export type emailApiType = z.infer<typeof emailApiZodObj>
-export type emailType = z.infer<typeof emailZodObj>
-export type pdfType = z.infer<typeof pdfZodObj>
 export type TemplateDirectoryFile = z.infer<typeof TemplateDirectoryFileZod>
 export type ProjectSchemaType = z.infer<typeof ProjectSchemaZod>
 export type ProjectRootType = z.infer<typeof ProjectRootZod>

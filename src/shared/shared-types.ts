@@ -1,4 +1,5 @@
-import { TemplateDirectoryFile, ProjectRootType, emailType } from './projectTypes'
+import { TemplateDirectoryFile, ProjectRootType } from './projectTypes'
+import { emailType } from 'daytalog'
 import { DatalogDynamicType } from './datalogTypes'
 import { z } from 'zod'
 
@@ -63,8 +64,8 @@ export type InitialEditorData = {
 export type InitialSendData = {
   selectedEmail: emailType | null
   project: ProjectRootType
-  selection: DatalogDynamicType | DatalogDynamicType[]
-  datalogs: DatalogDynamicType[]
+  selection?: string[]
+  logs: DatalogDynamicType[]
 }
 
 export interface DefaultPathsInput {

@@ -6,17 +6,17 @@ import { WorkerRequest } from './types'
 import { inlineAssetImports } from '@shared/utils/inlineAssetsImports'
 import { removeImports } from '@shared/utils/removeImports'
 import { insertPoweredBy } from '@shared/utils/addPoweredBy'
+import { createDaytalog, InternalDaytalogProvider } from 'daytalog'
 
 parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
-  const { id, path, code, type, dataObject } = event
+  const { id, path, code, type, daytalogProps } = event
   let components: Record<string, unknown> = {}
   let pdf
   let render
 
   try {
-    // Import shared data class.
-    const { DataObject } = await import('@shared/datalogClass')
-
+    const dayta = await createDaytalog(daytalogProps)
+    const { useDaytalog } = await import('daytalog')
     if (type === 'email') {
       ;({ render } = await import('@react-email/render'))
 
@@ -82,11 +82,6 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
       }
     }
 
-    // Create the data object.
-    const data = new DataObject(dataObject)
-
-    const { projectName, customInfo, message, datalog, datalogArray, datalogs, total } = data
-
     const codeWithAssets = await inlineAssetImports(type, path, code)
     const codeWithoutImports = await removeImports(codeWithAssets)
     const formatted = insertPoweredBy(codeWithoutImports, type)
@@ -109,13 +104,7 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
     const sandbox: Record<string, unknown> = {
       React,
       ...components,
-      projectName,
-      customInfo,
-      message,
-      datalog,
-      datalogArray,
-      datalogs,
-      total,
+      useDaytalog,
       // If PDF is needed, inject the preloaded pdf function.
       ...(pdf ? { pdf } : {}),
       // Provide a minimal console.
@@ -139,15 +128,32 @@ parentPort?.on('message', async (event: WorkerRequest): Promise<void> => {
 
     // Render output based on type.
     if (type === 'email') {
-      const renderedContent = await render(React.createElement(Component), {
-        plainText: false
-      })
-      const renderedContentPlainText = await render(React.createElement(Component), {
-        plainText: true
-      })
+      const renderedContent = await render(
+        React.createElement(InternalDaytalogProvider, {
+          value: dayta,
+          children: React.createElement(Component)
+        }),
+        {
+          plainText: false
+        }
+      )
+      const renderedContentPlainText = await render(
+        React.createElement(InternalDaytalogProvider, {
+          value: dayta,
+          children: React.createElement(Component)
+        }),
+        {
+          plainText: true
+        }
+      )
       parentPort?.postMessage({ id, code: renderedContent, plainText: renderedContentPlainText })
     } else if (type === 'pdf') {
-      const pdfDocument = await render(React.createElement(Component))
+      const pdfDocument = await render(
+        React.createElement(InternalDaytalogProvider, {
+          value: dayta,
+          children: React.createElement(Component)
+        })
+      )
       parentPort?.postMessage({ id, code: pdfDocument })
     }
   } catch (error) {

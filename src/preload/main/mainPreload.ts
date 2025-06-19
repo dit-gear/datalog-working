@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer, clipboard, shell } from 'electron'
 import { DatalogType, OcfClipType, SoundClipType } from '@shared/datalogTypes'
-import { pdfType, ProjectType } from '@shared/projectTypes'
-import { SponsorMessageResponseType, SponsorMessageType } from '@shared/shared-types'
+import { ProjectType } from '@shared/projectTypes'
+import { pdfType } from 'daytalog'
 
 // Custom APIs for renderer
 const mainApi = {
@@ -56,8 +56,7 @@ const mainApi = {
     type: 'ocf' | 'sound',
     storedClips: OcfClipType[] | SoundClipType[]
   ) => ipcRenderer.invoke('removeClips', paths, type, storedClips),
-  openSendWindow: (selection?: DatalogType | DatalogType[]) =>
-    ipcRenderer.send('open-send-window', selection),
+  openSendWindow: (selection?: string[]) => ipcRenderer.send('open-send-window', selection),
 
   openBuilder: (callback: () => void) => ipcRenderer.on('open-builder', () => callback()),
   removeOpenBuilder: (callback: () => void) => {

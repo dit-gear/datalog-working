@@ -1,18 +1,20 @@
 import React from 'react'
 import { transform } from 'sucrase'
-import { pdf } from '@react-pdf/renderer'
+import { pdf, DocumentProps } from '@react-pdf/renderer'
 import { render } from './utils/render'
 import { PreviewWorkerRequest } from './utils/types'
 import { inlineAssetImports } from '@shared/utils/inlineAssetsImports'
 import { removeImports } from '../../../shared/utils/removeImports'
 import { insertPoweredBy } from '../../../shared/utils/addPoweredBy'
+import { createDaytalog, InternalDaytalogProvider } from 'daytalog'
 
 self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>) => {
-  const { code, type, dataObject, id } = event.data
+  const { code, type, daytalogProps, id } = event.data
   let components: Record<string, unknown> = {}
 
   try {
-    const { DataObject } = await import('@shared/datalogClass')
+    const dayta = await createDaytalog(daytalogProps)
+    const { useDaytalog } = await import('daytalog')
     if (type === 'email') {
       const {
         Html,
@@ -71,7 +73,6 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>) => {
         StyleSheet
       }
     }
-    const daytalog = new DataObject(dataObject)
 
     const codeWithAssets = await inlineAssetImports(type, id, code)
     const codeWithoutImports = await removeImports(codeWithAssets)
@@ -89,36 +90,20 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>) => {
       return module.exports.default;
     `
 
-    const Component = new Function(
-      'React',
-      ...Object.keys(components),
-      'projectName',
-      'customInfo',
-      'message',
-      'log',
-      'logs',
-      'logAll',
-      'total',
-      'daytalog',
-      wrappedCode
-    )(
+    const Component = new Function('React', ...Object.keys(components), 'useDaytalog', wrappedCode)(
       React,
       ...Object.values(components),
-      daytalog.projectName,
-      daytalog.customInfo,
-      daytalog.message,
-      daytalog.log,
-      daytalog.logs,
-      daytalog.logAll,
-      daytalog.total,
-      daytalog
+      useDaytalog
     )
-
-    console.log('id:', id)
 
     if (type === 'email') {
       try {
-        const renderEmail = await render(React.createElement(Component))
+        const renderEmail = await render(
+          React.createElement(InternalDaytalogProvider, {
+            value: dayta,
+            children: React.createElement(Component)
+          })
+        )
         if (renderEmail.success) {
           self.postMessage({
             msgtype: 'preview-update',
@@ -146,7 +131,13 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>) => {
       }
     } else if (type === 'pdf') {
       try {
-        const doc = pdf(React.createElement(Component))
+        const providerElement = React.createElement(InternalDaytalogProvider, {
+          value: dayta,
+          children: React.createElement(Component)
+        })
+        // Cast to satisfy pdf() DocumentProps requirement
+        const doc = pdf(providerElement as unknown as React.ReactElement<DocumentProps>)
+        //const doc = pdf(React.createElement(Component))
         const blob = await doc.toBlob()
         const url = URL.createObjectURL(blob)
 

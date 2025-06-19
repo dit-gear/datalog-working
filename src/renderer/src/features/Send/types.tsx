@@ -1,4 +1,5 @@
-import { emailZodObj, pdfZodObj, ProjectRootType } from '@shared/projectTypes'
+import { ProjectRootType } from '@shared/projectTypes'
+import { emailZodObj, pdfZodObj } from 'daytalog'
 import { DatalogDynamicType } from '@shared/datalogTypes'
 import z from 'zod'
 

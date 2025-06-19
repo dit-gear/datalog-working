@@ -5,12 +5,12 @@ import YAML from 'yaml'
 import findFilesByType from '../../utils/find-files-by-type'
 import { appState } from '../app-state/state'
 import {
-  ProjectSchemaZod,
   GlobalSchemaZodNullable,
   ProjectRootType,
   TemplateDirectoryFile,
   ProjectMenuItem
 } from '../../../shared/projectTypes'
+import { ProjectSchemaZod } from 'daytalog'
 import logger from '../logger'
 import { ZodType } from 'zod'
 import trayManager from '../menu'

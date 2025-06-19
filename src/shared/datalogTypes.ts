@@ -133,7 +133,8 @@ export const datalogZod = z.object({
   ocf: OCF.optional(),
   proxy: Proxy.optional(),
   sound: Sound.optional(),
-  custom: z.array(Custom).optional()
+  custom: z.array(Custom).optional(),
+  version: z.number().int()
 })
 
 export const datalogZodMerged = datalogZod.omit({ day: true }).extend({

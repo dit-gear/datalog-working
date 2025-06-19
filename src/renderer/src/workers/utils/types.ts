@@ -1,4 +1,4 @@
-import { DataObjectType } from '@shared/datalogClass'
+import { DaytalogProps } from 'daytalog'
 
 interface BasePreviewUpdate {
   msgtype: 'preview-update'
@@ -31,5 +31,5 @@ export interface PreviewWorkerRequest {
   id: string //should be the file path
   code: string
   type: 'email' | 'pdf'
-  dataObject: DataObjectType
+  daytalogProps: DaytalogProps
 }

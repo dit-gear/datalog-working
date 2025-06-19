@@ -12,7 +12,7 @@ import { Input } from '@components/ui/input'
 import z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ProjectSchemaZod } from '@shared/projectTypes'
+import { ProjectSchemaZod } from 'daytalog'
 import { useNavigate } from 'react-router-dom'
 
 const NewProjectPage = () => {

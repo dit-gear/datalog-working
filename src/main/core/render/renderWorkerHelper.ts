@@ -9,13 +9,13 @@ export function createRenderWorker() {
     path,
     code,
     type,
-    dataObject
+    daytalogProps
   }): Promise<{ code: string; plainText?: string; error?: string }> {
     if (!worker) {
       worker = new Worker(renderWorkerPath)
     }
     return new Promise((resolve, reject) => {
-      worker?.postMessage({ id, path, code, type, dataObject })
+      worker?.postMessage({ id, path, code, type, daytalogProps })
 
       worker?.on('message', (result) => resolve(result))
       worker?.on('error', reject)

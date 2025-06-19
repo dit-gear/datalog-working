@@ -1,9 +1,6 @@
-import { pdfType } from '@shared/projectTypes'
-import { DatalogType } from '@shared/datalogTypes'
-import { DataObjectType } from '@shared/datalogClass'
+import { pdfType, DaytalogProps } from 'daytalog'
 import fs from 'fs/promises'
 import { datalogs as datalogStore, appState } from '../app-state/state'
-import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 import { getReactTemplate } from '@shared/utils/getReactTemplate'
 import { createRenderWorker } from './renderWorkerHelper'
 import { WorkerRequest } from './types'
@@ -11,20 +8,19 @@ import logger from '../logger'
 
 interface renderPdfProps {
   pdf: pdfType
-  selection?: DatalogType | DatalogType[]
+  selection?: string[]
 }
 export const renderPdf = async ({ pdf, selection }: renderPdfProps): Promise<string> => {
   const project = appState.project
   if (!project) throw new Error('No project')
-  const datalogs = Array.from(datalogStore().values())
-  if (!datalogs) throw new Error('No datalogs')
-  if (!selection) selection = await getLatestDatalog(datalogs, project)
+  const logs = Array.from(datalogStore().values())
+  if (!logs) throw new Error('No logs')
 
-  const dataObject: DataObjectType = {
+  const daytalogProps: DaytalogProps = {
     project,
+    logs,
     message: '',
-    datalog_selection: selection,
-    datalog_all: datalogs
+    selection
   }
 
   const templatesDir = project?.templatesDir
@@ -40,7 +36,7 @@ export const renderPdf = async ({ pdf, selection }: renderPdfProps): Promise<str
       path: pdfpath.path,
       code: code,
       type: pdfpath.type,
-      dataObject
+      daytalogProps
     }
     const result = await pdfWorker.render(req)
     if (result.error) {

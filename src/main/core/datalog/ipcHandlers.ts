@@ -123,7 +123,7 @@ export function setupDatalogIpcHandlers(): void {
     return await deleteDatalog(datalog)
   })
 
-  ipcMain.on('open-send-window', (_, selection: DatalogType | DatalogType[]) => {
+  ipcMain.on('open-send-window', (_, selection: string[]) => {
     createSendWindow(null, selection)
   })
 

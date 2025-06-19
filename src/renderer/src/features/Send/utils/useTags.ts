@@ -4,7 +4,7 @@ import { InitialSendData } from '@shared/shared-types'
 export const useTags = (data: InitialSendData) => {
   if (!data?.selection || Array.isArray(data.selection)) return null
 
-  const log = data.selection
+  const log = data.logs.filter((log) => data.selection?.includes(log.id))[0]
 
   const tags = {
     day: log.day,
@@ -21,11 +21,13 @@ export const useStringWithTags = (
   outputName: string,
   fallbackName: string
 ): string => {
+  const { selection, logs, project } = data
   const fileName = replaceTagsMultiple({
-    selection: data?.selection,
+    selection,
+    logs,
     template: outputName,
     fallbackName,
-    projectName: data?.project.project_name!
+    project
   })
   return fileName
 }

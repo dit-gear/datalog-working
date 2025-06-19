@@ -1,8 +1,5 @@
 import { z } from 'zod'
-import { pdfZodObj, emailZodObj } from '@shared/projectTypes'
-
-export type pdfType = z.infer<typeof pdfZodObj>
-export type emailType = z.infer<typeof emailZodObj>
+import { pdfZodObj, emailZodObj, pdfType, emailType } from 'daytalog'
 
 export type pdfEditType = {
   index: number

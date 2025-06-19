@@ -1,8 +1,9 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'path'
 import crypto from 'crypto'
-import { ProjectRootType, emailType, ProjectMenuItem, ProjectType } from '@shared/projectTypes'
-import { DatalogDynamicType, DatalogType } from '@shared/datalogTypes'
+import { ProjectRootType, ProjectMenuItem, ProjectType } from '@shared/projectTypes'
+import { emailType } from 'daytalog'
+import { DatalogDynamicType } from '@shared/datalogTypes'
 
 const datalogStore = new Map<string, DatalogDynamicType>()
 export const sendWindowDataMap = new Map<
@@ -10,7 +11,7 @@ export const sendWindowDataMap = new Map<
   {
     window: BrowserWindow
     selectedEmail: emailType | null
-    selection?: DatalogType | DatalogType[]
+    selection?: string[]
   }
 >()
 

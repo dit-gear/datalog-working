@@ -1,14 +1,12 @@
-import { emailType } from '@shared/projectTypes'
-import { DataObjectType } from '@shared/datalogClass'
+import { emailType, DaytalogProps } from 'daytalog'
 import fs from 'fs/promises'
 import { datalogs as datalogStore, sendWindowDataMap, appState } from '../app-state/state'
 import { getReactTemplate } from '@shared/utils/getReactTemplate'
 import { createRenderWorker } from './renderWorkerHelper'
 import { getPdfAttachments } from '@shared/utils/getAttachments'
-import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 import { WorkerRequest } from './types'
 import logger from '../logger'
-import { replaceTagsMultiple } from '@shared/utils/formatDynamicString'
+import { getPdfOutputName } from './utils/getOutputName'
 
 interface renderEmailProps {
   email: emailType
@@ -30,16 +28,15 @@ export const renderEmail = async ({
 }> => {
   const project = appState.project
   if (!project) throw new Error('No project')
-  const datalogs = Array.from(datalogStore().values())
-  if (!datalogs) throw new Error('no datalogs')
-  const selection =
-    sendWindowDataMap.get(windowId)?.selection ?? (await getLatestDatalog(datalogs, project))
+  const logs = Array.from(datalogStore().values())
+  if (!logs) throw new Error('no logs')
+  const selection = sendWindowDataMap.get(windowId)?.selection
 
-  const dataObject: DataObjectType = {
+  const daytalogProps: DaytalogProps = {
     project,
-    message: email.message ?? '',
-    datalog_selection: selection,
-    datalog_all: datalogs
+    logs,
+    selection: selection,
+    message: email.message ?? ''
   }
 
   const templatesDir = project?.templatesDir
@@ -58,13 +55,12 @@ export const renderEmail = async ({
             path: emailpath.path,
             code,
             type: emailpath.type,
-            dataObject
+            daytalogProps
           }
           const renderedEmail = await emailWorker.render(req)
           if (renderedEmail.error) {
             throw new Error(`Email render failed: ${renderedEmail.error}`)
           }
-          //const emailcode = renderedEmail.code
           return renderedEmail
         }
       }
@@ -87,7 +83,7 @@ export const renderEmail = async ({
             path: pdfpath.path,
             code: codepdf,
             type: pdfpath.type,
-            dataObject
+            daytalogProps
           }
           const renderedPdf = await pdfWorker.render(reqpdf)
           if (renderedPdf.error) {
@@ -96,12 +92,7 @@ export const renderEmail = async ({
           const pdfBuffer = Buffer.from(renderedPdf.code)
           attachmentsToSend.push({
             content: pdfBuffer.toString('base64'),
-            filename: replaceTagsMultiple({
-              selection,
-              template: att.output_name,
-              fallbackName: att.label,
-              projectName: appState.project!.project_name!
-            })
+            filename: getPdfOutputName(att, selection)
           })
         }
       }

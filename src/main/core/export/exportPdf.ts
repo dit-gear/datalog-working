@@ -1,43 +1,21 @@
 import { dialog, Notification, app, nativeImage } from 'electron'
 import fs from 'fs/promises'
 import { renderPdf } from '../render/renderPdf'
-import { pdfType } from '@shared/projectTypes'
-import { DatalogType } from '@shared/datalogTypes'
+import { pdfType } from 'daytalog'
 import logger from '../logger'
-import replaceTags, { Tags } from '@shared/utils/formatDynamicString'
-import { appState, datalogs } from '../app-state/state'
-import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 import successicon from '../../../../resources/success_icon.png?asset'
 import erroricon from '../../../../resources/error_icon.png?asset'
+import { getPdfOutputName } from '../render/utils/getOutputName'
 
 interface exportPdfProps {
   pdf: pdfType
-  selection?: DatalogType | DatalogType[]
+  selection?: string[]
   hasDialog?: boolean
 }
 
 export const exportPdf = async ({ pdf, selection, hasDialog = false }: exportPdfProps) => {
-  if (!selection) {
-    const project = appState.project
-    if (!project) throw new Error('No project')
-    const _datalogs = Array.from(datalogs().values())
-    if (!_datalogs) throw new Error('No datalogs')
-    selection = await getLatestDatalog(_datalogs, project)
-  }
-
-  const log = Array.isArray(selection) ? selection[0] : selection
-
-  const tags: Tags = {
-    day: log.day,
-    date: log.date,
-    projectName: appState.project?.project_name,
-    unit: log.unit,
-    log: log.id
-  }
-
-  const outputName = replaceTags(pdf.output_name, tags)
-
   app.focus()
+  const outputName = getPdfOutputName(pdf, selection)
 
   try {
     if (hasDialog) {

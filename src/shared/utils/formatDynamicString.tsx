@@ -1,6 +1,8 @@
 import { DatalogType } from '@shared/datalogTypes'
 import { getFirstAndLastDatalogs } from '@shared/utils/datalog-merge'
 import { format, parse } from 'date-fns'
+import { getLatestLog } from './getLatestDatalog'
+import { ProjectRootType } from '@shared/projectTypes'
 
 export type Tags = {
   day?: number
@@ -82,27 +84,30 @@ const tags = (log: DatalogType, projectName: string): Tags => {
 }
 
 interface getFileNameProps {
-  selection: DatalogType | DatalogType[] | undefined
+  selection?: string[]
+  logs: DatalogType[]
   template: string
   fallbackName: string
-  projectName: string
+  project: ProjectRootType
 }
 export const replaceTagsMultiple = ({
-  selection,
+  selection: _selection,
+  logs,
   template,
-  fallbackName,
-  projectName
+  project,
+  fallbackName
 }: getFileNameProps): string => {
-  if (!selection) return fallbackName
+  if (!logs) return fallbackName
+  const selection = logs.filter((log) => _selection?.includes(log.id))
 
   if (Array.isArray(selection) && selection.length > 1) {
     const { first, last } = getFirstAndLastDatalogs(selection)
 
-    const firstName = replaceTags(template, tags(first, projectName))
-    const lastName = replaceTags(template, tags(last, projectName))
+    const firstName = replaceTags(template, tags(first, project.project_name))
+    const lastName = replaceTags(template, tags(last, project.project_name))
     return `${firstName}-${lastName}`
   } else {
-    const logs = Array.isArray(selection) ? selection[0] : selection
-    return replaceTags(template, tags(logs, projectName))
+    const singleLog = !selection.length ? getLatestLog(logs, project) : selection[0]
+    return replaceTags(template, tags(singleLog, project.project_name))
   }
 }

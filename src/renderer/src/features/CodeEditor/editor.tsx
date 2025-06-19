@@ -6,25 +6,14 @@ import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
 import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
-//import { createHighlighter } from 'shiki'
-//import { shikiToMonaco } from '@shikijs/monaco'
 import { LoadedFile, ChangedFile } from '@shared/shared-types'
 import { loadTypeDefinitions } from './utils/typeDefinitions'
 import { useInitialData } from './dataContext'
 import { formatter } from '@renderer/utils/prettierFormatter'
-import { getLatestDatalog, getLatestTwoDatalogs } from '@shared/utils/getLatestDatalog'
 import { mockDataType } from './newMockdataDialog'
 import useDebouncedCallback from '@renderer/utils/useDebouncedCallback'
-import { DataObjectType } from '@shared/datalogClass'
+import { DaytalogProps } from 'daytalog'
 import { PreviewWorkerResponse, PreviewWorkerRequest } from '@renderer/workers/utils/types'
-import { DatalogType } from '@shared/datalogTypes'
-
-//type Monaco = typeof monaco
-
-/*const highlighter = await createHighlighter({
-  themes: ['dark-plus', 'aurora-x'],
-  langs: ['typescript-ext']
-})*/
 
 export type EditorHandle = {
   openFile: (file: LoadedFile) => void
@@ -66,7 +55,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
   const autoCloseTagsRef = useRef(autoCloseTags)
   const formatOnSaveRef = useRef(formatOnSave)
 
-  const selectionRef = useRef<DatalogType | DatalogType[]>(null)
+  const selectionRef = useRef<string[]>(null)
   const mockDataRef = useRef(mockdata)
 
   const { initialData } = useInitialData()
@@ -86,9 +75,9 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
     const fetchAndSendSelection = async () => {
       mockDataRef.current = mockdata
       const latestSelection =
-        selection === 'single'
-          ? await getLatestDatalog(mockDataRef.current.datalogs, project)
-          : await getLatestTwoDatalogs(mockDataRef.current.datalogs)
+        selection === 'multi'
+          ? mockDataRef.current.datalogs.slice(-2).map((log) => log.id)
+          : mockDataRef.current.datalogs.slice(-1).map((log) => log.id)
       selectionRef.current = latestSelection
 
       const model = editorRef.current?.getModel()
@@ -171,17 +160,17 @@ const Editor = forwardRef<EditorHandle, EditorProps>((props, ref) => {
         if (!project) throw new Error('No project data available')
         if (!selectionRef.current) return
 
-        const dataObject: DataObjectType = {
+        const daytalogProps: DaytalogProps = {
           project,
-          message: mockDataRef.current.message,
-          datalog_selection: selectionRef.current,
-          datalog_all: mockDataRef.current.datalogs
+          logs: mockDataRef.current.datalogs,
+          selection: selectionRef.current,
+          message: mockDataRef.current.message
         }
         const request: PreviewWorkerRequest = {
           id: file.path,
           code: model.getValue(),
           type: file.type,
-          dataObject
+          daytalogProps
         }
         window.dispatchEvent(new CustomEvent('preview-load'))
         previewWorkerRef.current.postMessage(request)

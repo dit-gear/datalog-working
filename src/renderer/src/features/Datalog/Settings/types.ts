@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { ProjectSchemaZod, GlobalSchemaZod, emailApiZodObj } from '@shared/projectTypes'
+import { ProjectSchemaZod, GlobalSchemaZod } from 'daytalog'
+import { emailApiZodObj } from '@shared/projectTypes'
 
 export type Scope = 'project' | 'global'
 

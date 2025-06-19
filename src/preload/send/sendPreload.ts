@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { InitialSendData, Response } from '@shared/shared-types'
 import { safeInvoke } from '@shared/utils/ipcUtils'
-import { emailType } from '@shared/projectTypes'
+import { emailType } from 'daytalog'
 import { sharedApi } from '../main/mainPreload'
 
 const sendApi = {

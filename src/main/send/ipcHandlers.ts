@@ -2,12 +2,11 @@
 import { ipcMain, Notification, nativeImage } from 'electron'
 import fs from 'fs/promises'
 import { InitialSendData, Response } from '@shared/shared-types'
-import { emailType } from '@shared/projectTypes'
+import { emailType } from 'daytalog'
 import { appState, datalogs as datalogStore, sendWindowDataMap } from '../core/app-state/state'
 import { getSendWindow } from './sendWindow'
 import { renderEmail } from '../core/render/renderEmail'
 import { sendEmail } from '../core/send-email'
-import { getLatestDatalog } from '@shared/utils/getLatestDatalog'
 import successicon from '../../../resources/success_icon.png?asset'
 import erroricon from '../../../resources/error_icon.png?asset'
 
@@ -15,16 +14,15 @@ export function setupSendIpcHandlers(): void {
   ipcMain.handle('initial-send-data', async (event): Promise<InitialSendData> => {
     try {
       const project = appState.project
-      const datalogs = Array.from(datalogStore().values())
+      const logs = Array.from(datalogStore().values())
       if (!project) throw Error
       const windowId = event.sender.id
       const windowData = sendWindowDataMap.get(windowId)
       if (!windowData) {
         throw new Error(`No window data found for window id: ${windowId}`)
       }
-      const { selectedEmail, selection: winSelection } = windowData
-      const selection = winSelection ?? (await getLatestDatalog(datalogs, project))
-      return { selectedEmail, project, selection, datalogs }
+      const { selectedEmail, selection } = windowData
+      return { selectedEmail, project, selection, logs }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'unknown error'
       throw new Error(`Failed to load send window data: ${message}`)

@@ -40,7 +40,8 @@ async function createProject(projectName: string): Promise<CreateNewProjectResul
 
   const filepath = path.join(newProjectPath, 'config.yaml')
   const defaultYaml = {
-    project_name: projectName
+    project_name: projectName,
+    version: 1
   }
   const yaml = YAML.stringify(defaultYaml)
 

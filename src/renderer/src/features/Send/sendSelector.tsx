@@ -3,7 +3,7 @@ import Send from './send'
 import { Select, SelectContent, SelectItem, SelectValue } from '@components/ui/select'
 import { SelectTrigger } from '@components/SelectIconTrigger'
 import { useData } from './utils/useData'
-import { emailType } from '@shared/projectTypes'
+import { emailType } from 'daytalog'
 
 const SendSelector = () => {
   const { data, isLoading, isError } = useData()

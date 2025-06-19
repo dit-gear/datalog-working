@@ -3,8 +3,7 @@ import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../../resources/appIcondark.png?asset'
 import { sendWindowDataMap } from '../core/app-state/state'
-import { emailType } from '@shared/projectTypes'
-import { DatalogType } from '@shared/datalogTypes'
+import { emailType } from 'daytalog'
 
 export const getSendWindow = (windowId: number): BrowserWindow | undefined => {
   const data = sendWindowDataMap.get(windowId)
@@ -14,10 +13,7 @@ export const getSendWindow = (windowId: number): BrowserWindow | undefined => {
   return undefined
 }
 
-export function createSendWindow(
-  selectedEmail: emailType | null,
-  selection?: DatalogType | DatalogType[]
-): void {
+export function createSendWindow(selectedEmail: emailType | null, selection?: string[]): void {
   const sendWindow = new BrowserWindow({
     width: 1200,
     height: 760,

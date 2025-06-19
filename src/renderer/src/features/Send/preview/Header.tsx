@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useData } from '../utils/useData'
 import Tabs from './Tabs'
-import { DataObjectType } from '@shared/datalogClass'
+import { DaytalogProps } from 'daytalog'
 import { PreviewWorkerRequest } from '@renderer/workers/utils/types'
 
 export const Header = () => {
@@ -45,17 +45,17 @@ export const Header = () => {
         if (!previewWorkerRef.current) throw new Error('Worker not initialized')
         if (!data) throw new Error('No project data available')
 
-        const dataObject: DataObjectType = {
+        const daytalogProps: DaytalogProps = {
           project: data.project,
           message: message,
-          datalog_selection: data.selection,
-          datalog_all: data.datalogs
+          selection: data.selection,
+          logs: data.logs
         }
         const request: PreviewWorkerRequest = {
           id: path,
           code: code,
           type: type,
-          dataObject
+          daytalogProps
         }
         console.log('request sent to worker:', request)
         previewWorkerRef.current.postMessage(request)
