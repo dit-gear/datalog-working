@@ -67,10 +67,10 @@ const getSelectedDatalogs = (
   selection: string | string[]
 ): DatalogType | DatalogType[] | undefined => {
   if (typeof selection === 'string') {
-    return datalogs().get(`${appState.activeProjectPath}/logs/${selection}.datalog`)
+    return datalogs().get(`${appState.activeProjectPath}/logs/${selection}.dayta`)
   } else if (Array.isArray(selection)) {
     const items = selection
-      .map((id) => datalogs().get(`${appState.activeProjectPath}/logs/${id}.datalog`))
+      .map((id) => datalogs().get(`${appState.activeProjectPath}/logs/${id}.dayta`))
       .filter((d): d is DatalogType => d !== undefined)
     return items.length === selection.length ? items : undefined
   }
@@ -276,7 +276,7 @@ export async function startLocalServer() {
       return res.status(400).json(formatErrors(parseResult.error))
     }
     const { id } = parseResult.data
-    const datalog = datalogs().get(`${appState.activeProjectPath}/logs/${id}.datalog`)
+    const datalog = datalogs().get(`${appState.activeProjectPath}/logs/${id}.dayta`)
     if (!datalog) {
       return res.status(404).json({ error: 'Requested Datalog not found' })
     }
@@ -296,10 +296,10 @@ export async function startLocalServer() {
       return res.status(404).json({ error: 'No project loaded' })
     }
 
-    const path = `${appState.activeProjectPath}/logs/${id}.datalog`
+    const path = `${appState.activeProjectPath}/logs/${id}.dayta`
     const existing = datalogs().get(path)
     if (!existing) {
-      return res.status(404).json({ error: 'Datalog not found' })
+      return res.status(404).json({ error: 'Log not found' })
     }
 
     const parseResult = DatalogDynamicZod(project).partial().safeParse(req.body)
@@ -329,7 +329,7 @@ export async function startLocalServer() {
       return res.status(404).json({ error: 'No project loaded' })
     }
 
-    const path = `${appState.activeProjectPath}/logs/${id}.datalog`
+    const path = `${appState.activeProjectPath}/logs/${id}.dayta`
     const datalog = datalogs().get(path)
     if (!datalog) {
       return res.status(404).json({ error: 'Datalog not found' })
@@ -393,7 +393,11 @@ export async function startLocalServer() {
       }
       const { presetId, datalogId } = parseResult.data
       const email = appState.project?.emails?.find((email) => email.id === presetId)
-      const selection = getSelectedDatalogs(datalogId)
+      const selectionCheck = getSelectedDatalogs(datalogId)
+      if (!selectionCheck) {
+        return res.status(404).json({ error: 'Could not find logs from IDs' })
+      }
+      const selection = typeof datalogId === 'string' ? [datalogId] : datalogId
       try {
         createSendWindow(email ?? null, selection)
         return res.status(200).json({ success: true })
@@ -417,10 +421,11 @@ export async function startLocalServer() {
       if (!pdf) {
         return res.status(404).json({ error: 'Could not find matching pdf id' })
       }
-      const selection = getSelectedDatalogs(datalogId)
-      if (!selection) {
-        return res.status(404).json({ error: 'Could not find datalogs from IDs' })
+      const selectionCheck = getSelectedDatalogs(datalogId)
+      if (!selectionCheck) {
+        return res.status(404).json({ error: 'Could not find logs from IDs' })
       }
+      const selection = typeof datalogId === 'string' ? [datalogId] : datalogId
       try {
         const rendered = await exportPdf({ pdf, selection })
         if (!rendered?.success) {

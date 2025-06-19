@@ -18,7 +18,7 @@ export const initDatalogWatcher = async () => {
   await ensureDirectoryExists(watchPattern)
 
   datalogsWatcher = chokidar.watch(watchPattern, {
-    ignored: (file, stats): boolean => !!stats?.isFile() && !file.endsWith('.datalog'),
+    ignored: (file, stats): boolean => !!stats?.isFile() && !file.endsWith('.dayta'),
     persistent: true
   })
 

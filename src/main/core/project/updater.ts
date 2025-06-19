@@ -86,8 +86,10 @@ export const updateProject = async ({
         logger.error('email api config update failed')
       }
     }
-    const projectYaml = YAML.stringify(update_settings.project)
-    const globalYaml = update_settings.global ? YAML.stringify(update_settings.global) : null
+    const projectYaml = YAML.stringify({ ...update_settings.project, version: 1 })
+    const globalYaml = update_settings.global
+      ? YAML.stringify({ ...update_settings.global, version: 1 })
+      : null
 
     const newprojectname = update_settings.project.project_name
     const oldprojectname = getFileName(appState.activeProjectPath)

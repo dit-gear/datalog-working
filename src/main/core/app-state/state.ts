@@ -23,7 +23,7 @@ class AppState {
   private _activeProjectPath: string | null = null
   private _activeProjectData: ProjectRootType | null = null
   private readonly _appPath: string = app.getPath('userData')
-  private readonly _folderPath: string = path.join(app.getPath('documents'), 'Datalog')
+  private readonly _folderPath: string = path.join(app.getPath('documents'), 'Daytalog')
   private readonly _localsharedPath: string = path.join(this._folderPath, 'LocalShared')
   private readonly _projectsPath: string = path.join(this._folderPath, 'Projects')
   private readonly _sessionId: string = crypto.randomUUID()

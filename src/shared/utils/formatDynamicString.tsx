@@ -35,7 +35,8 @@ function returnString(string: string = ''): string {
   return string
 }
 
-function replaceTags(template: string, tags: Tags): string {
+function replaceTags(template: string, tagsArray: Tags | [Tags, Tags]): string {
+  const isRange = Array.isArray(tagsArray)
   const tagFunctions: Record<string, TagFunction> = {
     // Dates
     '<yyyymmdd>': (tag) => formatDate(tag.date, 'yyyyMMdd'),
@@ -62,12 +63,19 @@ function replaceTags(template: string, tags: Tags): string {
     '<project>': (tag) => returnString(tag.projectName),
     '<unit>': (tag) => returnString(tag.unit),
 
-    '<log>': (tag) => replaceTags(tag.log || '', tags)
+    '<log>': (tag) => replaceTags(tag.log || '', tagsArray)
   }
 
   return template.replace(/<[^>]+>/g, (tag) => {
-    const tagFunction = tagFunctions[tag]
-    return tagFunction ? tagFunction(tags) : tag
+    const fn = tagFunctions[tag]
+    if (!fn) return tag
+
+    if (isRange) {
+      const [a, b] = tagsArray as [Tags, Tags]
+      return `${fn(a)}-${fn(b)}`
+    } else {
+      return fn(tagsArray as Tags)
+    }
   })
 }
 
@@ -102,10 +110,10 @@ export const replaceTagsMultiple = ({
 
   if (Array.isArray(selection) && selection.length > 1) {
     const { first, last } = getFirstAndLastDatalogs(selection)
-
-    const firstName = replaceTags(template, tags(first, project.project_name))
-    const lastName = replaceTags(template, tags(last, project.project_name))
-    return `${firstName}-${lastName}`
+    return replaceTags(template, [
+      tags(first, project.project_name),
+      tags(last, project.project_name)
+    ])
   } else {
     const singleLog = !selection.length ? getLatestLog(logs, project) : selection[0]
     return replaceTags(template, tags(singleLog, project.project_name))

@@ -7,7 +7,7 @@ import Errorhandler from '../../utils/Errorhandler'
 
 const deleteDatalog = async (datalog: DatalogType): Promise<Response> => {
   try {
-    const filepath = path.join(appState.activeProjectPath, 'logs', `${datalog.id}.datalog`)
+    const filepath = path.join(appState.activeProjectPath, 'logs', `${datalog.id}.dayta`)
     return moveFileToTrash(filepath)
   } catch (error) {
     return Errorhandler(error)

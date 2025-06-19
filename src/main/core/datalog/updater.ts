@@ -16,7 +16,7 @@ const updateDatalog = async (data: DatalogType, oldDatalog?: DatalogType): Promi
     await ensureDirectoryExists(path.join(appState.activeProjectPath, 'logs'))
     const { id, ...rest } = data
     const yaml = YAML.stringify(rest)
-    const filepath = path.join(appState.activeProjectPath, 'logs', `${id}.datalog`)
+    const filepath = path.join(appState.activeProjectPath, 'logs', `${id}.dayta`)
     const file = await fileExists(filepath)
     if (file && !oldDatalog) {
       if (win) {

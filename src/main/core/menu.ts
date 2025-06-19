@@ -19,7 +19,7 @@ interface buildContextMenuProps {
 const baseMenu = (): Menu => {
   return Menu.buildFromTemplate([
     {
-      label: 'Datalog',
+      label: 'Daytalog',
       role: 'appMenu',
       submenu: [
         { label: 'About', click: () => createAboutWindow() },

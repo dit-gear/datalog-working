@@ -12,6 +12,10 @@ self.onmessage = async (event: MessageEvent<PreviewWorkerRequest>) => {
   const { code, type, daytalogProps, id } = event.data
   let components: Record<string, unknown> = {}
 
+  if (!daytalogProps) {
+    return // Just wait for the next message
+  }
+
   try {
     const dayta = await createDaytalog(daytalogProps)
     const { useDaytalog } = await import('daytalog')

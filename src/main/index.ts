@@ -9,7 +9,7 @@ import trayManager from './core/menu'
 import { startLocalServer, stopLocalServer } from './server/apiServer'
 
 // Initialize the application
-app.setName('Datalog')
+app.setName('Daytalog')
 
 app.commandLine.appendSwitch('disable-features', 'OverlayScrollbar')
 
